@@ -34,7 +34,7 @@ namespace OmniSharp
             catch (OptionException e)
             {
                 Console.WriteLine(e.Message);
-                Console.WriteLine("Try 'vimtosharp --help' for more information.");
+                Console.WriteLine("Try 'omnisharp --help' for more information.");
                 return;
             }
 
@@ -45,9 +45,6 @@ namespace OmniSharp
                 ShowHelp(p);
                 return;
             }
-
-
-
 
             var listener = new Listener(solutionPath, port);
             listener.Start();

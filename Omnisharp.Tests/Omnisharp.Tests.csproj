@@ -49,9 +49,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="CompletionsSpecBase.cs" />
     <Compile Include="CompletionTestBase.cs" />
+    <Compile Include="ConstructorParameterCompletions.cs" />
     <Compile Include="DerivedTypeCompletions.cs" />
     <Compile Include="FakeProject.cs" />
     <Compile Include="FakeSolution.cs" />
@@ -61,7 +61,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\OmniSharp\OmniSharp.csproj">
+    <ProjectReference Include="..\OmniSharp\OmniSharp.csproj">
       <Project>{39D6E519-26A4-47D7-B3B1-A7545EBCE23B}</Project>
       <Name>OmniSharp</Name>
     </ProjectReference>

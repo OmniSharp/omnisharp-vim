@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniSharp", "OmniSharp\OmniSharp.csproj", "{39D6E519-26A4-47D7-B3B1-A7545EBCE23B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnisharp.Tests", "Tests\Omnisharp.Tests\Omnisharp.Tests.csproj", "{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnisharp.Tests", "Omnisharp.Tests\Omnisharp.Tests.csproj", "{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
