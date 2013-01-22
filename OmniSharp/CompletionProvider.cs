@@ -30,10 +30,26 @@ namespace OmniSharp
 
         public IEnumerable<ICompletionData> CreateProvider(string filename, string partialWord, string text, int cursorPosition, bool isCtrlSpace)
         {
-            var editorText = ReconstructEditorText(partialWord, text, cursorPosition);
+            //var editorText = ReconstructEditorText(partialWord, text, cursorPosition);
+            string editorText;
+            //if (cursorPosition > text.Length)
+            //{
+            //    editorText = ReconstructEditorText(partialWord, text, cursorPosition);
+            //}
+            //else
+            {
+                if (text != "")
+                {
+                    editorText = text;
+                    cursorPosition -= partialWord.Length;
+                }
+                else
+                {
+                    editorText = partialWord;
+                }    
+            }
 
-            cursorPosition = Math.Min(cursorPosition, editorText.Length);
-
+            //cursorPosition = Math.Min(cursorPosition, editorText.Length);
             string parsedText = text;
             var project = ProjectContainingFile(filename);
             if (project == null)

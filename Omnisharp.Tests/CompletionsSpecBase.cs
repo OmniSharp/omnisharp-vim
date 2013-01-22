@@ -17,14 +17,14 @@ namespace Omnisharp.Tests
         public IEnumerable<ICompletionData> GetCompletions(string editorText)
         {
             var project = new FakeProject();
-            project.AddFile(editorText.Replace("$", " "));
+            project.AddFile(editorText.Replace("$", ""));
             _solution.Projects.Add("dummyproject", project);
             var provider = new CompletionProvider(_solution, new Logger());
             var partialWord = GetPartialWord(editorText);
             var cursorPosition = editorText.IndexOf("$", System.StringComparison.Ordinal);
             // vim removes the word to complete.... so we do here also
             editorText = editorText.Remove(cursorPosition - partialWord.Length, partialWord.Length);
-            return provider.CreateProvider("myfile", partialWord, editorText.Replace("$", " "), cursorPosition, true);
+            return provider.CreateProvider("myfile", partialWord, editorText.Replace("$", ""), cursorPosition, true);
         }
 
         private static string GetPartialWord(string editorText)

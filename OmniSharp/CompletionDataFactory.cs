@@ -56,10 +56,8 @@ namespace OmniSharp
 
             ICompletionData completionData = CompletionData(entity);
 
-            //if (completionData == null)
-            //    completionData = new CompletionData(entity.Name);
             ////_cachedCompletions.TryAdd(cacheKey, completionData);
-            //Debug.Assert(completionData != null);
+            Debug.Assert(completionData != null);
             return completionData;
         }
 

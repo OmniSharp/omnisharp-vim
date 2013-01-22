@@ -1,4 +1,9 @@
+" Supertab settings
+let g:SuperTabDefaultCompletionType = 'context'
+let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
+let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
 set completeopt=longest,menuone,preview "don't autoselect first item in omnicomplete,show if only one item(for preview)
+
 autocmd FileType cs setlocal omnifunc=OmniSharp
 let g:partialWord= "none"
 function! OmniSharp(findstart, base)

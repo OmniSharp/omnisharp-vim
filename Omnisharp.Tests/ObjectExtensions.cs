@@ -1,13 +1,17 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
+using System.Linq;
+using Should;
 
 namespace Omnisharp.Tests
 {
     public static class ObjectExtensions
     {
-        public static void ShouldContainOnly(this IEnumerable<string> actual, params string[] expected)
+        public static void ShouldContainOnly(this IEnumerable<object> actual, params object[] expected)
         {
-            CollectionAssert.AreEqual(expected, actual);
+            actual.SequenceEqual(expected);
+            //actual.ShouldContain(expected);
+            actual.Count().ShouldEqual(expected.Count(), "Expected " + expected.Count() + " items, got " + actual.Count());
+
         }
     }
 }
