@@ -21,7 +21,10 @@ namespace Omnisharp.Tests
             _solution.Projects.Add("dummyproject", project);
             var provider = new CompletionProvider(_solution, new Logger());
             var partialWord = GetPartialWord(editorText);
-            return provider.CreateProvider("myfile", partialWord, editorText.Replace("$", " "), editorText.IndexOf("$", System.StringComparison.Ordinal), true);
+            var cursorPosition = editorText.IndexOf("$", System.StringComparison.Ordinal);
+            // vim removes the word to complete.... so we do here also
+            editorText = editorText.Remove(cursorPosition - partialWord.Length, partialWord.Length);
+            return provider.CreateProvider("myfile", partialWord, editorText.Replace("$", " "), cursorPosition, true);
         }
 
         private static string GetPartialWord(string editorText)

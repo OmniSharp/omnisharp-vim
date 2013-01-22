@@ -56,9 +56,9 @@ namespace OmniSharp
             var rctx = new CSharpTypeResolveContext(cmp.MainAssembly);
             rctx = rctx.WithUsingScope(parsedFile.GetUsingScope(loc).Resolve(cmp));
 
-		    		
+
             IUnresolvedTypeDefinition curDef = parsedFile.GetInnermostTypeDefinition(loc);
-			if (curDef != null)
+            if (curDef != null)
             {
                 ITypeDefinition resolvedDef = curDef.Resolve(rctx).GetDefinition();
                 rctx = rctx.WithCurrentTypeDefinition(resolvedDef);
@@ -100,10 +100,7 @@ namespace OmniSharp
                 }
                 else
                 {
-                    if (cursorPosition > text.Length)
-                        editorText = text.Substring(0, cursorPosition - partialWord.Length) + partialWord;
-                    else
-                        editorText = text.Substring(0, cursorPosition) + partialWord;
+                    editorText = text.Substring(0, cursorPosition - partialWord.Length) + partialWord;
 
                     if (cursorPosition < text.Length)
                     {
@@ -123,7 +120,7 @@ namespace OmniSharp
             var res = new List<ICompletionData>();
             foreach (var completion in completions)
             {
-                res.AddRange(completion.HasOverloads ? completion.OverloadedData : new[] {completion});
+                res.AddRange(completion.HasOverloads ? completion.OverloadedData : new[] { completion });
             }
             return res;
         }

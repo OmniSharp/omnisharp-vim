@@ -90,6 +90,10 @@ namespace OmniSharp
                                                 documentationComment.Xml.Text);
                         completionData = new CompletionData(_signature, _completionText, documentation);
                     }
+                    else
+                    {
+                        completionData = new CompletionData(_signature, _completionText, "No documentation");
+                    }
                 }
                 else
                 {
