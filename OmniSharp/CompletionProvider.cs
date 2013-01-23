@@ -28,29 +28,30 @@ namespace OmniSharp
             return _solution.Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
 
-        public IEnumerable<ICompletionData> CreateProvider(string filename, string partialWord, string text, int cursorPosition, bool isCtrlSpace)
+        public IEnumerable<ICompletionData> CreateProvider(string filename, string partialWord, string parsedText, string text, int cursorPosition, bool isCtrlSpace)
         {
             //var editorText = ReconstructEditorText(partialWord, text, cursorPosition);
-            string editorText;
+            string editorText = text;
             //if (cursorPosition > text.Length)
             //{
             //    editorText = ReconstructEditorText(partialWord, text, cursorPosition);
             //}
             //else
-            {
-                if (text != "")
-                {
-                    editorText = text;
-                    cursorPosition -= partialWord.Length;
-                }
-                else
-                {
-                    editorText = partialWord;
-                }    
-            }
-
+            //{
+            //    if (text != "")
+            //    {
+            //        editorText = text;
+            ////        cursorPosition -= partialWord.Length;
+            //    }
+            //    else
+            //    {
+            //        editorText = partialWord;
+            //    }    
+            //}
             //cursorPosition = Math.Min(cursorPosition, editorText.Length);
-            string parsedText = text;
+            cursorPosition = Math.Max(cursorPosition, 0);
+
+            //string parsedText = text;
             var project = ProjectContainingFile(filename);
             if (project == null)
                 return Enumerable.Empty<ICompletionData>();
@@ -58,20 +59,21 @@ namespace OmniSharp
             if (pctx == null)
                 return Enumerable.Empty<ICompletionData>();
             IUnresolvedFile oldFile = pctx.GetFile(filename);
-            var compilationUnit = new CSharpParser().Parse(parsedText, filename);
+            var compilationUnit = new CSharpParser().Parse(editorText, filename);
             compilationUnit.Freeze();
             var parsedFile = compilationUnit.ToTypeSystem();
-            pctx = pctx.AddOrUpdateFiles(oldFile, parsedFile);
+            pctx = pctx.AddOrUpdateFiles(oldFile,parsedFile);
             project.ProjectContent = pctx;
             ICompilation cmp = pctx.CreateCompilation();
 
             var doc = new ReadOnlyDocument(editorText);
 
-            TextLocation loc = doc.GetLocation(cursorPosition);
+            TextLocation loc = doc.GetLocation(cursorPosition - partialWord.Length);
 
             var rctx = new CSharpTypeResolveContext(cmp.MainAssembly);
-            rctx = rctx.WithUsingScope(parsedFile.GetUsingScope(loc).Resolve(cmp));
-
+            var usingScope = parsedFile.GetUsingScope(loc).Resolve(cmp);
+            rctx = rctx.WithUsingScope(usingScope);
+            _logger.Debug(usingScope);
 
             IUnresolvedTypeDefinition curDef = parsedFile.GetInnermostTypeDefinition(loc);
             if (curDef != null)

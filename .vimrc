@@ -2,6 +2,7 @@
 let g:SuperTabDefaultCompletionType = 'context'
 let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
 let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
+let g:SuperTabClosePreviewOnPopupClose = 1
 set completeopt=longest,menuone,preview "don't autoselect first item in omnicomplete,show if only one item(for preview)
 
 autocmd FileType cs setlocal omnifunc=OmniSharp
@@ -27,7 +28,7 @@ port = 2000
 
 buffer = VIM::Buffer
 body = []
-cursorPosition = VIM::evaluate('line2byte(line("."))+col(".")') - 1
+cursorPosition = VIM::evaluate('line2byte(line("."))+col(".")') 
 body << cursorPosition
 
 body << VIM::evaluate('a:base') # the current word to be completed

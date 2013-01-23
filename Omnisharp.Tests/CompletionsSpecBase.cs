@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
@@ -16,15 +17,24 @@ namespace Omnisharp.Tests
 
         public IEnumerable<ICompletionData> GetCompletions(string editorText)
         {
+            var cursorPosition = editorText.IndexOf("$", StringComparison.Ordinal);
+            var partialWord = GetPartialWord(editorText);
+            editorText = editorText.Replace("$", "");
+
             var project = new FakeProject();
-            project.AddFile(editorText.Replace("$", ""));
+            project.AddFile(editorText);
             _solution.Projects.Add("dummyproject", project);
             var provider = new CompletionProvider(_solution, new Logger());
-            var partialWord = GetPartialWord(editorText);
-            var cursorPosition = editorText.IndexOf("$", System.StringComparison.Ordinal);
+            
             // vim removes the word to complete.... so we do here also
-            editorText = editorText.Remove(cursorPosition - partialWord.Length, partialWord.Length);
-            return provider.CreateProvider("myfile", partialWord, editorText.Replace("$", ""), cursorPosition, true);
+            string parsedText = editorText.Remove(cursorPosition - partialWord.Length, partialWord.Length);
+            Console.WriteLine("Cursor = " + cursorPosition);
+            Console.WriteLine("--------editor--------");
+            Console.WriteLine(editorText);
+            Console.WriteLine("--------parsed--------");
+            Console.WriteLine(parsedText);
+            parsedText = editorText;
+            return provider.CreateProvider("myfile", partialWord, editorText , parsedText, cursorPosition, true);
         }
 
         private static string GetPartialWord(string editorText)

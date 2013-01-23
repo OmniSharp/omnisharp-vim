@@ -1,6 +1,8 @@
 using NUnit.Framework;
 using Should;
+
 namespace Omnisharp.Tests
+
 {
     public class NamespaceCompletions : CompletionTestBase
     {
@@ -11,9 +13,33 @@ namespace Omnisharp.Tests
         }
 
         [Test]
-        public void Should_complete_using()
+        public void Should_complete_using1()
+        {
+            DisplayTextFor("u$").ShouldContain("using");
+        }
+
+        [Test]
+        public void Should_complete_using2()
+        {
+            DisplayTextFor("us$").ShouldContainOnly("using");
+        }
+
+        [Test]
+        public void Should_complete_using3()
         {
             DisplayTextFor("usi$").ShouldContainOnly("using");
+        }
+
+        [Test]
+        public void Should_complete_using4()
+        {
+            DisplayTextFor("usin$").ShouldContainOnly("using");
+        }
+
+        [Test]
+        public void Should_complete_using5()
+        {
+            DisplayTextFor("using$").ShouldContainOnly("using");
         }
 
         [Test]
@@ -26,8 +52,26 @@ namespace Omnisharp.Tests
         public void Should_complete_namespace2()
         {
             DisplayTextFor(
+@"using System;
+n$").ShouldContainOnly("namespace");
+        }
+
+        [Test]
+        public void Should_complete_using_first()
+        {
+            DisplayTextFor(
+                @"us$
+using System;
+                  ").ShouldContainOnly("using");
+        }
+
+        [Test]
+        public void Should_complete_using_second()
+        {
+            DisplayTextFor(
                 @"using System;
-                  name$").ShouldContainOnly("namespace");
+                  us$
+                  ").ShouldContainOnly("using");
         }
 
         [Test]
@@ -49,9 +93,15 @@ namespace Omnisharp.Tests
         }
 
         [Test]
+        public void Should_complete_diagnostics_from_d()
+        {
+            DisplayTextFor("using System.d$").ShouldContainOnly("Deployment", "Diagnostics", "Dynamic");
+        }
+        
+        [Test]
         public void Should_complete_diagnostics_only()
         {
-            DisplayTextFor("using System.diag$").ShouldContainOnly("Diagnostics");
+            DisplayTextFor("using System.di$").ShouldContain("Diagnostics");
         }
     }
 }

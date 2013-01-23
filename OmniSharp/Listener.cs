@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using ICSharpCode.NRefactory.Completion;
 using OmniSharp.Solution;
 
 namespace OmniSharp
@@ -55,16 +57,27 @@ namespace OmniSharp
                     socket.Receive(bytes);
                     string buffer = Encoding.ASCII.GetString(bytes.TakeWhile(b => !b.Equals(0)).ToArray());
                     string[] lines = buffer.Split(new[] { "\r\n" }, StringSplitOptions.None);
-                    int cursorPosition = int.Parse(lines[0]);
-                    _logger.Debug(cursorPosition);
                     string partialWord = lines[1];
+                    int cursorPosition = int.Parse(lines[0]) + partialWord.Length;
+                    _logger.Debug(cursorPosition);
+
                     _logger.Debug(partialWord);
                     //cursorPosition += partialWord.Length;
                     string filename = lines[2].Trim();
                     string code = string.Join("\r\n", lines.Skip(3).ToArray());
                     _logger.Debug(code);
                     var sb = new StringBuilder();
-                    var completions = _completionProvider.CreateProvider(filename, partialWord, code, cursorPosition, true);
+                    IEnumerable<ICompletionData> completions = null;
+                    for (int i = -5; i < 5; i++)
+                    {
+                        completions = _completionProvider.CreateProvider(filename, partialWord, code, code, cursorPosition + i,
+                                                                             false);
+                        if (completions.Any())
+                        {
+                            _logger.Debug("broke on " + i);
+                            break;
+                        }
+                    }
                     foreach (var completion in completions)
                     {
                         sb.AppendFormat("add(res, {{'word':'{0}', 'abbr':'{1}', 'info':\"{2}\", 'icase':1, 'dup':1}})\n",
