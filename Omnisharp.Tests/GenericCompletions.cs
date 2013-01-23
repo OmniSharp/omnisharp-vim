@@ -6,7 +6,7 @@ namespace Omnisharp.Tests
     [TestFixture]
     public class GenericCompletions : CompletionTestBase
     {
-        [Test, Ignore("wip")]
+        [Test]
         public void Should_complete_generic_completion()
         {
             DisplayTextFor(

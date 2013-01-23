@@ -55,7 +55,7 @@ namespace Omnisharp.Tests
 @"using System;
 n$").ShouldContainOnly("namespace");
         }
-
+        
         [Test]
         public void Should_complete_using_first()
         {
