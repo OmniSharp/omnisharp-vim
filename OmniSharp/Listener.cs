@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using ICSharpCode.NRefactory.Completion;
 using OmniSharp.Solution;
 
 namespace OmniSharp
@@ -58,37 +56,31 @@ namespace OmniSharp
                     string buffer = Encoding.ASCII.GetString(bytes.TakeWhile(b => !b.Equals(0)).ToArray());
                     string[] lines = buffer.Split(new[] { "\r\n" }, StringSplitOptions.None);
                     string partialWord = lines[1];
-                    int cursorPosition = int.Parse(lines[0]) + partialWord.Length;
+                    int cursorPosition = int.Parse(lines[0]) - 2;
+                    
+
                     _logger.Debug(cursorPosition);
 
                     _logger.Debug(partialWord);
-                    //cursorPosition += partialWord.Length;
                     string filename = lines[2].Trim();
                     string code = string.Join("\r\n", lines.Skip(3).ToArray());
+                    int i = cursorPosition - 2;
+                    
                     _logger.Debug(code);
                     var sb = new StringBuilder();
-                    IEnumerable<ICompletionData> completions = null;
-                    for (int i = -5; i < 5; i++)
-                    {
-                        completions = _completionProvider.CreateProvider(filename, partialWord, code, code, cursorPosition + i,
-                                                                             false);
-                        if (completions.Any())
-                        {
-                            _logger.Debug("broke on " + i);
-                            break;
-                        }
-                    }
+                    var completions = _completionProvider.CreateProvider(filename, partialWord, code, cursorPosition,true);
                     foreach (var completion in completions)
                     {
                         sb.AppendFormat("add(res, {{'word':'{0}', 'abbr':'{1}', 'info':\"{2}\", 'icase':1, 'dup':1}})\n",
                                         completion.CompletionText, completion.DisplayText,
-                                        completion.Description.Replace(Environment.NewLine, "\\n").Replace("\"", "''"));            
+                                        completion.Description.Replace(Environment.NewLine, "\\n").Replace("\"", "''"));
                     }
 
                     string res = sb.ToString();
-
+                    _logger.Debug(res);
                     Send(res, ref socket);
                     socket.Close();
+                    socket.Dispose();
                 }
             }
         }

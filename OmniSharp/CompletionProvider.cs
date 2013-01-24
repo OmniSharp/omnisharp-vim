@@ -28,30 +28,11 @@ namespace OmniSharp
             return _solution.Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
 
-        public IEnumerable<ICompletionData> CreateProvider(string filename, string partialWord, string parsedText, string text, int cursorPosition, bool isCtrlSpace)
+        public IEnumerable<ICompletionData> CreateProvider(string filename, string partialWord, string editorText, int cursorPosition, bool isCtrlSpace)
         {
-            //var editorText = ReconstructEditorText(partialWord, text, cursorPosition);
-            string editorText = text;
-            //if (cursorPosition > text.Length)
-            //{
-            //    editorText = ReconstructEditorText(partialWord, text, cursorPosition);
-            //}
-            //else
-            //{
-            //    if (text != "")
-            //    {
-            //        editorText = text;
-            ////        cursorPosition -= partialWord.Length;
-            //    }
-            //    else
-            //    {
-            //        editorText = partialWord;
-            //    }    
-            //}
-            //cursorPosition = Math.Min(cursorPosition, editorText.Length);
+            cursorPosition = Math.Min(cursorPosition, editorText.Length);
             cursorPosition = Math.Max(cursorPosition, 0);
 
-            //string parsedText = text;
             var project = ProjectContainingFile(filename);
             if (project == null)
                 return Enumerable.Empty<ICompletionData>();
@@ -97,37 +78,6 @@ namespace OmniSharp
             return data.Where(d => d != null && d.DisplayText.IsValidCompletionFor(partialWord))
                        .FlattenOverloads()
                        .OrderBy(d => d.DisplayText);
-        }
-
-        private static string ReconstructEditorText(string partialWord, string text, int cursorPosition)
-        {
-            // Vim sends us the text without the current word to be completed.
-            // We have to put it back in here
-
-            string editorText;
-
-            if (text == "")
-            {
-                editorText = partialWord;
-            }
-            else
-            {
-                if (partialWord == "")
-                {
-                    editorText = text;
-                }
-                else
-                {
-                    editorText = text.Substring(0, cursorPosition - partialWord.Length) + partialWord;
-
-                    if (cursorPosition < text.Length)
-                    {
-                        editorText +=
-                            text.Substring(cursorPosition);
-                    }
-                }
-            }
-            return editorText;
         }
     }
 

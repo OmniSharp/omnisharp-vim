@@ -26,14 +26,8 @@ namespace Omnisharp.Tests
             _solution.Projects.Add("dummyproject", project);
             var provider = new CompletionProvider(_solution, new Logger());
             
-            // vim removes the word to complete.... so we do here also
-            string parsedText = editorText.Remove(cursorPosition - partialWord.Length, partialWord.Length);
-            Console.WriteLine("Cursor = " + cursorPosition);
-            Console.WriteLine("--------editor--------");
-            Console.WriteLine("|" + editorText + "|");
-            Console.WriteLine("--------parsed--------");
-            Console.WriteLine("|" + parsedText + "|");
-            return provider.CreateProvider("myfile", partialWord, parsedText, editorText, cursorPosition, true);
+            
+            return provider.CreateProvider("myfile", partialWord, editorText, cursorPosition, true);
         }
 
         private static string GetPartialWord(string editorText)
