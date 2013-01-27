@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ICSharpCode.NRefactory;
@@ -28,8 +29,13 @@ namespace OmniSharp
             return _solution.Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
 
-        public IEnumerable<ICompletionData> CreateProvider(string filename, string partialWord, string editorText, int cursorPosition, bool isCtrlSpace)
+        public IEnumerable<ICompletionData> CreateProvider(AutocompleteRequest request)
         {
+            var cursorPosition = request.CursorPosition;
+            var editorText = request.Buffer;
+            var filename = request.FileName;
+            var partialWord = request.WordToComplete ?? "";
+            var isCtrlSpace = true;
             cursorPosition = Math.Min(cursorPosition, editorText.Length);
             cursorPosition = Math.Max(cursorPosition, 0);
 
@@ -77,8 +83,11 @@ namespace OmniSharp
 
             return data.Where(d => d != null && d.DisplayText.IsValidCompletionFor(partialWord))
                        .FlattenOverloads()
+                       .RemoveDupes()
                        .OrderBy(d => d.DisplayText);
         }
+
+        
     }
 
     public static class CompletionDataExtenstions

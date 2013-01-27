@@ -1,5 +1,7 @@
 ﻿using System;
 using NDesk.Options;
+using Nancy.Diagnostics;
+using OmniSharp.Solution;
 
 namespace OmniSharp
 {
@@ -46,8 +48,19 @@ namespace OmniSharp
                 return;
             }
 
-            var listener = new Listener(solutionPath, port);
-            listener.Start();
+            var _logger = new Logger();
+            var solution = new CSharpSolution(solutionPath);
+
+            var completionProvider = new CompletionProvider(solution, _logger);
+            var nancyHost = new Nancy.Hosting.Self.NancyHost(new Bootstrapper(completionProvider), new Uri("http://localhost:" + port));
+            
+            
+            nancyHost.Start();
+ 
+            Console.ReadLine();
+            nancyHost.Stop();
+            //var listener = new Listener(solutionPath, port);
+            //listener.Start();
         }
 
         static void ShowHelp(OptionSet p)

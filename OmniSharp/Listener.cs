@@ -68,7 +68,12 @@ namespace OmniSharp
                     
                     _logger.Debug(code);
                     var sb = new StringBuilder();
-                    var completions = _completionProvider.CreateProvider(filename, partialWord, code, cursorPosition,true);
+                    var request = new AutocompleteRequest();
+                    request.FileName = filename;
+                    request.WordToComplete = partialWord;
+                    request.Buffer = code;
+                    request.CursorPosition = cursorPosition;
+                    var completions = _completionProvider.CreateProvider(request);
                     foreach (var completion in completions)
                     {
                         sb.AppendFormat("add(res, {{'word':'{0}', 'abbr':'{1}', 'info':\"{2}\", 'icase':1, 'dup':1}})\n",
