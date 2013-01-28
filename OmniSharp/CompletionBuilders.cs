@@ -486,7 +486,7 @@ namespace OmniSharp
             return GetIntrinsicTypeName(type);
         }
 
-        public string GetIntrinsicTypeName(IType dotNetTypeName)
+        private string GetIntrinsicTypeName(IType dotNetTypeName)
         {
             string shortName;
             string lookup;
