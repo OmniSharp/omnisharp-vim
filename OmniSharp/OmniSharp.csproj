@@ -112,7 +112,6 @@
     <Compile Include="CompletionProvider.cs" />
     <Compile Include="Solution\CSharpFile.cs" />
     <Compile Include="Solution\CSharpProject.cs" />
-    <Compile Include="Listener.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MyCompletionCategory.cs" />
     <Compile Include="Options.cs" />

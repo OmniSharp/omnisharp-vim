@@ -1,6 +1,5 @@
 ﻿using System;
 using NDesk.Options;
-using Nancy.Diagnostics;
 using OmniSharp.Solution;
 
 namespace OmniSharp
@@ -59,8 +58,6 @@ namespace OmniSharp
  
             Console.ReadLine();
             nancyHost.Stop();
-            //var listener = new Listener(solutionPath, port);
-            //listener.Start();
         }
 
         static void ShowHelp(OptionSet p)

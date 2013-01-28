@@ -25,9 +25,15 @@ namespace Omnisharp.Tests
             project.AddFile(editorText);
             _solution.Projects.Add("dummyproject", project);
             var provider = new CompletionProvider(_solution, new Logger());
-            
-            
-            return provider.CreateProvider("myfile", partialWord, editorText, cursorPosition, true);
+            var request = new AutocompleteRequest
+                {
+                    FileName = "myfile",
+                    WordToComplete = partialWord,
+                    Buffer = editorText,
+                    CursorPosition = cursorPosition
+                };
+
+            return provider.CreateProvider(request);
         }
 
         private static string GetPartialWord(string editorText)
