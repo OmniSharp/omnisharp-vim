@@ -64,6 +64,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BugFixTests.cs" />
     <Compile Include="CompletionsSpecBase.cs" />
     <Compile Include="CompletionTestBase.cs" />
     <Compile Include="ConstructorParameterCompletions.cs" />

@@ -3,12 +3,12 @@ let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
 let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
 let g:SuperTabClosePreviewOnPopupClose = 1
 
+setlocal omnifunc=OmniSharp
 set completeopt=longest,menuone,preview "don't autoselect first item in omnicomplete,show if only one item(for preview)
-autocmd FileType cs setlocal omnifunc=OmniSharp
 function! OmniSharp(findstart, base)
      if a:findstart
 		 let g:textBuffer = getline(1,'$')
-		 let g:cursorPosition = line2byte(line("."))+col(".")
+		 let g:cursorPosition = line2byte(line("."))+col(".") - 2
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
