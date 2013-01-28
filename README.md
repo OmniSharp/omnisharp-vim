@@ -34,3 +34,13 @@ This project is very much incomplete/buggy.
 
 It may eat your code.
 
+
+#####TODO
+
+- Refactorings
+- Add files to project
+- Highlight syntax errors as you type
+- Fix bugs
+
+Pull requests welcome!
+
