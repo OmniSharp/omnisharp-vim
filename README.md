@@ -17,7 +17,7 @@ completions as MonoDevelop/SharpDevelop.
 
 ##Installation
 
-Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/)
+Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). If you installed Vim using the windows installer, you will need to install the x86 version of Python.
 
 Verify that Python is working inside Vim with :python print "hi". You may need to log out and back in again.
 
