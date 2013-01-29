@@ -11,6 +11,10 @@ This is currently working on Windows only, but will only require minor tweaks to
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
 completions as MonoDevelop/SharpDevelop. 
 
+##Screenshot
+![Omnisharp screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/Omnisharp.png)
+
+
 ##Installation
 
 Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/)

@@ -47,10 +47,10 @@ namespace OmniSharp
                 return;
             }
 
-            var _logger = new Logger();
+            var logger = new Logger();
             var solution = new CSharpSolution(solutionPath);
 
-            var completionProvider = new CompletionProvider(solution, _logger);
+            var completionProvider = new CompletionProvider(solution, logger);
             var nancyHost = new Nancy.Hosting.Self.NancyHost(new Bootstrapper(completionProvider), new Uri("http://localhost:" + port));
             
             
