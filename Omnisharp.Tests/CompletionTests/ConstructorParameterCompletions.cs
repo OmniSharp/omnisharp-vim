@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using Should;
-namespace Omnisharp.Tests
+
+namespace Omnisharp.Tests.CompletionTests
 {
     public class ConstructorParameterCompletions : CompletionTestBase
     {
@@ -8,7 +9,7 @@ namespace Omnisharp.Tests
         public void Should_return_all_constructors()
         {
             DisplayTextFor(
-                  @"public class MyClass {
+                @"public class MyClass {
                             public MyClass() {}
                             public MyClass(int param) {}
                             public MyClass(string param) {}
@@ -20,18 +21,17 @@ namespace Omnisharp.Tests
                                 var c = new My$
                             }
                         }")
-
-            .ShouldContainOnly(
-                "MyClass()",
-                "MyClass(int param)",
-                "MyClass(string param)");
+                .ShouldContainOnly(
+                    "MyClass()",
+                    "MyClass(int param)",
+                    "MyClass(string param)");
         }
 
         [Test]
         public void Should_return_all_constructors_using_camel_case_completions()
         {
             DisplayTextFor(
-            @"  public class MyClassA {
+                @"  public class MyClassA {
                         public MyClassA() {}
                         public MyClassA(int param) {}
                         public MyClassA(string param) {}
@@ -43,18 +43,17 @@ namespace Omnisharp.Tests
                             var c = new mca$
                         }
                     }")
-
-            .ShouldContainOnly(
-                "MyClassA()",
-                "MyClassA(int param)",
-                "MyClassA(string param)");
+                .ShouldContainOnly(
+                    "MyClassA()",
+                    "MyClassA(int param)",
+                    "MyClassA(string param)");
         }
 
         [Test]
         public void Should_return_no_completions()
         {
             DisplayTextFor(
-                    @"  public class MyClassA {
+                @"  public class MyClassA {
                         public MyClassA() {}
                         public MyClassA(int param) {}
                         public MyClassA(string param) {}
@@ -83,7 +82,7 @@ namespace Omnisharp.Tests
         public void Should_not_close_parenthesis_for_constructor_with_parameter()
         {
             CompletionsFor(
-            @"public class MyClass {
+                @"public class MyClass {
                     public MyClass(int param) {}
                 }
 
@@ -93,7 +92,7 @@ namespace Omnisharp.Tests
                         var c = new My$
                     }
                 }")
-        .ShouldContainOnly("MyClass(");
+                .ShouldContainOnly("MyClass(");
         }
 
         [Test]
@@ -110,8 +109,7 @@ namespace Omnisharp.Tests
                         var c = new My$
                     }
                 }")
-            .ShouldContainOnly("MyClass()");
-                
+                .ShouldContainOnly("MyClass()");
         }
     }
 }

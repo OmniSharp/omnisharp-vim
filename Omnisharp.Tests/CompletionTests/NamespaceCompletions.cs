@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using Should;
 
-namespace Omnisharp.Tests
+namespace Omnisharp.Tests.CompletionTests
 
 {
     public class NamespaceCompletions : CompletionTestBase
@@ -52,10 +52,10 @@ namespace Omnisharp.Tests
         public void Should_complete_namespace2()
         {
             DisplayTextFor(
-@"using System;
+                @"using System;
 n$").ShouldContainOnly("namespace");
         }
-        
+
         [Test]
         public void Should_complete_using_first()
         {
@@ -97,7 +97,7 @@ using System;
         {
             DisplayTextFor("using System.d$").ShouldContainOnly("Deployment", "Diagnostics", "Dynamic");
         }
-        
+
         [Test]
         public void Should_complete_diagnostics_only()
         {
@@ -105,5 +105,3 @@ using System;
         }
     }
 }
-
-

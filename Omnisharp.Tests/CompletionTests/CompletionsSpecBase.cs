@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
 using OmniSharp;
 
-namespace Omnisharp.Tests
+namespace Omnisharp.Tests.CompletionTests
 {
     public class CompletionsSpecBase
     {
-        readonly FakeSolution _solution;
+        private readonly FakeSolution _solution;
 
         public CompletionsSpecBase()
         {
@@ -17,9 +17,9 @@ namespace Omnisharp.Tests
 
         public IEnumerable<ICompletionData> GetCompletions(string editorText)
         {
-            var cursorPosition = editorText.IndexOf("$", StringComparison.Ordinal);
-            var partialWord = GetPartialWord(editorText);
-            editorText = editorText.Replace("$", "" );
+            int cursorPosition = editorText.IndexOf("$", StringComparison.Ordinal);
+            string partialWord = GetPartialWord(editorText);
+            editorText = editorText.Replace("$", "");
 
             var project = new FakeProject();
             project.AddFile(editorText);
@@ -38,7 +38,7 @@ namespace Omnisharp.Tests
 
         private static string GetPartialWord(string editorText)
         {
-            var matches = Regex.Matches(editorText, @"([a-zA-Z_]*)\$");
+            MatchCollection matches = Regex.Matches(editorText, @"([a-zA-Z_]*)\$");
             return matches[0].Groups[1].ToString();
         }
     }

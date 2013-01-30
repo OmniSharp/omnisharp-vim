@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Should;
 
-namespace Omnisharp.Tests
+namespace Omnisharp.Tests.CompletionTests
 {
     public class BugFixTests : CompletionTestBase
     {
@@ -10,7 +10,7 @@ namespace Omnisharp.Tests
         public void Should_complete_to_string()
         {
             DisplayTextFor(
-@"public class A {
+                @"public class A {
     public A() 
     {
         int n;

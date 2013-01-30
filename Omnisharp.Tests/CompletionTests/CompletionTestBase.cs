@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Omnisharp.Tests
+namespace Omnisharp.Tests.CompletionTests
 {
     public class CompletionTestBase
     {

@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Omnisharp.Tests
+namespace Omnisharp.Tests.CompletionTests
 {
     public class DerivedTypeCompletions : CompletionTestBase
     {
@@ -8,7 +8,7 @@ namespace Omnisharp.Tests
         public void Should_complete_derived_types()
         {
             DisplayTextFor(
-@"public class A {
+                @"public class A {
     public A() 
     {
         int n;

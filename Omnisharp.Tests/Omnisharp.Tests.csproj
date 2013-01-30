@@ -64,15 +64,15 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BugFixTests.cs" />
-    <Compile Include="CompletionsSpecBase.cs" />
-    <Compile Include="CompletionTestBase.cs" />
-    <Compile Include="ConstructorParameterCompletions.cs" />
-    <Compile Include="DerivedTypeCompletions.cs" />
+    <Compile Include="CompletionTests\BugFixTests.cs" />
+    <Compile Include="CompletionTests\CompletionsSpecBase.cs" />
+    <Compile Include="CompletionTests\CompletionTestBase.cs" />
+    <Compile Include="CompletionTests\ConstructorParameterCompletions.cs" />
+    <Compile Include="CompletionTests\DerivedTypeCompletions.cs" />
     <Compile Include="FakeProject.cs" />
     <Compile Include="FakeSolution.cs" />
-    <Compile Include="GenericCompletions.cs" />
-    <Compile Include="NamespaceCompletions.cs" />
+    <Compile Include="CompletionTests\GenericCompletions.cs" />
+    <Compile Include="CompletionTests\NamespaceCompletions.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
