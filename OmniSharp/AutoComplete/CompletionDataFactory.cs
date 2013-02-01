@@ -8,7 +8,7 @@ using ICSharpCode.NRefactory.Completion;
 using ICSharpCode.NRefactory.Documentation;
 using ICSharpCode.NRefactory.TypeSystem;
 
-namespace OmniSharp
+namespace OmniSharp.AutoComplete
 {
     public class CompletionDataFactory : ICompletionDataFactory
     {

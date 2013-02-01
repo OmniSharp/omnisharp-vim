@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
 using OmniSharp;
+using OmniSharp.AutoComplete;
 
 namespace Omnisharp.Tests.CompletionTests
 {

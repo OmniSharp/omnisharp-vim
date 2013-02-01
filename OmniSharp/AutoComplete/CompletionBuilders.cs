@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.NRefactory.TypeSystem.Implementation;
 
-namespace OmniSharp
+namespace OmniSharp.AutoComplete
 {
     public class CompletionBuilders
     {

@@ -20,36 +20,41 @@ function! OmniSharp(findstart, base)
      else
          let res = []
 :python << EOF
-import vim, urllib2, urllib, logging, sys
+import vim, urllib2, urllib, httplib, logging, sys, json
 parameters = {}
 parameters['cursorPosition'] = vim.eval("g:cursorPosition")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name
 
+logger = logging.getLogger('omnisharp')
+hdlr = logging.FileHandler('c:\python.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.WARNING)
+
 target = 'http://localhost:2000/autocomplete'
 
 parameters = urllib.urlencode(parameters)
 try:
+	#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
+	#opener = urllib2.build_opener(proxy_handler)
+	#urllib2.install_opener(opener)
 	response = urllib2.urlopen(target, parameters)
 except:
 	vim.command("call confirm('Could not connect to " + target + "')")
 
-response = response.read() 
-for command in response.split('\n')[:]:
-	try:
-		if command != '':
-			print command
+js = response.read()
+if(js != ''):
+	completions = json.loads(js)
+	for completion in completions:
+		try:
+			command = "add(res, {'word': '%(CompletionText)s', 'abbr': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })" % completion
 			vim.eval(command)
-	except:
-		logger = logging.getLogger('myapp')
-		hdlr = logging.FileHandler('c:\python.log')
-		formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-		hdlr.setFormatter(formatter)
-		logger.addHandler(hdlr) 
-		logger.setLevel(logging.WARNING)
-		logger.error(command)
-		
+		except:
+			logger.error(command)
+			
 EOF
          return res
      endif

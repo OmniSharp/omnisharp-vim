@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-namespace OmniSharp
+namespace OmniSharp.AutoComplete
 {
     public static class CodeCompletionItemProvider
     {

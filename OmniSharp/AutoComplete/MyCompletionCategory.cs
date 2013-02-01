@@ -2,7 +2,7 @@
 using ICSharpCode.NRefactory.Completion;
 using ICSharpCode.NRefactory.TypeSystem;
 
-namespace OmniSharp
+namespace OmniSharp.AutoComplete
 {
     public class MyCompletionsCategory : CompletionCategory
     {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ICSharpCode.NRefactory;
@@ -11,7 +10,7 @@ using ICSharpCode.NRefactory.Editor;
 using ICSharpCode.NRefactory.TypeSystem;
 using OmniSharp.Solution;
 
-namespace OmniSharp
+namespace OmniSharp.AutoComplete
 {
     public class CompletionProvider
     {
@@ -35,7 +34,6 @@ namespace OmniSharp
             var editorText = request.Buffer;
             var filename = request.FileName;
             var partialWord = request.WordToComplete ?? "";
-            var isCtrlSpace = true;
             cursorPosition = Math.Min(cursorPosition, editorText.Length);
             cursorPosition = Math.Max(cursorPosition, 0);
 
@@ -78,7 +76,7 @@ namespace OmniSharp
             //engine.FormattingPolicy = new CSharpFormattingOptions();
             _logger.Debug("Getting Completion Data");
 
-            IEnumerable<ICompletionData> data = engine.GetCompletionData(cursorPosition, isCtrlSpace);
+            IEnumerable<ICompletionData> data = engine.GetCompletionData(cursorPosition, true);
             _logger.Debug("Got Completion Data");
 
             return data.Where(d => d != null && d.DisplayText.IsValidCompletionFor(partialWord))
