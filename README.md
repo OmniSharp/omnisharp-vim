@@ -19,7 +19,7 @@ __New!__ OmniSharp now also includes a "go to definition" function that doesn't 
 
 ##Installation
 
-Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). If you installed Vim using the windows installer, you will need to install the x86 version of Python.
+Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). If you installed Vim using the windows installer, you will need to install the x86 (32 bit!) version of Python.
 
 Verify that Python is working inside Vim with :python print "hi". 
 
