@@ -91,10 +91,11 @@ if(js != ''):
 
 	definition = json.loads(js)
 	filename = definition['FileName']
-	if(filename != vim.current.buffer.name):
-		vim.command('e ' + definition['FileName'])
-	#row is 1 based, column is 0 based
-	vim.current.window.cursor = (definition['Line'], definition['Column'] - 1 )
+	if(filename != None):
+		if(filename != vim.current.buffer.name):
+			vim.command('e ' + definition['FileName'])
+		#row is 1 based, column is 0 based
+		vim.current.window.cursor = (definition['Line'], definition['Column'] - 1 )
 EOF
 
 endfunction
