@@ -9,9 +9,9 @@ CamelCase completions are supported, e.g Console.WL(TAB) will complete to Consol
 This is currently working on Windows only, but will only require minor tweaks to run under Linux/OSX/Mono (pull requests welcome!)
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop/SharpDevelop. 
+completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 
-New! OmniSharp now also includes a "go to definition" function that doesn't require CTAGS.
+__New!__ OmniSharp now also includes a "go to definition" function that doesn't require CTAGS.
 
 ##Screenshot
 ![Omnisharp screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/Omnisharp.png)
@@ -29,7 +29,7 @@ Copy the contents of vimfiles into your $VIM\vimfiles directory.
 
 ## Run the server
 
-OmniSharp.exe -s (path\to\sln)
+	OmniSharp.exe -s (path\to\sln)
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
