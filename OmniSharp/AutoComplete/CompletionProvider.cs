@@ -49,7 +49,7 @@ namespace OmniSharp.AutoComplete
             var compilationUnit = new CSharpParser().Parse(editorText, filename);
             compilationUnit.Freeze();
             var parsedFile = compilationUnit.ToTypeSystem();
-            pctx = pctx.AddOrUpdateFiles(oldFile,parsedFile);
+            pctx = pctx.AddOrUpdateFiles(oldFile, parsedFile);
             project.ProjectContent = pctx;
             ICompilation cmp = pctx.CreateCompilation();
 
@@ -109,17 +109,20 @@ namespace OmniSharp.AutoComplete
             var loc = new TextLocation(request.Line, request.Column);
 
             ResolveResult resolveResult = ICSharpCode.NRefactory.CSharp.Resolver.ResolveAtLocation.Resolve(cmp, parsedFile, compilationUnit, loc);
-            var region = resolveResult.GetDefinitionRegion();
-            var response = new GotoDefinitionResponse
-                {
-                    FileName = region.FileName ?? request.FileName,
-                    Line = region.BeginLine,
-                    Column = region.BeginColumn
-                };
+            var response = new GotoDefinitionResponse();
+            if (resolveResult != null)
+            {
+                var region = resolveResult.GetDefinitionRegion();
+
+                response.FileName = region.FileName;
+                response.Line = region.BeginLine;
+                response.Column = region.BeginColumn;
+            }
+            
             return response;
         }
-    
-    
+
+
     }
 
 
