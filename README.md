@@ -33,13 +33,14 @@ Copy the contents of vimfiles into your $VIM\vimfiles directory.
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
-To get completions, open one of the C# solution files within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed)
+To get completions, open one of the C# solution files within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
+Repeat to cycle through completions, or use the cursor keys (eugh!)
 
 To use the "go to definition" function, add a mapping to call the GotoDefinition function in your $VIMRC file, such as :-
 
 	map <F12> :call GotoDefinition()<cr>
 
-You'll also probably want to "set hidden", otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
+You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
 
 	set hidden
     
@@ -57,6 +58,7 @@ It may eat your code.
 - Refactorings
 - Add files to project
 - Highlight syntax errors as you type
+- Start the server from within Vim and auto discover the solution file where possible
 - Fix bugs
 
 Pull requests welcome!
