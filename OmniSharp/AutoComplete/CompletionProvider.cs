@@ -7,7 +7,9 @@ using ICSharpCode.NRefactory.CSharp.Completion;
 using ICSharpCode.NRefactory.CSharp.TypeSystem;
 using ICSharpCode.NRefactory.Completion;
 using ICSharpCode.NRefactory.Editor;
+using ICSharpCode.NRefactory.Semantics;
 using ICSharpCode.NRefactory.TypeSystem;
+using OmniSharp.Requests;
 using OmniSharp.Solution;
 
 namespace OmniSharp.AutoComplete
@@ -85,7 +87,48 @@ namespace OmniSharp.AutoComplete
                        .OrderBy(d => d.DisplayText);
         }
 
-        
+        public GotoDefinitionResponse ResolveAtLocation(GotoDefinitionRequest request)
+        {
+            //TODO: needs refactoring
+
+            var editorText = request.Buffer;
+            var filename = request.FileName;
+
+            var project = ProjectContainingFile(filename);
+            
+            IProjectContent pctx = project.ProjectContent;
+            
+            IUnresolvedFile oldFile = pctx.GetFile(filename);
+            var compilationUnit = new CSharpParser().Parse(editorText, filename);
+            compilationUnit.Freeze();
+            var parsedFile = compilationUnit.ToTypeSystem();
+            pctx = pctx.AddOrUpdateFiles(oldFile, parsedFile);
+            project.ProjectContent = pctx;
+            ICompilation cmp = pctx.CreateCompilation();
+
+            var loc = new TextLocation(request.Line, request.Column);
+
+            ResolveResult resolveResult = ICSharpCode.NRefactory.CSharp.Resolver.ResolveAtLocation.Resolve(cmp, parsedFile, compilationUnit, loc);
+            var region = resolveResult.GetDefinitionRegion();
+            var response = new GotoDefinitionResponse
+                {
+                    FileName = region.FileName ?? request.FileName,
+                    Line = region.BeginLine,
+                    Column = region.BeginColumn
+                };
+            return response;
+        }
+    
+    
+    }
+
+
+
+    public class GotoDefinitionResponse
+    {
+        public string FileName { get; set; }
+        public int Line { get; set; }
+        public int Column { get; set; }
     }
 
     public static class CompletionDataExtenstions

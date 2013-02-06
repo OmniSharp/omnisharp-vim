@@ -1,9 +1,24 @@
+if exists("g:omnisharp_loaded")
+ finish
+endif
+let g:omnisharp_loaded = 1
+
+:python << EOF
+import vim, urllib2, urllib, httplib, logging, sys, json
+logger = logging.getLogger('omnisharp')
+hdlr = logging.FileHandler('c:\python.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.WARNING)
+EOF
+
 let g:SuperTabDefaultCompletionType = 'context'
 let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
 let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
 let g:SuperTabClosePreviewOnPopupClose = 1
 
-setlocal omnifunc=OmniSharp
+set omnifunc=OmniSharp
 set completeopt=longest,menuone,preview "don't autoselect first item in omnicomplete,show if only one item(for preview)
 function! OmniSharp(findstart, base)
      if a:findstart
@@ -20,19 +35,11 @@ function! OmniSharp(findstart, base)
      else
          let res = []
 :python << EOF
-import vim, urllib2, urllib, httplib, logging, sys, json
 parameters = {}
 parameters['cursorPosition'] = vim.eval("g:cursorPosition")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name
-
-logger = logging.getLogger('omnisharp')
-hdlr = logging.FileHandler('c:\python.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr) 
-logger.setLevel(logging.WARNING)
 
 target = 'http://localhost:2000/autocomplete'
 
@@ -59,3 +66,35 @@ EOF
          return res
      endif
 endfunction 
+
+function! GotoDefinition()
+:python << EOF
+parameters = {}
+parameters['line'] = vim.eval('line(".")')
+parameters['column'] = vim.eval('col(".")')
+parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
+parameters['filename'] = vim.current.buffer.name
+
+target = 'http://localhost:2000/gotodefinition'
+
+parameters = urllib.urlencode(parameters)
+try:
+	#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
+	#opener = urllib2.build_opener(proxy_handler)
+	#urllib2.install_opener(opener)
+	response = urllib2.urlopen(target, parameters)
+except:
+	vim.command("call confirm('Could not connect to " + target + "')")
+
+js = response.read()
+if(js != ''):
+
+	definition = json.loads(js)
+	filename = definition['FileName']
+	if(filename != vim.current.buffer.name):
+		vim.command('e ' + definition['FileName'])
+	#row is 1 based, column is 0 based
+	vim.current.window.cursor = (definition['Line'], definition['Column'] - 1 )
+EOF
+
+endfunction

@@ -103,13 +103,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutocompleteListener.cs" />
-    <Compile Include="AutocompleteRequest.cs" />
+    <Compile Include="Modules\AutocompleteListener.cs" />
+    <Compile Include="Requests\AutocompleteRequest.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="AutoComplete\CodeCompletionItemProvider.cs" />
     <Compile Include="AutoComplete\CompletionBuilders.cs" />
     <Compile Include="AutoComplete\CompletionData.cs" />
     <Compile Include="AutoComplete\CompletionProvider.cs" />
+    <Compile Include="Modules\GotoDefinitionModule.cs" />
+    <Compile Include="Requests\GotoDefinitionRequest.cs" />
+    <Compile Include="Requests\Request.cs" />
     <Compile Include="Solution\CSharpFile.cs" />
     <Compile Include="Solution\CSharpProject.cs" />
     <Compile Include="Logger.cs" />
@@ -122,12 +125,13 @@
     <Compile Include="Solution\CSharpSolution.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="TypeReference.cs" />
-    <Compile Include="XmlDocumentationProviderFactory.cs" />
+    <Compile Include="AutoComplete\XmlDocumentationProviderFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

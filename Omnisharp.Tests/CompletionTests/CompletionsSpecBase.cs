@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
 using OmniSharp;
 using OmniSharp.AutoComplete;
+using OmniSharp.Requests;
 
 namespace Omnisharp.Tests.CompletionTests
 {

@@ -2,8 +2,9 @@
 using Nancy;
 using Nancy.ModelBinding;
 using OmniSharp.AutoComplete;
+using OmniSharp.Requests;
 
-namespace OmniSharp
+namespace OmniSharp.Modules
 {
     public class AutocompleteListener : NancyModule
     {
@@ -13,9 +14,10 @@ namespace OmniSharp
                 {
                     var req = this.Bind<AutocompleteRequest>();
                     var completions = completionProvider.CreateProvider(req);
-                    
                     return Response.AsJson(completions.Select(c => new CompletionDataDto(c)));
                 };
         }
+
+        
     }
 }

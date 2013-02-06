@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using ICSharpCode.NRefactory.Documentation;
-namespace OmniSharp
+
+namespace OmniSharp.AutoComplete
 {
     public class XmlDocumentationProviderFactory
     {

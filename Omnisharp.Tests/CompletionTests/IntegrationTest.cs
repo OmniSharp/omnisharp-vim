@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Nancy.Testing;
 using OmniSharp;
 using OmniSharp.AutoComplete;
+using OmniSharp.Requests;
 using Should;
 
 namespace Omnisharp.Tests.CompletionTests

@@ -160,14 +160,22 @@ namespace OmniSharp.Solution
 
         static bool? GetBoolProperty(Microsoft.Build.Evaluation.Project p, string propertyName)
         {
+			int i;
             string val = p.GetPropertyValue(propertyName);
             if (val.Equals("true", StringComparison.OrdinalIgnoreCase))
                 return true;
             if (val.Equals("false", StringComparison.OrdinalIgnoreCase))
                 return false;
+			i.ToString();
             return null;
         }
-
+            public void Dummy()
+			
+			
+			{
+				int i;
+				i.ToString();
+			}
         public CSharpParser CreateParser()
         {
             var settings = new CompilerSettings();

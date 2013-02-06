@@ -61,10 +61,10 @@ namespace OmniSharp.Solution
                             break;
                         case "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}": // C# project
                             Console.WriteLine("Loading project - " + title);
-
                             _projects.Add(title, new CSharpProject(this, title, Path.Combine(Directory, location)));
+                            break;
+                        default:
                             Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);
-							
                             break;
                     }
                 }
