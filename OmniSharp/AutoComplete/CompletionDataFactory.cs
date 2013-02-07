@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,7 +15,6 @@ namespace OmniSharp.AutoComplete
 
         private readonly CompletionBuilders _completionBuilders;
 
-        private static readonly ConcurrentDictionary<string, ICompletionData> _cachedCompletions = new ConcurrentDictionary<string, ICompletionData>();
         private string _completionText;
         private string _signature;
 
@@ -29,21 +27,6 @@ namespace OmniSharp.AutoComplete
 
         public ICompletionData CreateEntityCompletionData(IEntity entity)
         {
-            //string cacheKey = entity.ReflectionName;
-
-
-            //if(_cachedCompletions.TryGetValue(cacheKey, out completionData))
-            //{
-            //    //return completionData;
-            //    //TODO: caching breaks overloads
-            //}
-
-            if (!ShouldProcess(entity))
-            {
-                // why are we even here?
-                // don't cache this
-                return new CompletionData(entity.Name);
-            }
 
             _completionText = _signature = entity.Name;
 
@@ -56,7 +39,6 @@ namespace OmniSharp.AutoComplete
 
             ICompletionData completionData = CompletionData(entity);
 
-            ////_cachedCompletions.TryAdd(cacheKey, completionData);
             Debug.Assert(completionData != null);
             return completionData;
         }

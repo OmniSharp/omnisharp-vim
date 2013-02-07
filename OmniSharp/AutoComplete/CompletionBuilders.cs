@@ -18,7 +18,7 @@ namespace OmniSharp.AutoComplete
 
         public static IDictionary<string, string> TypeConversionTable
         {
-            get { return ICSharpCode.NRefactory.Ast.TypeReference.PrimitiveTypesCSharpReverse; }
+            get { return TypeReference.PrimitiveTypesCSharpReverse; }
         }
 
         //// EntityDeclaration

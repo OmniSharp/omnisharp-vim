@@ -1,18 +1,16 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
-using OmniSharp.AutoComplete;
-using OmniSharp.Requests;
 
-namespace OmniSharp.Modules
+namespace OmniSharp.GotoDefinition
 {
     public class GotoDefinitionModule : NancyModule
     {
-        public GotoDefinitionModule(CompletionProvider completionProvider)
+        public GotoDefinitionModule(GotoDefinitionProvider gotoDefinitionProvider)
         {
             Post["/gotodefinition"] = x =>
                 {
                     var req = this.Bind<GotoDefinitionRequest>();
-                    var res = completionProvider.ResolveAtLocation(req);
+                    var res = gotoDefinitionProvider.GetGotoDefinitionResponse(req);
                     return Response.AsJson(res);
                 };
         }

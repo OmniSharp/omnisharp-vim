@@ -1,14 +1,12 @@
 ﻿using System.Linq;
 using Nancy;
 using Nancy.ModelBinding;
-using OmniSharp.AutoComplete;
-using OmniSharp.Requests;
 
-namespace OmniSharp.Modules
+namespace OmniSharp.AutoComplete
 {
-    public class AutocompleteListener : NancyModule
+    public class AutocompleteModule : NancyModule
     {
-        public AutocompleteListener(CompletionProvider completionProvider)
+        public AutocompleteModule(CompletionProvider completionProvider)
         {
             Post["/autocomplete"] = x =>
                 {

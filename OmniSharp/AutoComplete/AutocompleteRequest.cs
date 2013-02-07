@@ -1,4 +1,6 @@
-﻿namespace OmniSharp.Requests
+﻿using OmniSharp.Requests;
+
+namespace OmniSharp.AutoComplete
 {
     public class AutocompleteRequest : Request
     {

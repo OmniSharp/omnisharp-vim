@@ -3,13 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Text;
-using ICSharpCode.NRefactory.CSharp;
 
-namespace ICSharpCode.NRefactory.Ast
+namespace OmniSharp.AutoComplete
 {
     public class TypeReference 
     {

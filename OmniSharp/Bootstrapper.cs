@@ -1,27 +1,23 @@
-﻿using System.Linq;
-using Nancy.Bootstrapper;
-using Nancy.Json;
+﻿using Nancy.Json;
 using Nancy.TinyIoc;
-using OmniSharp.AutoComplete;
+using OmniSharp.Solution;
 
 namespace OmniSharp
 {
     public class Bootstrapper : Nancy.DefaultNancyBootstrapper
     {
-        private readonly CompletionProvider _completionProvider;
+        private readonly ISolution _solution;
 
-        public Bootstrapper(CompletionProvider completionProvider)
+        public Bootstrapper(ISolution solution)
         {
-            _completionProvider = completionProvider;
-            JsonSettings.MaxJsonLength = 500000;
+            _solution = solution;
+            JsonSettings.MaxJsonLength = int.MaxValue;
         }
 
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
             base.ConfigureApplicationContainer(container);
-            container.Register(_completionProvider);
+            container.Register(_solution);
         }
-
-        
     }
 }

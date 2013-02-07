@@ -5,7 +5,7 @@ using ICSharpCode.NRefactory.Documentation;
 
 namespace OmniSharp.AutoComplete
 {
-    public class XmlDocumentationProviderFactory
+    public static class XmlDocumentationProviderFactory
     {
         static readonly string referenceAssembliesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Reference Assemblies\Microsoft\\Framework");
         static readonly string frameworkPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), @"Microsoft.NET\Framework");
