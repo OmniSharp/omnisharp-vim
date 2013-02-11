@@ -5,9 +5,8 @@ using ICSharpCode.NRefactory.Completion;
 using OmniSharp;
 using OmniSharp.AutoComplete;
 using OmniSharp.Parser;
-using OmniSharp.Requests;
 
-namespace Omnisharp.Tests.CompletionTests
+namespace Omnisharp.Tests.CompletionTests.AutoComplete
 {
     public class CompletionsSpecBase
     {
@@ -27,7 +26,7 @@ namespace Omnisharp.Tests.CompletionTests
             var project = new FakeProject();
             project.AddFile(editorText);
             _solution.Projects.Add("dummyproject", project);
-            var provider = new CompletionProvider(new EditorTextParser(_solution), new Logger());
+            var provider = new AutoCompleteHandler(new BufferParser(_solution), new Logger());
             var request = new AutocompleteRequest
                 {
                     FileName = "myfile",

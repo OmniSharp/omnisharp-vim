@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Omnisharp.Tests.CompletionTests
+namespace Omnisharp.Tests.CompletionTests.AutoComplete
 {
     public class DerivedTypeCompletions : CompletionTestBase
     {

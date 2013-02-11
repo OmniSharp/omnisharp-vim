@@ -7,7 +7,7 @@ using OmniSharp.AutoComplete;
 using OmniSharp.Solution;
 using Should;
 
-namespace Omnisharp.Tests.CompletionTests
+namespace Omnisharp.Tests.CompletionTests.AutoComplete
 {
     [TestFixture]
     public class IntegrationTest
@@ -46,7 +46,7 @@ public class myclass
                 with.FormValue("CursorPosition", cursorPosition.ToString());
             });
 
-            var res = result.Body.DeserializeJson<CompletionDataDto[]>().Select(c => c.DisplayText);
+            var res = result.Body.DeserializeJson<AutoCompleteResponse[]>().Select(c => c.DisplayText);
             res.ShouldContain("Trim()");
         }
 

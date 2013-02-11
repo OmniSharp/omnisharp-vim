@@ -11,12 +11,12 @@ using OmniSharp.Parser;
 
 namespace OmniSharp.AutoComplete
 {
-    public class CompletionProvider
+    public class AutoCompleteHandler
     {
-        private readonly EditorTextParser _parser;
+        private readonly BufferParser _parser;
         private readonly Logger _logger;
 
-        public CompletionProvider(EditorTextParser parser, Logger logger)
+        public AutoCompleteHandler(BufferParser parser, Logger logger)
         {
             _parser = parser;
             _logger = logger;

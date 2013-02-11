@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Should;
 
-namespace Omnisharp.Tests.CompletionTests
+namespace Omnisharp.Tests.CompletionTests.AutoComplete
 {
     public class ConstructorParameterCompletions : CompletionTestBase
     {

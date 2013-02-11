@@ -5,12 +5,12 @@ namespace OmniSharp.GotoDefinition
 {
     public class GotoDefinitionModule : NancyModule
     {
-        public GotoDefinitionModule(GotoDefinitionProvider gotoDefinitionProvider)
+        public GotoDefinitionModule(GotoDefinitionHandler gotoDefinitionHandler)
         {
             Post["/gotodefinition"] = x =>
                 {
                     var req = this.Bind<GotoDefinitionRequest>();
-                    var res = gotoDefinitionProvider.GetGotoDefinitionResponse(req);
+                    var res = gotoDefinitionHandler.GetGotoDefinitionResponse(req);
                     return Response.AsJson(res);
                 };
         }

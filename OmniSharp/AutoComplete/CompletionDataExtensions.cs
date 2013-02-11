@@ -4,7 +4,7 @@ using ICSharpCode.NRefactory.Completion;
 
 namespace OmniSharp.AutoComplete
 {
-    public static class CompletionDataExtenstions
+    public static class CompletionDataExtensions
     {
         public static IEnumerable<ICompletionData> FlattenOverloads(this IEnumerable<ICompletionData> completions)
         {
