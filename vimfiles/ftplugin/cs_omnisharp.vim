@@ -159,16 +159,25 @@ js = response.read()
 if(js != ''):
 	usages = json.loads(js)['Locations']
 
-	for usage in usages:
-		try:
-			command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
-			vim.eval(command)
-		except:
-			logger.error(command)
+	if(len(usages) == 1):
+		usage = usages[0]
+		filename = usage['FileName']
+		if(filename != None):
+			if(filename != vim.current.buffer.name):
+				vim.command('e ' + usage['FileName'])
+			#row is 1 based, column is 0 based
+			vim.current.window.cursor = (usage['Line'], usage['Column'] - 1 )
+	else:
+		for usage in usages:
+			try:
+				command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+				vim.eval(command)
+			except:
+				logger.error(command)
 EOF
 
 " Place the tags in the quickfix window, if possible
-if len(qf_taglist) > 0
+if len(qf_taglist) > 1
 	call setqflist(qf_taglist)
 	copen
 else

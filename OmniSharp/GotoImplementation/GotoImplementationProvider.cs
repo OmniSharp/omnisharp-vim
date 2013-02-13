@@ -100,7 +100,7 @@ namespace OmniSharp.GotoImplementation
 
     public static class TypeExtensions
     {
-        #region GetAllBaseTypeDefinitions (From NRefactory master)
+        #region GetAllBaseTypeDefinitions (borrowed from NRefactory master)
         /// <summary>
         /// Gets all base type definitions.
         /// The output is ordered so that base types occur before derived types.
