@@ -1,6 +1,7 @@
 #OmniSharp
 
-OmniSharp is an omnicomplete (intellisense) plugin for C# to use with Vim.
+OmniSharp is a plugin for Vim to provide IDE like abilities for C#. It currently supports omnicomplete(intellisense),
+go to definition, and go to implementation.
                                                                
 Code documentation is displayed in the scratch window.
 
@@ -11,7 +12,6 @@ This is currently working on Windows only, but will only require minor tweaks to
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
 completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 
-__New!__ OmniSharp now also includes a "go to definition" function that doesn't require CTAGS.
 
 ##Screenshot
 ![Omnisharp screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/Omnisharp.png)
@@ -39,6 +39,14 @@ Repeat to cycle through completions, or use the cursor keys (eugh!)
 To use the "go to definition" function, add a mapping to call the GotoDefinition function in your $VIMRC file, such as :-
 
 	map <F12> :call GotoDefinition()<cr>
+
+or
+
+	nmap gd :call GotoDefinition()<cr>
+
+To use the "Find implementations / derived types" function, add the following mapping :-
+
+	nmap fi : call FindImplementations()<cr>
 
 You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
 
