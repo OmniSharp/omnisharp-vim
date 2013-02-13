@@ -179,8 +179,6 @@ EOF
 " Place the tags in the quickfix window, if possible
 if len(qf_taglist) > 1
 	call setqflist(qf_taglist)
-	copen
-else
-	echo "No usages found"
+	copen 4
 endif
 endfunction
