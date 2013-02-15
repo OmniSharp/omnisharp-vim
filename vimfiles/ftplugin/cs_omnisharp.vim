@@ -99,3 +99,86 @@ if(js != ''):
 EOF
 
 endfunction
+
+function! FindUsages()
+let qf_taglist = []
+:python << EOF
+parameters = {}
+parameters['line'] = vim.eval('line(".")')
+parameters['column'] = vim.eval('col(".")')
+parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
+parameters['filename'] = vim.current.buffer.name
+
+target = 'http://localhost:2000/findusages'
+
+parameters = urllib.urlencode(parameters)
+try:
+	response = urllib2.urlopen(target, parameters)
+except:
+	vim.command("call confirm('Could not connect to " + target + "')")
+
+js = response.read()
+if(js != ''):
+	usages = json.loads(js)['Usages']
+
+	for usage in usages:
+		try:
+			command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+			vim.eval(command)
+		except:
+			logger.error(command)
+EOF
+
+" Place the tags in the quickfix window, if possible
+if len(qf_taglist) > 0
+	call setqflist(qf_taglist)
+	copen
+else
+	echo "No usages found"
+endif
+endfunction
+
+function! FindImplementations()
+let qf_taglist = []
+:python << EOF
+parameters = {}
+parameters['line'] = vim.eval('line(".")')
+parameters['column'] = vim.eval('col(".")')
+parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
+parameters['filename'] = vim.current.buffer.name
+
+target = 'http://localhost:2000/findimplementations'
+
+parameters = urllib.urlencode(parameters)
+try:
+	response = urllib2.urlopen(target, parameters)
+except:
+	vim.command("call confirm('Could not connect to " + target + "')")
+
+js = response.read()
+if(js != ''):
+	usages = json.loads(js)['Locations']
+
+	if(len(usages) == 1):
+		usage = usages[0]
+		filename = usage['FileName']
+		if(filename != None):
+			if(filename != vim.current.buffer.name):
+				vim.command('e ' + usage['FileName'])
+			#row is 1 based, column is 0 based
+			vim.current.window.cursor = (usage['Line'], usage['Column'] - 1 )
+	else:
+		for usage in usages:
+			try:
+				command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+				vim.eval(command)
+			except:
+				logger.error(command)
+EOF
+
+" Place the tags in the quickfix window, if possible
+if len(qf_taglist) > 1
+	call setqflist(qf_taglist)
+	copen 4
+endif
+endfunction
