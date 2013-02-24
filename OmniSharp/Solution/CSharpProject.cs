@@ -44,9 +44,12 @@ namespace OmniSharp.Solution
 			@"C:\Program Files (x86)\GtkSharp\2.12\lib\gtk-sharp-2.0",
 			@"C:\Program Files (x86)\GtkSharp\2.12\lib\Mono.Posix",
 			@"C:\work\SD\src\Tools\NUnit",
+            @"/usr/local/lib/mono/4.0",
+            @"/usr/local/lib/mono/3.5",
+            @"/usr/local/lib/mono/2.0",
             @"/usr/lib/mono/4.0",
             @"/usr/lib/mono/3.5",
-            @"/usr/lib/mono/2.0"
+            @"/usr/lib/mono/2.0",
 		};
 
         public readonly ISolution Solution;
