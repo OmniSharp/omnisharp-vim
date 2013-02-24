@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniSharp", "OmniSharp\Omni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omnisharp.Tests", "Omnisharp.Tests\Omnisharp.Tests.csproj", "{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Build.Evaluation", "Microsoft.Build.Evaluation\Microsoft.Build.Evaluation.csproj", "{3650EB54-3511-4009-B430-3DA4BBFD9D7F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,12 @@ Global
 		{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}.Release|x86.ActiveCfg = Release|Any CPU
+		{3650EB54-3511-4009-B430-3DA4BBFD9D7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3650EB54-3511-4009-B430-3DA4BBFD9D7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3650EB54-3511-4009-B430-3DA4BBFD9D7F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3650EB54-3511-4009-B430-3DA4BBFD9D7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3650EB54-3511-4009-B430-3DA4BBFD9D7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3650EB54-3511-4009-B430-3DA4BBFD9D7F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
