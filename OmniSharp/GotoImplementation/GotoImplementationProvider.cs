@@ -14,17 +14,17 @@ namespace OmniSharp.GotoImplementation
     public class GotoImplementationProvider
     {
         private readonly ISolution _solution;
-        private readonly EditorTextParser _editorTextParser;
+        private readonly BufferParser _bufferParser;
 
-        public GotoImplementationProvider(ISolution solution, EditorTextParser editorTextParser)
+        public GotoImplementationProvider(ISolution solution, BufferParser bufferParser)
         {
             _solution = solution;
-            _editorTextParser = editorTextParser;
+            _bufferParser = bufferParser;
         }
 
         public GotoImplementationResponse FindDerivedMembers(GotoImplementationRequest request)
         {
-            var res = _editorTextParser.ParsedContent(request.Buffer, request.FileName);
+            var res = _bufferParser.ParsedContent(request.Buffer, request.FileName);
 
             var loc = new TextLocation(request.Line, request.Column);
 

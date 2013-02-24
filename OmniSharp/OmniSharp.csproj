@@ -111,7 +111,6 @@
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
     <Compile Include="Parser\BufferParser.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionHandler.cs" />
-    <Compile Include="AutoComplete\CompletionDataExtenstions.cs" />
     <Compile Include="GotoImplementation\GotoImplementationModule.cs" />
     <Compile Include="GotoImplementation\GotoImplementationRequest.cs" />
     <Compile Include="GotoImplementation\GotoImplementationProvider.cs">
@@ -119,8 +118,6 @@
     </Compile>
     <Compile Include="GotoImplementation\GotoImplementationResponse.cs" />
     <Compile Include="GotoImplementation\Location.cs" />
-    <Compile Include="Parser\EditorTextParser.cs" />
-    <Compile Include="GotoDefinition\GotoDefinitionProvider.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionResponse.cs" />
     <Compile Include="Parser\ParsedResult.cs" />
     <Compile Include="AutoComplete\AutocompleteModule.cs" />
