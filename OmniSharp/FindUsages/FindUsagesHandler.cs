@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using ICSharpCode.NRefactory;
+using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.CSharp.Resolver;
 using ICSharpCode.NRefactory.CSharp.TypeSystem;
 using ICSharpCode.NRefactory.Semantics;
@@ -14,18 +15,55 @@ namespace OmniSharp.FindUsages
     public class FindUsagesHandler
     {
         private readonly BufferParser _parser;
-        private FindReferences _findReferences;
+        
 
         public FindUsagesHandler(BufferParser parser)
         {
             _parser = parser;
         }
 
-        public FindUsagesResponse FindUsages(FindUsagesRequest req)
+        public FindUsagesResponse FindUsages(FindUsagesRequest request)
+        {
+            var res = _parser.ParsedContent(request.Buffer, request.FileName);
+            
+            var loc = new TextLocation(request.Line, request.Column);
+
+            ResolveResult resolveResult = ResolveAtLocation.Resolve(res.Compilation, res.UnresolvedFile, res.SyntaxTree, loc);
+            resolveResult.Type.GetDefinition();
+            var findReferences = new FindReferences();
+            var searchScopes = findReferences.GetSearchScopes(resolveResult.Type.GetDefinition());
+
+            var interesting = new List<CSharpUnresolvedFile>();
+
+            foreach (var scope in searchScopes)
+            {
+                var scopeInteresting = findReferences.GetInterestingFiles(scope, res.Compilation);
+                interesting.AddRange(scopeInteresting);
+            }
+
+            var result = new List<AstNode>();
+
+            foreach (var file in interesting)
+            {
+                ParsedResult parsedResult = _parser.ParsedContent(File.ReadAllText(file.FileName), file.FileName);
+                findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree, parsedResult.Compilation,
+                                             (node, rr) => result.Add(node), CancellationToken.None);
+            }
+
+            var usages = result.Select(node =>  new Usage
+            {
+                FileName = node.GetRegion().FileName,
+                Line = node.StartLocation.Line,
+                Column = node.StartLocation.Column
+            });
+
+            return new FindUsagesResponse { Usages = usages };
+
+        }
+        public FindUsagesResponse FindUsages2(FindUsagesRequest req)
         {
             ParsedResult res = _parser.ParsedContent(req.Buffer, req.FileName);
-
-            _findReferences = new FindReferences();
+            var findReferences = new FindReferences();
             var result = new List<ResolveResult>();
 
             var loc = new TextLocation(req.Line, req.Column);
@@ -39,38 +77,27 @@ namespace OmniSharp.FindUsages
                 ITypeDefinition resolvedDef = curDef.Resolve(rctx).GetDefinition();
                 IMember curMember = resolvedDef.Members.FirstOrDefault(m => m.Region.Begin <= loc && loc < m.BodyRegion.End);
                 if (curMember != null)
+                
                 {
-                    var searchScopes = _findReferences.GetSearchScopes(curMember);
+
+                    //var typeEntity = res.Compilation.FindType().GetDefinition();
+                    //var searchScopes = findReferences.GetSearchScopes(typeEntity);
+                    var searchScopes = findReferences.GetSearchScopes(curMember);
                     var interesting = new List<CSharpUnresolvedFile>();
                     foreach (var scope in searchScopes)
                     {
-                        var scopeInteresting = _findReferences.GetInterestingFiles(scope, res.Compilation);
+                        var scopeInteresting = findReferences.GetInterestingFiles(scope, res.Compilation);
                         interesting.AddRange(scopeInteresting);
                     }
 
                     foreach (var file in interesting)
                     {
                         ParsedResult parsedResult = _parser.ParsedContent(File.ReadAllText(file.FileName), file.FileName);
-                        _findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree, parsedResult.Compilation,
+                        findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree, parsedResult.Compilation,
                                                      (node, rr) => result.Add(rr), CancellationToken.None);
                     }
                 }
-
-
             }
-
-            //IUnresolvedTypeDefinition curDef = resolveResult.Type;
-            //if (curDef != null)
-            //{
-            //    ITypeDefinition resolvedDef = curDef.Resolve(rctx).GetDefinition();
-            //    IMember curMember = resolvedDef.Members.FirstOrDefault(m => m.Region.Begin <= loc && loc < m.BodyRegion.End);
-            //    if (curMember != null)
-            //    {
-            //        var searchScopes = _findReferences.GetSearchScopes(curMember);
-            //        _findReferences.FindReferencesInFile(searchScopes, res.UnresolvedFile, res.SyntaxTree, res.Compilation,
-            //                                             (node, rr) => result.Add(node), CancellationToken.None);
-            //    }
-            //}
 
             var usages = result.Select(node => node.GetDefinitionRegion()).Select(region => new Usage
                 {
