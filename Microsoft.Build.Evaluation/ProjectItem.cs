@@ -23,11 +23,11 @@ namespace Microsoft.Build.Evaluation
         }
         public bool HasMetadata(string name)
         {
-            return Element.Descendants(name).Any();
+            return Element.Descendants(Element.Document.Root.Name.Namespace + name).Any();
         }
         public string GetMetadataValue(string name)
         {
-            return Element.Descendants(name).First().Value;
+            return Element.Descendants(Element.Document.Root.Name.Namespace + name).First().Value;
         }
     }
 }
