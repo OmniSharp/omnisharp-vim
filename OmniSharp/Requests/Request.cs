@@ -2,7 +2,8 @@
 {
     public abstract class Request
     {
-        public int CursorPosition { get; set; }
+        public int CursorLine { get; set; }
+        public int CursorColumn { get; set; }
         public string Buffer { get; set; }
         public string FileName { get; set; }
     }
