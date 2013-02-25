@@ -23,7 +23,8 @@ set completeopt=longest,menuone,preview "don't autoselect first item in omnicomp
 function! OmniSharp(findstart, base)
      if a:findstart
 		 let g:textBuffer = getline(1,'$')
-		 let g:cursorPosition = line2byte(line("."))+col(".") - 2
+		 let g:cursorLine = line(".")
+		 let g:cursorColumn = col(".")
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
@@ -36,7 +37,8 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['cursorPosition'] = vim.eval("g:cursorPosition")
+parameters['cursorLine'] = vim.eval("g:cursorLine")
+parameters['cursorColumn'] = vim.eval("g:cursorColumn")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name
