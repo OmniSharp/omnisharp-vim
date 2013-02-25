@@ -26,7 +26,8 @@ public class myclass
 }
 ";
             var solution = new FakeSolution();
-            int cursorPosition = editorText.IndexOf("$", StringComparison.Ordinal);
+            int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
+            Tuple<int, int> cursorPosition = GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
@@ -43,7 +44,8 @@ public class myclass
                 with.FormValue("FileName", "anewfile.cs");
                 with.FormValue("WordToComplete", partialWord);
                 with.FormValue("Buffer", editorText);
-                with.FormValue("CursorPosition", cursorPosition.ToString());
+                with.FormValue("CursorLine", cursorPosition.Item1.ToString());
+                with.FormValue("CursorColumn", cursorPosition.Item2.ToString());
             });
 
             var res = result.Body.DeserializeJson<CompletionDataDto[]>().Select(c => c.DisplayText);
@@ -54,6 +56,19 @@ public class myclass
         {
             MatchCollection matches = Regex.Matches(editorText, @"([a-zA-Z_]*)\$");
             return matches[0].Groups[1].ToString();
+        }
+
+        private static Tuple<int, int> GetLineAndColumnFromIndex(string text, int index)
+        {
+            int lineCount = 1, lastLineEnd = -1;
+            for (int i = 0; i < index; i++)
+                if (text[i] == '\n')
+                {
+                    lineCount++;
+                    lastLineEnd = i;
+                }
+
+            return new Tuple<int, int>(lineCount, index - lastLineEnd);
         }
     }
 }
