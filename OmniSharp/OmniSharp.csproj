@@ -102,7 +102,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoComplete\CompletionDataExtenstions.cs" />
+    <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
+    <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
+    <Compile Include="FindUsages\FindUsagesHandler.cs" />
+    <Compile Include="FindUsages\FindUsagesModule.cs" />
+    <Compile Include="FindUsages\FindUsagesRequest.cs" />
+    <Compile Include="FindUsages\FindUsagesResponse.cs" />
+    <Compile Include="Parser\BufferParser.cs" />
+    <Compile Include="GotoDefinition\GotoDefinitionHandler.cs" />
     <Compile Include="GotoImplementation\GotoImplementationModule.cs" />
     <Compile Include="GotoImplementation\GotoImplementationRequest.cs" />
     <Compile Include="GotoImplementation\GotoImplementationProvider.cs">
@@ -110,8 +117,6 @@
     </Compile>
     <Compile Include="GotoImplementation\GotoImplementationResponse.cs" />
     <Compile Include="GotoImplementation\Location.cs" />
-    <Compile Include="Parser\EditorTextParser.cs" />
-    <Compile Include="GotoDefinition\GotoDefinitionProvider.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionResponse.cs" />
     <Compile Include="Parser\ParsedResult.cs" />
     <Compile Include="AutoComplete\AutocompleteModule.cs" />
@@ -120,7 +125,7 @@
     <Compile Include="AutoComplete\CodeCompletionItemProvider.cs" />
     <Compile Include="AutoComplete\CompletionBuilders.cs" />
     <Compile Include="AutoComplete\CompletionData.cs" />
-    <Compile Include="AutoComplete\CompletionProvider.cs" />
+    <Compile Include="AutoComplete\AutoCompleteHandler.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionModule.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionRequest.cs" />
     <Compile Include="Requests\Request.cs" />

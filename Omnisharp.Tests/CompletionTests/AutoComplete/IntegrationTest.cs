@@ -7,7 +7,7 @@ using OmniSharp.AutoComplete;
 using OmniSharp.Solution;
 using Should;
 
-namespace Omnisharp.Tests.CompletionTests
+namespace Omnisharp.Tests.CompletionTests.AutoComplete
 {
     [TestFixture]
     public class IntegrationTest
@@ -26,8 +26,7 @@ public class myclass
 }
 ";
             var solution = new FakeSolution();
-            int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
-            Tuple<int, int> cursorPosition = GetLineAndColumnFromIndex(editorText, cursorOffset);
+            int cursorPosition = editorText.IndexOf("$", StringComparison.Ordinal);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
@@ -44,11 +43,10 @@ public class myclass
                 with.FormValue("FileName", "anewfile.cs");
                 with.FormValue("WordToComplete", partialWord);
                 with.FormValue("Buffer", editorText);
-                with.FormValue("CursorLine", cursorPosition.Item1.ToString());
-                with.FormValue("CursorColumn", cursorPosition.Item2.ToString());
+                with.FormValue("CursorPosition", cursorPosition.ToString());
             });
 
-            var res = result.Body.DeserializeJson<CompletionDataDto[]>().Select(c => c.DisplayText);
+            var res = result.Body.DeserializeJson<AutoCompleteResponse[]>().Select(c => c.DisplayText);
             res.ShouldContain("Trim()");
         }
 
@@ -56,19 +54,6 @@ public class myclass
         {
             MatchCollection matches = Regex.Matches(editorText, @"([a-zA-Z_]*)\$");
             return matches[0].Groups[1].ToString();
-        }
-
-        private static Tuple<int, int> GetLineAndColumnFromIndex(string text, int index)
-        {
-            int lineCount = 1, lastLineEnd = -1;
-            for (int i = 0; i < index; i++)
-                if (text[i] == '\n')
-                {
-                    lineCount++;
-                    lastLineEnd = i;
-                }
-
-            return new Tuple<int, int>(lineCount, index - lastLineEnd);
         }
     }
 }

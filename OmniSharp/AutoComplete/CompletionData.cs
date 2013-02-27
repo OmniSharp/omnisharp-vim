@@ -4,22 +4,6 @@ using ICSharpCode.NRefactory.Completion;
 
 namespace OmniSharp.AutoComplete
 {
-    public class CompletionDataDto
-    {
-        public CompletionDataDto() { } // for deserialisation
-
-        public CompletionDataDto(ICompletionData d)
-        {
-            DisplayText = d.DisplayText;
-            CompletionText = d.CompletionText;
-            Description = d.Description;
-        }
-
-        public string CompletionText { get; set; }
-        public string Description { get; set; }
-        public string DisplayText { get; set; }
-    }
-
     public class CompletionData
         : ICompletionData
     {

@@ -7,11 +7,11 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.Parser
 {
-    public class EditorTextParser
+    public class BufferParser
     {
         private readonly ISolution _solution;
 
-        public EditorTextParser(ISolution solution)
+        public BufferParser(ISolution solution)
         {
             _solution = solution;
         }

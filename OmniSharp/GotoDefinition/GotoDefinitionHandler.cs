@@ -5,18 +5,18 @@ using OmniSharp.Parser;
 
 namespace OmniSharp.GotoDefinition
 {
-    public class GotoDefinitionProvider
+    public class GotoDefinitionHandler
     {
-        private readonly EditorTextParser _editorTextParser;
+        private readonly BufferParser _bufferParser;
 
-        public GotoDefinitionProvider(EditorTextParser editorTextParser)
+        public GotoDefinitionHandler(BufferParser bufferParser)
         {
-            _editorTextParser = editorTextParser;
+            _bufferParser = bufferParser;
         }
 
         public GotoDefinitionResponse GetGotoDefinitionResponse(GotoDefinitionRequest request)
         {
-            var res = _editorTextParser.ParsedContent(request.Buffer, request.FileName);
+            var res = _bufferParser.ParsedContent(request.Buffer, request.FileName);
             
             var loc = new TextLocation(request.Line, request.Column);
 
