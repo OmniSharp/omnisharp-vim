@@ -35,7 +35,7 @@ namespace Omnisharp.Tests.CompletionTests.FindUsages
             var result = browser.Post("/findusages", with =>
             {
                 with.HttpRequest();
-                with.FormValue("FileName", "anewfile.cs");
+                with.FormValue("FileName", "myfile");
                 with.FormValue("Line", "3");
                 with.FormValue("Column", "21");
                 with.FormValue("Buffer", editorText);
@@ -43,6 +43,7 @@ namespace Omnisharp.Tests.CompletionTests.FindUsages
 
             var res = result.Body.DeserializeJson<FindUsagesResponse>();
             res.Usages.Count().ShouldEqual(1);
+            res.Usages.First().Text.ShouldEqual("method ()");
         }
     }
 }

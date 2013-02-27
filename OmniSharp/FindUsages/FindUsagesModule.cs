@@ -1,6 +1,5 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
-using OmniSharp.AutoComplete;
 
 namespace OmniSharp.FindUsages
 {

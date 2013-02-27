@@ -30,6 +30,7 @@ namespace OmniSharp.Solution
     public interface ISolution
     {
         Dictionary<string, IProject> Projects { get; }
+        CSharpFile GetFile(string filename);
     }
 
     public class CSharpSolution : ISolution
@@ -73,6 +74,14 @@ namespace OmniSharp.Solution
 
         protected CSharpSolution()
         {
+        }
+
+        public CSharpFile GetFile(string filename)
+        {
+            return (from project in _projects.Values
+                    from file in project.Files
+                    where file.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)
+                    select file).FirstOrDefault();
         }
 
         public void UpdateProject(CSharpProject projectContent)
