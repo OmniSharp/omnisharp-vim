@@ -125,7 +125,7 @@ if(js != ''):
 
 	for usage in usages:
 		try:
-			command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+			command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
 			vim.eval(command)
 		except:
 			logger.error(command)
