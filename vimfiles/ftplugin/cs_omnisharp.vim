@@ -23,8 +23,7 @@ set completeopt=longest,menuone,preview "don't autoselect first item in omnicomp
 function! OmniSharp(findstart, base)
      if a:findstart
 		 let g:textBuffer = getline(1,'$')
-		 let g:cursorLine = line(".")
-		 let g:cursorColumn = col(".")
+		 let g:cursorPosition = line2byte(line("."))+col(".") - 2
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
@@ -37,8 +36,7 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['cursorLine'] = vim.eval("g:cursorLine")
-parameters['cursorColumn'] = vim.eval("g:cursorColumn")
+parameters['cursorPosition'] = vim.eval("g:cursorPosition")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name
@@ -125,7 +123,7 @@ if(js != ''):
 
 	for usage in usages:
 		try:
-			command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+			command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
 			vim.eval(command)
 		except:
 			logger.error(command)
