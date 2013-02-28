@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -29,7 +30,7 @@ namespace OmniSharp.FindUsages
         {
             var res = _parser.ParsedContent(request.Buffer, request.FileName);
             var loc = new TextLocation(request.Line, request.Column);
-            var result = new List<AstNode>();
+            var result = new ConcurrentBag<AstNode>();
             var findReferences = new FindReferences();
             ResolveResult resolveResult = ResolveAtLocation.Resolve(res.Compilation, res.UnresolvedFile, res.SyntaxTree, loc);
             if (resolveResult is LocalResolveResult)
@@ -71,7 +72,7 @@ namespace OmniSharp.FindUsages
 
             }
 
-            var usages = result.Select(node =>  new Usage
+            var usages = result.Select(node => new Usage
             {
                 FileName = node.GetRegion().FileName,
                 Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)),
