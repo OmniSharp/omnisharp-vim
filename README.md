@@ -13,9 +13,12 @@ OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github
 completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 
 
-##Screenshot
+##Screenshots
+####Auto Complete
 ![Omnisharp screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/Omnisharp.png)
 
+####Find Usages
+![Find Usages screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/FindUsages.png)
 
 ##Installation
 
