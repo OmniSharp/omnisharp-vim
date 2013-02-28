@@ -1,7 +1,7 @@
 #OmniSharp
 
 OmniSharp is a plugin for Vim to provide IDE like abilities for C#. It currently supports omnicomplete(intellisense),
-go to definition, and go to implementation.
+go to definition, find usages and go to implementation.
                                                                
 Code documentation is displayed in the scratch window.
 
@@ -47,6 +47,10 @@ or
 To use the "Find implementations / derived types" function, add the following mapping :-
 
 	nmap fi : call FindImplementations()<cr>
+
+To use the "Find Usages" function, add the following mapping :-
+
+	nmap fu : call FindUsages()<cr>
 
 You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
 

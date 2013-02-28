@@ -24,23 +24,24 @@ namespace OmniSharp.AutoComplete
 
         public IEnumerable<ICompletionData> CreateProvider(AutocompleteRequest request)
         {
-            var cursorPosition = request.CursorPosition;
-            var editorText = request.Buffer;
+            var editorText = request.Buffer ?? "";
             var filename = request.FileName;
             var partialWord = request.WordToComplete ?? "";
+
+            var doc = new ReadOnlyDocument(editorText);
+            TextLocation loc = new TextLocation(request.CursorLine, request.CursorColumn - partialWord.Length);
+            int cursorPosition = doc.GetOffset(loc);
+            //Ensure cursorPosition only equals 0 when editorText is empty, so line 1,column 1
+            //completion will work correctly.
+            cursorPosition = Math.Max(cursorPosition, 1);
             cursorPosition = Math.Min(cursorPosition, editorText.Length);
-            cursorPosition = Math.Max(cursorPosition, 0);
 
             
-            var doc = new ReadOnlyDocument(editorText);
-
-            TextLocation loc = doc.GetLocation(cursorPosition - partialWord.Length);
             var res = _parser.ParsedContent(editorText, filename);
 
             var rctx = new CSharpTypeResolveContext(res.Compilation.MainAssembly);
             var usingScope = res.UnresolvedFile.GetUsingScope(loc).Resolve(res.Compilation);
             rctx = rctx.WithUsingScope(usingScope);
-            _logger.Debug(usingScope);
 
             IUnresolvedTypeDefinition curDef = res.UnresolvedFile.GetInnermostTypeDefinition(loc);
             if (curDef != null)

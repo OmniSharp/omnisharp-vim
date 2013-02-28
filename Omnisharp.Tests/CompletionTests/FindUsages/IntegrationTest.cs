@@ -43,7 +43,7 @@ namespace Omnisharp.Tests.CompletionTests.FindUsages
 
             var res = result.Body.DeserializeJson<FindUsagesResponse>();
             res.Usages.Count().ShouldEqual(1);
-            res.Usages.First().Text.ShouldEqual("method ()");
+            res.Usages.First().Text.Trim().ShouldEqual("method();");
         }
     }
 }
