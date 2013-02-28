@@ -51,6 +51,10 @@ namespace OmniSharp.FindUsages
                     entity = (resolveResult as MemberResolveResult).Member;
                 }
 
+                if (entity == null)
+                {
+                    return new FindUsagesResponse {Usages = new List<Usage>()};
+                }
                 var searchScopes = findReferences.GetSearchScopes(entity);
 
                 var interesting = new List<CSharpUnresolvedFile>();
