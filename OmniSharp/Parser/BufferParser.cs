@@ -39,7 +39,10 @@ namespace OmniSharp.Parser
                 IUnresolvedFile oldFile = pctx.GetFile(filename);
                 pctx = pctx.AddOrUpdateFiles(oldFile, parsedFile);
             }
-            
+
+            var editedFile = _solution.GetFile(filename);
+            editedFile.Update(editorText);
+
             project.ProjectContent = pctx;
             ICompilation cmp = pctx.CreateCompilation();
 
