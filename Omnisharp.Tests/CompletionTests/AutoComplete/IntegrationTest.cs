@@ -54,7 +54,7 @@ public class myclass
 
         private static string GetPartialWord(string editorText)
         {
-            MatchCollection matches = Regex.Matches(editorText, @"([a-zA-Z_]*)\$");
+            MatchCollection matches = Regex.Matches(editorText, @"([a-zA-Z0-9_]*)\$");
             return matches[0].Groups[1].ToString();
         }
 
