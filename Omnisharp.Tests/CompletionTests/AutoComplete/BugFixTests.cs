@@ -4,6 +4,7 @@ using Should;
 
 namespace Omnisharp.Tests.CompletionTests.AutoComplete
 {
+    [TestFixture]
     public class BugFixTests : CompletionTestBase
     {
         [Test]
@@ -17,6 +18,25 @@ namespace Omnisharp.Tests.CompletionTests.AutoComplete
         n.T$;
     }
 }").First().ShouldEqual("ToString()");
+        }
+
+        [Test]
+        public void Should_complete_to_Process1More()
+        {
+            DisplayTextFor(
+                    @"
+public class MyClass
+{
+    public static int Process1More()
+    {
+        return 10;
+    }
+
+    public static void Main()
+    {
+        var i = Process1M$
+    }
+}").ShouldContain("Process1More()");
         }
     }
 }
