@@ -28,6 +28,8 @@ namespace OmniSharp.FindUsages
 
         public FindUsagesResponse FindUsages(FindUsagesRequest request)
         {
+            var editedFile = _solution.GetFile(request.FileName);
+            editedFile.Update(request.Buffer);
             var res = _parser.ParsedContent(request.Buffer, request.FileName);
             var loc = new TextLocation(request.Line, request.Column);
             var result = new ConcurrentBag<AstNode>();

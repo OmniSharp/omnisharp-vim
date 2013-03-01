@@ -8,9 +8,9 @@ namespace OmniSharp.Solution
 {
     public class CSharpFile
     {
-        public readonly string FileName;
+        public string FileName;
 
-        public readonly ITextSource Content;
+        public ITextSource Content;
         public SyntaxTree SyntaxTree;
         public IUnresolvedFile ParsedFile;
 
@@ -23,11 +23,16 @@ namespace OmniSharp.Solution
 
         public CSharpFile(IProject project, string fileName, string source)
         {
+            Parse(project, fileName, source);
+        }
+
+        private void Parse(IProject project, string fileName, string source)
+        {
             Console.WriteLine("Loading " + fileName);
             this.FileName = fileName;
             this.Content = new StringTextSource(source);
             this.Document = new ReadOnlyDocument(this.Content);
-
+            this.Project = project;
             CSharpParser p = project.CreateParser();
             this.SyntaxTree = p.Parse(Content.CreateReader(), fileName);
             if (p.HasErrors)
@@ -39,6 +44,13 @@ namespace OmniSharp.Solution
                 }
             }
             this.ParsedFile = this.SyntaxTree.ToTypeSystem();
+        }
+
+        protected IProject Project { get; set; }
+
+        public void Update(string source)
+        {
+            Parse(Project, this.FileName, source);
         }
     }
 }
