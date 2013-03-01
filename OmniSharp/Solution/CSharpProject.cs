@@ -38,19 +38,28 @@ namespace OmniSharp.Solution
     public class CSharpProject : IProject
     {
         public static readonly string[] AssemblySearchPaths = {
-			@"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0",
-			@"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\v3.5",
-			@"C:\Windows\Microsoft.NET\Framework\v2.0.50727",
-			@"C:\Program Files (x86)\GtkSharp\2.12\lib\gtk-sharp-2.0",
-			@"C:\Program Files (x86)\GtkSharp\2.12\lib\Mono.Posix",
-			@"C:\work\SD\src\Tools\NUnit",
+            //Windows Paths
+            @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0",
+            @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\v3.5",
+            @"C:\Windows\Microsoft.NET\Framework\v2.0.50727",
+            @"C:\Program Files (x86)\GtkSharp\2.12\lib\gtk-sharp-2.0",
+            @"C:\Program Files (x86)\GtkSharp\2.12\lib\Mono.Posix",
+            @"C:\work\SD\src\Tools\NUnit",
+
+            //Unix Paths
             @"/usr/local/lib/mono/4.0",
             @"/usr/local/lib/mono/3.5",
             @"/usr/local/lib/mono/2.0",
             @"/usr/lib/mono/4.0",
             @"/usr/lib/mono/3.5",
             @"/usr/lib/mono/2.0",
-		};
+
+            //OS X Paths
+            @"/Library/Frameworks/Mono.Framework/Libraries/mono/4.5",
+            @"/Library/Frameworks/Mono.Framework/Libraries/mono/4.0",
+            @"/Library/Frameworks/Mono.Framework/Libraries/mono/3.5",
+            @"/Library/Frameworks/Mono.Framework/Libraries/mono/2.0",
+        };
 
         public readonly ISolution Solution;
         public string Title { get; set; }
