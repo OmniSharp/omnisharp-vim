@@ -28,6 +28,7 @@ namespace OmniSharp.FindUsages
 
         public FindUsagesResponse FindUsages(FindUsagesRequest request)
         {
+            
             var res = _parser.ParsedContent(request.Buffer, request.FileName);
             var loc = new TextLocation(request.Line, request.Column);
             var result = new ConcurrentBag<AstNode>();
@@ -79,7 +80,7 @@ namespace OmniSharp.FindUsages
             var usages = result.Select(node => new Usage
             {
                 FileName = node.GetRegion().FileName,
-                Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)),
+                Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)).Replace("'", "''"),
                 Line = node.StartLocation.Line,
                 Column = node.StartLocation.Column,
             });
