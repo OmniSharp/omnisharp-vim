@@ -22,14 +22,14 @@ namespace OmniSharp.AutoComplete
             _logger = logger;
         }
 
-        public IEnumerable<ICompletionData> CreateProvider(AutocompleteRequest request)
+        public IEnumerable<ICompletionData> CreateProvider(AutoCompleteRequest request)
         {
             var editorText = request.Buffer ?? "";
             var filename = request.FileName;
             var partialWord = request.WordToComplete ?? "";
 
             var doc = new ReadOnlyDocument(editorText);
-            TextLocation loc = new TextLocation(request.CursorLine, request.CursorColumn - partialWord.Length);
+            TextLocation loc = new TextLocation(request.Line, request.Column - partialWord.Length);
             int cursorPosition = doc.GetOffset(loc);
             //Ensure cursorPosition only equals 0 when editorText is empty, so line 1,column 1
             //completion will work correctly.

@@ -28,13 +28,13 @@ namespace OmniSharp.Tests.CompletionTests.AutoComplete
             project.AddFile(editorText);
             _solution.Projects.Add("dummyproject", project);
             var provider = new AutoCompleteHandler(new BufferParser(_solution), new Logger());
-            var request = new AutocompleteRequest
+            var request = new AutoCompleteRequest
                 {
                     FileName = "myfile",
                     WordToComplete = partialWord,
                     Buffer = editorText,
-                    CursorLine = cursorPosition.Item1,
-                    CursorColumn = cursorPosition.Item2,
+                    Line = cursorPosition.Item1,
+                    Column = cursorPosition.Item2,
                 };
 
             return provider.CreateProvider(request);

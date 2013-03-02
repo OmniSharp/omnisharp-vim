@@ -2,8 +2,10 @@
 
 namespace OmniSharp.AutoComplete
 {
-    public class AutocompleteRequest : Request
+    public class AutoCompleteRequest : Request
     {
+        public int Line { get; set; }
+        public int Column { get; set; }
         public string WordToComplete { get; set; }
     }
 }

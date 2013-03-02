@@ -4,13 +4,13 @@ using Nancy.ModelBinding;
 
 namespace OmniSharp.AutoComplete
 {
-    public class AutocompleteModule : NancyModule
+    public class AutoCompleteModule : NancyModule
     {
-        public AutocompleteModule(AutoCompleteHandler autoCompleteHandler)
+        public AutoCompleteModule(AutoCompleteHandler autoCompleteHandler)
         {
             Post["/autocomplete"] = x =>
                 {
-                    var req = this.Bind<AutocompleteRequest>();
+                    var req = this.Bind<AutoCompleteRequest>();
                     var completions = autoCompleteHandler.CreateProvider(req);
                     return Response.AsJson(completions.Select(c => new AutoCompleteResponse(c)));
                 };
