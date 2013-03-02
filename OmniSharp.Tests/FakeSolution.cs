@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OmniSharp.Solution;
 
-namespace Omnisharp.Tests
+namespace OmniSharp.Tests
 {
     public class FakeSolution : ISolution
     {

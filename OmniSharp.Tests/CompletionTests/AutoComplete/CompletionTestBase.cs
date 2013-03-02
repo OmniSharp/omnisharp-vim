@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Omnisharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.CompletionTests.AutoComplete
 {
     public class CompletionTestBase
     {

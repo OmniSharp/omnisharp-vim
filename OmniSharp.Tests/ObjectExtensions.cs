@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 
-namespace Omnisharp.Tests
+namespace OmniSharp.Tests
 {
     public static class ObjectExtensions
     {

@@ -5,22 +5,22 @@ using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
 using OmniSharp.Solution;
 
-namespace Omnisharp.Tests
+namespace OmniSharp.Tests
 {
     public class FakeProject : IProject
     {
-		static readonly Lazy<IUnresolvedAssembly> mscorlib = new Lazy<IUnresolvedAssembly>(
-		    () => new CecilLoader().LoadAssemblyFile(typeof (object).Assembly.Location));
-		
-		static readonly Lazy<IUnresolvedAssembly> systemCore = new Lazy<IUnresolvedAssembly>(
-		    () => new CecilLoader().LoadAssemblyFile(typeof (Enumerable).Assembly.Location));
-		
+        static readonly Lazy<IUnresolvedAssembly> mscorlib = new Lazy<IUnresolvedAssembly>(
+            () => new CecilLoader().LoadAssemblyFile(typeof (object).Assembly.Location));
+        
+        static readonly Lazy<IUnresolvedAssembly> systemCore = new Lazy<IUnresolvedAssembly>(
+            () => new CecilLoader().LoadAssemblyFile(typeof (Enumerable).Assembly.Location));
+        
         public FakeProject()
         {
             Files = new List<CSharpFile>();
             this.ProjectContent = new CSharpProjectContent();
             this.ProjectContent.SetAssemblyName("fake");
-			this.ProjectContent = this.ProjectContent.AddAssemblyReferences (new [] { mscorlib.Value, systemCore.Value });
+            this.ProjectContent = this.ProjectContent.AddAssemblyReferences(new [] { mscorlib.Value, systemCore.Value });
         }
 
         public void AddFile(string source)

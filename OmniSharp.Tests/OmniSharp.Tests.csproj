@@ -8,8 +8,8 @@
     <ProjectGuid>{1F3D3CA5-1E85-4657-8719-24E5ED0D1FAE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Omnisharp.Tests</RootNamespace>
-    <AssemblyName>Omnisharp.Tests</AssemblyName>
+    <RootNamespace>OmniSharp.Tests</RootNamespace>
+    <AssemblyName>OmniSharp.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>

@@ -7,7 +7,7 @@ using OmniSharp.AutoComplete;
 using OmniSharp.Solution;
 using Should;
 
-namespace Omnisharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.CompletionTests.AutoComplete
 {
     [TestFixture]
     public class IntegrationTest
@@ -25,12 +25,12 @@ public class myclass
     }
 }
 ";
-            var solution = new FakeSolution();
             int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
             Tuple<int, int> cursorPosition = GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
+            var solution = new FakeSolution();
             var project = new FakeProject();
             project.AddFile(editorText);
             solution.Projects.Add("dummyproject", project);

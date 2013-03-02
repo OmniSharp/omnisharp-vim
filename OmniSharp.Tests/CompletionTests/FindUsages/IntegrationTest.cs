@@ -5,7 +5,7 @@ using OmniSharp.FindUsages;
 using OmniSharp.Solution;
 using Should;
 
-namespace Omnisharp.Tests.CompletionTests.FindUsages
+namespace OmniSharp.Tests.CompletionTests.FindUsages
 {
     [TestFixture]
     public class IntegrationTest

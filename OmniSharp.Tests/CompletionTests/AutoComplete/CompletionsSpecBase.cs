@@ -6,7 +6,7 @@ using OmniSharp;
 using OmniSharp.AutoComplete;
 using OmniSharp.Parser;
 
-namespace Omnisharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.CompletionTests.AutoComplete
 {
     public class CompletionsSpecBase
     {
