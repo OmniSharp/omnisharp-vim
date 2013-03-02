@@ -41,7 +41,10 @@ namespace OmniSharp.Parser
             }
 
             var editedFile = _solution.GetFile(filename);
-            editedFile.Update(editorText);
+            //If GetFile couldn't find a file, it will return null
+            //this will happen when an project-less file is loaded
+            if (editedFile != null)
+                editedFile.Update(editorText);
 
             project.ProjectContent = pctx;
             ICompilation cmp = pctx.CreateCompilation();
