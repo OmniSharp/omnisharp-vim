@@ -1,12 +1,23 @@
-if exists("g:omnisharp_loaded")
- finish
+if exists("g:OmniSharp_loaded")
+	finish
 endif
-let g:omnisharp_loaded = 1
+
+let g:OmniSharp_loaded = 1
+
+"Set a default value for the server address
+if !exists('g:OmniSharp_host')
+	let g:OmniSharp_host='http://localhost:2000'
+endif
 
 :python << EOF
-import vim, urllib2, urllib, httplib, logging, sys, json
+import vim, logging, json
+
+from urllib import urlencode
+from urllib2 import urlopen
+from urlparse import urljoin
+
 logger = logging.getLogger('omnisharp')
-hdlr = logging.FileHandler('c:\python.log')
+hdlr = logging.FileHandler('python.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
@@ -37,20 +48,17 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['line'] = vim.eval("g:line")
-parameters['column'] = vim.eval("g:column")
+parameters['line'] = vim.eval("s:line")
+parameters['column'] = vim.eval("s:column")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/autocomplete'
+target = urljoin(vim.eval('g:OmniSharp_host'), 'autocomplete')
 
-parameters = urllib.urlencode(parameters)
+parameters = urlencode(parameters)
 try:
-	#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
-	#opener = urllib2.build_opener(proxy_handler)
-	#urllib2.install_opener(opener)
-	response = urllib2.urlopen(target, parameters)
+	response = urlopen(target, parameters)
 except:
 	vim.command("call confirm('Could not connect to " + target + "')")
 
@@ -77,14 +85,11 @@ parameters['column'] = vim.eval('col(".")')
 parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/gotodefinition'
+target = urljoin(vim.eval('g:OmniSharp_host'), 'gotodefinition')
 
-parameters = urllib.urlencode(parameters)
+parameters = urlencode(parameters)
 try:
-	#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
-	#opener = urllib2.build_opener(proxy_handler)
-	#urllib2.install_opener(opener)
-	response = urllib2.urlopen(target, parameters)
+	response = urlopen(target, parameters)
 except:
 	vim.command("call confirm('Could not connect to " + target + "')")
 
@@ -111,11 +116,11 @@ parameters['column'] = vim.eval('col(".")')
 parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/findusages'
+target = urljoin(vim.eval('g:OmniSharp_host'), 'findusages')
 
-parameters = urllib.urlencode(parameters)
+parameters = urlencode(parameters)
 try:
-	response = urllib2.urlopen(target, parameters)
+	response = urlopen(target, parameters)
 except:
 	vim.command("call confirm('Could not connect to " + target + "')")
 
@@ -149,11 +154,11 @@ parameters['column'] = vim.eval('col(".")')
 parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/findimplementations'
+target = urljoin(vim.eval('g:OmniSharp_host'), 'findimplementations')
 
-parameters = urllib.urlencode(parameters)
+parameters = urlencode(parameters)
 try:
-	response = urllib2.urlopen(target, parameters)
+	response = urlopen(target, parameters)
 except:
 	vim.command("call confirm('Could not connect to " + target + "')")
 
