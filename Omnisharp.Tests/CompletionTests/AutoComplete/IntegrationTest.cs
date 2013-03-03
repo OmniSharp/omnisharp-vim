@@ -41,11 +41,11 @@ public class myclass
             var result = browser.Post("/autocomplete", with =>
             {
                 with.HttpRequest();
-                with.FormValue("FileName", "anewfile.cs");
+                with.FormValue("FileName", "myfile");
                 with.FormValue("WordToComplete", partialWord);
                 with.FormValue("Buffer", editorText);
-                with.FormValue("CursorLine", cursorPosition.Item1.ToString());
-                with.FormValue("CursorColumn", cursorPosition.Item2.ToString());
+                with.FormValue("Line", cursorPosition.Item1.ToString());
+                with.FormValue("Column", cursorPosition.Item2.ToString());
             });
 
             var res = result.Body.DeserializeJson<AutoCompleteResponse[]>().Select(c => c.DisplayText);

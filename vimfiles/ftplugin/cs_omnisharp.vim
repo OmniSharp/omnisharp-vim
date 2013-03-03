@@ -11,6 +11,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
 logger.setLevel(logging.WARNING)
+base = 'http://localhost:2000'
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'
@@ -28,7 +29,7 @@ function! OmniSharp(findstart, base)
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
-		 while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]' 
+		 while start > 0 && line[start - 1] =~ '\v[a-zA-z_]' 
 			 let start -= 1
 		 endwhile   
 
@@ -37,13 +38,13 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['cursorLine'] = vim.eval("g:cursorLine")
-parameters['cursorColumn'] = vim.eval("g:cursorColumn")
+parameters['line'] = vim.eval("g:cursorLine")
+parameters['column'] = vim.eval("g:cursorColumn")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/autocomplete'
+target = base + '/autocomplete'
 
 parameters = urllib.urlencode(parameters)
 try:
@@ -77,7 +78,7 @@ parameters['column'] = vim.eval('col(".")')
 parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/gotodefinition'
+target = base + '/gotodefinition'
 
 parameters = urllib.urlencode(parameters)
 try:
@@ -111,7 +112,7 @@ parameters['column'] = vim.eval('col(".")')
 parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/findusages'
+target = base + '/findusages'
 
 parameters = urllib.urlencode(parameters)
 try:
@@ -149,7 +150,7 @@ parameters['column'] = vim.eval('col(".")')
 parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
 parameters['filename'] = vim.current.buffer.name
 
-target = 'http://localhost:2000/findimplementations'
+target = base + '/findimplementations'
 
 parameters = urllib.urlencode(parameters)
 try:

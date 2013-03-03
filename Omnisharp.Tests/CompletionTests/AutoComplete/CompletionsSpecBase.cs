@@ -33,8 +33,8 @@ namespace Omnisharp.Tests.CompletionTests.AutoComplete
                     FileName = "myfile",
                     WordToComplete = partialWord,
                     Buffer = editorText,
-                    CursorLine = cursorPosition.Item1,
-                    CursorColumn = cursorPosition.Item2,
+                    Line = cursorPosition.Item1,
+                    Column = cursorPosition.Item2,
                 };
 
             return provider.CreateProvider(request);
