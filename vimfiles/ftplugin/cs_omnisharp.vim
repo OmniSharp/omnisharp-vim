@@ -39,7 +39,7 @@ function! OmniSharp(findstart, base)
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
-		 while start > 0 && line[start - 1] =~ '\v[a-zA-z_]' 
+		 while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]' 
 			 let start -= 1
 		 endwhile   
 
