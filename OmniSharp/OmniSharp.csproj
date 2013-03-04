@@ -108,6 +108,7 @@
     <Compile Include="FindUsages\FindUsagesModule.cs" />
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
+    <Compile Include="FindUsages\Usage.cs" />
     <Compile Include="Parser\BufferParser.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionHandler.cs" />
     <Compile Include="GotoImplementation\GotoImplementationModule.cs" />

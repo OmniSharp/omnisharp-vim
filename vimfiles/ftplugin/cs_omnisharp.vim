@@ -12,6 +12,29 @@ hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
 logger.setLevel(logging.WARNING)
 base = 'http://localhost:2000'
+
+def getResponse(endPoint, additionalParameters=None):
+	parameters = {}
+	parameters['line'] = vim.eval('line(".")')
+	parameters['column'] = vim.eval('col(".")')
+	parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
+	parameters['filename'] = vim.current.buffer.name
+
+	if(additionalParameters != None):
+		parameters.update(additionalParameters)
+
+	target = base + endPoint
+
+	parameters = urllib.urlencode(parameters)
+	try:
+		#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
+		#opener = urllib2.build_opener(proxy_handler)
+		#urllib2.install_opener(opener)
+		response = urllib2.urlopen(target, parameters)
+	except:
+		vim.command("call confirm('Could not connect to " + target + "')")
+
+	return response.read()
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'
@@ -38,24 +61,9 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['line'] = vim.eval("g:cursorLine")
-parameters['column'] = vim.eval("g:cursorColumn")
 parameters['wordToComplete'] = vim.eval("a:base")
-parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
-parameters['filename'] = vim.current.buffer.name
 
-target = base + '/autocomplete'
-
-parameters = urllib.urlencode(parameters)
-try:
-	#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
-	#opener = urllib2.build_opener(proxy_handler)
-	#urllib2.install_opener(opener)
-	response = urllib2.urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/autocomplete', parameters)
 if(js != ''):
 	completions = json.loads(js)
 	for completion in completions:
@@ -72,24 +80,7 @@ endfunction
 
 function! GotoDefinition()
 :python << EOF
-parameters = {}
-parameters['line'] = vim.eval('line(".")')
-parameters['column'] = vim.eval('col(".")')
-parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-parameters['filename'] = vim.current.buffer.name
-
-target = base + '/gotodefinition'
-
-parameters = urllib.urlencode(parameters)
-try:
-	#proxy_handler = urllib2.ProxyHandler({'http': 'localhost:8888'})
-	#opener = urllib2.build_opener(proxy_handler)
-	#urllib2.install_opener(opener)
-	response = urllib2.urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/gotodefinition');
 if(js != ''):
 
 	definition = json.loads(js)
@@ -106,21 +97,7 @@ endfunction
 function! FindUsages()
 let qf_taglist = []
 :python << EOF
-parameters = {}
-parameters['line'] = vim.eval('line(".")')
-parameters['column'] = vim.eval('col(".")')
-parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-parameters['filename'] = vim.current.buffer.name
-
-target = base + '/findusages'
-
-parameters = urllib.urlencode(parameters)
-try:
-	response = urllib2.urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/findusages')
 if(js != ''):
 	usages = json.loads(js)['Usages']
 
@@ -144,21 +121,7 @@ endfunction
 function! FindImplementations()
 let qf_taglist = []
 :python << EOF
-parameters = {}
-parameters['line'] = vim.eval('line(".")')
-parameters['column'] = vim.eval('col(".")')
-parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-parameters['filename'] = vim.current.buffer.name
-
-target = base + '/findimplementations'
-
-parameters = urllib.urlencode(parameters)
-try:
-	response = urllib2.urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/findimplementations')
 if(js != ''):
 	usages = json.loads(js)['Locations']
 
