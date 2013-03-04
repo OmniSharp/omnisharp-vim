@@ -39,7 +39,7 @@ function! OmniSharp(findstart, base)
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
-		 while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]' 
+		 while start > 0 && line[start - 1] =~ '\v[a-zA-z_]' 
 			 let start -= 1
 		 endwhile   
 
@@ -48,8 +48,8 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['line'] = vim.eval("s:line")
-parameters['column'] = vim.eval("s:column")
+parameters['line'] = vim.eval("g:line")
+parameters['column'] = vim.eval("g:column")
 parameters['wordToComplete'] = vim.eval("a:base")
 parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
 parameters['filename'] = vim.current.buffer.name

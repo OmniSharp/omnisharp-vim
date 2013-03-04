@@ -41,7 +41,7 @@ public class myclass
             var result = browser.Post("/autocomplete", with =>
             {
                 with.HttpRequest();
-                with.FormValue("FileName", "anewfile.cs");
+                with.FormValue("FileName", "myfile");
                 with.FormValue("WordToComplete", partialWord);
                 with.FormValue("Buffer", editorText);
                 with.FormValue("Line", cursorPosition.Item1.ToString());
