@@ -9,7 +9,7 @@ namespace OmniSharp
         private readonly ISolution _solution;
 
         public Bootstrapper(ISolution solution)
-        {
+		{
             _solution = solution;
             JsonSettings.MaxJsonLength = int.MaxValue;
         }

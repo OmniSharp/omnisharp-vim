@@ -109,11 +109,13 @@
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
     <Compile Include="FindUsages\Usage.cs" />
+    <Compile Include="SyntaxErrors\Error.cs" />
+    <Compile Include="SyntaxErrors\SyntaxErrorsModule.cs" />
     <Compile Include="Parser\BufferParser.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionHandler.cs" />
     <Compile Include="GotoImplementation\GotoImplementationModule.cs" />
     <Compile Include="GotoImplementation\GotoImplementationRequest.cs" />
-    <Compile Include="GotoImplementation\GotoImplementationProvider.cs">
+    <Compile Include="GotoImplementation\GotoImplementationHandler.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GotoImplementation\GotoImplementationResponse.cs" />
@@ -143,6 +145,8 @@
     <Compile Include="AutoComplete\StringExtensions.cs" />
     <Compile Include="AutoComplete\TypeReference.cs" />
     <Compile Include="AutoComplete\XmlDocumentationProviderFactory.cs" />
+    <Compile Include="SyntaxErrors\SyntaxErrorsHandler.cs" />
+    <Compile Include="SyntaxErrors\SyntaxErrorsResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -154,6 +158,7 @@
       <Name>Microsoft.Build.Evaluation</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

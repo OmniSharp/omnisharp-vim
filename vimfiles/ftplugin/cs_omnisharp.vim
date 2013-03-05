@@ -2,7 +2,7 @@ if exists("g:omnisharp_loaded")
  finish
 endif
 let g:omnisharp_loaded = 1
-
+autocmd BufWritePre * call FindSyntaxErrors() 
 :python << EOF
 import vim, urllib2, urllib, httplib, logging, sys, json
 logger = logging.getLogger('omnisharp')
@@ -112,12 +112,39 @@ EOF
 " Place the tags in the quickfix window, if possible
 if len(qf_taglist) > 0
 	call setqflist(qf_taglist)
-	copen
+	copen 4
 else
 	echo "No usages found"
 endif
 endfunction
 
+function! FindSyntaxErrors()
+let qf_taglist = []
+if bufname('%') == ''
+	return
+endif
+:python << EOF
+js = getResponse('/syntaxerrors')
+if(js != ''):
+	usages = json.loads(js)['Errors']
+
+	for usage in usages:
+		try:
+			command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Message)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+			vim.eval(command)
+		except:
+			logger.error(command)
+EOF
+
+" Place the tags in the quickfix window, if possible
+if len(qf_taglist) > 0
+	call setqflist(qf_taglist)
+	copen 4
+else
+	cclose
+endif
+
+endfunction
 function! FindImplementations()
 let qf_taglist = []
 :python << EOF
