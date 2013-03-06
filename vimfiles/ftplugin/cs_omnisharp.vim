@@ -31,15 +31,16 @@ def getResponse(endPoint, additionalParameters=None):
 	if(additionalParameters != None):
 		parameters.update(additionalParameters)
 
-		target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
+	target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
 
 	parameters = urllib.urlencode(parameters)
 	try:
 		response = urllib2.urlopen(target, parameters)
 	except:
 		vim.command("call confirm('Could not connect to " + target + "')")
-
-	return response.read()
+	else:
+		return response.read()
+	return ''
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'
