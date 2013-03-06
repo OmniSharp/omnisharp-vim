@@ -31,7 +31,7 @@ def getResponse(endPoint, additionalParameters=None):
 	if(additionalParameters != None):
 		parameters.update(additionalParameters)
 
-		target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
+	target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
 
 	parameters = urllib.urlencode(parameters)
 	try:
