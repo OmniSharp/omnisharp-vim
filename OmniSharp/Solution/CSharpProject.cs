@@ -93,7 +93,7 @@ namespace OmniSharp.Solution
             this.PreprocessorDefines = p.GetPropertyValue("DefineConstants").Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in p.GetItems("Compile"))
             {
-                string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude);
+                string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude).FixPath();
                 if (File.Exists(path))
                     _files.Add(new CSharpFile(this, path));
             }
@@ -113,7 +113,7 @@ namespace OmniSharp.Solution
                 string assemblyFileName = null;
                 if (item.HasMetadata("HintPath"))
                 {
-                    assemblyFileName = Path.Combine(p.DirectoryPath, item.GetMetadataValue("HintPath"));
+                    assemblyFileName = Path.Combine(p.DirectoryPath, item.GetMetadataValue("HintPath")).FixPath();
                     if (!File.Exists(assemblyFileName))
                         assemblyFileName = null;
                 }
@@ -166,7 +166,7 @@ namespace OmniSharp.Solution
                 evaluatedInclude = evaluatedInclude.Substring(0, evaluatedInclude.IndexOf(','));
             foreach (string searchPath in assemblySearchPaths)
             {
-                string assemblyFile = Path.Combine(searchPath, evaluatedInclude + ".dll");
+                string assemblyFile = Path.Combine(searchPath, evaluatedInclude + ".dll").FixPath();
                 if (File.Exists(assemblyFile))
                     return assemblyFile;
             }

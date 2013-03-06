@@ -53,7 +53,7 @@ namespace OmniSharp.Solution
                 {
                     string typeGuid = match.Groups["TypeGuid"].Value;
                     string title = match.Groups["Title"].Value;
-                    string location = match.Groups["Location"].Value;
+                    string location = match.Groups["Location"].Value.FixPath();
                     string guid = match.Groups["Guid"].Value;
                     switch (typeGuid.ToUpperInvariant())
                     {
