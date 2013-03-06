@@ -5,12 +5,12 @@ namespace OmniSharp.GotoImplementation
 {
     public class GotoImplementationModule : NancyModule
     {
-        public GotoImplementationModule(GotoImplementationProvider provider)
+        public GotoImplementationModule(GotoImplementationHandler handler)
         {
             Post["/findimplementations"] = x =>
                 {
                     var req = this.Bind<GotoImplementationRequest>();
-                    var res = provider.FindDerivedMembers(req);
+                    var res = handler.FindDerivedMembers(req);
                     return Response.AsJson(res);
                 };
         }

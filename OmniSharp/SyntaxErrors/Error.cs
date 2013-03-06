@@ -1,10 +1,10 @@
-﻿namespace OmniSharp.Requests
+﻿namespace OmniSharp.SyntaxErrors
 {
-    public class Request
+    public class Error
     {
+        public string Message { get; set; }
         public int Line { get; set; }
         public int Column { get; set; }
-        public string Buffer { get; set; }
         public string FileName { get; set; }
     }
 }

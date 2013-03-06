@@ -9,19 +9,37 @@ if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
 endif
 
-:python << EOF
-import vim, logging, json
+autocmd BufWritePre * call FindSyntaxErrors() 
 
-from urllib import urlencode
-from urllib2 import urlopen
-from urlparse import urljoin
+:python << EOF
+import vim, urllib2, urllib, urlparse, logging, json
 
 logger = logging.getLogger('omnisharp')
-hdlr = logging.FileHandler('python.log')
+hdlr = logging.FileHandler('c:\python.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
 logger.setLevel(logging.WARNING)
+
+def getResponse(endPoint, additionalParameters=None):
+	parameters = {}
+	parameters['line'] = vim.eval('line(".")')
+	parameters['column'] = vim.eval('col(".")')
+	parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
+	parameters['filename'] = vim.current.buffer.name
+
+	if(additionalParameters != None):
+		parameters.update(additionalParameters)
+
+		target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
+
+	parameters = urllib.urlencode(parameters)
+	try:
+		response = urllib2.urlopen(target, parameters)
+	except:
+		vim.command("call confirm('Could not connect to " + target + "')")
+
+	return response.read()
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'
@@ -33,9 +51,8 @@ set omnifunc=OmniSharp
 set completeopt=longest,menuone,preview "don't autoselect first item in omnicomplete,show if only one item(for preview)
 function! OmniSharp(findstart, base)
      if a:findstart
-		 let g:textBuffer = getline(1,'$')
-		 let g:line = line(".")
-		 let g:column = col(".")
+		 "store the current cursor position
+		 let s:column = col(".")
 		 "locate the start of the word
 		 let line = getline('.')
 		 let start = col(".") - 1
@@ -48,21 +65,10 @@ function! OmniSharp(findstart, base)
          let res = []
 :python << EOF
 parameters = {}
-parameters['line'] = vim.eval("g:line")
-parameters['column'] = vim.eval("g:column")
+parameters['column'] = vim.eval("s:column")
 parameters['wordToComplete'] = vim.eval("a:base")
-parameters['buffer'] = '\r\n'.join(vim.eval('g:textBuffer')[:])
-parameters['filename'] = vim.current.buffer.name
 
-target = urljoin(vim.eval('g:OmniSharp_host'), 'autocomplete')
-
-parameters = urlencode(parameters)
-try:
-	response = urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/autocomplete', parameters)
 if(js != ''):
 	completions = json.loads(js)
 	for completion in completions:
@@ -79,21 +85,7 @@ endfunction
 
 function! GotoDefinition()
 :python << EOF
-parameters = {}
-parameters['line'] = vim.eval('line(".")')
-parameters['column'] = vim.eval('col(".")')
-parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-parameters['filename'] = vim.current.buffer.name
-
-target = urljoin(vim.eval('g:OmniSharp_host'), 'gotodefinition')
-
-parameters = urlencode(parameters)
-try:
-	response = urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/gotodefinition');
 if(js != ''):
 
 	definition = json.loads(js)
@@ -110,21 +102,7 @@ endfunction
 function! FindUsages()
 let qf_taglist = []
 :python << EOF
-parameters = {}
-parameters['line'] = vim.eval('line(".")')
-parameters['column'] = vim.eval('col(".")')
-parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-parameters['filename'] = vim.current.buffer.name
-
-target = urljoin(vim.eval('g:OmniSharp_host'), 'findusages')
-
-parameters = urlencode(parameters)
-try:
-	response = urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/findusages')
 if(js != ''):
 	usages = json.loads(js)['Usages']
 
@@ -139,30 +117,43 @@ EOF
 " Place the tags in the quickfix window, if possible
 if len(qf_taglist) > 0
 	call setqflist(qf_taglist)
-	copen
+	copen 4
 else
 	echo "No usages found"
 endif
 endfunction
 
+function! FindSyntaxErrors()
+let qf_taglist = []
+if bufname('%') == ''
+	return
+endif
+:python << EOF
+js = getResponse('/syntaxerrors')
+if(js != ''):
+	usages = json.loads(js)['Errors']
+
+	for usage in usages:
+		try:
+			command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Message)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+			vim.eval(command)
+		except:
+			logger.error(command)
+EOF
+
+" Place the tags in the quickfix window, if possible
+if len(qf_taglist) > 0
+	call setqflist(qf_taglist)
+	copen 4
+else
+	cclose
+endif
+
+endfunction
 function! FindImplementations()
 let qf_taglist = []
 :python << EOF
-parameters = {}
-parameters['line'] = vim.eval('line(".")')
-parameters['column'] = vim.eval('col(".")')
-parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-parameters['filename'] = vim.current.buffer.name
-
-target = urljoin(vim.eval('g:OmniSharp_host'), 'findimplementations')
-
-parameters = urlencode(parameters)
-try:
-	response = urlopen(target, parameters)
-except:
-	vim.command("call confirm('Could not connect to " + target + "')")
-
-js = response.read()
+js = getResponse('/findimplementations')
 if(js != ''):
 	usages = json.loads(js)['Locations']
 

@@ -11,12 +11,12 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.GotoImplementation
 {
-    public class GotoImplementationProvider
+    public class GotoImplementationHandler
     {
         private readonly ISolution _solution;
         private readonly BufferParser _bufferParser;
 
-        public GotoImplementationProvider(ISolution solution, BufferParser bufferParser)
+        public GotoImplementationHandler(ISolution solution, BufferParser bufferParser)
         {
             _solution = solution;
             _bufferParser = bufferParser;

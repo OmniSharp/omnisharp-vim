@@ -58,7 +58,8 @@ To use the "Find Usages" function, add the following mapping :-
 You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
 
 	set hidden
-    
+
+Simple syntax error highlighting is performed when saving the current buffer.
 
 
 ###Disclaimer
