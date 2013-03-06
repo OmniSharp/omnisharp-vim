@@ -2,6 +2,7 @@ using NUnit.Framework;
 
 namespace OmniSharp.Tests.CompletionTests.AutoComplete
 {
+    [TestFixture]
     public class DerivedTypeCompletions : CompletionTestBase
     {
         [Test]
