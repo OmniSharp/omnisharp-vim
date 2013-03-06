@@ -38,20 +38,8 @@ namespace OmniSharp.AutoComplete
 
             
             var res = _parser.ParsedContent(editorText, filename);
+            var rctx = res.UnresolvedFile.GetTypeResolveContext(res.Compilation, loc);
 
-            var rctx = new CSharpTypeResolveContext(res.Compilation.MainAssembly);
-            var usingScope = res.UnresolvedFile.GetUsingScope(loc).Resolve(res.Compilation);
-            rctx = rctx.WithUsingScope(usingScope);
-
-            IUnresolvedTypeDefinition curDef = res.UnresolvedFile.GetInnermostTypeDefinition(loc);
-            if (curDef != null)
-            {
-                ITypeDefinition resolvedDef = curDef.Resolve(rctx).GetDefinition();
-                rctx = rctx.WithCurrentTypeDefinition(resolvedDef);
-                IMember curMember = resolvedDef.Members.FirstOrDefault(m => m.Region.Begin <= loc && loc < m.BodyRegion.End);
-                if (curMember != null)
-                    rctx = rctx.WithCurrentMember(curMember);
-            }
             ICompletionContextProvider contextProvider = new DefaultCompletionContextProvider(doc, res.UnresolvedFile);
             var engine = new CSharpCompletionEngine(doc, contextProvider, new CompletionDataFactory(partialWord), res.ProjectContent, rctx)
                 {
