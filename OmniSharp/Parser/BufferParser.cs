@@ -18,35 +18,16 @@ namespace OmniSharp.Parser
 
         public ParsedResult ParsedContent(string editorText, string filename)
         {
-            IProjectContent pctx;
-            var syntaxTree = new CSharpParser().Parse(editorText, filename);
+            var project = _solution.ProjectContainingFile(filename);
+            project.GetFile(filename).Update(editorText);
+
+            var syntaxTree = project.CreateParser().Parse(editorText, filename);
             syntaxTree.Freeze();
             CSharpUnresolvedFile parsedFile = syntaxTree.ToTypeSystem();
 
-            var project = ProjectContainingFile(filename);
-            if (project == null)
-            {
-                // First we know about this file
-                //TODO: if the file isn't part of the solution, we need to add the file to an appropriate project
-                project = _solution.Projects.First().Value;
-                parsedFile = (CSharpUnresolvedFile) new CSharpFile(project, filename, editorText).ParsedFile;
-                pctx = project.ProjectContent;
-                pctx = pctx.AddOrUpdateFiles(parsedFile);
-            }
-            else
-            {
-                pctx = project.ProjectContent;
-                IUnresolvedFile oldFile = pctx.GetFile(filename);
-                pctx = pctx.AddOrUpdateFiles(oldFile, parsedFile);
-            }
-
-            var editedFile = _solution.GetFile(filename);
-            //If GetFile couldn't find a file, it will return null
-            //this will happen when an project-less file is loaded
-            if (editedFile != null)
-                editedFile.Update(editorText);
-
+            var pctx = project.ProjectContent.AddOrUpdateFiles(parsedFile);
             project.ProjectContent = pctx;
+
             ICompilation cmp = pctx.CreateCompilation();
 
             return new ParsedResult
@@ -56,11 +37,6 @@ namespace OmniSharp.Parser
                     UnresolvedFile = parsedFile,
                     SyntaxTree = syntaxTree
                 };
-        }
-
-        private IProject ProjectContainingFile(string filename)
-        {
-            return _solution.Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
     }
 }
