@@ -47,7 +47,7 @@ namespace OmniSharp.Solution
             @"C:\work\SD\src\Tools\NUnit",
 
             //Unix Paths
-            @"/usr/local/lib/mono/4.0",
+            "/usr/local/lib/mono/4.0",
             @"/usr/local/lib/mono/3.5",
             @"/usr/local/lib/mono/2.0",
             @"/usr/lib/mono/4.0",
