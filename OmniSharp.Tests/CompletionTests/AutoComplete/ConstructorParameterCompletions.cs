@@ -3,6 +3,7 @@ using Should;
 
 namespace OmniSharp.Tests.CompletionTests.AutoComplete
 {
+    [TestFixture]
     public class ConstructorParameterCompletions : CompletionTestBase
     {
         [Test]

@@ -30,8 +30,9 @@ namespace OmniSharp.Solution
     public interface IProject
     {
         IProjectContent ProjectContent { get; set; }
-        string Title { get; set; }
+        string Title { get; }
         List<CSharpFile> Files { get; }
+        CSharpFile GetFile(string fileName);
         CSharpParser CreateParser();
     }
 
@@ -62,65 +63,63 @@ namespace OmniSharp.Solution
         };
 
         public readonly ISolution Solution;
-        public string Title { get; set; }
         public readonly string AssemblyName;
         public readonly string FileName;
 
-        readonly List<CSharpFile> _files = new List<CSharpFile>();
+        public string Title { get; private set; }
+        public IProjectContent ProjectContent { get; set; }
+        public List<CSharpFile> Files { get; private set; }
 
-        public readonly bool AllowUnsafeBlocks;
-        public readonly bool CheckForOverflowUnderflow;
-        public readonly string[] PreprocessorDefines;
-
-        ////public ICompilation Compilation
-        //{
-        //    get
-        //    {
-        //        return Solution.SolutionSnapshot.GetCompilation(ProjectContent);
-        //    }
-        //}
+        private CompilerSettings _compilerSettings;
 
         public CSharpProject(ISolution solution, string title, string fileName)
         {
-            this.Solution = solution;
-            this.Title = title;
-            this.FileName = fileName;
+            Solution = solution;
+            Title = title;
+            FileName = fileName;
+            Files = new List<CSharpFile>();
 
-            var p = new Microsoft.Build.Evaluation.Project(fileName);
-            this.AssemblyName = p.GetPropertyValue("AssemblyName");
-            this.AllowUnsafeBlocks = GetBoolProperty(p, "AllowUnsafeBlocks") ?? false;
-            this.CheckForOverflowUnderflow = GetBoolProperty(p, "CheckForOverflowUnderflow") ?? false;
-            this.PreprocessorDefines = p.GetPropertyValue("DefineConstants").Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var p = new Microsoft.Build.Evaluation.Project(FileName);
+            AssemblyName = p.GetPropertyValue("AssemblyName");
+
+            _compilerSettings = new CompilerSettings()
+                {
+                    AllowUnsafeBlocks = GetBoolProperty(p, "AllowUnsafeBlocks") ?? false,
+                    CheckForOverflow = GetBoolProperty(p, "CheckForOverflowUnderflow") ?? false,
+                };
+            string[] defines = p.GetPropertyValue("DefineConstants").Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string define in defines)
+                _compilerSettings.ConditionalSymbols.Add(define);
+
             foreach (var item in p.GetItems("Compile"))
             {
-                string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude);
+                string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude).FixPath();
                 if (File.Exists(path))
-                    _files.Add(new CSharpFile(this, path));
+                    Files.Add(new CSharpFile(this, path));
             }
+
             List<IAssemblyReference> references = new List<IAssemblyReference>();
             string mscorlib = FindAssembly(AssemblySearchPaths, "mscorlib");
             if (mscorlib != null)
-            {
                 references.Add(LoadAssembly(mscorlib));
-            }
             else
-            {
                 Console.WriteLine("Could not find mscorlib");
-            }
+
             bool hasSystemCore = false;
             foreach (var item in p.GetItems("Reference"))
             {
+
                 string assemblyFileName = null;
                 if (item.HasMetadata("HintPath"))
                 {
-                    assemblyFileName = Path.Combine(p.DirectoryPath, item.GetMetadataValue("HintPath"));
+                    assemblyFileName = Path.Combine(p.DirectoryPath, item.GetMetadataValue("HintPath")).FixPath();
                     if (!File.Exists(assemblyFileName))
                         assemblyFileName = null;
                 }
+                //If there isn't a path hint or it doesn't exist, try searching
                 if (assemblyFileName == null)
-                {
                     assemblyFileName = FindAssembly(AssemblySearchPaths, item.EvaluatedInclude);
-                }
+
                 if (assemblyFileName != null)
                 {
                     if (Path.GetFileName(assemblyFileName).Equals("System.Core.dll", StringComparison.OrdinalIgnoreCase))
@@ -137,41 +136,55 @@ namespace OmniSharp.Solution
 
                 }
                 else
-                {
                     Console.WriteLine("Could not find referenced assembly " + item.EvaluatedInclude);
-                }
             }
             if (!hasSystemCore && FindAssembly(AssemblySearchPaths, "System.Core") != null)
                 references.Add(LoadAssembly(FindAssembly(AssemblySearchPaths, "System.Core")));
             foreach (var item in p.GetItems("ProjectReference"))
-            {
-                references.Add(new ProjectReference(solution, item.GetMetadataValue("Name")));
-            }
+                references.Add(new ProjectReference(Solution, item.GetMetadataValue("Name")));
+
             this.ProjectContent = new CSharpProjectContent()
                 .SetAssemblyName(this.AssemblyName)
                 .AddAssemblyReferences(references)
-                .AddOrUpdateFiles(_files.Select(f => f.ParsedFile));
+                .AddOrUpdateFiles(Files.Select(f => f.ParsedFile));
         }
 
-        public IProjectContent ProjectContent { get; set; }
-
-        public List<CSharpFile> Files
+        public CSharpFile GetFile(string fileName)
         {
-            get { return _files; }
+            return Files.Single(f => f.FileName == fileName);
         }
 
-        string FindAssembly(IEnumerable<string> assemblySearchPaths, string evaluatedInclude)
+        public CSharpParser CreateParser()
+        {
+            return new CSharpParser(_compilerSettings);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("[CSharpProject AssemblyName={0}]", AssemblyName);
+        }
+
+        #region Static Members
+        static ConcurrentDictionary<string, IUnresolvedAssembly> assemblyDict = new ConcurrentDictionary<string, IUnresolvedAssembly>(Platform.FileNameComparer);
+
+        public static IUnresolvedAssembly LoadAssembly(string assemblyFileName)
+        {
+            return assemblyDict.GetOrAdd(assemblyFileName, file => new CecilLoader().LoadAssemblyFile(file));
+        }
+
+        public static string FindAssembly(IEnumerable<string> assemblySearchPaths, string evaluatedInclude)
         {
             if (evaluatedInclude.IndexOf(',') >= 0)
                 evaluatedInclude = evaluatedInclude.Substring(0, evaluatedInclude.IndexOf(','));
             foreach (string searchPath in assemblySearchPaths)
             {
-                string assemblyFile = Path.Combine(searchPath, evaluatedInclude + ".dll");
+                string assemblyFile = Path.Combine(searchPath, evaluatedInclude + ".dll").FixPath();
                 if (File.Exists(assemblyFile))
                     return assemblyFile;
             }
             return null;
         }
+
 
         static bool? GetBoolProperty(Microsoft.Build.Evaluation.Project p, string propertyName)
         {
@@ -182,31 +195,6 @@ namespace OmniSharp.Solution
                 return false;
             return null;
         }
-
-        public CSharpParser CreateParser()
-        {
-            var settings = new CompilerSettings();
-            settings.AllowUnsafeBlocks = AllowUnsafeBlocks;
-            foreach (string define in PreprocessorDefines)
-                settings.ConditionalSymbols.Add(define);
-            return new CSharpParser(settings);
-        }
-
-        public override string ToString()
-        {
-            return string.Format("[CSharpProject AssemblyName={0}]", AssemblyName);
-        }
-
-        public CSharpFile GetFile(string fileName)
-        {
-            return _files.Single(f => f.FileName == fileName);
-        }
-
-        static ConcurrentDictionary<string, IUnresolvedAssembly> assemblyDict = new ConcurrentDictionary<string, IUnresolvedAssembly>(Platform.FileNameComparer);
-
-        public static IUnresolvedAssembly LoadAssembly(string assemblyFileName)
-        {
-            return assemblyDict.GetOrAdd(assemblyFileName, file => new CecilLoader().LoadAssemblyFile(file));
-        }
+        #endregion
     }
 }

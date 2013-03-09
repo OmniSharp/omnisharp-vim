@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OmniSharp.Solution;
@@ -18,6 +19,11 @@ namespace OmniSharp.Tests
                     from file in project.Files
                     where file.FileName == filename
                     select file).FirstOrDefault();
+        }
+
+        public IProject ProjectContainingFile(string filename)
+        {
+            return Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
     }
 }
