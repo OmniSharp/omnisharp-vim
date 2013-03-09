@@ -12,7 +12,7 @@ endif
 autocmd BufWritePre * call FindSyntaxErrors() 
 
 :python << EOF
-import vim, urllib2, urllib, urlparse, logging, json
+import vim, urllib2, urllib, urlparse, logging, json, os.path
 
 logger = logging.getLogger('omnisharp')
 hdlr = logging.FileHandler('c:\python.log')
@@ -108,6 +108,7 @@ if(js != ''):
 	usages = json.loads(js)['Usages']
 
 	for usage in usages:
+		usage["FileName"] = os.path.relpath(usage["FileName"])
 		try:
 			command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
 			vim.eval(command)
