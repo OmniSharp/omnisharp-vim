@@ -55,7 +55,7 @@ namespace OmniSharp.Solution
                 {
                     string typeGuid = match.Groups["TypeGuid"].Value;
                     string title = match.Groups["Title"].Value;
-                    string location = match.Groups["Location"].Value.FixPath();
+                    string location = Path.Combine(Directory, match.Groups["Location"].Value).FixPath();
                     string guid = match.Groups["Guid"].Value;
                     switch (typeGuid.ToUpperInvariant())
                     {
@@ -64,7 +64,7 @@ namespace OmniSharp.Solution
                             break;
                         case "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}": // C# project
                             Console.WriteLine("Loading project - " + title);
-                            Projects.Add(title, new CSharpProject(this, title, Path.Combine(Directory, location)));
+                            Projects.Add(title, new CSharpProject(this, title, location));
                             break;
                         default:
                             Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);

@@ -169,6 +169,7 @@ if(js != ''):
 			vim.current.window.cursor = (usage['Line'], usage['Column'] - 1 )
 	else:
 		for usage in usages:
+			usage["FileName"] = os.path.relpath(usage["FileName"])
 			try:
 				command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
 				vim.eval(command)
