@@ -151,7 +151,7 @@ namespace OmniSharp.Solution
 
         public CSharpFile GetFile(string fileName)
         {
-            return Files.Single(f => f.FileName == fileName);
+            return Files.Single(f => f.FileName.Equals(fileName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public CSharpParser CreateParser()
