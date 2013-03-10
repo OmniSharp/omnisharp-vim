@@ -28,7 +28,11 @@ namespace OmniSharp.Tests
             Files.Add(new CSharpFile(this, "myfile", source));    
             this.ProjectContent = this.ProjectContent
                 .AddOrUpdateFiles(Files.Select(f => f.ParsedFile));
+        }
 
+        public CSharpFile GetFile(string fileName)
+        {
+            return this.Files.SingleOrDefault(f => f.ParsedFile.FileName.Equals(fileName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public IProjectContent ProjectContent { get; set; }

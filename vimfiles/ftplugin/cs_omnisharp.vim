@@ -12,7 +12,7 @@ endif
 autocmd BufWritePre * call FindSyntaxErrors() 
 
 :python << EOF
-import vim, urllib2, urllib, urlparse, logging, json
+import vim, urllib2, urllib, urlparse, logging, json, os.path
 
 logger = logging.getLogger('omnisharp')
 hdlr = logging.FileHandler('c:\python.log')
@@ -38,8 +38,9 @@ def getResponse(endPoint, additionalParameters=None):
 		response = urllib2.urlopen(target, parameters)
 	except:
 		vim.command("call confirm('Could not connect to " + target + "')")
-
-	return response.read()
+	else:
+		return response.read()
+	return ''
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'
@@ -107,6 +108,7 @@ if(js != ''):
 	usages = json.loads(js)['Usages']
 
 	for usage in usages:
+		usage["FileName"] = os.path.relpath(usage["FileName"])
 		try:
 			command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
 			vim.eval(command)
@@ -167,6 +169,7 @@ if(js != ''):
 			vim.current.window.cursor = (usage['Line'], usage['Column'] - 1 )
 	else:
 		for usage in usages:
+			usage["FileName"] = os.path.relpath(usage["FileName"])
 			try:
 				command = "add(qf_taglist, {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
 				vim.eval(command)

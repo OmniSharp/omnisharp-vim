@@ -1,5 +1,6 @@
 ﻿using Nancy.Json;
 using Nancy.TinyIoc;
+using Nancy.Bootstrapper;
 using OmniSharp.Solution;
 
 namespace OmniSharp
@@ -13,6 +14,15 @@ namespace OmniSharp
             _solution = solution;
             JsonSettings.MaxJsonLength = int.MaxValue;
         }
+
+       protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
+       {
+            pipelines.OnError.AddItemToEndOfPipeline((ctx, ex) => {
+                System.Console.WriteLine(ex);
+                return null;
+            });
+       }
+
 
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {

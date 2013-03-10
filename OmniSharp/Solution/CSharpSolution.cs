@@ -31,21 +31,23 @@ namespace OmniSharp.Solution
     {
         Dictionary<string, IProject> Projects { get; }
         CSharpFile GetFile(string filename);
+        IProject ProjectContainingFile(string filename);
     }
 
     public class CSharpSolution : ISolution
     {
         public readonly string Directory;
-        readonly Dictionary<string, IProject> _projects = new Dictionary<string, IProject>();
-        public readonly ISolutionSnapshot SolutionSnapshot = new DefaultSolutionSnapshot();
+        public Dictionary<string, IProject> Projects { get; private set; }
 
-
-        public virtual Dictionary<string, IProject> Projects { get { return _projects; } }
+        private OrphanProject _orphanProject;
 
         public CSharpSolution(string fileName)
         {
-            this.Directory = Path.GetDirectoryName(fileName);
+            _orphanProject = new OrphanProject(this);
+            Projects = new Dictionary<string, IProject>();
+            Directory = Path.GetDirectoryName(fileName);
             var projectLinePattern = new Regex("Project\\(\"(?<TypeGuid>.*)\"\\)\\s+=\\s+\"(?<Title>.*)\",\\s*\"(?<Location>.*)\",\\s*\"(?<Guid>.*)\"");
+
             foreach (string line in File.ReadLines(fileName))
             {
                 Match match = projectLinePattern.Match(line);
@@ -53,7 +55,7 @@ namespace OmniSharp.Solution
                 {
                     string typeGuid = match.Groups["TypeGuid"].Value;
                     string title = match.Groups["Title"].Value;
-                    string location = match.Groups["Location"].Value;
+                    string location = Path.Combine(Directory, match.Groups["Location"].Value).FixPath();
                     string guid = match.Groups["Guid"].Value;
                     switch (typeGuid.ToUpperInvariant())
                     {
@@ -62,7 +64,7 @@ namespace OmniSharp.Solution
                             break;
                         case "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}": // C# project
                             Console.WriteLine("Loading project - " + title);
-                            _projects.Add(title, new CSharpProject(this, title, Path.Combine(Directory, location)));
+                            Projects.Add(title, new CSharpProject(this, title, location));
                             break;
                         default:
                             Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);
@@ -72,22 +74,19 @@ namespace OmniSharp.Solution
             }
         }
 
-        protected CSharpSolution()
-        {
-        }
-
         public CSharpFile GetFile(string filename)
         {
-            return (from project in _projects.Values
+            return (from project in Projects.Values
                     from file in project.Files
                     where file.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)
                     select file).FirstOrDefault();
         }
 
-        public void UpdateProject(CSharpProject projectContent)
+        public IProject ProjectContainingFile(string filename)
         {
-            _projects[projectContent.Title] = projectContent;
+            return Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase))) ?? _orphanProject;
         }
+
     }
 }
 
