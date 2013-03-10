@@ -149,6 +149,10 @@
     <Compile Include="AutoComplete\XmlDocumentationProviderFactory.cs" />
     <Compile Include="SyntaxErrors\SyntaxErrorsHandler.cs" />
     <Compile Include="SyntaxErrors\SyntaxErrorsResponse.cs" />
+    <Compile Include="TypeLookup\TypeLookupHandler.cs" />
+    <Compile Include="TypeLookup\TypeLookupResponse.cs" />
+    <Compile Include="TypeLookup\TypeLookupModule.cs" />
+    <Compile Include="TypeLookup\TypeLookupRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
