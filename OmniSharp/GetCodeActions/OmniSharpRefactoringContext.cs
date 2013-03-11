@@ -18,6 +18,8 @@ namespace OmniSharp.GetCodeActions
             _location = location;
         }
 
+        public IDocument Document { get { return _document; } }
+
         public override int GetOffset(TextLocation location)
         {
             return _document.GetOffset(location);

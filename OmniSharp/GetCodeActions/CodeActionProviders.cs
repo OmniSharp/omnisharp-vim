@@ -28,9 +28,6 @@ namespace OmniSharp.GetCodeActions
 
         public static IEnumerable<ICodeActionProvider> Providers { get { return _providers; } }
 
-        public string GetByName(string name)
-        {
-            return _providers.First(p => p.)
-        }
+        
     }
 }
