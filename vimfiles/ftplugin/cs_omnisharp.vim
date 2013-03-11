@@ -15,7 +15,7 @@ autocmd BufWritePre * call FindSyntaxErrors()
 import vim, urllib2, urllib, urlparse, logging, json, os.path
 
 logger = logging.getLogger('omnisharp')
-hdlr = logging.FileHandler('c:\python.log')
+hdlr = logging.FileHandler('python.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
@@ -32,15 +32,13 @@ def getResponse(endPoint, additionalParameters=None):
 		parameters.update(additionalParameters)
 
 	target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
-
 	parameters = urllib.urlencode(parameters)
 	try:
 		response = urllib2.urlopen(target, parameters)
+		return response.read()
 	except:
 		vim.command("call confirm('Could not connect to " + target + "')")
-	else:
-		return response.read()
-	return ''
+		return ''
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'

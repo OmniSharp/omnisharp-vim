@@ -13,15 +13,13 @@ namespace OmniSharp.GetCodeActions
         public CodeActionProviders()
         {
             var types = Assembly.GetAssembly(typeof(ICodeActionProvider))
-                                .GetTypes();
-
-            var providerTypes = types.Where(t => typeof(ICodeActionProvider).IsAssignableFrom(t));
+                                .GetTypes()
+                                .Where(t => typeof(ICodeActionProvider).IsAssignableFrom(t));
 
             IEnumerable<ICodeActionProvider> providers =
-                providerTypes
-                    .Where(type => !type.IsInterface)
-                    .Where(type => !type.ContainsGenericParameters)
-                    .Select(type => (ICodeActionProvider)Activator.CreateInstance(type));
+                types
+                    .Where(type => !type.IsInterface && !type.ContainsGenericParameters) //TODO: handle providers with generic params 
+                    .Select(type => (ICodeActionProvider) Activator.CreateInstance(type));
 
             _providers = providers;
         }
