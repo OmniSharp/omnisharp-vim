@@ -112,10 +112,13 @@
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
     <Compile Include="FindUsages\Usage.cs" />
+    <Compile Include="GetCodeActions\CodeActionProviders.cs" />
     <Compile Include="GetCodeActions\GetCodeActionsHandler.cs" />
     <Compile Include="GetCodeActions\GetCodeActionsModule.cs" />
     <Compile Include="GetCodeActions\GetCodeActionsResponse.cs" />
     <Compile Include="GetCodeActions\OmniSharpRefactoringContext.cs" />
+    <Compile Include="GetCodeActions\RunCodeActionRequest.cs" />
+    <Compile Include="GetCodeActions\RunCodeActionsResponse.cs" />
     <Compile Include="Solution\OrphanProject.cs" />
     <Compile Include="Solution\StringExtensions.cs" />
     <Compile Include="SyntaxErrors\Error.cs" />

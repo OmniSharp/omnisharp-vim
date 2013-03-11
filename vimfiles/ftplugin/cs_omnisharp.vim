@@ -100,6 +100,19 @@ EOF
 
 endfunction
 
+function! GetCodeActions()
+:echohl Title
+:echo 'Code actions:'
+:echohl None
+:python << EOF
+js = getResponse('/getcodeactions');
+if(js != ''):
+	actions = json.loads(js)['CodeActions']
+	for index, action in enumerate(actions):
+		vim.command('echo ' + str(index) + '"' + action + '"')
+EOF
+endfunction
+
 function! FindUsages()
 let qf_taglist = []
 :python << EOF
