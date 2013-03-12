@@ -99,16 +99,38 @@ EOF
 endfunction
 
 function! GetCodeActions()
-:echohl Title
-:echo 'Code actions:'
-:echohl None
 :python << EOF
 js = getResponse('/getcodeactions');
 if(js != ''):
 	actions = json.loads(js)['CodeActions']
 	for index, action in enumerate(actions):
-		vim.command('echo ' + str(index) + '"' + action + '"')
+		vim.command('echo ' + str(index) + '":  ' + action + '"')
+	if(len(actions) == 0):
+		vim.command('return 1')
+else:
+	vim.command('return 1')
 EOF
+
+let a:option=nr2char(getchar())
+if(a:option < '0' || a:option > '9')
+	return 1
+endif
+:python << EOF
+parameters = {}
+parameters['codeaction'] = vim.eval("a:option")
+js = getResponse('/runcodeaction', parameters);
+text = json.loads(js)['Text']
+if(text == None):
+	vim.command('return 1')
+lines = text.splitlines()
+
+cursor = vim.current.window.cursor
+vim.command('normal ggdG')
+lines = [line.encode('utf-8') for line in lines]
+vim.current.buffer[:] = lines
+vim.current.window.cursor = cursor
+EOF
+
 endfunction
 
 function! FindUsages()

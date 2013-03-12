@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,17 +32,16 @@ namespace OmniSharp.GetCodeActions
 
         public RunCodeActionsResponse RunCodeAction(RunCodeActionRequest req)
         {
-            var actions = GetContextualCodeActions(req);
-            CodeAction action = actions.First(a => a.Description == req.CodeAction);
+            var actions = GetContextualCodeActions(req).ToList();
+            if(req.CodeAction > actions.Count)
+                return new RunCodeActionsResponse();
+
+            CodeAction action = actions[req.CodeAction];
             var context = GetRefactoringContext(req);
-
-            //bool isValid = action.GetActions(context).Any();
-
             
             using (var script = new TestScript(context))
             {
                 action.Run(script);
-                //action.GetActions(context).Skip(actionIndex).First().Run(script);
             }
 
             return new RunCodeActionsResponse {Text = context.Document.Text};
@@ -52,8 +52,8 @@ namespace OmniSharp.GetCodeActions
             var refactoringContext = GetRefactoringContext(req);
 
             var actions = new List<CodeAction>();
-
-            foreach (var provider in CodeActionProviders.Providers)
+            var providers = new CodeActionProviders().GetProviders();
+            foreach (var provider in providers)
             {
                 actions.AddRange(provider.GetActions(refactoringContext));
             }

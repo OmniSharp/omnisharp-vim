@@ -1,6 +1,4 @@
-*.swp
-*.swo
-*.swn
+*.sw*
 *.orig
 **/tags
 ## Ignore Visual Studio temporary files, build results, and

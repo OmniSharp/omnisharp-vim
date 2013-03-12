@@ -4,6 +4,6 @@ namespace OmniSharp.GetCodeActions
 {
     public class RunCodeActionRequest : Request
     {
-        public string CodeAction { get; set; }
+        public int CodeAction { get; set; }
     }
 }
