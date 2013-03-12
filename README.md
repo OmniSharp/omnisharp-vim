@@ -60,7 +60,7 @@ To use the "Find Usages" function, add the following mapping :-
 
 I find contextual code actions so useful that I have it mapped to the spacebar :-
 
-	nmap <space> :call CodeActions()<cr>
+	nmap <space> :call GetCodeActions()<cr>
 
 You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
 
