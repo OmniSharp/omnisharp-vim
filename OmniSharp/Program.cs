@@ -14,6 +14,7 @@ namespace OmniSharp
             string solutionPath = null;
 
             int port = 2000;
+
             var p = new OptionSet
                         {
                             {

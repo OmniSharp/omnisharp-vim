@@ -15,7 +15,7 @@ autocmd BufWritePre *.cs call FindSyntaxErrors()
 import vim, urllib2, urllib, urlparse, logging, json, os.path
 
 logger = logging.getLogger('omnisharp')
-hdlr = logging.FileHandler('c:\python.log')
+hdlr = logging.FileHandler('python.log')
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr) 
@@ -32,15 +32,13 @@ def getResponse(endPoint, additionalParameters=None):
 		parameters.update(additionalParameters)
 
 	target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
-
 	parameters = urllib.urlencode(parameters)
 	try:
 		response = urllib2.urlopen(target, parameters)
+		return response.read()
 	except:
 		vim.command("call confirm('Could not connect to " + target + "')")
-	else:
-		return response.read()
-	return ''
+		return ''
 EOF
 
 let g:SuperTabDefaultCompletionType = 'context'
@@ -96,6 +94,41 @@ if(js != ''):
 			vim.command('e ' + definition['FileName'])
 		#row is 1 based, column is 0 based
 		vim.current.window.cursor = (definition['Line'], definition['Column'] - 1 )
+EOF
+
+endfunction
+
+function! GetCodeActions()
+:python << EOF
+js = getResponse('/getcodeactions');
+if(js != ''):
+	actions = json.loads(js)['CodeActions']
+	for index, action in enumerate(actions):
+		vim.command('echo ' + str(index) + '":  ' + action + '"')
+	if(len(actions) == 0):
+		vim.command('return 1')
+else:
+	vim.command('return 1')
+EOF
+
+let a:option=nr2char(getchar())
+if(a:option < '0' || a:option > '9')
+	return 1
+endif
+:python << EOF
+parameters = {}
+parameters['codeaction'] = vim.eval("a:option")
+js = getResponse('/runcodeaction', parameters);
+text = json.loads(js)['Text']
+if(text == None):
+	vim.command('return 1')
+lines = text.splitlines()
+
+cursor = vim.current.window.cursor
+vim.command('normal ggdG')
+lines = [line.encode('utf-8') for line in lines]
+vim.current.buffer[:] = lines
+vim.current.window.cursor = cursor
 EOF
 
 endfunction

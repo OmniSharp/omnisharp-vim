@@ -70,6 +70,9 @@
     <StartupObject>OmniSharp.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CsQuery">
+      <HintPath>..\OmniSharp.Tests\bin\Debug\CsQuery.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.NRefactory, Version=5.0.0.0, Culture=neutral, PublicKeyToken=d4bfe873e7598c49, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\ICSharpCode.NRefactory.5.3.0\lib\Net40\ICSharpCode.NRefactory.dll</HintPath>
@@ -109,6 +112,14 @@
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
     <Compile Include="FindUsages\Usage.cs" />
+    <Compile Include="GetCodeActions\CodeActionProviders.cs" />
+    <Compile Include="GetCodeActions\GetCodeActionsHandler.cs" />
+    <Compile Include="GetCodeActions\GetCodeActionsModule.cs" />
+    <Compile Include="GetCodeActions\GetCodeActionsResponse.cs" />
+    <Compile Include="GetCodeActions\OmniSharpRefactoringContext.cs" />
+    <Compile Include="GetCodeActions\RunCodeActionModule.cs" />
+    <Compile Include="GetCodeActions\RunCodeActionRequest.cs" />
+    <Compile Include="GetCodeActions\RunCodeActionsResponse.cs" />
     <Compile Include="Solution\OrphanProject.cs" />
     <Compile Include="Solution\StringExtensions.cs" />
     <Compile Include="SyntaxErrors\Error.cs" />
