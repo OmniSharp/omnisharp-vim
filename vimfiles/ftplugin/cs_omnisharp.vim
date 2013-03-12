@@ -9,7 +9,7 @@ if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
 endif
 
-autocmd BufWritePre * call FindSyntaxErrors() 
+autocmd BufWritePre *.cs call FindSyntaxErrors() 
 
 :python << EOF
 import vim, urllib2, urllib, urlparse, logging, json, os.path
@@ -182,4 +182,18 @@ if len(qf_taglist) > 1
 	call setqflist(qf_taglist)
 	copen 4
 endif
+endfunction
+
+
+function! TypeLookup()
+:python << EOF
+js = getResponse('/typelookup');
+if(js != ''):
+
+	type = json.loads(js)['Type']
+	#filename = definition['FileName']
+	if(type != None):
+		print type
+EOF
+
 endfunction
