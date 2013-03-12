@@ -1,6 +1,6 @@
 #OmniSharp
 
-OmniSharp is a plugin for Vim to provide IDE like abilities for C#. It currently supports omnicomplete(intellisense),
+OmniSharp is a plugin for Vim to provide IDE like abilities for C#. It currently supports omnicomplete(intellisense), contextual code actions,
 go to definition, find usages and go to implementation.
                                                                
 Code documentation is displayed in the scratch window.
@@ -19,6 +19,9 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 
 ####Find Usages
 ![Find Usages screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/FindUsages.png)
+
+####Code Actions
+![Code Actions screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/CodeActions.png)
 
 ##Installation
 
@@ -49,11 +52,15 @@ or
 
 To use the "Find implementations / derived types" function, add the following mapping :-
 
-	nmap fi : call FindImplementations()<cr>
+	nmap fi :call FindImplementations()<cr>
 
 To use the "Find Usages" function, add the following mapping :-
 
-	nmap fu : call FindUsages()<cr>
+	nmap fu :call FindUsages()<cr>
+
+I find contextual code actions so useful that I have it mapped to the spacebar :-
+
+	nmap <space> :call CodeActions()<cr>
 
 You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
 
