@@ -58,6 +58,10 @@ To use the "Find Usages" function, add the following mapping :-
 
 	nmap fu :call FindUsages()<cr>
 
+To use the "Type Lookup/Tooltip," you can add the following mapping :- 
+
+	nmap <leader>tt :call TypeLookup<cr>
+
 I find contextual code actions so useful that I have it mapped to the spacebar :-
 
 	nmap <space> :call GetCodeActions()<cr>
