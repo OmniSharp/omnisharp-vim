@@ -55,7 +55,8 @@ namespace OmniSharp.GetCodeActions
             var providers = new CodeActionProviders().GetProviders();
             foreach (var provider in providers)
             {
-                actions.AddRange(provider.GetActions(refactoringContext));
+                var providerActions = provider.GetActions(refactoringContext);
+                actions.AddRange(providerActions);
             }
             return actions;
         }

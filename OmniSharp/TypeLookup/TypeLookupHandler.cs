@@ -6,7 +6,6 @@ using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.NRefactory.TypeSystem.Implementation;
 using OmniSharp.Parser;
 
-
 namespace OmniSharp.TypeLookup
 {
     public class TypeLookupHandler

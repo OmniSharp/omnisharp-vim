@@ -63,7 +63,7 @@ public class Test
 ".LookupType().ShouldEqual("int name");
         }
  
-        [Test]
+        [Test, Ignore("wip")]
         public void Should_LookupTest_From_var()
         {
             @"

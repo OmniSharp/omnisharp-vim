@@ -51,6 +51,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -139,7 +140,6 @@
     <Compile Include="AutoComplete\AutocompleteRequest.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="AutoComplete\CodeCompletionItemProvider.cs" />
-    <Compile Include="AutoComplete\CompletionBuilders.cs" />
     <Compile Include="AutoComplete\CompletionData.cs" />
     <Compile Include="AutoComplete\AutoCompleteHandler.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionModule.cs" />

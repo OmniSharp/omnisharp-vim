@@ -88,7 +88,7 @@ namespace OmniSharp.AutoComplete
                     }
                 } while (xml.Read());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //LoggingService.Debug("Invalid XML documentation: " + ex.Message);
                 return xmlDocumentation;

@@ -45,7 +45,7 @@ namespace OmniSharp.Tests.CompletionTests.AutoComplete
             }")
                 .ShouldContainOnly(
                     "Add(string item)",
-                    "AddRange(IEnumerable collection)"); //TODO: IEnumerable<string>
+                    "AddRange(IEnumerable<string> collection)"); 
         }
     }
 }

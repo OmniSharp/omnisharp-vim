@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.CSharp.Completion;
 using ICSharpCode.NRefactory.Completion;
 using ICSharpCode.NRefactory.Documentation;
@@ -12,8 +13,12 @@ namespace OmniSharp.AutoComplete
     public class CompletionDataFactory : ICompletionDataFactory
     {
         private readonly string _partialWord;
+        private readonly CSharpAmbience _ambience = new CSharpAmbience {ConversionFlags = AmbienceFlags};
 
-        private readonly CompletionBuilders _completionBuilders;
+        private const ConversionFlags AmbienceFlags =
+            ConversionFlags.ShowBody |
+            ConversionFlags.ShowParameterList |
+            ConversionFlags.ShowParameterNames;
 
         private string _completionText;
         private string _signature;
@@ -21,7 +26,7 @@ namespace OmniSharp.AutoComplete
         public CompletionDataFactory(string partialWord)
         {
             _partialWord = partialWord;
-            _completionBuilders = new CompletionBuilders();
+            
         }
 
 
@@ -29,11 +34,11 @@ namespace OmniSharp.AutoComplete
         {
 
             _completionText = _signature = entity.Name;
-
+            
+            _completionText = _ambience.ConvertEntity(entity).Replace(";", "");
             if (entity is IMethod)
             {
                 var method = entity as IMethod;
-                _completionText = new CompletionBuilders().MethodName(method);
                 GenerateMethodSignature(method);
             }
 
@@ -85,15 +90,11 @@ namespace OmniSharp.AutoComplete
 
         private void GenerateMethodSignature(IMethod method)
         {
-            _signature = _completionBuilders.Convert(method);
-
+            _signature = _ambience.ConvertEntity(method).Replace(";", "");
+            _completionText = _signature.Remove(_signature.IndexOf('(') + 1);
             if (!method.Parameters.Any())
             {
-                _completionText += "()";
-            }
-            else
-            {
-                _completionText += "(";
+                _completionText += ")";
             }
         }
 
