@@ -7,7 +7,7 @@ Code documentation is displayed in the scratch window.
 
 CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
 
-OmniSharp works both on Windows and on Linux and OS X with Mono. To run it with Mono you will probably have to use [IOMap] (http://www.mono-project.com/IOMap) since the solution and project files typically use Windows-styled paths.
+OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
 completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
@@ -57,6 +57,10 @@ To use the "Find implementations / derived types" function, add the following ma
 To use the "Find Usages" function, add the following mapping :-
 
 	nmap fu :call FindUsages()<cr>
+
+To use the "Type Lookup/Tooltip," you can add the following mapping :- 
+
+	nmap <leader>tt :call TypeLookup<cr>
 
 I find contextual code actions so useful that I have it mapped to the spacebar :-
 
