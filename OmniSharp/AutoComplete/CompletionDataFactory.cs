@@ -16,7 +16,6 @@ namespace OmniSharp.AutoComplete
         private readonly CSharpAmbience _ambience = new CSharpAmbience {ConversionFlags = AmbienceFlags};
 
         private const ConversionFlags AmbienceFlags =
-            ConversionFlags.ShowBody |
             ConversionFlags.ShowParameterList |
             ConversionFlags.ShowParameterNames;
 
@@ -26,9 +25,7 @@ namespace OmniSharp.AutoComplete
         public CompletionDataFactory(string partialWord)
         {
             _partialWord = partialWord;
-            
         }
-
 
         public ICompletionData CreateEntityCompletionData(IEntity entity)
         {

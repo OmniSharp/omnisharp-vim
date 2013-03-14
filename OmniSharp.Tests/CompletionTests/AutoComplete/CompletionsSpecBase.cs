@@ -20,6 +20,9 @@ namespace OmniSharp.Tests.CompletionTests.AutoComplete
         public IEnumerable<ICompletionData> GetCompletions(string editorText)
         {
             int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
+            if(cursorOffset == -1)
+                throw new ArgumentException("Editor text should contain a $");
+
             Tuple<int, int> cursorPosition = GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");

@@ -7,6 +7,20 @@ namespace OmniSharp.Tests.CompletionTests.AutoComplete
     [TestFixture]
     public class BugFixTests : CompletionTestBase
     {
+
+        [Test]
+        public void Should_not_add_property_body()
+        {
+            CompletionsFor(
+                @"public class A {
+    public A() 
+    {
+        string s;
+        s.Leng$;
+    }
+}").ShouldContainOnly("Length");
+        }
+        
         [Test]
         public void Should_complete_to_string()
         {
