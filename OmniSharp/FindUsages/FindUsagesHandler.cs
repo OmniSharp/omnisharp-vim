@@ -93,7 +93,6 @@ namespace OmniSharp.FindUsages
     {
         public static string Preview(this AstNode node, CSharpFile file)
         {
-            var region = node.GetRegion();
             var location = node.StartLocation;
             var offset = file.Document.GetOffset(location.Line, location.Column);
             var line = file.Document.GetLineByNumber(location.Line);
@@ -102,8 +101,8 @@ namespace OmniSharp.FindUsages
                 return file.Document.GetText(line.Offset, line.Length);
             }
 
-            var start = Math.Max(line.Offset, offset - 30);
-            var end = Math.Min(line.EndOffset, offset + 30);
+            var start = Math.Max(line.Offset, offset - 60);
+            var end = Math.Min(line.EndOffset, offset + 60);
 
             return "..." + file.Document.GetText(start, end - start).Trim() + "...";
         }

@@ -156,7 +156,6 @@
     <Compile Include="AutoComplete\CompletionDataFactory.cs" />
     <Compile Include="Solution\CSharpSolution.cs" />
     <Compile Include="AutoComplete\StringExtensions.cs" />
-    <Compile Include="AutoComplete\TypeReference.cs" />
     <Compile Include="AutoComplete\XmlDocumentationProviderFactory.cs" />
     <Compile Include="SyntaxErrors\SyntaxErrorsHandler.cs" />
     <Compile Include="SyntaxErrors\SyntaxErrorsResponse.cs" />
