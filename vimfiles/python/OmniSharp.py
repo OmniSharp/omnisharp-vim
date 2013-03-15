@@ -1,11 +1,17 @@
-import vim, urllib2, urllib, urlparse, logging, json, os.path
+import vim, urllib2, urllib, urlparse, logging, json, os, os.path
+
 
 logger = logging.getLogger('omnisharp')
-hdlr = logging.FileHandler('python.log')
+logger.setLevel(logging.WARNING)
+
+log_dir = os.path.join(vim.eval('expand("<sfile>:p:h")'), '..', 'log')
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+hdlr = logging.FileHandler(os.path.join(log_dir, 'python.log'))
+logger.addHandler(hdlr) 
+
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
-logger.addHandler(hdlr) 
-logger.setLevel(logging.WARNING)
 
 def getResponse(endPoint, additionalParameters=None):
     parameters = {}
