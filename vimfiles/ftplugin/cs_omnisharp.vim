@@ -133,6 +133,23 @@ EOF
 
 endfunction
 
+function! Rename()        
+let a:renameto = inputdialog("Rename to:")
+
+:python << EOF
+parameters = {}
+parameters['renameto'] = vim.eval("a:renameto")
+
+js = getResponse('/rename', parameters)
+changes = json.loads(js)['Changes']
+for change in changes:
+	lines = change['Buffer'].splitlines()
+	lines = [line.encode('utf-8') for line in lines]
+	vim.current.buffer[:] = lines
+
+EOF
+endfunction
+
 function! FindUsages()
 let qf_taglist = []
 :python << EOF

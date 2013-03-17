@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,6 +10,7 @@ using ICSharpCode.NRefactory.CSharp.TypeSystem;
 using ICSharpCode.NRefactory.Semantics;
 using ICSharpCode.NRefactory.TypeSystem;
 using OmniSharp.Parser;
+using OmniSharp.Requests;
 using OmniSharp.Solution;
 
 namespace OmniSharp.FindUsages
@@ -29,6 +29,25 @@ namespace OmniSharp.FindUsages
         public FindUsagesResponse FindUsages(FindUsagesRequest request)
         {
             
+            var result = FindUsageNodes(request).ToArray();
+            var res = new FindUsagesResponse();
+            if (result.Any())
+            {
+                var usages = result.Select(node => new Usage
+                {
+                    FileName = node.GetRegion().FileName,
+                    Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)).Replace("'", "''"),
+                    Line = node.StartLocation.Line,
+                    Column = node.StartLocation.Column,
+                });
+                res.Usages = usages;
+            }
+
+            return res;
+        }
+
+        public IEnumerable<AstNode> FindUsageNodes(Request request)
+        {
             var res = _parser.ParsedContent(request.Buffer, request.FileName);
             var loc = new TextLocation(request.Line, request.Column);
             var result = new ConcurrentBag<AstNode>();
@@ -37,7 +56,8 @@ namespace OmniSharp.FindUsages
             if (resolveResult is LocalResolveResult)
             {
                 var variable = (resolveResult as LocalResolveResult).Variable;
-                findReferences.FindLocalReferences(variable, res.UnresolvedFile, res.SyntaxTree, res.Compilation, (node, rr) => result.Add(node), CancellationToken.None);
+                findReferences.FindLocalReferences(variable, res.UnresolvedFile, res.SyntaxTree, res.Compilation,
+                                                   (node, rr) => result.Add(node), CancellationToken.None);
             }
             else
             {
@@ -52,10 +72,6 @@ namespace OmniSharp.FindUsages
                     entity = (resolveResult as MemberResolveResult).Member;
                 }
 
-                if (entity == null)
-                {
-                    return new FindUsagesResponse {Usages = new List<Usage>()};
-                }
                 var searchScopes = findReferences.GetSearchScopes(entity);
 
                 var interesting = new List<CSharpUnresolvedFile>();
@@ -74,37 +90,8 @@ namespace OmniSharp.FindUsages
                                                             parsedResult.Compilation,
                                                             (node, rr) => result.Add(node), CancellationToken.None);
                     });
-
             }
-
-            var usages = result.Select(node => new Usage
-            {
-                FileName = node.GetRegion().FileName,
-                Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)).Replace("'", "''"),
-                Line = node.StartLocation.Line,
-                Column = node.StartLocation.Column,
-            });
-
-            return new FindUsagesResponse { Usages = usages };
-        }
-    }
-
-    public static class AstNodeExtensions
-    {
-        public static string Preview(this AstNode node, CSharpFile file)
-        {
-            var location = node.StartLocation;
-            var offset = file.Document.GetOffset(location.Line, location.Column);
-            var line = file.Document.GetLineByNumber(location.Line);
-            if (line.Length < 50)
-            {
-                return file.Document.GetText(line.Offset, line.Length);
-            }
-
-            var start = Math.Max(line.Offset, offset - 60);
-            var end = Math.Min(line.EndOffset, offset + 60);
-
-            return "..." + file.Document.GetText(start, end - start).Trim() + "...";
+            return result;
         }
     }
 }
