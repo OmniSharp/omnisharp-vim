@@ -1,10 +1,8 @@
 using System;
-using OmniSharp.Tests;
 using OmniSharp.Parser;
-using OmniSharp.Solution;
 using OmniSharp.TypeLookup;
 
-namespace OmniSharp.Tests.CompletionTests.TypeLookup
+namespace OmniSharp.Tests.TypeLookup
 {
     public static class StringExtensions
     {

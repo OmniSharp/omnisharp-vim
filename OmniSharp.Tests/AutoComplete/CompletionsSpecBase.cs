@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
-using OmniSharp;
 using OmniSharp.AutoComplete;
 using OmniSharp.Parser;
 
-namespace OmniSharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.AutoComplete
 {
     public class CompletionsSpecBase
     {

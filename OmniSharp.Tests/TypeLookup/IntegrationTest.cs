@@ -1,12 +1,11 @@
 using System;
-using System.Linq;
 using NUnit.Framework;
 using Nancy.Testing;
 using OmniSharp.TypeLookup;
 using OmniSharp.Solution;
 using Should;
 
-namespace OmniSharp.Tests.CompletionTests.TypeLookup
+namespace OmniSharp.Tests.TypeLookup
 {
     [TestFixture]
     public class IntegrationTest

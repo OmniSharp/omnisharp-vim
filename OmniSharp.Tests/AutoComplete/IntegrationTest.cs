@@ -7,7 +7,7 @@ using OmniSharp.AutoComplete;
 using OmniSharp.Solution;
 using Should;
 
-namespace OmniSharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.AutoComplete
 {
     [TestFixture]
     public class IntegrationTest

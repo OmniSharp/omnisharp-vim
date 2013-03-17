@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Should;
 
-namespace OmniSharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.AutoComplete
 {
     [TestFixture]
     public class BugFixTests : CompletionTestBase
