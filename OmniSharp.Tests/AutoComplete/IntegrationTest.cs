@@ -26,7 +26,7 @@ public class myclass
 }
 ";
             int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
-            Tuple<int, int> cursorPosition = GetLineAndColumnFromIndex(editorText, cursorOffset);
+            Tuple<int, int> cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
@@ -58,17 +58,6 @@ public class myclass
             return matches[0].Groups[1].ToString();
         }
 
-        private static Tuple<int, int> GetLineAndColumnFromIndex(string text, int index)
-        {
-            int lineCount = 1, lastLineEnd = -1;
-            for (int i = 0; i < index; i++)
-                if (text[i] == '\n')
-                {
-                    lineCount++;
-                    lastLineEnd = i;
-                }
-
-            return new Tuple<int, int>(lineCount, index - lastLineEnd);
-        }
+        
     }
 }
