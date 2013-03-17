@@ -22,8 +22,8 @@ namespace OmniSharp.Tests.TypeLookup
                 {
                     Buffer = editorText,
                     FileName = "myfile",
-                    Line = cursorPosition.Item1,
-                    Column = cursorPosition.Item2,
+                    Line = cursorPosition.Line,
+                    Column = cursorPosition.Column,
                 };
 
             return handler.GetTypeLookupResponse(request).Type;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ICSharpCode.NRefactory;
 using NUnit.Framework;
 using Nancy.Testing;
 using OmniSharp.AutoComplete;
@@ -26,7 +27,7 @@ public class myclass
 }
 ";
             int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
-            Tuple<int, int> cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
+            TextLocation cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
@@ -44,8 +45,8 @@ public class myclass
                 with.FormValue("FileName", "myfile");
                 with.FormValue("WordToComplete", partialWord);
                 with.FormValue("Buffer", editorText);
-                with.FormValue("Line", cursorPosition.Item1.ToString());
-                with.FormValue("Column", cursorPosition.Item2.ToString());
+                with.FormValue("Line", cursorPosition.Line.ToString());
+                with.FormValue("Column", cursorPosition.Column.ToString());
             });
 
             var res = result.Body.DeserializeJson<AutoCompleteResponse[]>().Select(c => c.DisplayText);

@@ -1,4 +1,5 @@
 using System;
+using ICSharpCode.NRefactory;
 using NUnit.Framework;
 using Nancy.Testing;
 using OmniSharp.TypeLookup;
@@ -24,7 +25,7 @@ public class Test
 }
 ";
             int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
-            Tuple<int, int> cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
+            TextLocation cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
             editorText = editorText.Replace("$", "");
 
             var solution = new FakeSolution();
@@ -40,8 +41,8 @@ public class Test
                 with.HttpRequest();
                 with.FormValue("FileName", "myfile");
                 with.FormValue("Buffer", editorText);
-                with.FormValue("Line", cursorPosition.Item1.ToString());
-                with.FormValue("Column", cursorPosition.Item2.ToString());
+                with.FormValue("Line", cursorPosition.Line.ToString());
+                with.FormValue("Column", cursorPosition.Column.ToString());
             });
 
             var res = result.Body.DeserializeJson<TypeLookupResponse>();

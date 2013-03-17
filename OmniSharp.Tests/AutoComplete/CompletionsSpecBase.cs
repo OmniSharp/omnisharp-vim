@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using ICSharpCode.NRefactory;
 using ICSharpCode.NRefactory.Completion;
 using OmniSharp.AutoComplete;
 using OmniSharp.Parser;
@@ -22,7 +23,7 @@ namespace OmniSharp.Tests.AutoComplete
             if(cursorOffset == -1)
                 throw new ArgumentException("Editor text should contain a $");
 
-            Tuple<int, int> cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
+            TextLocation cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
@@ -35,8 +36,8 @@ namespace OmniSharp.Tests.AutoComplete
                     FileName = "myfile",
                     WordToComplete = partialWord,
                     Buffer = editorText,
-                    Line = cursorPosition.Item1,
-                    Column = cursorPosition.Item2,
+                    Line = cursorPosition.Line,
+                    Column = cursorPosition.Column,
                 };
 
             return provider.CreateProvider(request);
