@@ -19,6 +19,7 @@ namespace OmniSharp.FindUsages
     {
         private readonly BufferParser _parser;
         private readonly ISolution _solution;
+        private ConcurrentBag<AstNode> _result;
 
         public FindUsagesHandler(BufferParser parser, ISolution solution)
         {
@@ -50,45 +51,43 @@ namespace OmniSharp.FindUsages
         {
             var res = _parser.ParsedContent(request.Buffer, request.FileName);
             var loc = new TextLocation(request.Line, request.Column);
-            var result = new ConcurrentBag<AstNode>();
+            _result = new ConcurrentBag<AstNode>();
             var findReferences = new FindReferences();
             ResolveResult resolveResult = ResolveAtLocation.Resolve(res.Compilation, res.UnresolvedFile, res.SyntaxTree, loc);
             if (resolveResult is LocalResolveResult)
             {
                 var variable = (resolveResult as LocalResolveResult).Variable;
                 findReferences.FindLocalReferences(variable, res.UnresolvedFile, res.SyntaxTree, res.Compilation,
-                                                   (node, rr) => result.Add(node), CancellationToken.None);
+                                                   (node, rr) => _result.Add(node), CancellationToken.None);
             }
             else
             {
                 IEntity entity = null;
                 if (resolveResult is TypeResolveResult)
                 {
-                    entity = (resolveResult as TypeResolveResult).Type.GetDefinition();
+                    var type = (resolveResult as TypeResolveResult).Type;
+                    entity = type.GetDefinition();
+                    ProcessTypeResults(type);
                 }
 
                 if (resolveResult is MemberResolveResult)
                 {
                     entity = (resolveResult as MemberResolveResult).Member;
-                    //TODO: why does FindReferencesInFile not return the definition for a field? 
-                    // add it here instead for now. 
-                    var definition = resolveResult.GetDefinitionRegion();
-                    var declarationNode = res.SyntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
-                    if (declarationNode != null)
+                    if (entity.EntityType == EntityType.Constructor)
                     {
-                        while (declarationNode.GetNextNode() != null 
-                            && !(IsIdentifier(declarationNode)))
-                        {
-                            declarationNode = declarationNode.GetNextNode();
-                        }
-
-                        if(IsIdentifier(declarationNode))
-                            result.Add(declarationNode);
+                        // process type instead
+                        var type = entity.DeclaringType;
+                        entity = entity.DeclaringTypeDefinition;
+                        ProcessTypeResults(type);
+                    }
+                    else
+                    {
+                        ProcessMemberResults(resolveResult);    
                     }
                 }
 
                 if (entity == null)
-                    return result;
+                    return _result;
 
                 var searchScopes = findReferences.GetSearchScopes(entity);
 
@@ -106,10 +105,56 @@ namespace OmniSharp.FindUsages
                             _solution.GetFile(file.FileName).Content.Text, file.FileName);
                         findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree,
                                                             parsedResult.Compilation,
-                                                            (node, rr) => result.Add(node), CancellationToken.None);
+                                                            (node, rr) => _result.Add(node), CancellationToken.None);
                     });
             }
-            return result;
+            return _result;
+        }
+
+        private void ProcessMemberResults(ResolveResult resolveResult)
+        {
+            //TODO: why does FindReferencesInFile not return the definition for a field? 
+            // add it here instead for now. 
+            var definition = resolveResult.GetDefinitionRegion();
+            var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
+            var declarationNode = syntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
+            if (declarationNode != null)
+            {
+                while (declarationNode.GetNextNode() != null
+                       && !(IsIdentifier(declarationNode)))
+                {
+                    declarationNode = declarationNode.GetNextNode();
+                }
+
+                if (IsIdentifier(declarationNode))
+                    _result.Add(declarationNode);
+            }
+        }
+
+        private void ProcessTypeResults(IType type)
+        {
+            //TODO: why does FindReferencesInFile not return the constructors?
+            //var definition = resolveResult.GetDefinitionRegion();
+            //var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
+            //var constructors = syntaxTree.GetChildrenByRole()
+            foreach (var constructor in type.GetConstructors())
+            {
+                var definition = constructor.MemberDefinition.Region;
+                var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
+                var declarationNode = syntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
+                if (declarationNode != null)
+                {
+                    while (declarationNode.GetNextNode() != null
+                           && !(IsIdentifier(declarationNode)))
+                    {
+                        declarationNode = declarationNode.GetNextNode();
+                    }
+
+                    if (IsIdentifier(declarationNode))
+                        _result.Add(declarationNode);
+                }
+            }
+            
         }
 
         private static bool IsIdentifier(AstNode declarationNode)

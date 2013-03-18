@@ -141,5 +141,61 @@ namespace OmniSharp.Tests.Rename
         {
             Rename("pub$", "").ShouldEqual("pub");
         }
+
+        [Test]
+        public void Should_rename_type_and_constructors()
+        {
+            Rename(
+@"public class MyCla$ss
+{
+    public MyClass()
+    {
+    }
+
+    public MyClass(int param)
+    {
+    }
+}", "Renamed")
+.ShouldEqual(
+@"public class Renamed
+{
+    public Renamed()
+    {
+    }
+
+    public Renamed(int param)
+    {
+    }
+}"
+);          
+        }
+
+        [Test]
+        public void Should_rename_type_and_constructors_from_constructor_rename()
+        {
+            Rename(
+@"public class MyClass
+{
+    public My$Class()
+    {
+    }
+
+    public MyClass(int param)
+    {
+    }
+}", "Renamed")
+.ShouldEqual(
+@"public class Renamed
+{
+    public Renamed()
+    {
+    }
+
+    public Renamed(int param)
+    {
+    }
+}"
+);
+        }
     }
 }
