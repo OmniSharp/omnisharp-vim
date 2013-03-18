@@ -30,7 +30,9 @@ namespace OmniSharp.Tests.Rename
                 };
 
             var response = renameHandler.Rename(request);
-            return response.Changes.First().Buffer;
+            if(response.Changes.Any())
+                return response.Changes.First().Buffer;
+            return buffer;
         }
 
         [Test]
@@ -132,6 +134,12 @@ namespace OmniSharp.Tests.Rename
     }
 }"
 );            
+        }
+
+        [Test]
+        public void Should_not_bomb_when_cursor_is_not_on_renameable()
+        {
+            Rename("pub$", "").ShouldEqual("pub");
         }
     }
 }

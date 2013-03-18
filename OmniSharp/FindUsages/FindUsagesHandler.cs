@@ -76,11 +76,19 @@ namespace OmniSharp.FindUsages
                     var declarationNode = res.SyntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
                     if (declarationNode != null)
                     {
-                        while (!(declarationNode is VariableInitializer || declarationNode is Identifier))
+                        while (declarationNode.GetNextNode() != null 
+                            && !(IsIdentifier(declarationNode)))
+                        {
                             declarationNode = declarationNode.GetNextNode();
-                        result.Add(declarationNode);
+                        }
+
+                        if(IsIdentifier(declarationNode))
+                            result.Add(declarationNode);
                     }
                 }
+
+                if (entity == null)
+                    return result;
 
                 var searchScopes = findReferences.GetSearchScopes(entity);
 
@@ -102,6 +110,11 @@ namespace OmniSharp.FindUsages
                     });
             }
             return result;
+        }
+
+        private static bool IsIdentifier(AstNode declarationNode)
+        {
+            return declarationNode is VariableInitializer || declarationNode is Identifier;
         }
     }
 }
