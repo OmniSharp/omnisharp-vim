@@ -42,7 +42,7 @@ namespace OmniSharp.Tests.FindUsages
             });
 
             var res = result.Body.DeserializeJson<FindUsagesResponse>();
-            res.Usages.Count().ShouldEqual(1);
+            res.Usages.Count().ShouldEqual(2);
             res.Usages.First().Text.Trim().ShouldEqual("method();");
         }
     }

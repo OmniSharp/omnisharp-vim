@@ -116,6 +116,11 @@ namespace OmniSharp.FindUsages
             //TODO: why does FindReferencesInFile not return the definition for a field? 
             // add it here instead for now. 
             var definition = resolveResult.GetDefinitionRegion();
+            ProcessRegion(definition);
+        }
+
+        private void ProcessRegion(DomRegion definition)
+        {
             var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
             var declarationNode = syntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
             if (declarationNode != null)
@@ -134,27 +139,11 @@ namespace OmniSharp.FindUsages
         private void ProcessTypeResults(IType type)
         {
             //TODO: why does FindReferencesInFile not return the constructors?
-            //var definition = resolveResult.GetDefinitionRegion();
-            //var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
-            //var constructors = syntaxTree.GetChildrenByRole()
             foreach (var constructor in type.GetConstructors())
             {
                 var definition = constructor.MemberDefinition.Region;
-                var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
-                var declarationNode = syntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
-                if (declarationNode != null)
-                {
-                    while (declarationNode.GetNextNode() != null
-                           && !(IsIdentifier(declarationNode)))
-                    {
-                        declarationNode = declarationNode.GetNextNode();
-                    }
-
-                    if (IsIdentifier(declarationNode))
-                        _result.Add(declarationNode);
-                }
+                ProcessRegion(definition);
             }
-            
         }
 
         private static bool IsIdentifier(AstNode declarationNode)
