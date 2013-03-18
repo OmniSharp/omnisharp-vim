@@ -70,10 +70,12 @@ namespace OmniSharp.FindUsages
                 if (resolveResult is MemberResolveResult)
                 {
                     entity = (resolveResult as MemberResolveResult).Member;
-                    //TODO: why does FindReferencesInFile not return the definition for a field?
-
-                    // add it here instead for now
-                    var declarationNode = res.SyntaxTree.GetNodeAt(entity.BodyRegion.BeginLine, entity.BodyRegion.BeginColumn);
+                    //TODO: why does FindReferencesInFile not return the definition for a field? 
+                    // add it here instead for now. 
+                    var definition = resolveResult.GetDefinitionRegion();
+                    var declarationNode = res.SyntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
+                    while (!(declarationNode is VariableInitializer || declarationNode is Identifier) )
+                        declarationNode = declarationNode.GetNextNode();
                     result.Add(declarationNode);
                 }
 

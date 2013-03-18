@@ -102,5 +102,36 @@ namespace OmniSharp.Tests.Rename
  );
         }
 
+        [Test]
+        public void Should_rename_method()
+        {
+            Rename(
+@"public class MyClass
+{
+    public MyClass()
+    {
+        MyMethod$();
+    }
+
+    void MyMethod()
+    {
+        
+    }
+}", "RenamedMethod")
+.ShouldEqual(
+@"public class MyClass
+{
+    public MyClass()
+    {
+        RenamedMethod();
+    }
+
+    void RenamedMethod()
+    {
+        
+    }
+}"
+);            
+        }
     }
 }
