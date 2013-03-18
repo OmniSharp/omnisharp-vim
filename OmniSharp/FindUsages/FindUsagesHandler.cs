@@ -74,9 +74,12 @@ namespace OmniSharp.FindUsages
                     // add it here instead for now. 
                     var definition = resolveResult.GetDefinitionRegion();
                     var declarationNode = res.SyntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
-                    while (!(declarationNode is VariableInitializer || declarationNode is Identifier) )
-                        declarationNode = declarationNode.GetNextNode();
-                    result.Add(declarationNode);
+                    if (declarationNode != null)
+                    {
+                        while (!(declarationNode is VariableInitializer || declarationNode is Identifier))
+                            declarationNode = declarationNode.GetNextNode();
+                        result.Add(declarationNode);
+                    }
                 }
 
                 var searchScopes = findReferences.GetSearchScopes(entity);
