@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using ICSharpCode.NRefactory.CSharp;
 using OmniSharp.FindUsages;
 using OmniSharp.Parser;
 using OmniSharp.Refactoring;
@@ -24,12 +26,16 @@ namespace OmniSharp.Rename
             using (var script = new OmniSharpScript(context))
             {
                 var modfiedFiles = new List<ModifiedFileResponse>();
-                foreach (var node in nodes)
+                foreach (IGrouping<string, AstNode> groupedNodes in nodes.GroupBy(n => n.GetRegion().FileName))
                 {
-                    script.Rename(node, req.RenameTo);
+                    foreach (var node in groupedNodes)
+                    {
+                        script.Rename(node, req.RenameTo);
+                    }
+                    
                     var modifiedFile = new ModifiedFileResponse
                         {
-                            FileName = node.GetRegion().FileName,
+                            FileName = groupedNodes.Key,
                             Buffer = script.CurrentDocument.Text
                         };
                     modfiedFiles.Add(modifiedFile);
