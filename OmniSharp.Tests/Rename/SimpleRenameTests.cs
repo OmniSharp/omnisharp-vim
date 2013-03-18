@@ -50,7 +50,7 @@ namespace OmniSharp.Tests.Rename
     {
         var str = String.Empty;
     }
-}" 
+}"
  );
         }
 
@@ -65,7 +65,8 @@ namespace OmniSharp.Tests.Rename
         var s$ = ""s"";
         s = s + s;
     }
-}", "str").ShouldEqual(
+}", "str")
+  .ShouldEqual(
 @"public class MyClass
 {
     public MyClass()
@@ -76,7 +77,30 @@ namespace OmniSharp.Tests.Rename
 }"
  );
         }
+
+        [Test]
+        public void Should_rename_field_and_usage()
+        {
+            Rename(
+@"public class MyClass
+{
+    private string _s;
+    public MyClass()
+    {
+        _s$ = ""s"";
     }
+}", "_str")
+  .ShouldEqual(
+@"public class MyClass
+{
+    private string _str;
+    public MyClass()
+    {
+        _str = ""s"";
+    }
+}"
+ );
+        }
 
-
+    }
 }

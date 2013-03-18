@@ -20,7 +20,7 @@ namespace OmniSharp.Rename
 
         public RenameResponse Rename(RenameRequest req)
         {
-            var nodes = _findUsagesHandler.FindUsageNodes(req);
+            IEnumerable<AstNode> nodes = _findUsagesHandler.FindUsageNodes(req);
             var context = OmniSharpRefactoringContext.GetContext(_bufferParser, req);
             var response = new RenameResponse();
             using (var script = new OmniSharpScript(context))
