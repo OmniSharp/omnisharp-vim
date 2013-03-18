@@ -13,6 +13,19 @@ vim.command("let s:py_path = '" + py_path + "'")
 EOF
 exec "pyfile " . s:py_path
 
+"Setup variable defaults
+"Default value for the server address
+if !exists('g:OmniSharp_host')
+	let g:OmniSharp_host='http://localhost:2000'
+endif
+
+"Don't use the preview window by default
+if !exists("g:OmniSharp_typeLookupInPreview")
+	let g:OmniSharp_typeLookupInPreview = 0
+endif
+
+
+
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -97,6 +110,32 @@ function! OmniSharp#TypeLookup()
 	let type = ""
 	python typeLookup("type")
 
-	"TODO: Display type info in the preview window
-	echo type
+	if g:OmniSharp_typeLookupInPreview
+		"Try to go to preview window
+		silent! wincmd P
+		if !&previewwindow
+			"If couldn't goto the preview window, then there is no open preview
+			"window, so make one
+			pedit!
+			wincmd P
+			python vim.current.window.height = 3
+			badd [Scratch]
+			buff \[Scratch\]
+
+			setlocal noswapfile
+			setlocal filetype=cs
+			"When looking for the buffer to place completion details in Vim
+			"looks for the following options to set
+			setlocal buftype=nofile
+			setlocal bufhidden=wipe
+		endif
+		"Replace the contents of the preview window
+		set modifiable
+		exec "python vim.current.buffer[:] = ['" . type . "']"
+		set nomodifiable
+		"Return to original window
+		wincmd p
+	else
+		echo type
+	endif
 endfunction
