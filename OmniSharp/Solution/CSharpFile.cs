@@ -15,7 +15,7 @@ namespace OmniSharp.Solution
         public IUnresolvedFile ParsedFile;
 
 
-        public ReadOnlyDocument Document { get; set; }
+        public StringBuilderDocument Document { get; set; }
 
         public CSharpFile(IProject project, string fileName) : this(project, fileName, File.ReadAllText(fileName))
         {
@@ -31,7 +31,7 @@ namespace OmniSharp.Solution
             Console.WriteLine("Loading " + fileName);
             this.FileName = fileName;
             this.Content = new StringTextSource(source);
-            this.Document = new ReadOnlyDocument(this.Content);
+            this.Document = new StringBuilderDocument(this.Content);
             this.Project = project;
             CSharpParser p = project.CreateParser();
             this.SyntaxTree = p.Parse(Content.CreateReader(), fileName);

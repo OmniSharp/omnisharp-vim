@@ -19,7 +19,7 @@ namespace OmniSharp.Tests.Rename
             project.AddFile(buffer);
             solution.Projects.Add("dummyproject", project);
             var bufferParser = new BufferParser(solution);
-            var renameHandler = new RenameHandler(bufferParser, new FindUsagesHandler(bufferParser, solution));
+            var renameHandler = new RenameHandler(solution, bufferParser);
             var request = new RenameRequest
                 {
                     Buffer = buffer,

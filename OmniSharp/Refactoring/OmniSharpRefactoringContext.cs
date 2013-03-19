@@ -10,9 +10,14 @@ namespace OmniSharp.Refactoring
     public class OmniSharpRefactoringContext : RefactoringContext
     {
         private readonly IDocument _document;
-        private readonly TextLocation _location;
+        private TextLocation _location;
 
-        public OmniSharpRefactoringContext(IDocument document, TextLocation location, CSharpAstResolver resolver)
+        public OmniSharpRefactoringContext(IDocument document, CSharpAstResolver resolver)
+            : this(document, resolver, new TextLocation(1,1))
+        {
+        }
+
+        public OmniSharpRefactoringContext(IDocument document, CSharpAstResolver resolver, TextLocation location) 
             : base(resolver, CancellationToken.None)
         {
             _document = document;
@@ -25,17 +30,23 @@ namespace OmniSharp.Refactoring
             var resolver = new CSharpAstResolver(q.Compilation, q.SyntaxTree, q.UnresolvedFile);
             var doc = new StringBuilderDocument(request.Buffer);
             var location = new TextLocation(request.Line, request.Column);
-            var refactoringContext = new OmniSharpRefactoringContext(doc, location, resolver);
+            var refactoringContext = new OmniSharpRefactoringContext(doc, resolver, location);
             return refactoringContext;
         }
 
         public IDocument Document { get { return _document; } }
+
+        public void SetLocation(int line, int column)
+        {
+            _location = new TextLocation(line, column);
+        }
 
         public override int GetOffset(TextLocation location)
         {
             return _document.GetOffset(location);
         }
 
+        
         public override IDocumentLine GetLineByOffset(int offset)
         {
             return _document.GetLineByOffset(offset);
