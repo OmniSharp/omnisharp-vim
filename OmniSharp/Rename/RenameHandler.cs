@@ -57,7 +57,8 @@ namespace OmniSharp.Rename
 
                 var modifiedFile = new ModifiedFileResponse
                 {
-                    FileName = groupedNodes.Key,
+                    FileName
+                    = groupedNodes.Key,
                     Buffer = modifiedBuffer
                 };
                 modfiedFiles.Add(modifiedFile);

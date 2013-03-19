@@ -145,7 +145,10 @@ changes = json.loads(js)['Changes']
 for change in changes:
 	lines = change['Buffer'].splitlines()
 	lines = [line.encode('utf-8') for line in lines]
-	vim.current.buffer[:] = lines
+	filename = change['FileName']
+	vim.command(':argadd ' + filename)
+	buffer = filter(lambda b: b.name.upper() == filename.upper(), vim.buffers)[0]
+	buffer[:] = lines
 
 EOF
 endfunction
