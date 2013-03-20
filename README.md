@@ -1,16 +1,24 @@
 #OmniSharp
 
-OmniSharp is a plugin for Vim to provide IDE like abilities for C#. It currently supports omnicomplete(intellisense), contextual code actions,
-go to definition, find usages and go to implementation.
-                                                               
-Code documentation is displayed in the scratch window.
-
-CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
+OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provied below.
 
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
 completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
+
+##Features
+
+* Contextual code completion
+	* Code documentation is displayed in the preview window when available
+	* CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
+* Jump to the definition of an type/variable/method
+* Find implementations/derived types
+* Find usages
+* Contextual code actions
+* Lookup type information of an type/variable/method
+	* Can be printed to the status line or in the preview window
+* Simple syntax error highlighting
 
 
 ##Screenshots
@@ -33,44 +41,40 @@ Copy the contents of vimfiles into your $VIM\vimfiles directory.
 
 (Optional but highly recommended) Install [SuperTab] (https://github.com/ervandew/supertab) Vim plugin.
 
-## Run the server
+### Run the server
 
 	OmniSharp.exe -s (path\to\sln)
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
-To get completions, open one of the C# solution files within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
+To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
 
-To use the "go to definition" function, add a mapping to call the GotoDefinition function in your $VIMRC file, such as :-
+Simple syntax error highlighting is automatically performed when saving the current buffer.
 
-	map <F12> :call GotoDefinition()<cr>
+To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
 
-or
 
-	nmap gd :call GotoDefinition()<cr>
 
-To use the "Find implementations / derived types" function, add the following mapping :-
+### Example vimrc
 
-	nmap fi :call FindImplementations()<cr>
+```vim
+"This is the default value, setting it isn't actually necessary
+let g:OmniSharp_host = "http://localhost:2000"
 
-To use the "Find Usages" function, add the following mapping :-
+"Set the type lookup function to use the preview window instead of the status line
+let g:OmniSharp_typeLookupInPreview = 1
 
-	nmap fu :call FindUsages()<cr>
+map <F12> :call OmniSharp#GotoDefinition()<cr>
+nmap fi :call OmniSharp#FindImplementations()<cr>
+nmap fu :call OmniSharp#FindUsages()<cr>
+nmap <leader>tt :call OmniSharp#TypeLookup<cr>
+"I find contextual code actions so useful that I have it mapped to the spacebar
+nmap <space> :call OmniSharp#GetCodeActions()<cr>
 
-To use the "Type Lookup/Tooltip," you can add the following mapping :- 
-
-	nmap <leader>tt :call TypeLookup<cr>
-
-I find contextual code actions so useful that I have it mapped to the spacebar :-
-
-	nmap <space> :call GetCodeActions()<cr>
-
-You'll also probably want to "set hidden" if it's not already set, otherwise Vim will ask you to save the current buffer when you try and navigate to a new one.
-
-	set hidden
-
-Simple syntax error highlighting is performed when saving the current buffer.
+"Don't ask to save when changing buffers (ie when jumping to a type definition)
+set hidden
+```
 
 
 ###Disclaimer
