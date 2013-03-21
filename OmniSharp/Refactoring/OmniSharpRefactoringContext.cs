@@ -36,11 +36,6 @@ namespace OmniSharp.Refactoring
 
         public IDocument Document { get { return _document; } }
 
-        public void SetLocation(int line, int column)
-        {
-            _location = new TextLocation(line, column);
-        }
-
         public override int GetOffset(TextLocation location)
         {
             return _document.GetOffset(location);

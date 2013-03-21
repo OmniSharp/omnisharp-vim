@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using NUnit.Framework;
-using OmniSharp.FindUsages;
 using OmniSharp.Parser;
 using OmniSharp.Rename;
 using Should;
@@ -14,10 +13,11 @@ namespace OmniSharp.Tests.Rename
         {
             var location = TestHelpers.GetLineAndColumnFromDollar(buffer);
             buffer = buffer.Replace("$", "");
-            var solution = new FakeSolution();
-            var project = new FakeProject();
-            project.AddFile(buffer);
-            solution.Projects.Add("dummyproject", project);
+            
+            var solution = new FakeSolutionBuilder()
+                .AddFile(buffer)
+                .Build();
+            
             var bufferParser = new BufferParser(solution);
             var renameHandler = new RenameHandler(solution, bufferParser);
             var request = new RenameRequest

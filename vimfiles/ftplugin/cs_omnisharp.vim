@@ -134,23 +134,49 @@ EOF
 endfunction
 
 function! Rename()        
-let a:renameto = inputdialog("Rename to:")
+	let a:renameto = inputdialog("Rename to:")
+	call RenameTo(a:renameto)
+endfunction
 
+function! RenameTo(renameto)        
+let qf_taglist = []
 :python << EOF
 parameters = {}
 parameters['renameto'] = vim.eval("a:renameto")
 
 js = getResponse('/rename', parameters)
-changes = json.loads(js)['Changes']
+response = json.loads(js)
+changes = response['Changes']
+currentBuffer = vim.current.buffer.name
+cursor = vim.current.window.cursor
 for change in changes:
 	lines = change['Buffer'].splitlines()
 	lines = [line.encode('utf-8') for line in lines]
 	filename = change['FileName']
 	vim.command(':argadd ' + filename)
-	buffer = filter(lambda b: b.name.upper() == filename.upper(), vim.buffers)[0]
+	buffer = filter(lambda b: b.name != None and b.name.upper() == filename.upper(), vim.buffers)[0]
+	vim.command(':b ' + filename)
 	buffer[:] = lines
+	vim.command(':undojoin')
 
+vim.command(':b ' + currentBuffer)
+vim.current.window.cursor = cursor
+#usages = response["Usages"]
+#for usage in usages:
+#	usage["FileName"] = os.path.relpath(usage["FileName"])
+#	try:
+#		command = "add(qf_taglist, {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})" % usage
+#		vim.eval(command)
+#	except:
+#		logger.error(command)
 EOF
+" Place the tags in the quickfix window, if possible
+if len(qf_taglist) > 0
+	call setqflist(qf_taglist)
+	copen 4
+else
+	echo "No usages found"
+endif    
 endfunction
 
 function! FindUsages()

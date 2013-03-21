@@ -23,9 +23,9 @@ namespace OmniSharp.Tests
             this.ProjectContent = this.ProjectContent.AddAssemblyReferences(new [] { mscorlib.Value, systemCore.Value });
         }
 
-        public void AddFile(string source)
+        public void AddFile(string source, string fileName="myfile")
         {
-            Files.Add(new CSharpFile(this, "myfile", source));    
+            Files.Add(new CSharpFile(this, fileName, source));    
             this.ProjectContent = this.ProjectContent
                 .AddOrUpdateFiles(Files.Select(f => f.ParsedFile));
         }

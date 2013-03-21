@@ -82,6 +82,7 @@
     <Compile Include="AutoComplete\DerivedTypeCompletions.cs" />
     <Compile Include="AutoComplete\IntegrationTest.cs" />
     <Compile Include="FindUsages\IntegrationTest.cs" />
+    <Compile Include="Rename\FakeSolutionBuilder.cs" />
     <Compile Include="Rename\SimpleRenameTests.cs" />
     <Compile Include="TestHelpers.cs" />
     <Compile Include="TypeLookup\IntegrationTest.cs" />

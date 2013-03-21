@@ -108,7 +108,7 @@ namespace OmniSharp.FindUsages
                                                             (node, rr) => _result.Add(node), CancellationToken.None);
                     });
             }
-            return _result;
+            return _result.OrderBy(n => n.GetRegion().FileName.FixPath()).ThenBy(n => n.StartLocation.Line).ThenBy(n => n.StartLocation.Column);
         }
 
         private void ProcessMemberResults(ResolveResult resolveResult)
