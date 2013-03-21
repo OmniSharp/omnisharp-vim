@@ -4,6 +4,7 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.Parser
 {
+    //TODO: Remove this class and just use CSharpFile
     public class BufferParser
     {
         private readonly ISolution _solution;

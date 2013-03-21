@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.CSharp.Resolver;
@@ -70,19 +69,7 @@ namespace OmniSharp.Rename
                 _solution.GetFile(fileName).Update(modifiedBuffer);
             }
 
-            if (nodes.Any())
-            {
-                
-
-                var usages = nodes.Select(node => new Usage
-                {
-                    FileName = node.GetRegion().FileName,
-                    Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)).Replace("'", "''"),
-                    Line = node.StartLocation.Line,
-                    Column = node.StartLocation.Column,
-                });
-                response.Usages = usages;
-            }
+            
             return response;
         }
     }
