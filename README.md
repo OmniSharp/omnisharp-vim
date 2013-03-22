@@ -68,7 +68,7 @@ let g:OmniSharp_typeLookupInPreview = 1
 map <F12> :call OmniSharp#GotoDefinition()<cr>
 nmap fi :call OmniSharp#FindImplementations()<cr>
 nmap fu :call OmniSharp#FindUsages()<cr>
-nmap <leader>tt :call OmniSharp#TypeLookup<cr>
+nmap <leader>tt :call OmniSharp#TypeLookup()<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nmap <space> :call OmniSharp#GetCodeActions()<cr>
 
