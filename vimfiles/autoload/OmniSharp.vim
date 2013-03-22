@@ -10,6 +10,7 @@ python << EOF
 import vim, os.path
 py_path = os.path.join(vim.eval("s:py_path"), "..", "python", "OmniSharp.py")
 vim.command("let s:py_path = '" + py_path + "'")
+print py_path
 EOF
 exec "pyfile " . s:py_path
 
@@ -140,13 +141,13 @@ function! OmniSharp#TypeLookup()
 	endif
 endfunction
 
-function! Rename()        
+function! OmniSharp#Rename()        
 	let a:renameto = inputdialog("Rename to:")
-	call RenameTo(a:renameto)
+	call OmniSharp#RenameTo(a:renameto)
 endfunction
 
-function! RenameTo(renameto)        
-let qf_taglist = []
-python renameTo(renameTo)
+function! OmniSharp#RenameTo(renameto)        
+	let qf_taglist = []
+	python renameTo(renameTo)
 endfunction
 

@@ -121,7 +121,10 @@ namespace OmniSharp.FindUsages
 
         private void ProcessRegion(DomRegion definition)
         {
-            var syntaxTree = _solution.GetFile(definition.FileName).SyntaxTree;
+            var file =_solution.GetFile(definition.FileName);
+            if (file == null)
+                return;
+            var syntaxTree = file.SyntaxTree;
             var declarationNode = syntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
             if (declarationNode != null)
             {

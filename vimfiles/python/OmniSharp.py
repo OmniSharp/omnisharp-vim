@@ -149,8 +149,9 @@ def typeLookup(ret):
         if(type != None):
             vim.command("let %s = '%s'" % (ret, type)) 
 
-def renameTo(renameTo)
-	parameters = {} parameters['renameto'] = vim.eval("a:renameto") 
+def renameTo(renameTo):
+	parameters = {} 
+	parameters['renameto'] = vim.eval("a:renameto") 
 	js = getResponse('/rename', parameters)
 	response = json.loads(js)
 	changes = response['Changes']
