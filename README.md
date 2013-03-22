@@ -72,6 +72,11 @@ nmap <leader>tt :call OmniSharp#TypeLookup()<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nmap <space> :call OmniSharp#GetCodeActions()<cr>
 
+nmap nm :call OmniSharp#Rename()<cr>
+nmap <F2> :call OmniSharp#Rename()<cr>      
+" with cursor on the symbol to rename... :Rename newname
+command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
+
 "Don't ask to save when changing buffers (ie when jumping to a type definition)
 set hidden
 ```
