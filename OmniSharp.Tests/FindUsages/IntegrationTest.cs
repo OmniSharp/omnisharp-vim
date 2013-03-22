@@ -41,9 +41,10 @@ namespace OmniSharp.Tests.FindUsages
                 with.FormValue("Buffer", editorText);
             });
 
-            var res = result.Body.DeserializeJson<FindUsagesResponse>();
-            res.Usages.Count().ShouldEqual(2);
-            res.Usages.First().Text.Trim().ShouldEqual("method();");
+            var usages = result.Body.DeserializeJson<FindUsagesResponse>().Usages.ToArray();
+            usages.Count().ShouldEqual(2);
+            usages[0].Text.Trim().ShouldEqual("public void method() { }");
+            usages[1].Text.Trim().ShouldEqual("method();");
         }
     }
 }
