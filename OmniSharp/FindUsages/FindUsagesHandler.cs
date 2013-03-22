@@ -29,8 +29,11 @@ namespace OmniSharp.FindUsages
 
         public FindUsagesResponse FindUsages(FindUsagesRequest request)
         {
-            
-            var result = FindUsageNodes(request).ToArray();
+            var result = FindUsageNodes(request)
+                            .OrderBy(n => n.GetRegion().FileName.FixPath())
+                            .ThenBy(n => n.StartLocation.Line)
+                            .ThenBy(n => n.StartLocation.Column);
+                            
             var res = new FindUsagesResponse();
             if (result.Any())
             {
@@ -108,7 +111,7 @@ namespace OmniSharp.FindUsages
                                                             (node, rr) => _result.Add(node), CancellationToken.None);
                     });
             }
-            return _result.OrderBy(n => n.GetRegion().FileName.FixPath()).ThenBy(n => n.StartLocation.Line).ThenBy(n => n.StartLocation.Column);
+            return _result;
         }
 
         private void ProcessMemberResults(ResolveResult resolveResult)
