@@ -197,5 +197,43 @@ namespace OmniSharp.Tests.Rename
 }"
 );
         }
+
+        [Test]
+        public void Should_rename_derived_type_usages()
+        {
+            Rename(
+@"public class Request
+{
+    public string Col$umn { get; set; }
+}
+
+public class FindUsagesRequest : Request {}
+
+public class Handler
+{
+    public Handler()
+    {
+        var req = new FindUsagesRequest();
+        req.Column = 1;
+    }
+}", "Col"
+
+ ).ShouldEqual(
+@"public class Request
+{
+    public string Col { get; set; }
+}
+
+public class FindUsagesRequest : Request {}
+
+public class Handler
+{
+    public Handler()
+    {
+        var req = new FindUsagesRequest();
+        req.Col = 1;
+    }
+}");
+        }
     }
 }

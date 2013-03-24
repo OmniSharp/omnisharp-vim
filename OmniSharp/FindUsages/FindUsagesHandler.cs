@@ -102,6 +102,15 @@ namespace OmniSharp.FindUsages
                     interesting.AddRange(scopeInteresting);
                 }
 
+                foreach (var file in interesting.Where(f => f.FileName.Contains("GetCodeActionsHandler")))
+                {
+                    ParsedResult parsedResult = _parser.ParsedContent(
+                            _solution.GetFile(file.FileName).Content.Text, file.FileName);
+                    findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree,
+                                                        parsedResult.Compilation,
+                                                        (node, rr) => _result.Add(node), CancellationToken.None);
+                }
+                //findReferences.
                 Parallel.ForEach(interesting, file =>
                     {
                         ParsedResult parsedResult = _parser.ParsedContent(
