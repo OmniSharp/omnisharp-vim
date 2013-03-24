@@ -39,8 +39,6 @@ namespace OmniSharp.Tests.Rename
             return response.Changes;
         }
 
-        
-
         [Test]
         public void Should_rename_derived_type_usages()
         {
