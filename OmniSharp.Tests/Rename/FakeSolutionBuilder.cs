@@ -19,7 +19,7 @@
 
         public FakeSolution Build()
         {
-            _solution.Projects.Add("dummyproject", _project);
+            _solution.Projects.Add(_project);
             return _solution;
         }
     }

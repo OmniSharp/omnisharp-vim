@@ -15,7 +15,7 @@ namespace OmniSharp.Tests.TypeLookup
             var solution = new FakeSolution();
             var project = new FakeProject();
             project.AddFile(editorText);
-            solution.Projects.Add("dummyproject", project);
+            solution.Projects.Add(project);
 
             var handler = new TypeLookupHandler(new BufferParser(solution));
             var request = new TypeLookupRequest()

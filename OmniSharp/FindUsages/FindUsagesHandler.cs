@@ -122,7 +122,7 @@ namespace OmniSharp.FindUsages
                             // Compilation shouldn't be the source compilation..... but this code doesn't
                             // find public properties when I use the target compilation
                             findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree,
-                                                                res.Compilation,
+                                                                parsedResult.Compilation,
                                                                 (node, rr) => _result.Add(node), CancellationToken.None);
                         }
                     });

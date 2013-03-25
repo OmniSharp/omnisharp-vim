@@ -147,6 +147,7 @@ namespace OmniSharp.Solution
                 .SetAssemblyName(this.AssemblyName)
                 .AddAssemblyReferences(references)
                 .AddOrUpdateFiles(Files.Select(f => f.ParsedFile));
+            
         }
 
         public CSharpFile GetFile(string fileName)

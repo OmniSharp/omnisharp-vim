@@ -9,13 +9,13 @@ namespace OmniSharp.Tests
     {
         public FakeSolution()
         {
-            Projects = new Dictionary<string, IProject>();
+            Projects = new List<IProject>();
         }
-        public Dictionary<string, IProject> Projects { get; private set; }
+        public List<IProject> Projects { get; private set; }
 
         public CSharpFile GetFile(string filename)
         {
-            return (from project in Projects.Values
+            return (from project in Projects
                     from file in project.Files
                     where file.FileName == filename
                     select file).FirstOrDefault();
@@ -23,7 +23,7 @@ namespace OmniSharp.Tests
 
         public IProject ProjectContainingFile(string filename)
         {
-            return Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
+            return Projects.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
     }
 }

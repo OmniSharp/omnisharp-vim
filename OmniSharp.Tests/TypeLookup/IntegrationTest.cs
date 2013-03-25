@@ -31,7 +31,7 @@ public class Test
             var solution = new FakeSolution();
             var project = new FakeProject();
             project.AddFile(editorText);
-            solution.Projects.Add("dummyproject", project);
+            solution.Projects.Add(project);
             
             var bootstrapper = new ConfigurableBootstrapper(c => c.Dependency<ISolution>(solution));
             var browser = new Browser(bootstrapper);
