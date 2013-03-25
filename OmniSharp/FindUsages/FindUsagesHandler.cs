@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -55,7 +56,14 @@ namespace OmniSharp.FindUsages
             var res = _parser.ParsedContent(request.Buffer, request.FileName);
             var loc = new TextLocation(request.Line, request.Column);
             _result = new ConcurrentBag<AstNode>();
-            var findReferences = new FindReferences();
+            var findReferences = new FindReferences
+                {
+                    FindCallsThroughInterface = true,
+                    FindCallsThroughVirtualBaseMethod = true,
+                    FindTypeReferencesEvenIfAliased = true,
+                    FindOnlySpecializedReferences = true
+                };
+
             ResolveResult resolveResult = ResolveAtLocation.Resolve(res.Compilation, res.UnresolvedFile, res.SyntaxTree, loc);
             if (resolveResult is LocalResolveResult)
             {
@@ -104,11 +112,19 @@ namespace OmniSharp.FindUsages
 
                 Parallel.ForEach(interesting, file =>
                     {
-                        ParsedResult parsedResult = _parser.ParsedContent(
-                            _solution.GetFile(file.FileName).Content.Text, file.FileName);
-                        findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree,
-                                                            parsedResult.Compilation,
-                                                            (node, rr) => _result.Add(node), CancellationToken.None);
+                        //var content = _solution.GetFile(file.FileName).Content.Text;
+                        //if (content.Contains(searchScopes.First().SearchTerm))
+                        {
+                            ParsedResult parsedResult = _parser.ParsedContent(
+                                _solution.GetFile(file.FileName).Content.Text, file.FileName);
+
+                            //TODO: According to this, http://community.sharpdevelop.net/forums/t/14337.aspx
+                            // Compilation shouldn't be the source compilation..... but this code doesn't
+                            // find public properties when I use the target compilation
+                            findReferences.FindReferencesInFile(searchScopes, file, parsedResult.SyntaxTree,
+                                                                res.Compilation,
+                                                                (node, rr) => _result.Add(node), CancellationToken.None);
+                        }
                     });
             }
             return _result;
