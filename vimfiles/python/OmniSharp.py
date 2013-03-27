@@ -39,6 +39,7 @@ def getCompletions(ret, column, partialWord):
     parameters['column'] = vim.eval(column)
     parameters['wordToComplete'] = vim.eval(partialWord)
 
+    parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
     js = getResponse('/autocomplete', parameters)
 
     command_base = ("add(" + ret +
@@ -148,3 +149,4 @@ def typeLookup(ret):
         type = json.loads(js)['Type']
         if(type != None):
             vim.command("let %s = '%s'" % (ret, type)) 
+
