@@ -35,7 +35,11 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 
 Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). If you installed Vim using the windows installer, you will need to install the x86 (32 bit!) version of Python.
 
-Verify that Python is working inside Vim with :python print "hi". 
+Verify that Python is working inside Vim with 
+
+```vim
+:python print "hi". 
+```
 
 Copy the contents of vimfiles into your $VIM\vimfiles directory.
 
