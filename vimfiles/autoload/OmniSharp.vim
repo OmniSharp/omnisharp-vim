@@ -47,7 +47,7 @@ function! OmniSharp#Complete(findstart, base)
 		if len(words) == 0
 			return -3
 		endif
-		return {'words': words, 'refresh': ''}
+		return words
 	endif
 endfunction 
 
