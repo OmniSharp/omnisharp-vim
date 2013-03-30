@@ -38,7 +38,7 @@ Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). If you 
 Verify that Python is working inside Vim with 
 
 ```vim
-:python print "hi". 
+:python print "hi"
 ```
 
 Copy the contents of vimfiles into your $VIM\vimfiles directory.
