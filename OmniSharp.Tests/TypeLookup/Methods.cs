@@ -1,7 +1,7 @@
 using Should;
 using NUnit.Framework;
 
-namespace OmniSharp.Tests.CompletionTests.TypeLookup
+namespace OmniSharp.Tests.TypeLookup
 {
     [TestFixture]
     public class Methods

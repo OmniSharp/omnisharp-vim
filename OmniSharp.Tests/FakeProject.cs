@@ -9,23 +9,27 @@ namespace OmniSharp.Tests
 {
     public class FakeProject : IProject
     {
+        public string Name { get; set; }
+
         static readonly Lazy<IUnresolvedAssembly> mscorlib = new Lazy<IUnresolvedAssembly>(
             () => new CecilLoader().LoadAssemblyFile(typeof (object).Assembly.Location));
         
         static readonly Lazy<IUnresolvedAssembly> systemCore = new Lazy<IUnresolvedAssembly>(
             () => new CecilLoader().LoadAssemblyFile(typeof (Enumerable).Assembly.Location));
         
-        public FakeProject()
+        public FakeProject(string name = "fake")
         {
+            Name = name;
             Files = new List<CSharpFile>();
             this.ProjectContent = new CSharpProjectContent();
-            this.ProjectContent.SetAssemblyName("fake");
+            this.ProjectContent.SetAssemblyName(name);
+            this.ProjectContent.SetProjectFileName(name);
             this.ProjectContent = this.ProjectContent.AddAssemblyReferences(new [] { mscorlib.Value, systemCore.Value });
         }
 
-        public void AddFile(string source)
+        public void AddFile(string source, string fileName="myfile")
         {
-            Files.Add(new CSharpFile(this, "myfile", source));    
+            Files.Add(new CSharpFile(this, fileName, source));    
             this.ProjectContent = this.ProjectContent
                 .AddOrUpdateFiles(Files.Select(f => f.ParsedFile));
         }
@@ -38,6 +42,8 @@ namespace OmniSharp.Tests
         public IProjectContent ProjectContent { get; set; }
         public string Title { get; set; }
         public List<CSharpFile> Files { get; private set; }
+        public List<IAssemblyReference> References { get; set; }
+
         public CSharpParser CreateParser()
         {
             var settings = new CompilerSettings();

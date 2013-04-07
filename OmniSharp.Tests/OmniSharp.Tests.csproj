@@ -75,24 +75,29 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompletionTests\AutoComplete\BugFixTests.cs" />
-    <Compile Include="CompletionTests\AutoComplete\CompletionsSpecBase.cs" />
-    <Compile Include="CompletionTests\AutoComplete\CompletionTestBase.cs" />
-    <Compile Include="CompletionTests\AutoComplete\ConstructorParameterCompletions.cs" />
-    <Compile Include="CompletionTests\AutoComplete\DerivedTypeCompletions.cs" />
-    <Compile Include="CompletionTests\AutoComplete\IntegrationTest.cs" />
-    <Compile Include="CompletionTests\FindUsages\IntegrationTest.cs" />
-    <Compile Include="CompletionTests\TypeLookup\IntegrationTest.cs" />
-    <Compile Include="CompletionTests\TypeLookup\StringExtensions.cs" />
-    <Compile Include="CompletionTests\TypeLookup\LocalVariables.cs" />
-    <Compile Include="CompletionTests\TypeLookup\MemberVariables.cs" />
-    <Compile Include="CompletionTests\TypeLookup\Methods.cs" />
-    <Compile Include="CompletionTests\TypeLookup\Properties.cs" />
-    <Compile Include="CompletionTests\TypeLookup\EmptyResults.cs" />
+    <Compile Include="AutoComplete\BugFixTests.cs" />
+    <Compile Include="AutoComplete\CompletionsSpecBase.cs" />
+    <Compile Include="AutoComplete\CompletionTestBase.cs" />
+    <Compile Include="AutoComplete\ConstructorParameterCompletions.cs" />
+    <Compile Include="AutoComplete\DerivedTypeCompletions.cs" />
+    <Compile Include="AutoComplete\IntegrationTest.cs" />
+    <Compile Include="FindUsages\IntegrationTest.cs" />
+    <Compile Include="Rename\Buffer.cs" />
+    <Compile Include="Rename\FakeSolutionBuilder.cs" />
+    <Compile Include="Rename\MultiFileRenameTests.cs" />
+    <Compile Include="Rename\SimpleRenameTests.cs" />
+    <Compile Include="TestHelpers.cs" />
+    <Compile Include="TypeLookup\IntegrationTest.cs" />
+    <Compile Include="TypeLookup\StringExtensions.cs" />
+    <Compile Include="TypeLookup\LocalVariables.cs" />
+    <Compile Include="TypeLookup\MemberVariables.cs" />
+    <Compile Include="TypeLookup\Methods.cs" />
+    <Compile Include="TypeLookup\Properties.cs" />
+    <Compile Include="TypeLookup\EmptyResults.cs" />
     <Compile Include="FakeProject.cs" />
     <Compile Include="FakeSolution.cs" />
-    <Compile Include="CompletionTests\AutoComplete\GenericCompletions.cs" />
-    <Compile Include="CompletionTests\AutoComplete\NamespaceCompletions.cs" />
+    <Compile Include="AutoComplete\GenericCompletions.cs" />
+    <Compile Include="AutoComplete\NamespaceCompletions.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

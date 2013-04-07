@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ICSharpCode.NRefactory;
 using NUnit.Framework;
 using Nancy.Testing;
 using OmniSharp.AutoComplete;
 using OmniSharp.Solution;
 using Should;
 
-namespace OmniSharp.Tests.CompletionTests.AutoComplete
+namespace OmniSharp.Tests.AutoComplete
 {
     [TestFixture]
     public class IntegrationTest
@@ -26,14 +27,14 @@ public class myclass
 }
 ";
             int cursorOffset = editorText.IndexOf("$", StringComparison.Ordinal);
-            Tuple<int, int> cursorPosition = GetLineAndColumnFromIndex(editorText, cursorOffset);
+            TextLocation cursorPosition = TestHelpers.GetLineAndColumnFromIndex(editorText, cursorOffset);
             string partialWord = GetPartialWord(editorText);
             editorText = editorText.Replace("$", "");
 
             var solution = new FakeSolution();
             var project = new FakeProject();
             project.AddFile(editorText);
-            solution.Projects.Add("dummyproject", project);
+            solution.Projects.Add(project);
             
             var bootstrapper = new ConfigurableBootstrapper(c => c.Dependency<ISolution>(solution));
             var browser = new Browser(bootstrapper);
@@ -44,8 +45,8 @@ public class myclass
                 with.FormValue("FileName", "myfile");
                 with.FormValue("WordToComplete", partialWord);
                 with.FormValue("Buffer", editorText);
-                with.FormValue("Line", cursorPosition.Item1.ToString());
-                with.FormValue("Column", cursorPosition.Item2.ToString());
+                with.FormValue("Line", cursorPosition.Line.ToString());
+                with.FormValue("Column", cursorPosition.Column.ToString());
             });
 
             var res = result.Body.DeserializeJson<AutoCompleteResponse[]>().Select(c => c.DisplayText);
@@ -58,17 +59,6 @@ public class myclass
             return matches[0].Groups[1].ToString();
         }
 
-        private static Tuple<int, int> GetLineAndColumnFromIndex(string text, int index)
-        {
-            int lineCount = 1, lastLineEnd = -1;
-            for (int i = 0; i < index; i++)
-                if (text[i] == '\n')
-                {
-                    lineCount++;
-                    lastLineEnd = i;
-                }
-
-            return new Tuple<int, int>(lineCount, index - lastLineEnd);
-        }
+        
     }
 }

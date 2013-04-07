@@ -94,7 +94,7 @@ namespace OmniSharp.GotoImplementation
 
         private IEnumerable<IUnresolvedTypeDefinition> GetAllTypes()
         {
-            return _solution.Projects.SelectMany(project => project.Value.ProjectContent.GetAllTypeDefinitions());
+            return _solution.Projects.SelectMany(project => project.ProjectContent.GetAllTypeDefinitions());
         }
     }
 

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
-using ICSharpCode.NRefactory.Utils;
 
 namespace OmniSharp.Solution
 {
@@ -16,6 +11,7 @@ namespace OmniSharp.Solution
     {
         public string Title { get; private set; }
         public List<CSharpFile> Files { get; private set; }
+        public List<IAssemblyReference> References { get; set; }
         public IProjectContent ProjectContent { get; set; }
 
         private CSharpFile _file;
