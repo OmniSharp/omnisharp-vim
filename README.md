@@ -16,7 +16,6 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 * Find implementations/derived types
 * Find usages
 * Contextual code actions
-* Rename refactoring
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
 * Simple syntax error highlighting
@@ -77,11 +76,6 @@ nmap <leader>tt :call OmniSharp#TypeLookup()<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nmap <space> :call OmniSharp#GetCodeActions()<cr>
 
-" rename with dialog
-nmap nm :call OmniSharp#Rename()<cr>
-nmap <F2> :call OmniSharp#Rename()<cr>      
-" rename without dialog - with cursor on the symbol to rename... ':Rename newname'
-command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
