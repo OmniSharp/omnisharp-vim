@@ -22,14 +22,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ICSharpCode.NRefactory.TypeSystem;
-using ICSharpCode.NRefactory.TypeSystem.Implementation;
 
 namespace OmniSharp.Solution
 {
     public interface ISolution
     {
-        Dictionary<string, IProject> Projects { get; }
+        List<IProject> Projects { get; }
         CSharpFile GetFile(string filename);
         IProject ProjectContainingFile(string filename);
     }
@@ -37,14 +35,14 @@ namespace OmniSharp.Solution
     public class CSharpSolution : ISolution
     {
         public readonly string Directory;
-        public Dictionary<string, IProject> Projects { get; private set; }
+        public List<IProject> Projects { get; private set; }
 
         private OrphanProject _orphanProject;
 
         public CSharpSolution(string fileName)
         {
             _orphanProject = new OrphanProject(this);
-            Projects = new Dictionary<string, IProject>();
+            Projects = new List<IProject>();
             Directory = Path.GetDirectoryName(fileName);
             var projectLinePattern = new Regex("Project\\(\"(?<TypeGuid>.*)\"\\)\\s+=\\s+\"(?<Title>.*)\",\\s*\"(?<Location>.*)\",\\s*\"(?<Guid>.*)\"");
 
@@ -64,7 +62,7 @@ namespace OmniSharp.Solution
                             break;
                         case "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}": // C# project
                             Console.WriteLine("Loading project - " + title);
-                            Projects.Add(title, new CSharpProject(this, title, location));
+                            Projects.Add(new CSharpProject(this, title, location));
                             break;
                         default:
                             Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);
@@ -76,7 +74,7 @@ namespace OmniSharp.Solution
 
         public CSharpFile GetFile(string filename)
         {
-            return (from project in Projects.Values
+            return (from project in Projects
                     from file in project.Files
                     where file.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)
                     select file).FirstOrDefault();
@@ -84,7 +82,7 @@ namespace OmniSharp.Solution
 
         public IProject ProjectContainingFile(string filename)
         {
-            return Projects.Values.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase))) ?? _orphanProject;
+            return Projects.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase))) ?? _orphanProject;
         }
 
     }

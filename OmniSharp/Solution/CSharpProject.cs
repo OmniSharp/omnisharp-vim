@@ -32,6 +32,7 @@ namespace OmniSharp.Solution
         IProjectContent ProjectContent { get; set; }
         string Title { get; }
         List<CSharpFile> Files { get; }
+        List<IAssemblyReference> References { get; set; }
         CSharpFile GetFile(string fileName);
         CSharpParser CreateParser();
     }
@@ -43,9 +44,6 @@ namespace OmniSharp.Solution
             @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0",
             @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\v3.5",
             @"C:\Windows\Microsoft.NET\Framework\v2.0.50727",
-            @"C:\Program Files (x86)\GtkSharp\2.12\lib\gtk-sharp-2.0",
-            @"C:\Program Files (x86)\GtkSharp\2.12\lib\Mono.Posix",
-            @"C:\work\SD\src\Tools\NUnit",
 
             //Unix Paths
             @"/usr/local/lib/mono/4.0",
@@ -98,10 +96,10 @@ namespace OmniSharp.Solution
                     Files.Add(new CSharpFile(this, path));
             }
 
-            List<IAssemblyReference> references = new List<IAssemblyReference>();
+            References = new List<IAssemblyReference>();
             string mscorlib = FindAssembly(AssemblySearchPaths, "mscorlib");
             if (mscorlib != null)
-                references.Add(LoadAssembly(mscorlib));
+                References.Add(LoadAssembly(mscorlib));
             else
                 Console.WriteLine("Could not find mscorlib");
 
@@ -127,7 +125,7 @@ namespace OmniSharp.Solution
                     Console.WriteLine("Loading assembly " + item.EvaluatedInclude);
                     try
                     {
-                        references.Add(LoadAssembly(assemblyFileName));
+                        References.Add(LoadAssembly(assemblyFileName));
                     }
                     catch (Exception e)
                     {
@@ -139,15 +137,18 @@ namespace OmniSharp.Solution
                     Console.WriteLine("Could not find referenced assembly " + item.EvaluatedInclude);
             }
             if (!hasSystemCore && FindAssembly(AssemblySearchPaths, "System.Core") != null)
-                references.Add(LoadAssembly(FindAssembly(AssemblySearchPaths, "System.Core")));
+                References.Add(LoadAssembly(FindAssembly(AssemblySearchPaths, "System.Core")));
             foreach (var item in p.GetItems("ProjectReference"))
-                references.Add(new ProjectReference(Solution, item.GetMetadataValue("Name")));
+                References.Add(new ProjectReference(Solution, item.GetMetadataValue("Name")));
 
             this.ProjectContent = new CSharpProjectContent()
                 .SetAssemblyName(this.AssemblyName)
-                .AddAssemblyReferences(references)
+                .AddAssemblyReferences(References)
                 .AddOrUpdateFiles(Files.Select(f => f.ParsedFile));
+            
         }
+
+        public List<IAssemblyReference> References { get; set; }
 
         public CSharpFile GetFile(string fileName)
         {

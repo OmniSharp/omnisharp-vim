@@ -4,6 +4,7 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.Parser
 {
+    //TODO: Remove this class and just use CSharpFile
     public class BufferParser
     {
         private readonly ISolution _solution;
@@ -19,14 +20,14 @@ namespace OmniSharp.Parser
             project.GetFile(filename).Update(editorText);
 
             var syntaxTree = project.CreateParser().Parse(editorText, filename);
-            syntaxTree.Freeze();
+            //syntaxTree.Freeze();
             CSharpUnresolvedFile parsedFile = syntaxTree.ToTypeSystem();
 
             var pctx = project.ProjectContent.AddOrUpdateFiles(parsedFile);
             project.ProjectContent = pctx;
 
             ICompilation cmp = pctx.CreateCompilation();
-
+            
             return new ParsedResult
                 {
                     ProjectContent = pctx,
