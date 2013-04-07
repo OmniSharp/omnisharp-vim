@@ -144,7 +144,9 @@ endfunction
 
 function! OmniSharp#Rename()        
 	let a:renameto = inputdialog("Rename to:")
-	call OmniSharp#RenameTo(a:renameto)
+	if a:renameto != ''
+		call OmniSharp#RenameTo(a:renameto)
+	endif
 endfunction
 
 function! OmniSharp#RenameTo(renameto)        
