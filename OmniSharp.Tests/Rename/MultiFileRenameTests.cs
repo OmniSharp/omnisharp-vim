@@ -29,6 +29,7 @@ namespace OmniSharp.Tests.Rename
                         FileName = buffer.Filename
                     };
                 }
+                //solutionBuilder = solutionBuilder.AddProject();
                 solutionBuilder = solutionBuilder.AddFile(buffer.Text, buffer.Filename);
             }
             var solution = solutionBuilder.Build();
@@ -59,11 +60,11 @@ namespace OmniSharp.Tests.Rename
     }
 }", "Handler.cs");
 
-            var changedFiles = Rename("Col", request, findUsagesRequest, handler).ToList();
+            var changedFiles = Rename("ColumnRenamed", request, findUsagesRequest, handler).ToList();
             changedFiles[0].Buffer.ShouldEqual(
 @"public class Request
 {
-    public string Col { get; set; }
+    public string ColumnRenamed { get; set; }
 }");
             changedFiles[1].Buffer.ShouldEqual(
 
@@ -72,7 +73,7 @@ namespace OmniSharp.Tests.Rename
     public Handler()
     {
         var req = new FindUsagesRequest();
-        req.Col = 1;
+        req.ColumnRenamed = 1;
     }
 }");
         }

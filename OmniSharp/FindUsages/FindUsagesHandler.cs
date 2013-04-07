@@ -104,11 +104,14 @@ namespace OmniSharp.FindUsages
 
                 var interesting = new List<CSharpUnresolvedFile>();
 
-                foreach (var scope in searchScopes)
-                {
-                    var scopeInteresting = findReferences.GetInterestingFiles(scope, res.Compilation);
-                    interesting.AddRange(scopeInteresting);
-                }
+                //foreach (var scope in searchScopes)
+                //{
+                //    var scopeInteresting = findReferences.GetInterestingFiles(scope, res.Compilation);
+                //    interesting.AddRange(scopeInteresting);
+                //}
+                interesting = (from project in _solution.Projects
+                              from file in project.Files
+                              select (file.ParsedFile as CSharpUnresolvedFile)).ToList();
 
                 Parallel.ForEach(interesting, file =>
                     {
