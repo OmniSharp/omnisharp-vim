@@ -113,6 +113,7 @@
     <Compile Include="FindUsages\FindUsagesModule.cs" />
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
+    <Compile Include="FindUsages\MemberCollector.cs" />
     <Compile Include="FindUsages\Usage.cs" />
     <Compile Include="GetCodeActions\CodeActionProviders.cs" />
     <Compile Include="GetCodeActions\GetCodeActionsHandler.cs" />
