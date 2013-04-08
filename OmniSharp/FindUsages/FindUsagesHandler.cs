@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using ICSharpCode.NRefactory;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.CSharp.Resolver;
@@ -61,7 +60,6 @@ namespace OmniSharp.FindUsages
                     FindCallsThroughInterface = true,
                     FindCallsThroughVirtualBaseMethod = true,
                     FindTypeReferencesEvenIfAliased = true,
-                    //FindOnlySpecializedReferences = true
                 };
 
             ResolveResult resolveResult = ResolveAtLocation.Resolve(res.Compilation, res.UnresolvedFile, res.SyntaxTree, loc);
@@ -80,7 +78,7 @@ namespace OmniSharp.FindUsages
                     var type = (resolveResult as TypeResolveResult).Type;
                     entity = type.GetDefinition();
                     ProcessTypeResults(type);
-                    searchScopes = new[] { findReferences.GetSearchScopes(entity) };
+                    searchScopes = new[] {findReferences.GetSearchScopes(entity)};
                 }
 
                 if (resolveResult is MemberResolveResult)
@@ -92,12 +90,13 @@ namespace OmniSharp.FindUsages
                         var type = entity.DeclaringType;
                         entity = entity.DeclaringTypeDefinition;
                         ProcessTypeResults(type);
-                        searchScopes = new[] { findReferences.GetSearchScopes(entity) };
+                        searchScopes = new[] {findReferences.GetSearchScopes(entity)};
                     }
                     else
                     {
                         ProcessMemberResults(resolveResult);
-                        var members = MemberCollector.CollectMembers(_solution, (resolveResult as MemberResolveResult).Member);
+                        var members = MemberCollector.CollectMembers(_solution,
+                                                                     (resolveResult as MemberResolveResult).Member);
                         searchScopes = members.Select(findReferences.GetSearchScopes);
                     }
                 }
@@ -105,35 +104,27 @@ namespace OmniSharp.FindUsages
                 if (entity == null)
                     return _result;
 
-
                 var interesting = new List<CSharpUnresolvedFile>();
 
-                //foreach (var scope in searchScopes)
-                //{
-                //    foreach (var scope2 in scope)
-                //    {
-                //        var scopeInteresting = findReferences.GetInterestingFiles(scope2, res.Compilation);
-                //        interesting.AddRange(scopeInteresting);
-                //    }
-                //}
-                interesting = (from project in _solution.Projects
-                               from file in project.Files
-                               select (file.ParsedFile as CSharpUnresolvedFile)).ToList();
+                foreach (var project in _solution.Projects)
+                {
+                    var pctx = project.ProjectContent.CreateCompilation();
+                    interesting = (from file in project.Files
+                                   select (file.ParsedFile as CSharpUnresolvedFile)).ToList();
 
-                Parallel.ForEach(interesting, file =>
+                    foreach (var file in interesting)
                     {
                         string text = _solution.GetFile(file.FileName).Content.Text;
-                        if (text != null && text.Contains(searchScopes.First().First().SearchTerm))
+                        var unit = new CSharpParser().Parse(text, file.FileName);
+                        foreach (var scope in searchScopes)
                         {
-                            ParsedResult parsedResult = _parser.ParsedContent(text, file.FileName);
-                            foreach (var scope in searchScopes)
-
-                                findReferences.FindReferencesInFile(scope, file, parsedResult.SyntaxTree,
-                                                                    parsedResult.Compilation,
-                                                                    (node, rr) => _result.Add(node),
-                                                                    CancellationToken.None);
+                            findReferences.FindReferencesInFile(scope, file, unit,
+                                                                pctx,
+                                                                (node, rr) => _result.Add(node),
+                                                                CancellationToken.None);
                         }
-                    });
+                    }
+                }
             }
             return _result;
         }
