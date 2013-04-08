@@ -15,7 +15,7 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 * Jump to the definition of a type/variable/method
 * Find implementations/derived types
 * Find usages
-* Contextual code actions
+* Contextual code actions (sort usings, use var....etc.)
 * Rename refactoring
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
@@ -71,6 +71,7 @@ let g:OmniSharp_host = "http://localhost:2000"
 let g:OmniSharp_typeLookupInPreview = 1
 
 map <F12> :call OmniSharp#GotoDefinition()<cr>
+map gd :call OmniSharp#GotoDefinition()<cr>
 nmap fi :call OmniSharp#FindImplementations()<cr>
 nmap fu :call OmniSharp#FindUsages()<cr>
 nmap <leader>tt :call OmniSharp#TypeLookup()<cr>
