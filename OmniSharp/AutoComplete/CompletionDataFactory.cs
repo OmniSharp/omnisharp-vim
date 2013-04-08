@@ -62,24 +62,34 @@ namespace OmniSharp.AutoComplete
                     docProvider =
                         XmlDocumentationProviderFactory.Get(entity.ParentAssembly.AssemblyName);
                 }
+                var ambience = new CSharpAmbience
+                {
+                    ConversionFlags = ConversionFlags.ShowParameterList |
+                                      ConversionFlags.ShowParameterNames |
+                                      ConversionFlags.ShowReturnType |
+                                      ConversionFlags.ShowBody |
+                                      ConversionFlags.ShowTypeParameterList
+                };
+
+                var documentationSignature = ambience.ConvertEntity(entity);
                 if (docProvider != null)
                 {
                     DocumentationComment documentationComment = docProvider.GetDocumentation(entity);
                     if (documentationComment != null)
                     {
-                        var documentation = _signature + Environment.NewLine +
+                        var documentation = documentationSignature + Environment.NewLine +
                                             CodeCompletionItemProvider.ConvertDocumentation(
                                                 documentationComment.Xml.Text);
                         completionData = new CompletionData(_signature, _completionText, documentation);
                     }
                     else
                     {
-                        completionData = new CompletionData(_signature, _completionText, "No documentation");
+                        completionData = new CompletionData(_signature, _completionText, documentationSignature);
                     }
                 }
                 else
                 {
-                    completionData = new CompletionData(_signature, _completionText, _signature);
+                    completionData = new CompletionData(_signature, _completionText, documentationSignature);
                 }
             }
             return completionData;
