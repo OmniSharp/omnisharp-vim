@@ -52,6 +52,7 @@ namespace OmniSharp.Solution
 
         public void Update(string source)
         {
+            this.Content = new StringTextSource(source);
             Parse(Project, this.FileName, source);
         }
     }
