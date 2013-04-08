@@ -108,6 +108,7 @@
   <ItemGroup>
     <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
+    <Compile Include="Extensions\NodeExtensions.cs" />
     <Compile Include="FindUsages\AstNodeExtensions.cs" />
     <Compile Include="FindUsages\FindUsagesHandler.cs" />
     <Compile Include="FindUsages\FindUsagesModule.cs" />

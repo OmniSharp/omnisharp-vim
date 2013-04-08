@@ -9,6 +9,7 @@ using ICSharpCode.NRefactory.CSharp.TypeSystem;
 using ICSharpCode.NRefactory.Semantics;
 using ICSharpCode.NRefactory.TypeSystem;
 using MonoDevelop.Ide.FindInFiles;
+using OmniSharp.Extensions;
 using OmniSharp.Parser;
 using OmniSharp.Requests;
 using OmniSharp.Solution;
@@ -30,6 +31,7 @@ namespace OmniSharp.FindUsages
         public FindUsagesResponse FindUsages(FindUsagesRequest request)
         {
             var result = FindUsageNodes(request)
+                            .Distinct(new NodeComparer())
                             .OrderBy(n => n.GetRegion().FileName.FixPath())
                             .ThenBy(n => n.StartLocation.Line)
                             .ThenBy(n => n.StartLocation.Column);
@@ -120,7 +122,7 @@ namespace OmniSharp.FindUsages
                         {
                             findReferences.FindReferencesInFile(scope, file, unit,
                                                                 pctx,
-                                                                (node, rr) => _result.Add(node),
+                                                                (node, rr) => _result.Add(node.GetIdentifier()),
                                                                 CancellationToken.None);
                         }
                     }
@@ -146,15 +148,21 @@ namespace OmniSharp.FindUsages
             var declarationNode = syntaxTree.GetNodeAt(definition.BeginLine, definition.BeginColumn);
             if (declarationNode != null)
             {
-                while (declarationNode.GetNextNode() != null
-                       && !(IsIdentifier(declarationNode)))
-                {
-                    declarationNode = declarationNode.GetNextNode();
-                }
+                declarationNode = FindIdentifier(declarationNode);
 
                 if (IsIdentifier(declarationNode))
                     _result.Add(declarationNode);
             }
+        }
+
+        private static AstNode FindIdentifier(AstNode declarationNode)
+        {
+            while (declarationNode.GetNextNode() != null
+                   && !(IsIdentifier(declarationNode)))
+            {
+                declarationNode = declarationNode.GetNextNode();
+            }
+            return declarationNode;
         }
 
         private void ProcessTypeResults(IType type)
@@ -170,6 +178,19 @@ namespace OmniSharp.FindUsages
         private static bool IsIdentifier(AstNode declarationNode)
         {
             return declarationNode is VariableInitializer || declarationNode is Identifier;
+        }
+    }
+
+    public class NodeComparer : IEqualityComparer<AstNode>
+    {
+        public bool Equals(AstNode x, AstNode y)
+        {
+            return x.StartLocation == y.StartLocation;
+        }
+
+        public int GetHashCode(AstNode obj)
+        {
+            return base.GetHashCode();
         }
     }
 }
