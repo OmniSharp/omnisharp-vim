@@ -15,7 +15,8 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 * Jump to the definition of a type/variable/method
 * Find implementations/derived types
 * Find usages
-* Contextual code actions
+* Contextual code actions (sort usings, use var....etc.)
+* Rename refactoring
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
 * Simple syntax error highlighting
@@ -70,12 +71,18 @@ let g:OmniSharp_host = "http://localhost:2000"
 let g:OmniSharp_typeLookupInPreview = 1
 
 map <F12> :call OmniSharp#GotoDefinition()<cr>
+map gd :call OmniSharp#GotoDefinition()<cr>
 nmap fi :call OmniSharp#FindImplementations()<cr>
 nmap fu :call OmniSharp#FindUsages()<cr>
 nmap <leader>tt :call OmniSharp#TypeLookup()<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nmap <space> :call OmniSharp#GetCodeActions()<cr>
 
+" rename with dialog
+nmap nm :call OmniSharp#Rename()<cr>
+nmap <F2> :call OmniSharp#Rename()<cr>      
+" rename without dialog - with cursor on the symbol to rename... ':Rename newname'
+command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
@@ -98,5 +105,4 @@ It may eat your code.
 - Fix bugs
 
 Pull requests welcome!
-
 
