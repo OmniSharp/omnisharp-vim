@@ -43,7 +43,7 @@ def getCompletions(ret, column, partialWord):
     js = getResponse('/autocomplete', parameters)
 
     command_base = ("add(" + ret +
-        ", {'word': '%(CompletionText)s', 'abbr': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
+            ", {'word': '%(CompletionText)s', 'abbr': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
     if(js != ''):
         completions = json.loads(js)
         for completion in completions:
@@ -59,14 +59,15 @@ def findUsages(ret):
         usages = json.loads(js)['Usages']
 
         command_base = ("add(" + ret +
-            ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
-        for usage in usages:
-            usage["FileName"] = os.path.relpath(usage["FileName"])
-            try:
-                command = command_base % usage
-                vim.eval(command)
-            except:
-                logger.error(command)
+                ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
+        if(usages != None):
+            for usage in usages:
+                usage["FileName"] = os.path.relpath(usage["FileName"])
+                try:
+                    command = command_base % usage
+                    vim.eval(command)
+                except:
+                    logger.error(command)
 
 def findImplementations(ret):
     js = getResponse('/findimplementations')
@@ -74,7 +75,7 @@ def findImplementations(ret):
         usages = json.loads(js)['Locations']
 
         command_base = ("add(" + ret + 
-            ", {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
+                ", {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
         if(len(usages) == 1):
             usage = usages[0]
             filename = usage['FileName']
@@ -109,7 +110,7 @@ def getCodeActions():
     if(js != ''):
         actions = json.loads(js)['CodeActions']
         for index, action in enumerate(actions):
-                print "%d :  %s" % (index, action)
+            print "%d :  %s" % (index, action)
         if len(actions) > 0:
             return True
     return False
@@ -135,7 +136,7 @@ def findSyntaxErrors(ret):
         errors = json.loads(js)['Errors']
 
         command_base = ("add(" + ret +
-            ", {'filename': '%(FileName)s', 'text': '%(Message)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
+                ", {'filename': '%(FileName)s', 'text': '%(Message)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
         for err in errors:
             try:
                 command = command_base % err
@@ -151,22 +152,24 @@ def typeLookup(ret):
             vim.command("let %s = '%s'" % (ret, type)) 
 
 def renameTo(renameTo):
-	parameters = {} 
-	parameters['renameto'] = vim.eval("a:renameto") 
-	js = getResponse('/rename', parameters)
-	response = json.loads(js)
-	changes = response['Changes']
-	currentBuffer = vim.current.buffer.name
-	cursor = vim.current.window.cursor
-	for change in changes:
-		lines = change['Buffer'].splitlines()
-		lines = [line.encode('utf-8') for line in lines]
-		filename = change['FileName']
-		vim.command(':argadd ' + filename)
-		buffer = filter(lambda b: b.name != None and b.name.upper() == filename.upper(), vim.buffers)[0]
-		vim.command(':b ' + filename)
-		buffer[:] = lines
-		vim.command(':undojoin')
+    parameters = {} 
+    parameters['renameto'] = vim.eval("a:renameto") 
+    js = getResponse('/rename', parameters)
+    response = json.loads(js)
+    changes = response['Changes']
+    currentBuffer = vim.current.buffer.name
+    cursor = vim.current.window.cursor
+    for change in changes:
+        lines = change['Buffer'].splitlines()
+        lines = [line.encode('utf-8') for line in lines]
+        filename = change['FileName']
+        vim.command(':argadd ' + filename)
+        buffer = filter(lambda b: b.name != None and b.name.upper() == filename.upper(), vim.buffers)[0]
+        vim.command(':b ' + filename)
+        buffer[:] = lines
+        vim.command(':undojoin')
 
-	vim.command(':b ' + currentBuffer)
-	vim.current.window.cursor = cursor
+    vim.command(':b ' + currentBuffer)
+    vim.current.window.cursor = cursor
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
