@@ -154,3 +154,6 @@ function! OmniSharp#RenameTo(renameto)
 	python renameTo(renameTo)
 endfunction
 
+function! OmniSharp#Build()
+	python build()
+endfunction

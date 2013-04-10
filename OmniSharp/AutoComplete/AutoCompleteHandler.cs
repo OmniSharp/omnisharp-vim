@@ -48,7 +48,6 @@ namespace OmniSharp.AutoComplete
 
             IEnumerable<ICompletionData> data = engine.GetCompletionData(cursorPosition, true);
             _logger.Debug("Got Completion Data");
-
             return data.Where(d => d != null && d.DisplayText.IsValidCompletionFor(partialWord))
                        .FlattenOverloads()
                        .RemoveDupes()

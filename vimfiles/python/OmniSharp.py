@@ -1,4 +1,6 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path
+import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from SocketServer import ThreadingMixIn
 
 
 logger = logging.getLogger('omnisharp')
@@ -12,6 +14,7 @@ logger.addHandler(hdlr)
 
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
+
 
 def getResponse(endPoint, additionalParameters=None):
     parameters = {}
@@ -172,4 +175,6 @@ def renameTo(renameTo):
     vim.command(':b ' + currentBuffer)
     vim.current.window.cursor = cursor
 
-# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
+def build():
+    return getResponse('/build')
+

@@ -1,7 +1,6 @@
 ﻿using System;
 using NDesk.Options;
 using Nancy.Hosting.Self;
-using OmniSharp.AutoComplete;
 using OmniSharp.Solution;
 
 namespace OmniSharp

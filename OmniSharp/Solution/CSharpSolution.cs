@@ -28,6 +28,7 @@ namespace OmniSharp.Solution
     public interface ISolution
     {
         List<IProject> Projects { get; }
+        string FileName { get; }
         CSharpFile GetFile(string filename);
         IProject ProjectContainingFile(string filename);
     }
@@ -39,8 +40,11 @@ namespace OmniSharp.Solution
 
         private OrphanProject _orphanProject;
 
+        public string FileName { get; private set; }
+
         public CSharpSolution(string fileName)
         {
+            FileName = fileName;
             _orphanProject = new OrphanProject(this);
             Projects = new List<IProject>();
             Directory = Path.GetDirectoryName(fileName);

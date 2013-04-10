@@ -12,6 +12,7 @@ namespace OmniSharp.Tests
             Projects = new List<IProject>();
         }
         public List<IProject> Projects { get; private set; }
+        public string FileName { get; private set; }
 
         public CSharpFile GetFile(string filename)
         {
