@@ -69,7 +69,7 @@ namespace OmniSharp.FindUsages
             {
                 var variable = (resolveResult as LocalResolveResult).Variable;
                 findReferences.FindLocalReferences(variable, res.UnresolvedFile, res.SyntaxTree, res.Compilation,
-                                                   (node, rr) => _result.Add(node), CancellationToken.None);
+                                                   (node, rr) => _result.Add(node.GetDefinition()), CancellationToken.None);
             }
             else
             {
