@@ -31,7 +31,7 @@ namespace OmniSharp.Rename
             var originalName = sourceNode.GetText();
 
             IEnumerable<AstNode> nodes = _findUsagesHandler.FindUsageNodes(req).ToArray();
-            
+
             var response = new RenameResponse();
 
             var modfiedFiles = new List<ModifiedFileResponse>();
@@ -63,19 +63,22 @@ namespace OmniSharp.Rename
                     }
                 }
 
-                var modifiedFile = new ModifiedFileResponse
+                if (modifiedBuffer != null)
                 {
-                    FileName
-                    = fileName,
-                    Buffer = modifiedBuffer
-                };
-                modfiedFiles.Add(modifiedFile);
-                response.Changes = modfiedFiles;
-                _bufferParser.ParsedContent(modifiedBuffer, fileName);
-                _solution.GetFile(fileName).Update(modifiedBuffer);
+                    var modifiedFile = new ModifiedFileResponse
+                    {
+                        FileName
+                        = fileName,
+                        Buffer = modifiedBuffer
+                    };
+                    modfiedFiles.Add(modifiedFile);
+                    response.Changes = modfiedFiles;
+
+                    _bufferParser.ParsedContent(modifiedBuffer, fileName);
+                    _solution.GetFile(fileName).Update(modifiedBuffer);
+                }
             }
 
-            
             return response;
         }
     }
