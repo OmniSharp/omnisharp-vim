@@ -20,6 +20,7 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
 * Simple syntax error highlighting
+* Integrated xbuild/msbuild
 
 
 ##Screenshots
@@ -70,6 +71,7 @@ let g:OmniSharp_host = "http://localhost:2000"
 "Set the type lookup function to use the preview window instead of the status line
 let g:OmniSharp_typeLookupInPreview = 1
 
+map <F5> :wa!<cr>:call OmniSharp#Build()<cr>
 map <F12> :call OmniSharp#GotoDefinition()<cr>
 map gd :call OmniSharp#GotoDefinition()<cr>
 nmap fi :call OmniSharp#FindImplementations()<cr>
