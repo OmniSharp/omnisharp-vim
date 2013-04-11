@@ -2,6 +2,7 @@
 using System.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.CSharp.Resolver;
+using ICSharpCode.NRefactory.CSharp.TypeSystem;
 using OmniSharp.FindUsages;
 using OmniSharp.Parser;
 using OmniSharp.Refactoring;
@@ -24,6 +25,11 @@ namespace OmniSharp.Rename
 
         public RenameResponse Rename(RenameRequest req)
         {
+            var project = _solution.ProjectContainingFile(req.FileName);
+            var syntaxTree = project.CreateParser().Parse(req.Buffer, req.FileName);
+            var sourceNode = syntaxTree.GetNodeAt(req.Line, req.Column);
+            var originalName = sourceNode.GetText();
+
             IEnumerable<AstNode> nodes = _findUsagesHandler.FindUsageNodes(req).ToArray();
             
             var response = new RenameResponse();
@@ -48,7 +54,7 @@ namespace OmniSharp.Rename
                     context = OmniSharpRefactoringContext.GetContext(_bufferParser, req);
                 }
                 string modifiedBuffer = null;
-                foreach (var node in groupedNodes)
+                foreach (var node in groupedNodes.Where(n => n.GetText() == originalName))
                 {
                     using (var script = new OmniSharpScript(context))
                     {

@@ -21,6 +21,7 @@ namespace OmniSharp.Tests.Rename
         public FakeSolutionBuilder AddProject()
         {
             var newProject = new FakeProject("Project" + projectCount++);
+			
             foreach (var project in _projects)
             {
                 // each project references the ones that came before it.
