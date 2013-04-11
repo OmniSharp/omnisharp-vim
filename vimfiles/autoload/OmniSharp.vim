@@ -159,7 +159,7 @@ function! OmniSharp#Build()
 	python build("qf_taglist")
 
 	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 1
+	if len(qf_taglist) > 0
 		call setqflist(qf_taglist)
 		copen 4
 	endif

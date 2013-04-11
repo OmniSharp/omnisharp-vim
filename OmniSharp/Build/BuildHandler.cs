@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 using OmniSharp.Common;
 using OmniSharp.Solution;
@@ -11,7 +10,6 @@ namespace OmniSharp.Build
     public class BuildHandler
     {
         private readonly ISolution _solution;
-        private readonly StringBuilder _output = new StringBuilder();
         private readonly BuildResponse _response;
         private readonly List<QuickFix> _quickFixes;
 
@@ -26,7 +24,7 @@ namespace OmniSharp.Build
 		{
 			get
 			{
-				int p = (int)Environment.OSVersion.Platform;
+				var p = (int)Environment.OSVersion.Platform;
 				return (p == 4) || (p == 6) || (p == 128);
 			}
 		}
@@ -40,7 +38,7 @@ namespace OmniSharp.Build
             var startInfo = new ProcessStartInfo
                 {
                     FileName = build,
-                    Arguments = "/m /v:q /nologo /property:GenerateFullPaths=true " + _solution.FileName,
+                    Arguments = "/m /nologo /property:GenerateFullPaths=true " + _solution.FileName,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     RedirectStandardInput = true,
@@ -70,16 +68,16 @@ namespace OmniSharp.Build
         {
             Console.WriteLine(e.Data);
             if (e.Data == null)
-                
                 return;
 
             if (e.Data == "Build succeeded.")
                 _response.Success = true;
             if (e.Data.Contains("error CS"))
             {
-                var matches = Regex.Matches(e.Data, @"(.*cs)\((\d+),(\d+)\).*error CS\d+: (.*) \[",
-                                            RegexOptions.Compiled);
-                var quickFix = new QuickFix
+                var matches = Regex.Matches(e.Data, @"\s+(.*cs)\((\d+),(\d+)\).*error CS\d+: (.*) \[", RegexOptions.Compiled);
+                if (!Regex.IsMatch(matches[0].Groups[1].Value, @"\d+>"))
+                {
+                    var quickFix = new QuickFix
                     {
                         FileName = matches[0].Groups[1].Value,
                         Line = int.Parse(matches[0].Groups[2].Value),
@@ -87,7 +85,8 @@ namespace OmniSharp.Build
                         Text = matches[0].Groups[4].Value.Replace("'", "''")
                     };
 
-                _quickFixes.Add(quickFix);
+                    _quickFixes.Add(quickFix);    
+                }
             }
         }
 

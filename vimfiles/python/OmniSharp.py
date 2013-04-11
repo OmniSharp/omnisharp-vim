@@ -177,7 +177,14 @@ def renameTo(renameTo):
     vim.current.window.cursor = cursor
 
 def build(ret):
-    js = getResponse('/build')
-    quickfixes = json.loads(js)['QuickFixes']
+    response = json.loads(getResponse('/build'))
+    
+    success = response["Success"]
+    if success:
+        print "Build succeeded"
+    else:
+        print "Build failed"
+
+    quickfixes = response['QuickFixes']
     populateQuickFix(ret, quickfixes)
 

@@ -7,8 +7,8 @@ namespace OmniSharp
         public void Debug(object message)
         {
             Console.WriteLine(message);
-        }
-
+		}
+        
         public void Error(object message)
         {
             Console.WriteLine(message);
