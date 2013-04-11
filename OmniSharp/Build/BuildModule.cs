@@ -6,7 +6,10 @@ namespace OmniSharp.Build
     {
         public BuildModule(BuildHandler buildHandler)
         {
-            Post["/build"] = x => buildHandler.Build();
+            Post["/build"] = x =>
+                {
+                    return Response.AsJson(buildHandler.Build());
+                };
         }
     }
-}
+} 

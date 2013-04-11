@@ -1,6 +1,6 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
-using Request = OmniSharp.Requests.Request;
+using Request = OmniSharp.Common.Request;
 
 namespace OmniSharp.SyntaxErrors
 {

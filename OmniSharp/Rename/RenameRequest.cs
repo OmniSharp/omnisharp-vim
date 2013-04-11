@@ -1,6 +1,8 @@
-﻿namespace OmniSharp.Rename
+﻿using OmniSharp.Common;
+
+namespace OmniSharp.Rename
 {
-    public class RenameRequest : Requests.Request
+    public class RenameRequest : Request
     {
         public string RenameTo { get; set; }
     }

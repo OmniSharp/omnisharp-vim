@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
+using OmniSharp.Common;
 using OmniSharp.Solution;
 
 namespace OmniSharp.Build
@@ -9,19 +11,36 @@ namespace OmniSharp.Build
     public class BuildHandler
     {
         private readonly ISolution _solution;
-        private StringBuilder _output = new StringBuilder();
+        private readonly StringBuilder _output = new StringBuilder();
+        private readonly BuildResponse _response;
+        private readonly List<QuickFix> _quickFixes;
 
         public BuildHandler(ISolution solution)
         {
             _solution = solution;
+            _response = new BuildResponse();
+            _quickFixes = new List<QuickFix>();
         }
 
-        public string Build()
+		private static bool IsUnix
+		{
+			get
+			{
+				int p = (int)Environment.OSVersion.Platform;
+				return (p == 4) || (p == 6) || (p == 128);
+			}
+		}
+
+        public BuildResponse Build()
         {
+			var build = IsUnix
+						? "xbuild" 
+						: @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Msbuild.exe";
+
             var startInfo = new ProcessStartInfo
                 {
-                    FileName = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Msbuild.exe",
-                    Arguments = "/m /nologo " + _solution.FileName,
+                    FileName = build,
+                    Arguments = "/m /v:q /nologo /property:GenerateFullPaths=true " + _solution.FileName,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     RedirectStandardInput = true,
@@ -42,13 +61,34 @@ namespace OmniSharp.Build
             process.BeginErrorReadLine();
 
             process.WaitForExit();
-            return _output.ToString();
+            _response.QuickFixes = _quickFixes;
+
+            return _response;
         }
 
         void OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             Console.WriteLine(e.Data);
-            _output.Append(e.Data);
+            if (e.Data == null)
+                
+                return;
+
+            if (e.Data == "Build succeeded.")
+                _response.Success = true;
+            if (e.Data.Contains("error CS"))
+            {
+                var matches = Regex.Matches(e.Data, @"(.*cs)\((\d+),(\d+)\).*error CS\d+: (.*) \[",
+                                            RegexOptions.Compiled);
+                var quickFix = new QuickFix
+                    {
+                        FileName = matches[0].Groups[1].Value,
+                        Line = int.Parse(matches[0].Groups[2].Value),
+                        Column = int.Parse(matches[0].Groups[3].Value),
+                        Text = matches[0].Groups[4].Value.Replace("'", "''")
+                    };
+
+                _quickFixes.Add(quickFix);
+            }
         }
 
         void ErrorDataReceived(object sender, DataReceivedEventArgs e)

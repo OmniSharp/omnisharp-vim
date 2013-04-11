@@ -9,9 +9,9 @@ using ICSharpCode.NRefactory.CSharp.TypeSystem;
 using ICSharpCode.NRefactory.Semantics;
 using ICSharpCode.NRefactory.TypeSystem;
 using MonoDevelop.Ide.FindInFiles;
+using OmniSharp.Common;
 using OmniSharp.Extensions;
 using OmniSharp.Parser;
-using OmniSharp.Requests;
 using OmniSharp.Solution;
 
 namespace OmniSharp.FindUsages
@@ -39,7 +39,7 @@ namespace OmniSharp.FindUsages
             var res = new FindUsagesResponse();
             if (result.Any())
             {
-                var usages = result.Select(node => new Usage
+                var usages = result.Select(node => new QuickFix
                 {
                     FileName = node.GetRegion().FileName,
                     Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)).Replace("'", "''"),

@@ -110,6 +110,7 @@
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
     <Compile Include="Build\BuildHandler.cs" />
     <Compile Include="Build\BuildModule.cs" />
+    <Compile Include="Build\BuildResponse.cs" />
     <Compile Include="Extensions\NodeExtensions.cs" />
     <Compile Include="FindUsages\AstNodeExtensions.cs" />
     <Compile Include="FindUsages\FindUsagesHandler.cs" />
@@ -117,7 +118,7 @@
     <Compile Include="FindUsages\FindUsagesRequest.cs" />
     <Compile Include="FindUsages\FindUsagesResponse.cs" />
     <Compile Include="FindUsages\MemberCollector.cs" />
-    <Compile Include="FindUsages\Usage.cs" />
+    <Compile Include="Common\QuickFix.cs" />
     <Compile Include="GetCodeActions\CodeActionProviders.cs" />
     <Compile Include="GetCodeActions\GetCodeActionsHandler.cs" />
     <Compile Include="GetCodeActions\GetCodeActionsModule.cs" />
@@ -155,7 +156,7 @@
     <Compile Include="AutoComplete\AutoCompleteHandler.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionModule.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionRequest.cs" />
-    <Compile Include="Requests\Request.cs" />
+    <Compile Include="Common\Request.cs" />
     <Compile Include="Solution\CSharpFile.cs" />
     <Compile Include="Solution\CSharpProject.cs" />
     <Compile Include="Logger.cs" />

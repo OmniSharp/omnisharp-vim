@@ -60,17 +60,18 @@ def findUsages(ret):
     js = getResponse('/findusages')
     if(js != ''):
         usages = json.loads(js)['Usages']
+        populateQuickFix(ret, usages)
 
-        command_base = ("add(" + ret +
-                ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
-        if(usages != None):
-            for usage in usages:
-                usage["FileName"] = os.path.relpath(usage["FileName"])
-                try:
-                    command = command_base % usage
-                    vim.eval(command)
-                except:
-                    logger.error(command)
+def populateQuickFix(ret, quickfixes):
+    command_base = ("add(" + ret + ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
+    if(quickfixes != None):
+        for quickfix in quickfixes:
+            quickfix["FileName"] = os.path.relpath(quickfix["FileName"])
+            try:
+                command = command_base % quickfix
+                vim.eval(command)
+            except:
+                logger.error(command)
 
 def findImplementations(ret):
     js = getResponse('/findimplementations')
@@ -175,6 +176,8 @@ def renameTo(renameTo):
     vim.command(':b ' + currentBuffer)
     vim.current.window.cursor = cursor
 
-def build():
-    return getResponse('/build')
+def build(ret):
+    js = getResponse('/build')
+    quickfixes = json.loads(js)['QuickFixes']
+    populateQuickFix(ret, quickfixes)
 

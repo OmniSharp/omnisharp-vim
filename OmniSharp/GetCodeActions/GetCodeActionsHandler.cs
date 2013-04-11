@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ICSharpCode.NRefactory.CSharp.Refactoring;
+using OmniSharp.Common;
 using OmniSharp.Parser;
 using OmniSharp.Refactoring;
-using OmniSharp.Requests;
 
 namespace OmniSharp.GetCodeActions
 {

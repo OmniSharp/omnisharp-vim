@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using OmniSharp.Common;
 
 namespace OmniSharp.FindUsages
 {
     public class FindUsagesResponse
     {
-        public IEnumerable<Usage> Usages { get; set; }
+        public IEnumerable<QuickFix> Usages { get; set; }
     }
 }

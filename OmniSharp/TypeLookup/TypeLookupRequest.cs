@@ -1,4 +1,4 @@
-﻿using OmniSharp.Requests;
+﻿using OmniSharp.Common;
 
 namespace OmniSharp.TypeLookup
 {

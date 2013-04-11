@@ -3,6 +3,7 @@ using ICSharpCode.NRefactory;
 using ICSharpCode.NRefactory.CSharp.Refactoring;
 using ICSharpCode.NRefactory.CSharp.Resolver;
 using ICSharpCode.NRefactory.Editor;
+using OmniSharp.Common;
 using OmniSharp.Parser;
 
 namespace OmniSharp.Refactoring
@@ -24,7 +25,7 @@ namespace OmniSharp.Refactoring
             _location = location;
         }
 
-        public static OmniSharpRefactoringContext GetContext(BufferParser bufferParser, Requests.Request request)
+        public static OmniSharpRefactoringContext GetContext(BufferParser bufferParser, Request request)
         {
             var q = bufferParser.ParsedContent(request.Buffer, request.FileName);
             var resolver = new CSharpAstResolver(q.Compilation, q.SyntaxTree, q.UnresolvedFile);

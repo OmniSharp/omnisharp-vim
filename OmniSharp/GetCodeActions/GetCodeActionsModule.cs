@@ -1,5 +1,6 @@
 ﻿using Nancy;
 using Nancy.ModelBinding;
+using Request = OmniSharp.Common.Request;
 
 namespace OmniSharp.GetCodeActions
 {
@@ -9,7 +10,7 @@ namespace OmniSharp.GetCodeActions
         {
             Post["/getcodeactions"] = x =>
                 {
-                    var req = this.Bind<Requests.Request>();
+                    var req = this.Bind<Request>();
                     var res = gotoDefinitionHandler.GetCodeActions(req);
                     return Response.AsJson(res);
                 };

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
+using OmniSharp.Common;
 using OmniSharp.Parser;
-using OmniSharp.Requests;
 
 namespace OmniSharp.SyntaxErrors
 {
