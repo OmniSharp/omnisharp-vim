@@ -25,7 +25,6 @@ namespace OmniSharp.GotoDefinition
             if (resolveResult != null)
             {
                 var region = resolveResult.GetDefinitionRegion();
-
                 response.FileName = region.FileName;
                 response.Line = region.BeginLine;
                 response.Column = region.BeginColumn;
