@@ -147,8 +147,8 @@
     <Compile Include="GotoImplementation\Location.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionResponse.cs" />
     <Compile Include="Parser\ParsedResult.cs" />
-    <Compile Include="AutoComplete\AutocompleteModule.cs" />
-    <Compile Include="AutoComplete\AutocompleteRequest.cs" />
+    <Compile Include="AutoComplete\AutoCompleteModule.cs" />
+    <Compile Include="AutoComplete\AutoCompleteRequest.cs" />
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="AutoComplete\CodeCompletionItemProvider.cs" />
     <Compile Include="AutoComplete\CompletionData.cs" />
