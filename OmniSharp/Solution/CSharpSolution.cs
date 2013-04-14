@@ -31,11 +31,12 @@ namespace OmniSharp.Solution
         string FileName { get; }
         CSharpFile GetFile(string filename);
         IProject ProjectContainingFile(string filename);
+        void Reload();
     }
 
     public class CSharpSolution : ISolution
     {
-        public readonly string Directory;
+        public string Directory;
         public List<IProject> Projects { get; private set; }
 
         private OrphanProject _orphanProject;
@@ -44,11 +45,18 @@ namespace OmniSharp.Solution
 
         public CSharpSolution(string fileName)
         {
+            LoadSolution(fileName);
+        }
+
+        private void LoadSolution(string fileName)
+        {
             FileName = fileName;
             _orphanProject = new OrphanProject(this);
             Projects = new List<IProject>();
             Directory = Path.GetDirectoryName(fileName);
-            var projectLinePattern = new Regex("Project\\(\"(?<TypeGuid>.*)\"\\)\\s+=\\s+\"(?<Title>.*)\",\\s*\"(?<Location>.*)\",\\s*\"(?<Guid>.*)\"");
+            var projectLinePattern =
+                new Regex(
+                    "Project\\(\"(?<TypeGuid>.*)\"\\)\\s+=\\s+\"(?<Title>.*)\",\\s*\"(?<Location>.*)\",\\s*\"(?<Guid>.*)\"");
 
             foreach (string line in File.ReadLines(fileName))
             {
@@ -89,6 +97,10 @@ namespace OmniSharp.Solution
             return Projects.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase))) ?? _orphanProject;
         }
 
+        public void Reload()
+        {
+            LoadSolution(this.FileName);
+        }
     }
 }
 

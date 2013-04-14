@@ -26,5 +26,10 @@ namespace OmniSharp.Tests
         {
             return Projects.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase)));
         }
+
+        public void Reload()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

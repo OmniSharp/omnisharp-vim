@@ -105,6 +105,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddFileToProject\AddFileToProjectHandler.cs" />
+    <Compile Include="AddFileToProject\AddFileToProjectModule.cs" />
     <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
     <Compile Include="Build\BuildHandler.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="GetCodeActions\RunCodeActionModule.cs" />
     <Compile Include="GetCodeActions\RunCodeActionRequest.cs" />
     <Compile Include="GetCodeActions\RunCodeActionsResponse.cs" />
+    <Compile Include="ReloadSolution\ReloadSolutionModule.cs" />
     <Compile Include="Rename\ModifiedFileResponse.cs" />
     <Compile Include="Rename\RenameHandler.cs" />
     <Compile Include="Rename\RenameModule.cs" />

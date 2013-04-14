@@ -164,3 +164,7 @@ function! OmniSharp#Build()
 		copen 4
 	endif
 endfunction
+
+function! OmniSharp#ReloadSolution()
+	python getResponse("/reloadsolution")
+endfunction
