@@ -10,24 +10,23 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OmniSharp.Tests</RootNamespace>
     <AssemblyName>OmniSharp.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -58,14 +57,6 @@
     <Reference Include="Mono.Cecil.Rocks">
       <HintPath>..\packages\Mono.Cecil.0.9.5.4\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
-    <Reference Include="Nancy, Version=0.16.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Nancy.0.16.1\lib\net40\Nancy.dll</HintPath>
-    </Reference>
-    <Reference Include="Nancy.Testing, Version=0.16.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Nancy.Testing.0.16.1\lib\net40\Nancy.Testing.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -74,6 +65,12 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="Nancy">
+      <HintPath>..\packages\Nancy.0.16.1\lib\net40\Nancy.dll</HintPath>
+    </Reference>
+    <Reference Include="Nancy.Testing">
+      <HintPath>..\packages\Nancy.Testing.0.16.1\lib\net40\Nancy.Testing.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoComplete\BugFixTests.cs" />
@@ -81,14 +78,11 @@
     <Compile Include="AutoComplete\CompletionTestBase.cs" />
     <Compile Include="AutoComplete\ConstructorParameterCompletions.cs" />
     <Compile Include="AutoComplete\DerivedTypeCompletions.cs" />
-    <Compile Include="AutoComplete\IntegrationTest.cs" />
-    <Compile Include="FindUsages\IntegrationTest.cs" />
     <Compile Include="Rename\Buffer.cs" />
     <Compile Include="Rename\FakeSolutionBuilder.cs" />
     <Compile Include="Rename\MultiFileRenameTests.cs" />
     <Compile Include="Rename\SimpleRenameTests.cs" />
     <Compile Include="TestHelpers.cs" />
-    <Compile Include="TypeLookup\IntegrationTest.cs" />
     <Compile Include="TypeLookup\StringExtensions.cs" />
     <Compile Include="TypeLookup\LocalVariables.cs" />
     <Compile Include="TypeLookup\MemberVariables.cs" />
@@ -113,8 +107,8 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import condition="HasTrailingSlash('$(SolutionDir)')" Project="$(SolutionDir).nuget\NuGet.targets" />
-  <Import condition="!HasTrailingSlash('$(SolutionDir)')" Project="$(SolutionDir)\.nuget\NuGet.targets" />
+  <Import Condition="HasTrailingSlash('$(SolutionDir)')" Project="$(SolutionDir).nuget\NuGet.targets" />
+  <Import Condition="!HasTrailingSlash('$(SolutionDir)')" Project="$(SolutionDir)\.nuget\NuGet.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -122,4 +116,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="FindUsages\" />
+  </ItemGroup>
 </Project>
