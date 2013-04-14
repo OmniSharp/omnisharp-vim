@@ -41,6 +41,7 @@ namespace OmniSharp.Tests
 
         public IProjectContent ProjectContent { get; set; }
         public string Title { get; set; }
+        public string FileName { get; private set; }
         public List<CSharpFile> Files { get; private set; }
         public List<IAssemblyReference> References { get; set; }
 

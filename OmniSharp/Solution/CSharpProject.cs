@@ -31,6 +31,7 @@ namespace OmniSharp.Solution
     {
         IProjectContent ProjectContent { get; set; }
         string Title { get; }
+        string FileName { get; }
         List<CSharpFile> Files { get; }
         List<IAssemblyReference> References { get; set; }
         CSharpFile GetFile(string fileName);
@@ -62,7 +63,7 @@ namespace OmniSharp.Solution
 
         public readonly ISolution Solution;
         public readonly string AssemblyName;
-        public readonly string FileName;
+        public string FileName { get; private set; }
 
         public string Title { get; private set; }
         public IProjectContent ProjectContent { get; set; }

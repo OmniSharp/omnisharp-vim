@@ -94,7 +94,26 @@ namespace OmniSharp.Solution
 
         public IProject ProjectContainingFile(string filename)
         {
-            return Projects.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase))) ?? _orphanProject;
+			var project = Projects.FirstOrDefault(p => p.Files.Any(f => f.FileName.Equals(filename, StringComparison.InvariantCultureIgnoreCase))) ;
+			if(project == null)
+			{
+				var file = new FileInfo(filename);
+				var directory = file.Directory;
+				var files = directory.GetFiles("*.csproj");
+				while (!files.Any() && directory.Parent != null)
+				{
+                    directory = directory.Parent;
+				    files = directory.GetFiles("*.csproj");
+				}
+
+				if(files.Any())
+				{
+					var projectFile = files.First();
+                    project = Projects.First(p => p.FileName == projectFile.FullName);
+					project.Files.Add(new CSharpFile(project, filename));
+				}
+			}
+            return project ?? _orphanProject;
         }
 
         public void Reload()
