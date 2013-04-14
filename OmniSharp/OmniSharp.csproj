@@ -105,8 +105,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddFileToProject\AddFileToProjectHandler.cs" />
-    <Compile Include="AddFileToProject\AddFileToProjectModule.cs" />
     <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
     <Compile Include="Build\BuildHandler.cs" />
