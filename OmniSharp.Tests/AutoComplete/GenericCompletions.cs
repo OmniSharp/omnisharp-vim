@@ -5,7 +5,7 @@ namespace OmniSharp.Tests.AutoComplete
     [TestFixture]
     public class GenericCompletions : CompletionTestBase
     {
-        [Test, Ignore("wip")]
+        [Test]
         public void Should_complete_extension_method()
         {
             DisplayTextFor(
@@ -26,8 +26,13 @@ namespace OmniSharp.Tests.AutoComplete
                 {
                     return s;
                 }
+
+                public static string MyExtension(this string s, int i)
+                {
+                    return s;
+                }
             }
-            ").ShouldContainOnly("MyExtension()");
+            ").ShouldContainOnly("MyExtension()", "MyExtension(int i)");
         }
 
         [Test]

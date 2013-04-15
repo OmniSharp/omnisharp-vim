@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
 
 namespace OmniSharp.AutoComplete
@@ -11,6 +12,7 @@ namespace OmniSharp.AutoComplete
             = new List<ICompletionData>();
 
         private string _description;
+        private string _displayText;
 
         public CompletionData(string text)
         {
@@ -37,7 +39,16 @@ namespace OmniSharp.AutoComplete
 
         public CompletionCategory CompletionCategory { get; set; }
 
-        public string DisplayText { get; set; }
+        public string DisplayText
+        {
+            get { return _displayText; }
+            set { _displayText = RemoveExtensionMethodParameter(value); }
+        }
+
+        private static string RemoveExtensionMethodParameter(string completion)
+        {
+            return Regex.Replace(completion, @"this\s+[a-zA-Z0-9<>]+\s+[a-zA-Z0-9]+,?\s?", "", RegexOptions.Compiled);
+        }
 
         public string Description
         {
