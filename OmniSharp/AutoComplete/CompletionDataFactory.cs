@@ -46,7 +46,7 @@ namespace OmniSharp.AutoComplete
             {
                 completionData = new CompletionData(_signature, _completionText,
                                                     _signature + Environment.NewLine +
-                                                    CodeCompletionItemProvider.ConvertDocumentation(entity.Documentation));
+                                                    DocumentationConverter.ConvertDocumentation(entity.Documentation));
             }
             else
             {
@@ -72,7 +72,7 @@ namespace OmniSharp.AutoComplete
                     if (documentationComment != null)
                     {
                         var documentation = documentationSignature + Environment.NewLine +
-                                            CodeCompletionItemProvider.ConvertDocumentation(
+                                            DocumentationConverter.ConvertDocumentation(
                                                 documentationComment.Xml.Text);
                         completionData = new CompletionData(_signature, _completionText, documentation);
                     }

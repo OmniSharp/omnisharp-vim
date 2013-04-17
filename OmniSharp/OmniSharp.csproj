@@ -151,7 +151,7 @@
     <Compile Include="AutoComplete\AutoCompleteModule.cs" />
     <Compile Include="AutoComplete\AutoCompleteRequest.cs" />
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="AutoComplete\CodeCompletionItemProvider.cs" />
+    <Compile Include="AutoComplete\DocumentationConverter.cs" />
     <Compile Include="AutoComplete\CompletionData.cs" />
     <Compile Include="AutoComplete\AutoCompleteHandler.cs" />
     <Compile Include="GotoDefinition\GotoDefinitionModule.cs" />
