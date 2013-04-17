@@ -39,7 +39,7 @@ syn keyword csException			try catch finally throw
 " TODO:
 syn keyword csUnspecifiedStatement	as base checked event fixed in is lock operator out params ref sizeof stackalloc this typeof unchecked unsafe using
 
-syn keyword csLinqWords 		from in select orderby into equals where
+syn keyword csLinqKeyword               ascending by descending equals from group in into join let on orderby select where
 " TODO:
 syn keyword csUnsupportedStatement	add remove value
 " TODO:
