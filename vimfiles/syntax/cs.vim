@@ -94,11 +94,13 @@ syn region	csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
 
 
 syn region csAttributeType start="\["hs=s+1 end="[\(\]]"he=e-1 oneline
-syn region csType start="[\<]" end="[\>]" oneline
+syn region csType start="[\<]"hs=s+1 end="[\>]"he=e-1 oneline contains=csNewType, csNew
 syn region csClassType start="class"hs=s+6 end="[:\n{]"he=e-1 contains=csClass
-syn region csNewType start="new"hs=s+4 end="[\(\<{\[]"he=e-1 oneline contains=csNew
+syn region csNewType start="new"hs=s+4 end="[\(\<{\[]"he=e-1 oneline contains=csNew contains=csNewType
+syn region csIsType start="\v (is|as) "hs=s+4 end="\v[A-Za-z0-9]+" oneline contains=csIsAs
 syn keyword csNew new contained
 syn keyword csClass class contained
+syn keyword csIsAs is as
 
 " Strings and constants
 syn match   csSpecialError	contained "\\."
@@ -124,6 +126,7 @@ hi def link csType			Type
 hi def link csNewType			Type
 hi def link csClassType			Type
 hi def link csAttributeType		Type
+hi def link csIsType			Type
 hi def link csStorage			StorageClass
 hi def link csClass			StorageClass
 hi def link csRepeat			Repeat
@@ -133,11 +136,12 @@ hi def link csModifier			StorageClass
 hi def link csConstant			Constant
 hi def link csException			Exception
 hi def link csUnspecifiedStatement	Statement
-hi def link csNew	Statement
+hi def link csNew			Statement
 
 hi def link csLinqWords			Statement
 hi def link csUnsupportedStatement	Statement
 hi def link csUnspecifiedKeyword	Keyword
+hi def link csIsAs 			Keyword
 hi def link csContextualStatement	Statement
 hi def link csOperatorError		Error
 
