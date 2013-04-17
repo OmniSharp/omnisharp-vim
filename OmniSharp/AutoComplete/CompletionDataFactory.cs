@@ -12,6 +12,7 @@ namespace OmniSharp.AutoComplete
 {
     public class CompletionDataFactory : ICompletionDataFactory
     {
+        private readonly string _partialWord;
         private readonly CSharpAmbience _ambience = new CSharpAmbience {ConversionFlags = AmbienceFlags};
 
         private const ConversionFlags AmbienceFlags =
@@ -21,12 +22,20 @@ namespace OmniSharp.AutoComplete
         private string _completionText;
         private string _signature;
 
+        public CompletionDataFactory(string partialWord)
+        {
+            _partialWord = partialWord;
+        }
+
         public ICompletionData CreateEntityCompletionData(IEntity entity)
         {
 
             _completionText = _signature = entity.Name;
             
             _completionText = _ambience.ConvertEntity(entity).Replace(";", "");
+            if (!_completionText.IsValidCompletionFor(_partialWord))
+                return new CompletionData("~~");
+
             if (entity is IMethod)
             {
                 var method = entity as IMethod;
@@ -41,6 +50,7 @@ namespace OmniSharp.AutoComplete
 
         private ICompletionData CompletionData(IEntity entity)
         {
+            
             ICompletionData completionData = null;
             if (entity.Documentation != null)
             {

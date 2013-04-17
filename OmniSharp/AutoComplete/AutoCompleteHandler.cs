@@ -39,7 +39,7 @@ namespace OmniSharp.AutoComplete
             var rctx = res.UnresolvedFile.GetTypeResolveContext(res.Compilation, loc);
 
             ICompletionContextProvider contextProvider = new DefaultCompletionContextProvider(doc, res.UnresolvedFile);
-            var engine = new CSharpCompletionEngine(doc, contextProvider, new CompletionDataFactory(), res.ProjectContent, rctx)
+            var engine = new CSharpCompletionEngine(doc, contextProvider, new CompletionDataFactory(partialWord), res.ProjectContent, rctx)
                 {
                     EolMarker = Environment.NewLine
                 };
