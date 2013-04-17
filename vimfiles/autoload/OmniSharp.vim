@@ -4,6 +4,11 @@ endif
 
 let g:OmniSharp_loaded = 1
 
+"Showmatch significantly slows down omnicomplete
+"when the first match contains parentheses.
+"Temporarily disable it
+set noshowmatch
+
 "Load python/OmniSharp.py
 let s:py_path=fnameescape(expand('<sfile>:p:h'))
 python << EOF
