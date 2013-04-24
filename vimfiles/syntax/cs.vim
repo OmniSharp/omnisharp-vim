@@ -18,7 +18,7 @@ set cpo&vim
 
 
 " type
-syn keyword csType			bool byte char decimal double float int long object sbyte short string uint ulong ushort var void
+syn keyword csType			bool byte char decimal double float int long object sbyte short string T uint ulong ushort var void
 " storage
 syn keyword csStorage			delegate enum interface namespace struct
 " repeat / condition / label
@@ -96,7 +96,7 @@ syn region	csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
 syn region csAttributeType start="\s\["hs=s+2 end="[\(\]]"he=e-1 oneline
 syn region csType start="[\<]"hs=s+1 end="[\>]"he=e-1 oneline contains=csNewType, csNew
 syn region csClassType start="class"hs=s+6 end="[:\n{]"he=e-1 contains=csClass
-syn region csNewType start="new"hs=s+4 end="[\(\<{\[]"he=e-1 oneline contains=csNew contains=csNewType
+syn region csNewType start="new"hs=s+4 end="[\(\<{\[]"he=e-1 contains=csNew contains=csNewType
 syn region csIsType start="\v (is|as) "hs=s+4 end="\v[A-Za-z0-9]+" oneline contains=csIsAs
 syn keyword csNew new contained
 syn keyword csClass class contained
