@@ -93,7 +93,7 @@ syn region	csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
 
 
-syn region csAttributeType start="\["hs=s+1 end="[\(\]]"he=e-1 oneline
+syn region csAttributeType start="\s\["hs=s+2 end="[\(\]]"he=e-1 oneline
 syn region csType start="[\<]"hs=s+1 end="[\>]"he=e-1 oneline contains=csNewType, csNew
 syn region csClassType start="class"hs=s+6 end="[:\n{]"he=e-1 contains=csClass
 syn region csNewType start="new"hs=s+4 end="[\(\<{\[]"he=e-1 oneline contains=csNew contains=csNewType
