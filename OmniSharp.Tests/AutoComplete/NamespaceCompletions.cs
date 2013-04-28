@@ -21,7 +21,7 @@ namespace OmniSharp.Tests.AutoComplete
         [Test]
         public void Should_complete_using2()
         {
-            DisplayTextFor("us$").ShouldContainOnly("using");
+            DisplayTextFor("us$").ShouldContainOnly("using", "unsafe");
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace OmniSharp.Tests.AutoComplete
         {
             DisplayTextFor(
                 @"using System;
-n$").ShouldContainOnly("namespace");
+n$").ShouldContain("namespace");
         }
 
         [Test]
@@ -62,7 +62,7 @@ n$").ShouldContainOnly("namespace");
             DisplayTextFor(
                 @"us$
 using System;
-                  ").ShouldContainOnly("using");
+                  ").ShouldContainOnly("using", "unsafe");
         }
 
         [Test]
@@ -71,7 +71,7 @@ using System;
             DisplayTextFor(
                 @"using System;
                   us$
-                  ").ShouldContainOnly("using");
+                  ").ShouldContainOnly("using", "unsafe");
         }
 
         [Test]
@@ -95,7 +95,7 @@ using System;
         [Test]
         public void Should_complete_diagnostics_from_d()
         {
-            DisplayTextFor("using System.d$").ShouldContainOnly("Deployment", "Diagnostics", "Dynamic");
+            DisplayTextFor("using System.d$").ShouldContainOnly("Deployment", "Diagnostics", "Dynamic", "Threading");
         }
 
         [Test]

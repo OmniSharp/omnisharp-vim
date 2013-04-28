@@ -48,10 +48,14 @@ namespace OmniSharp.AutoComplete
 
             IEnumerable<ICompletionData> data = engine.GetCompletionData(cursorPosition, true);
             _logger.Debug("Got Completion Data");
-            return data.Where(d => d != null && d.DisplayText.IsValidCompletionFor(partialWord))
+            return data.Where(d => d != null && d.CompletionText.IsValidCompletionFor(partialWord))
                        .FlattenOverloads()
                        .RemoveDupes()
-                       .OrderBy(d => d.DisplayText);
+					   .OrderByDescending(d => d.CompletionText.IsValidCompletionStartsWithExactCase(partialWord))
+					   .ThenByDescending(d => d.CompletionText.IsValidCompletionStartsWithIgnoreCase(partialWord))
+					   .ThenByDescending(d => d.CompletionText.IsCamelCaseMatch(partialWord))
+					   .ThenByDescending(d => d.CompletionText.IsSubsequenceMatch(partialWord))
+                       .ThenBy(d => d.DisplayText);
         }
     }
 }

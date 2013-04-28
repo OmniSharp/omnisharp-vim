@@ -48,7 +48,7 @@ namespace OmniSharp.Tests.AutoComplete
                     l.ad$
                 }
             }")
-                .ShouldContainOnly(
+                .ShouldContain(
                     "Add(string item)",
                     "AddRange(IEnumerable<string> collection)"); 
         }
