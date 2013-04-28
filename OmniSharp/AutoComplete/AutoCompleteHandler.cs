@@ -22,9 +22,9 @@ namespace OmniSharp.AutoComplete
 
         public IEnumerable<ICompletionData> CreateProvider(AutoCompleteRequest request)
         {
-            var editorText = request.Buffer ?? "";
+            var editorText = request.Buffer ?? string.Empty;
             var filename = request.FileName;
-            var partialWord = request.WordToComplete ?? "";
+            var partialWord = request.WordToComplete ?? string.Empty;
 
             var doc = new ReadOnlyDocument(editorText);
             var loc = new TextLocation(request.Line, request.Column - partialWord.Length);

@@ -27,6 +27,9 @@ namespace OmniSharp.AutoComplete
 
 		public static bool IsSubsequenceMatch(this string completion, string partial)
 		{
+		    if (partial == string.Empty)
+		        return true;
+
 			var firstLetter = partial.ToLower()[0];
 			if(!(firstLetter >= 'a' && firstLetter <= 'z'))
 				return false;
