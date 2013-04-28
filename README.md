@@ -99,7 +99,7 @@ nmap <leader>rl :call OmniSharp#ReloadSolution()<cr>
 set hidden
 ```
 
-OmniSharp works very well with the (NeoComplCache) [https://github.com/Shougo/neocomplcache] plugin. Used in conjunction with
+OmniSharp works very well with the [NeoComplCache] (https://github.com/Shougo/neocomplcache) plugin. Used in conjunction with
 NeoComplCache, OmniSharp can provide an experience matching or even bettering
 Visual Studio intellisense. Completions are provided as you type.
 These are my settings to use with this plugin. Don't set these unless you use this plugin! 
