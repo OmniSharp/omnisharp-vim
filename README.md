@@ -85,6 +85,8 @@ nmap nm :call OmniSharp#Rename()<cr>
 nmap <F2> :call OmniSharp#Rename()<cr>      
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
+" Force OmniSharp to reload the solution. Useful when switching branches etc.
+nmap <leader>rl :call OmniSharp#ReloadSolution()<cr>
 
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
