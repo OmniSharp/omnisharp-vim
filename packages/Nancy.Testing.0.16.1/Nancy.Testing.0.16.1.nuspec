@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Nancy.Testing</id>
+    <version>0.16.1</version>
+    <title>Nancy.Testing</title>
+    <authors>Andreas Håkansson,  Steven Robbins and contributors</authors>
+    <owners>Andreas Håkansson,  Steven Robbins and contributors</owners>
+    <licenseUrl>https://github.com/NancyFx/Nancy/blob/master/license.txt</licenseUrl>
+    <projectUrl>http://nancyfx.org/</projectUrl>
+    <iconUrl>http://nancyfx.org/nancy-nuget.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Test harness for Nancy applications.</description>
+    <summary>Nancy is a lightweight web framework for the .Net platform, inspired by Sinatra. Nancy aim at delivering a low ceremony approach to building light, fast web applications.</summary>
+    <releaseNotes />
+    <copyright>Andreas Håkansson, Steven Robbins and contributors</copyright>
+    <language>en-US</language>
+    <tags>Nancy Testing</tags>
+    <dependencies>
+      <dependency id="Nancy" version="0.16.1" />
+      <dependency id="CsQuery" version="1.3.3" />
+    </dependencies>
+    <references>
+      <reference file="Nancy.Testing.dll" />
+    </references>
+  </metadata>
+</package>
