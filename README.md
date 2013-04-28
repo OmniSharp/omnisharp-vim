@@ -12,6 +12,13 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 * Contextual code completion
 	* Code documentation is displayed in the preview window when available
 	* CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
+	* "Subsequence" completions are also supported. e.g. Console.Wline would also complete to Console.WriteLine
+	* Completions are ranked in the following order
+		* Exact start match (case sensitive)
+		* Exact start match (case insensitive)
+		* CamelCase completions
+		* Subsequence match completions
+
 * Jump to the definition of a type/variable/method
 * Find implementations/derived types
 * Find usages
