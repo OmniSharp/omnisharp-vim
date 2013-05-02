@@ -72,6 +72,9 @@ To use the other features, you'll want to create key bindings for them. See the 
 ### Example vimrc
 
 ```vim
+" OmniSharp won't work without this setting
+filetype plugin on
+
 "This is the default value, setting it isn't actually necessary
 let g:OmniSharp_host = "http://localhost:2000"
 
