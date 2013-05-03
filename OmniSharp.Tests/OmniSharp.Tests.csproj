@@ -78,6 +78,7 @@
     <Compile Include="AutoComplete\CompletionTestBase.cs" />
     <Compile Include="AutoComplete\ConstructorParameterCompletions.cs" />
     <Compile Include="AutoComplete\DerivedTypeCompletions.cs" />
+    <Compile Include="CodeFormat\CodeFormatTest.cs" />
     <Compile Include="Rename\Buffer.cs" />
     <Compile Include="Rename\FakeSolutionBuilder.cs" />
     <Compile Include="Rename\MultiFileRenameTests.cs" />
@@ -105,7 +106,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="FindUsages\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Import Condition="HasTrailingSlash('$(SolutionDir)')" Project="$(SolutionDir).nuget\NuGet.targets" />-->
   <!--<Import Condition="!HasTrailingSlash('$(SolutionDir)')" Project="$(SolutionDir)\.nuget\NuGet.targets" />-->
@@ -116,7 +119,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="FindUsages\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

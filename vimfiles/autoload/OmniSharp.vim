@@ -30,9 +30,6 @@ if !exists("g:OmniSharp_typeLookupInPreview")
 	let g:OmniSharp_typeLookupInPreview = 0
 endif
 
-
-
-
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
 		"store the current cursor position
@@ -172,4 +169,8 @@ endfunction
 
 function! OmniSharp#ReloadSolution()
 	python getResponse("/reloadsolution")
+endfunction
+
+function! OmniSharp#CodeFormat()
+	python codeFormat()
 endfunction

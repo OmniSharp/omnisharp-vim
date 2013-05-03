@@ -176,9 +176,14 @@ def renameTo(renameTo):
     vim.command(':b ' + currentBuffer)
     vim.current.window.cursor = cursor
 
+def setBuffer(buffer):
+    lines = buffer.splitlines()
+    lines = [line.encode('utf-8') for line in lines]
+    vim.current.buffer[:] = lines
+
 def build(ret):
     response = json.loads(getResponse('/build'))
-    
+
     success = response["Success"]
     if success:
         print "Build succeeded"
@@ -188,3 +193,6 @@ def build(ret):
     quickfixes = response['QuickFixes']
     populateQuickFix(ret, quickfixes)
 
+def codeFormat():
+    response = json.loads(getResponse('/codeformat'))
+    setBuffer(response["Buffer"])

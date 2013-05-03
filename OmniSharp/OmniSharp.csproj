@@ -110,6 +110,9 @@
     <Compile Include="Build\BuildHandler.cs" />
     <Compile Include="Build\BuildModule.cs" />
     <Compile Include="Build\BuildResponse.cs" />
+    <Compile Include="CodeFormat\CodeFormatHandler.cs" />
+    <Compile Include="CodeFormat\CodeFormatModule.cs" />
+    <Compile Include="CodeFormat\CodeFormatResponse.cs" />
     <Compile Include="Extensions\NodeExtensions.cs" />
     <Compile Include="FindUsages\AstNodeExtensions.cs" />
     <Compile Include="FindUsages\FindUsagesHandler.cs" />
