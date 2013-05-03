@@ -16,11 +16,12 @@ namespace OmniSharp.Tests.CodeFormat
 }";
 
             string expected =
-@"public class Test 
+@"public class Test
 {
 }";
             var handler = new CodeFormatHandler();
-            handler.Format(new Request {Buffer = code}).Buffer.ShouldEqual(expected);
+            var buffer = handler.Format(new Request {Buffer = code}).Buffer;
+            buffer.ShouldEqual(expected);
         }
     }
 }

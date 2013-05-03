@@ -11,7 +11,7 @@ namespace OmniSharp.CodeFormat
         {
             var document = new StringBuilderDocument(request.Buffer);
             var options = new TextEditorOptions();
-            options.EolMarker = "\n";
+            options.EolMarker = Environment.NewLine;
             options.WrapLineLength = 80;
             var policy = FormattingOptionsFactory.CreateAllman();
             var visitor = new AstFormattingVisitor(policy, document, options);
@@ -20,7 +20,6 @@ namespace OmniSharp.CodeFormat
             syntaxTree.AcceptVisitor(visitor);
             visitor.ApplyChanges();
             return new CodeFormatResponse(document.Text);
-
         }
     }
 }
