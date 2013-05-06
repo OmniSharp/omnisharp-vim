@@ -1,6 +1,6 @@
 #OmniSharp
 
-OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provied below.
+OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provided below.
 
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
@@ -43,7 +43,24 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 
 ##Installation
 
-Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). If you installed Vim using the windows installer, you will need to install the x86 (32 bit!) version of Python.
+[pathogen.vim](https://github.com/tpope/vim-pathogen) is the recommended way to install OmniSharp.
+
+###Linux
+    cd ~/.vim/bundle
+    git clone https://github.com/scrooloose/nerdtree.git
+    cd Omnisharp/server
+	xbuild
+
+###Windows
+	c:\
+	cd c:\Users\username\vimfiles\bundle
+    git clone https://github.com/scrooloose/nerdtree.git
+    cd Omnisharp\server
+	msbuild
+
+###Install Python
+Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). Make sure that you pick correct version of Python to match the architecture of Vim. 
+For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
 Verify that Python is working inside Vim with 
 
@@ -51,7 +68,6 @@ Verify that Python is working inside Vim with
 :python print "hi"
 ```
 
-Copy the contents of vimfiles into your $VIM\vimfiles directory.
 
 (Optional but highly recommended) Install [SuperTab] (https://github.com/ervandew/supertab) Vim plugin.
 
