@@ -45,7 +45,7 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 
 [pathogen.vim](https://github.com/tpope/vim-pathogen) is the recommended way to install OmniSharp.
 
-###Linux
+###OSX / Linux
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
     cd Omnisharp/server
