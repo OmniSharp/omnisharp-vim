@@ -15,7 +15,6 @@ python << EOF
 import vim, os.path
 py_path = os.path.join(vim.eval("s:py_path"), "..", "python", "OmniSharp.py")
 vim.command("let s:py_path = '" + py_path + "'")
-print py_path
 EOF
 exec "pyfile " . s:py_path
 
