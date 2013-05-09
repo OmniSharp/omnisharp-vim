@@ -8,15 +8,18 @@ let g:OmniSharp_loaded = 1
 "when the first match contains parentheses.
 "Temporarily disable it
 set noshowmatch
-
+let s:omnisharp_path = expand('<sfile>:p:h')
 "Load python/OmniSharp.py
-let s:py_path=fnameescape(expand('<sfile>:p:h'))
+let s:py_path = s:omnisharp_path
+let s:omnisharp_server = s:omnisharp_path
 python << EOF
 import vim, os.path
-py_path = os.path.join(vim.eval("s:py_path"), "..", "python", "OmniSharp.py")
+py_path = os.path.join(vim.eval("s:omnisharp_path"), "..", "python", "OmniSharp.py")
+omnisharp_server = os.path.join(vim.eval("s:omnisharp_server"), "..", "server", "OmniSharp", "bin", "Debug", "OmniSharp.exe")
 vim.command("let s:py_path = '" + py_path + "'")
+vim.command("let s:omnisharp_server = '" + omnisharp_server + "'")
 EOF
-exec "pyfile " . s:py_path
+exec "pyfile " . fnameescape(s:py_path)
 
 "Setup variable defaults
 "Default value for the server address
@@ -172,4 +175,50 @@ endfunction
 
 function! OmniSharp#CodeFormat()
 	python codeFormat()
+endfunction
+
+function! OmniSharp#StartServer()
+	"get the path for the current buffer
+	let folder = expand('%:p:h')
+	let solutionfiles = globpath(folder, "*.sln")
+	
+	while (solutionfiles == '')
+		let lastfolder = folder
+		"traverse up a level
+
+		let folder = fnamemodify(folder, ':p:h:h')
+		if(folder == lastfolder)
+			break
+		endif
+		let solutionfiles = globpath(folder , "*.sln")
+	endwhile
+
+    if (solutionfiles != '')
+		let array = split(solutionfiles, '\n')
+		if (len(array) == 1)
+			call OmniSharp#StartServerSolution(array[0])
+		else
+			let index = 1
+			for solutionfile in array
+				echo index . ' - '. solutionfile
+				let index = index + 1
+			endfor
+			echo 'Choose a solution file'
+			let option=nr2char(getchar())
+			if(option < '1' || option > '9')
+				return
+			endif
+			if(option > len(array))
+				return
+			endif
+
+			call OmniSharp#StartServerSolution(array[option - 1])
+		endif
+	else
+		echoerr "Did not find a solution file"
+	endif
+endfunction
+
+function! OmniSharp#StartServerSolution(solutionPath)
+	silent! exec '! ' . shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
 endfunction
