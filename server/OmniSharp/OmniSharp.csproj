@@ -103,8 +103,13 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddToProject\AddToProjectHandler.cs" />
+    <Compile Include="AddToProject\AddToProjectModule.cs" />
+    <Compile Include="AddToProject\AddToProjectRequest.cs" />
+    <Compile Include="AddToProject\ProjectNotFoundException.cs" />
     <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
     <Compile Include="Build\BuildHandler.cs" />
