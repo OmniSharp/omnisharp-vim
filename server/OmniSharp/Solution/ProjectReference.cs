@@ -17,8 +17,10 @@ namespace OmniSharp.Solution
 
         public IAssembly Resolve(ITypeResolveContext context)
         {
-            var project = _solution.Projects.Single(p => string.Equals(p.Title, _projectTitle, StringComparison.OrdinalIgnoreCase));
-            return project.ProjectContent.Resolve(context);
+            var project = _solution.Projects.FirstOrDefault(p => string.Equals(p.Title, _projectTitle, StringComparison.OrdinalIgnoreCase));
+            if (project != null) 
+                return project.ProjectContent.Resolve(context);
+            return null;
         }
     }
 }

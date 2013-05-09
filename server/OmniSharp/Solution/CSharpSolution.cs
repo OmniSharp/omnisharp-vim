@@ -46,7 +46,6 @@ namespace OmniSharp.Solution
         public CSharpSolution(string fileName)
         {
             new Action<string>(LoadSolution).BeginInvoke(fileName, null, null);
-            //LoadSolution(fileName);
         }
 
         private void LoadSolution(string fileName)
