@@ -220,5 +220,6 @@ function! OmniSharp#StartServer()
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
-	silent! exec '! ' . shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
+	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
+	call dispatch#start(command, {'background': 0})
 endfunction
