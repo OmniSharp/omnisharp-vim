@@ -21,6 +21,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.NRefactory.Utils;
@@ -36,6 +37,8 @@ namespace OmniSharp.Solution
         List<IAssemblyReference> References { get; set; }
         CSharpFile GetFile(string fileName);
         CSharpParser CreateParser();
+        XDocument AsXml();
+        void Save(XDocument project);
     }
 
     public class CSharpProject : IProject
@@ -159,6 +162,16 @@ namespace OmniSharp.Solution
         public CSharpParser CreateParser()
         {
             return new CSharpParser(_compilerSettings);
+        }
+
+        public XDocument AsXml()
+        {
+            return XDocument.Load(FileName);
+        }
+
+        public void Save(XDocument project)
+        {
+            project.Save(FileName);
         }
 
         public override string ToString()

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
 using OmniSharp.Solution;
@@ -17,9 +18,10 @@ namespace OmniSharp.Tests
         static readonly Lazy<IUnresolvedAssembly> systemCore = new Lazy<IUnresolvedAssembly>(
             () => new CecilLoader().LoadAssemblyFile(typeof (Enumerable).Assembly.Location));
         
-        public FakeProject(string name = "fake")
+        public FakeProject(string name = "fake", string fileName = "fake.csproj")
         {
             Name = name;
+            FileName = fileName;
             Files = new List<CSharpFile>();
             this.ProjectContent = new CSharpProjectContent();
             this.ProjectContent.SetAssemblyName(name);
@@ -44,11 +46,22 @@ namespace OmniSharp.Tests
         public string FileName { get; private set; }
         public List<CSharpFile> Files { get; private set; }
         public List<IAssemblyReference> References { get; set; }
+        public XDocument XmlRepresentation { get; set; } 
 
         public CSharpParser CreateParser()
         {
             var settings = new CompilerSettings();
             return new CSharpParser(settings);
+        }
+
+        public XDocument AsXml()
+        {
+            return XmlRepresentation;
+        }
+
+        public void Save(XDocument project)
+        {
+            XmlRepresentation = project;
         }
     }
 }
