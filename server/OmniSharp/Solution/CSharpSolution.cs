@@ -110,7 +110,11 @@ namespace OmniSharp.Solution
                 {
                     var projectFile = files.First();
                     project = Projects.First(p => projectFile.FullName.Contains(p.FileName));
-                    project.Files.Add(new CSharpFile(project, filename));
+                    if (File.Exists(filename))
+                    {
+                        project.Files.Add(new CSharpFile(project, filename));
+                    }
+                    
                 }
             }
             return project ?? _orphanProject;
