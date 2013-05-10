@@ -95,9 +95,15 @@ namespace OmniSharp.Solution
 
             foreach (var item in p.GetItems("Compile"))
             {
-                string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude).FixPath();
-                if (File.Exists(path))
-                    Files.Add(new CSharpFile(this, path));
+                try
+                {
+                    string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude).FixPath();
+                    if (File.Exists(path))
+                        Files.Add(new CSharpFile(this, path));
+                }
+                catch (NullReferenceException)
+                {
+                }
             }
 
             References = new List<IAssemblyReference>();
