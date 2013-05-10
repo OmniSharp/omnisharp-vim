@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
 
@@ -38,6 +39,16 @@ namespace OmniSharp.Solution
         public CSharpParser CreateParser()
         {
             return new CSharpParser();
+        }
+
+        public XDocument AsXml()
+        {
+            return XDocument.Load(FileName);
+        }
+
+        public void Save(XDocument project)
+        {
+            project.Save(FileName);
         }
     }
 }

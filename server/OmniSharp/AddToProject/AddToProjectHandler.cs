@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using OmniSharp.Solution;
 
@@ -25,7 +26,7 @@ namespace OmniSharp.AddToProject
                 throw new ProjectNotFoundException(string.Format("Unable to find project relative to file {0}", request.FileName));
             }
 
-            var project = XDocument.Load(relativeProject.FileName);
+            var project = relativeProject.AsXml();
 
             var relativeFileName = request.FileName.Replace(relativeProject.FileName.Substring(0, relativeProject.FileName.LastIndexOf(_osSpecificFileSeparator) + 1), "");
 
@@ -33,7 +34,7 @@ namespace OmniSharp.AddToProject
                                           .Elements(_msBuildNameSpace + "ItemGroup")
                                           .Elements(_msBuildNameSpace + "Compile").ToList();
 
-            var fileAlreadyInProject = compilationNodes.Any(n => n.Attribute("Include").Value == relativeFileName);
+            var fileAlreadyInProject = compilationNodes.Any(n => n.Attribute("Include").Value.Equals(relativeFileName, StringComparison.InvariantCultureIgnoreCase));
 
             if (!fileAlreadyInProject)
             {
@@ -43,7 +44,7 @@ namespace OmniSharp.AddToProject
 
                 compilationNodeParent.Add(newFileElement);
 
-                project.Save(relativeProject.FileName);
+                relativeProject.Save(project);
             }
         }
     }
