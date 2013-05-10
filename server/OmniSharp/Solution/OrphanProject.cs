@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
@@ -43,12 +44,12 @@ namespace OmniSharp.Solution
 
         public XDocument AsXml()
         {
-            return XDocument.Load(FileName);
+            throw new NotImplementedException();
         }
 
         public void Save(XDocument project)
         {
-            project.Save(FileName);
+            throw new NotImplementedException();
         }
     }
 }
