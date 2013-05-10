@@ -19,6 +19,11 @@ namespace OmniSharp.AddToProject
 
         public void AddToProject(AddToProjectRequest request)
         {
+            if (request.FileName == null || !request.FileName.EndsWith(".cs"))
+            {
+                return;
+            }
+
             var relativeProject = _solution.ProjectContainingFile(request.FileName);
 
             if (relativeProject == null)
@@ -28,7 +33,8 @@ namespace OmniSharp.AddToProject
 
             var project = relativeProject.AsXml();
 
-            var relativeFileName = request.FileName.Replace(relativeProject.FileName.Substring(0, relativeProject.FileName.LastIndexOf(_osSpecificFileSeparator) + 1), "");
+            var relativeFileName = request.FileName.Replace(relativeProject.FileName.Substring(0, relativeProject.FileName.LastIndexOf(_osSpecificFileSeparator) + 1), "")
+                .Replace(_osSpecificFileSeparator, @"\");
 
             var compilationNodes = project.Element(_msBuildNameSpace + "Project")
                                           .Elements(_msBuildNameSpace + "ItemGroup")
