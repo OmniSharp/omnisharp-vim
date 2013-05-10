@@ -1,4 +1,5 @@
 ﻿using System.Xml.Linq;
+using FluentAssertions;
 using NUnit.Framework;
 using OmniSharp.AddToProject;
 
@@ -27,7 +28,7 @@ namespace OmniSharp.Tests.AddToProject
              var handler = new AddToProjectHandler(solution);
              handler.AddToProject(request);
 
-             Assert.That(project.AsXml(), Is.EqualTo(expectedXml));
+             project.AsXml().Should().Be(expectedXml);
          }
 
         [Test]
@@ -51,7 +52,7 @@ namespace OmniSharp.Tests.AddToProject
             var handler = new AddToProjectHandler(solution);
             handler.AddToProject(request);
 
-            Assert.That(project.AsXml(), Is.EqualTo(expectedXml));
+            project.AsXml().ToString().Should().Be(expectedXml.ToString());
         }
     }
 }
