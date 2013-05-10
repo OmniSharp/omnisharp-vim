@@ -29,6 +29,7 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 * Simple syntax error highlighting
 * Integrated xbuild/msbuild
 * Code formatter
+* Add file to project (currently will only add .cs files to a .csproj file)
 
 
 ##Screenshots
@@ -115,6 +116,7 @@ command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 " Force OmniSharp to reload the solution. Useful when switching branches etc.
 nmap <leader>rl :call OmniSharp#ReloadSolution()<cr>
 nmap <leader>cf :call OmniSharp#CodeFormat()<cr>
+nmap <leader>tp :call OmniSharp#AddToProject()<cr>
 
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden

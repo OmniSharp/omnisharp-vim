@@ -173,3 +173,7 @@ endfunction
 function! OmniSharp#CodeFormat()
 	python codeFormat()
 endfunction
+
+function! OmniSharp#AddToProject()
+	python getResponse("/addtoproject")
+endfunction

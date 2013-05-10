@@ -103,8 +103,13 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddToProject\AddToProjectHandler.cs" />
+    <Compile Include="AddToProject\AddToProjectModule.cs" />
+    <Compile Include="AddToProject\AddToProjectRequest.cs" />
+    <Compile Include="AddToProject\ProjectNotFoundException.cs" />
     <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
     <Compile Include="Build\BuildHandler.cs" />
@@ -191,6 +196,7 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!--<Import Project="$(SolutionDir)\.nuget\NuGet.targets" />-->
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
