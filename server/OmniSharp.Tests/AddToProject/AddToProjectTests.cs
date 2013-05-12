@@ -2,6 +2,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using OmniSharp.AddToProject;
+using OmniSharp.Solution;
 
 namespace OmniSharp.Tests.AddToProject
 {
@@ -99,6 +100,39 @@ namespace OmniSharp.Tests.AddToProject
             handler.AddToProject(request);
 
             project.AsXml().ToString().Should().Be(expectedXml.ToString());
+        }
+
+        [Test, ExpectedException(typeof(ProjectNotFoundException))]
+        public void ShouldThrowProjectNotFoundExceptionWhenProjectNotFound()
+        {
+            var project = new FakeProject(fileName: @"/test/code/fake.csproj");
+            var solution = new FakeSolution(@"/test/fake.sln");
+            solution.Projects.Add(project);
+
+            var request = new AddToProjectRequest
+            {
+                FileName = @"/test/folder/Test.cs"
+            };
+
+            var handler = new AddToProjectHandler(solution);
+            handler.AddToProject(request);
+        }
+
+        [Test, ExpectedException(typeof (ProjectNotFoundException))]
+        public void ShouldThrowProjectNotFoundExceptionForOrphanProject()
+        {
+            var solution = new FakeSolution(@"/test/fake.sln");
+            var project = new OrphanProject(solution);
+            project.Files.Add(new CSharpFile(project, "/test/folder/Test.cs", "Some content..."));
+            solution.Projects.Add(project);
+
+            var request = new AddToProjectRequest
+            {
+                FileName = @"/test/folder/Test.cs"
+            };
+
+            var handler = new AddToProjectHandler(solution);
+            handler.AddToProject(request);
         }
     }
 }
