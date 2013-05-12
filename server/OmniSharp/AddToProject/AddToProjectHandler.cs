@@ -26,7 +26,7 @@ namespace OmniSharp.AddToProject
 
             var relativeProject = _solution.ProjectContainingFile(request.FileName);
 
-            if (relativeProject == null)
+            if (relativeProject == null || relativeProject is OrphanProject)
             {
                 throw new ProjectNotFoundException(string.Format("Unable to find project relative to file {0}", request.FileName));
             }
