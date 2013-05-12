@@ -11,6 +11,12 @@ namespace OmniSharp.Tests
         {
             Projects = new List<IProject>();
         }
+
+        public FakeSolution(string filename) : this()
+        {
+            FileName = filename;
+        }
+
         public List<IProject> Projects { get; private set; }
         public string FileName { get; private set; }
 

@@ -221,5 +221,9 @@ endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
 	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
-	call dispatch#start(command, {'background': 0})
+	call dispatch#start(command, {'background': 1})
+endfunction
+
+function! OmniSharp#AddToProject()
+	python getResponse("/addtoproject")
 endfunction
