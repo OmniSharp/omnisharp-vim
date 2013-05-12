@@ -99,7 +99,7 @@ namespace OmniSharp.Solution
                 {
                     string path = Path.Combine(p.DirectoryPath, item.EvaluatedInclude).FixPath();
                     if (File.Exists(path))
-                        Files.Add(new CSharpFile(this, path));
+                        Files.Add(new CSharpFile(this, new FileInfo(path).FullName));
                 }
                 catch (NullReferenceException)
                 {
