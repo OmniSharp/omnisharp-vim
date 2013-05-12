@@ -11,11 +11,10 @@ set noshowmatch
 let s:omnisharp_path = expand('<sfile>:p:h')
 "Load python/OmniSharp.py
 let s:py_path = s:omnisharp_path
-let s:omnisharp_server = s:omnisharp_path
 python << EOF
 import vim, os.path
 py_path = os.path.join(vim.eval("s:omnisharp_path"), "..", "python", "OmniSharp.py")
-omnisharp_server = os.path.join(vim.eval("s:omnisharp_server"), "..", "server", "OmniSharp", "bin", "Debug", "OmniSharp.exe")
+omnisharp_server = os.path.join(vim.eval("s:omnisharp_path"), "..", "server", "OmniSharp", "bin", "Debug", "OmniSharp.exe")
 vim.command("let s:py_path = '" + py_path + "'")
 vim.command("let s:omnisharp_server = '" + omnisharp_server + "'")
 EOF
