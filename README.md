@@ -99,25 +99,26 @@ let g:OmniSharp_host = "http://localhost:2000"
 "Set the type lookup function to use the preview window instead of the status line
 let g:OmniSharp_typeLookupInPreview = 1
 
-map <F5> :wa!<cr>:call OmniSharp#Build()<cr>
-map <F12> :call OmniSharp#GotoDefinition()<cr>
-map gd :call OmniSharp#GotoDefinition()<cr>
-nmap fi :call OmniSharp#FindImplementations()<cr>
-nmap fu :call OmniSharp#FindUsages()<cr>
-nmap <leader>tt :call OmniSharp#TypeLookup()<cr>
+nnoremap <F5> :wa!<cr>:call OmniSharp#Build()<cr>
+nnoremap <F12> :call OmniSharp#GotoDefinition()<cr>
+nnoremap gd :call OmniSharp#GotoDefinition()<cr>
+nnoremap fi :call OmniSharp#FindImplementations()<cr>
+nnoremap fu :call OmniSharp#FindUsages()<cr>
+nnoremap <leader>tt :call OmniSharp#TypeLookup()<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
-nmap <space> :call OmniSharp#GetCodeActions()<cr>
+nnoremap <space> :call OmniSharp#GetCodeActions()<cr>
 
 " rename with dialog
-nmap nm :call OmniSharp#Rename()<cr>
-nmap <F2> :call OmniSharp#Rename()<cr>      
+nnoremap nm :call OmniSharp#Rename()<cr>
+nnoremap <F2> :call OmniSharp#Rename()<cr>      
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 " Force OmniSharp to reload the solution. Useful when switching branches etc.
-nmap <leader>rl :call OmniSharp#ReloadSolution()<cr>
-nmap <leader>cf :call OmniSharp#CodeFormat()<cr>
-nmap <leader>tp :call OmniSharp#AddToProject()<cr>
-
+nnoremap <leader>rl :call OmniSharp#ReloadSolution()<cr>
+nnoremap <leader>cf :call OmniSharp#CodeFormat()<cr>
+nnoremap <leader>tp :call OmniSharp#AddToProject()<cr>
+" (Experimental - uses vim-dispatch plugin) - Start the omnisharp server for the current solution
+nnoremap <leader>ss :call OmniSharp#StartServer()<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
 ```
