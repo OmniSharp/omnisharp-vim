@@ -1,8 +1,8 @@
 ﻿using System.Xml.Linq;
-using FluentAssertions;
 using NUnit.Framework;
 using OmniSharp.AddToProject;
 using OmniSharp.Solution;
+using Should;
 
 namespace OmniSharp.Tests.AddToProject
 {
@@ -29,7 +29,7 @@ namespace OmniSharp.Tests.AddToProject
              var handler = new AddToProjectHandler(solution);
              handler.AddToProject(request);
 
-             project.AsXml().Should().Be(expectedXml);
+             project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
          }
 
         [Test]
@@ -52,7 +52,7 @@ namespace OmniSharp.Tests.AddToProject
             var handler = new AddToProjectHandler(solution);
             handler.AddToProject(request);
 
-            project.AsXml().ToString().Should().Be(expectedXml.ToString());
+            project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace OmniSharp.Tests.AddToProject
             var handler = new AddToProjectHandler(solution);
             handler.AddToProject(request);
 
-            project.AsXml().ToString().Should().Be(expectedXml.ToString());
+            project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace OmniSharp.Tests.AddToProject
             var handler = new AddToProjectHandler(solution);
             handler.AddToProject(request);
 
-            project.AsXml().ToString().Should().Be(expectedXml.ToString());
+            project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
         }
 
         [Test, ExpectedException(typeof(ProjectNotFoundException))]
