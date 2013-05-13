@@ -8,16 +8,8 @@ let g:OmniSharp_loaded = 1
 "when the first match contains parentheses.
 "Temporarily disable it
 set noshowmatch
-let s:omnisharp_path = expand('<sfile>:p:h')
 "Load python/OmniSharp.py
-let s:py_path = s:omnisharp_path
-python << EOF
-import vim, os.path
-py_path = os.path.join(vim.eval("s:omnisharp_path"), "..", "python", "OmniSharp.py")
-omnisharp_server = os.path.join(vim.eval("s:omnisharp_path"), "..", "server", "OmniSharp", "bin", "Debug", "OmniSharp.exe")
-vim.command("let s:py_path = '" + py_path + "'")
-vim.command("let s:omnisharp_server = '" + omnisharp_server + "'")
-EOF
+let s:py_path = join([expand('<sfile>:p:h:h'), "python", "OmniSharp.py"], '/')
 exec "pyfile " . fnameescape(s:py_path)
 
 "Setup variable defaults
