@@ -38,7 +38,7 @@ namespace OmniSharp.Build
             var startInfo = new ProcessStartInfo
                 {
                     FileName = build,
-                    Arguments = IsUnix ? "" : "/m " + "/nologo /property:GenerateFullPaths=true " + _solution.FileName,
+                    Arguments = IsUnix ? "" : "/m " + "/nologo /property:GenerateFullPaths=true \"" + _solution.FileName + "\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     RedirectStandardInput = true,
