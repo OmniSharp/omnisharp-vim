@@ -192,7 +192,7 @@ endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
 	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
-	call dispatch#start(command, {'background': 1})
+	call dispatch#start(command, {'background': has('win32') ? 0 : 1})
 endfunction
 
 function! OmniSharp#AddToProject()
