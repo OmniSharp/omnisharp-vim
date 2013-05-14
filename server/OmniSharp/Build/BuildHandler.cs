@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 using OmniSharp.Common;
 using OmniSharp.Solution;
 
@@ -12,12 +11,14 @@ namespace OmniSharp.Build
         private readonly ISolution _solution;
         private readonly BuildResponse _response;
         private readonly List<QuickFix> _quickFixes;
+        private readonly BuildLogParser _logParser;
 
         public BuildHandler(ISolution solution)
         {
             _solution = solution;
             _response = new BuildResponse();
             _quickFixes = new List<QuickFix>();
+            _logParser = new BuildLogParser();
         }
 
 		private static bool IsUnix
@@ -72,22 +73,9 @@ namespace OmniSharp.Build
 
             if (e.Data == "Build succeeded.")
                 _response.Success = true;
-            if (e.Data.Contains("error CS"))
-            {
-                var matches = Regex.Matches(e.Data, @"\s+(.*cs)\((\d+),(\d+)\).*error CS\d+: (.*) \[", RegexOptions.Compiled);
-                if (!Regex.IsMatch(matches[0].Groups[1].Value, @"\d+>"))
-                {
-                    var quickFix = new QuickFix
-                    {
-                        FileName = matches[0].Groups[1].Value,
-                        Line = int.Parse(matches[0].Groups[2].Value),
-                        Column = int.Parse(matches[0].Groups[3].Value),
-                        Text = matches[0].Groups[4].Value.Replace("'", "''")
-                    };
-
-                    _quickFixes.Add(quickFix);    
-                }
-            }
+            var quickfix = _logParser.Parse(e.Data);
+            if(quickfix != null)
+                _quickFixes.Add(quickfix);
         }
 
         void ErrorDataReceived(object sender, DataReceivedEventArgs e)

@@ -81,6 +81,7 @@
     <Compile Include="AutoComplete\CompletionTestBase.cs" />
     <Compile Include="AutoComplete\ConstructorParameterCompletions.cs" />
     <Compile Include="AutoComplete\DerivedTypeCompletions.cs" />
+    <Compile Include="Build\BuildLogParserTests.cs" />
     <Compile Include="CodeFormat\CodeFormatTest.cs" />
     <Compile Include="Rename\Buffer.cs" />
     <Compile Include="Rename\FakeSolutionBuilder.cs" />

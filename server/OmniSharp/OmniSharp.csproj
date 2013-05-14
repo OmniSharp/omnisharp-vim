@@ -113,6 +113,7 @@
     <Compile Include="AutoComplete\AutoCompleteResponse.cs" />
     <Compile Include="AutoComplete\CompletionDataExtensions.cs" />
     <Compile Include="Build\BuildHandler.cs" />
+    <Compile Include="Build\BuildLogParser.cs" />
     <Compile Include="Build\BuildModule.cs" />
     <Compile Include="Build\BuildResponse.cs" />
     <Compile Include="CodeFormat\CodeFormatHandler.cs" />
