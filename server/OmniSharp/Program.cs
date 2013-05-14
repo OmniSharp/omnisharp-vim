@@ -55,7 +55,10 @@ namespace OmniSharp
             
             nancyHost.Start();
  
-            Console.ReadLine();
+            while (Console.ReadLine() != "exit")
+            {
+                //Do nothing
+            }
             nancyHost.Stop();
         }
 
