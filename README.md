@@ -99,6 +99,18 @@ let g:OmniSharp_host = "http://localhost:2000"
 "Set the type lookup function to use the preview window instead of the status line
 let g:OmniSharp_typeLookupInPreview = 1
 
+"Set autocomplete function to OmniSharp (if not using YouCompleteMe completion plugin)
+setlocal omnifunc=OmniSharp#Complete
+
+"Super tab settings
+"let g:SuperTabDefaultCompletionType = 'context'
+"let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
+"let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
+"let g:SuperTabClosePreviewOnPopupClose = 1
+
+"don't autoselect first item in omnicomplete, show if only one item (for preview)
+set completeopt=longest,menuone,preview
+
 nnoremap <F5> :wa!<cr>:call OmniSharp#Build()<cr>
 nnoremap <F12> :call OmniSharp#GotoDefinition()<cr>
 nnoremap gd :call OmniSharp#GotoDefinition()<cr>
