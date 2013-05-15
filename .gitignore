@@ -8,6 +8,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.sublime-workspace
 
 # Build results
 
