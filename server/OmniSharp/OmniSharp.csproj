@@ -106,6 +106,10 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddReference\AddReferenceHandler.cs" />
+    <Compile Include="AddReference\AddReferenceModule.cs" />
+    <Compile Include="AddReference\AddReferenceRequest.cs" />
+    <Compile Include="AddReference\AddReferenceResponse.cs" />
     <Compile Include="AddToProject\AddToProjectHandler.cs" />
     <Compile Include="AddToProject\AddToProjectModule.cs" />
     <Compile Include="AddToProject\AddToProjectRequest.cs" />
