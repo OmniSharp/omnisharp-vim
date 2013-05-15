@@ -21,7 +21,10 @@ def getResponse(endPoint, additionalParameters=None):
     parameters['line'] = vim.eval('line(".")')
     parameters['column'] = vim.eval('col(".")')
     parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-    parameters['filename'] = vim.current.buffer.name
+    if(vim.eval('exists("+shellslash") && &shellslash')):
+        parameters['filename'] = vim.current.buffer.name.replace('/', '\\')
+    else:
+        parameters['filename'] = vim.current.buffer.name
 
     if(additionalParameters != None):
         parameters.update(additionalParameters)
