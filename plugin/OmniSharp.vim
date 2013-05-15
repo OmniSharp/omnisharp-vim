@@ -23,3 +23,12 @@ if !exists("g:OmniSharp_typeLookupInPreview")
 	let g:OmniSharp_typeLookupInPreview = 0
 endif
 
+
+" Auto syntax-check options.
+" Default:
+" g:OmniSharp_BufWritePreSyntaxCheck = 1
+" g:OmniSharp_CursorHoldSyntaxCheck  = 0
+let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, "OmniSharp_BufWritePreSyntaxCheck", 1)
+let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck", 0)
+
+
