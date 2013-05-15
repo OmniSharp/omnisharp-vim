@@ -77,6 +77,12 @@ Verify that Python is working inside Vim with
 	OmniSharp.exe -s (path\to\sln)
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
+Also if you are running OmniSharp as a non-privileged user, or without UAC elevation on Vista or later, you will need to run the following
+
+```http add urlacl url=http://+:2000/ user=DOMAIN\user
+```
+
+This will give your user permission to bind to port 2000.
 
 To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
