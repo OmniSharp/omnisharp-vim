@@ -1,4 +1,4 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi
+import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
 
@@ -32,7 +32,7 @@ def getResponse(endPoint, additionalParameters=None):
     target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
     parameters = urllib.urlencode(parameters)
     try:
-        response = urllib2.urlopen(target, parameters)
+        response = urllib2.urlopen(target, parameters, timeout=int(vim.eval('g:OmniSharp_timeout')))
         return response.read()
     except Exception as e:
         print("OmniSharp : Could not connect to " + target + ": " + str(e))
@@ -50,12 +50,16 @@ def getCompletions(ret, column, partialWord):
 
     command_base = ("add(" + ret +
             ", {'word': '%(CompletionText)s', 'abbr': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
+    enc = vim.eval('&encoding')
     if(js != ''):
         completions = json.loads(js)
         for completion in completions:
             try:
                 command = command_base % completion
-                vim.eval(command)
+                if type(command) == types.StringType:
+                    vim.eval(command)
+                else:
+                    vim.eval(command.encode(enc))
             except:
                 logger.error(command)
 

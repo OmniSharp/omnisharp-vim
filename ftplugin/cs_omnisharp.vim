@@ -6,18 +6,20 @@ endif
 
 
 " Auto syntax check.
-autocmd BufWritePre <buffer>
-\	if g:OmniSharp_BufWritePreSyntaxCheck
-\|		let b:OmniSharp_SyntaxChecked = 1
-\|		call OmniSharp#FindSyntaxErrors()
-\|	else
-\|		let b:OmniSharp_SyntaxChecked = 0
-\|	endif
+augroup plugin-OmniSharp-SyntaxCheck
+	autocmd! * <buffer>
+	autocmd BufWritePre <buffer>
+	\	if g:OmniSharp_BufWritePreSyntaxCheck
+	\|		let b:OmniSharp_SyntaxChecked = 1
+	\|		call OmniSharp#FindSyntaxErrors()
+	\|	else
+	\|		let b:OmniSharp_SyntaxChecked = 0
+	\|	endif
 
-autocmd CursorHold <buffer>
-\	if g:OmniSharp_CursorHoldSyntaxCheck && !get(b:, "OmniSharp_SyntaxChecked", 0)
-\|		let b:OmniSharp_SyntaxChecked = 1
-\|		call OmniSharp#FindSyntaxErrors()
-\|	endif
-
+	autocmd CursorHold <buffer>
+	\	if g:OmniSharp_CursorHoldSyntaxCheck && !get(b:, "OmniSharp_SyntaxChecked", 0)
+	\|		let b:OmniSharp_SyntaxChecked = 1
+	\|		call OmniSharp#FindSyntaxErrors()
+	\|	endif
+augroup END
 
