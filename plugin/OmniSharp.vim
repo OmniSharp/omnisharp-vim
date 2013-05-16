@@ -4,10 +4,6 @@ endif
 
 let g:OmniSharp_loaded = 1
 
-"Load python/OmniSharp.py
-let s:py_path = join([expand('<sfile>:p:h:h'), "python", "OmniSharp.py"], '/')
-exec "pyfile " . fnameescape(s:py_path)
-
 "Setup variable defaults
 "Default value for the server address
 let g:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:2000')
