@@ -32,7 +32,7 @@ def getResponse(endPoint, additionalParameters=None):
     target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
     parameters = urllib.urlencode(parameters)
     try:
-        response = urllib2.urlopen(target, parameters)
+        response = urllib2.urlopen(target, parameters, timeout=int(vim.eval('g:OmniSharp_timeout')))
         return response.read()
     except:
         vim.command("echo 'OmniSharp : Could not connect to " + target + "'")
