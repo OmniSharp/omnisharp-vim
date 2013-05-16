@@ -55,7 +55,7 @@ def getCompletions(ret, column, partialWord):
         completions = json.loads(js)
         for completion in completions:
             try:
-                completion['Description'] = completion['Description'].replace('\r\n', '')
+                completion['Description'] = completion['Description'].replace('\r\n', '\n')
                 command = command_base % completion
                 if type(command) == types.StringType:
                     vim.eval(command)

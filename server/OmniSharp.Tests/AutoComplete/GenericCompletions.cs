@@ -32,7 +32,7 @@ namespace OmniSharp.Tests.AutoComplete
                     return s;
                 }
             }
-            ").ShouldContainOnly("MyExtension()", "MyExtension(int i)");
+            ").ShouldContainOnly("string MyExtension()", "string MyExtension(int i)");
         }
 
         [Test]
@@ -49,8 +49,8 @@ namespace OmniSharp.Tests.AutoComplete
                 }
             }")
                 .ShouldContain(
-                    "Add(string item)",
-                    "AddRange(IEnumerable<string> collection)"); 
+                    "void Add(string item)",
+                    "void AddRange(IEnumerable<string> collection)"); 
         }
     }
 }
