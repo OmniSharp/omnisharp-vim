@@ -14,6 +14,7 @@ namespace OmniSharp.AutoComplete
     {
         private readonly string _partialWord;
         private readonly CSharpAmbience _ambience = new CSharpAmbience {ConversionFlags = AmbienceFlags};
+        private readonly CSharpAmbience _signatureAmbience = new CSharpAmbience {ConversionFlags = AmbienceFlags | ConversionFlags.ShowReturnType};
 
         private const ConversionFlags AmbienceFlags =
             ConversionFlags.ShowParameterList |
@@ -101,8 +102,9 @@ namespace OmniSharp.AutoComplete
 
         private void GenerateMethodSignature(IMethod method)
         {
-            _signature = _ambience.ConvertEntity(method).Replace(";", "");
-            _completionText = _signature.Remove(_signature.IndexOf('(') + 1);
+            _signature = _signatureAmbience.ConvertEntity(method).Replace(";", "");
+            _completionText = _ambience.ConvertEntity(method);
+            _completionText = _completionText.Remove(_completionText.IndexOf('(') + 1);
             var zeroParameterCount = method.IsExtensionMethod ? 1 : 0;
             if (method.Parameters.Count == zeroParameterCount)
             {

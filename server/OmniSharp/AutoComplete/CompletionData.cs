@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ICSharpCode.NRefactory.Completion;
@@ -53,7 +52,7 @@ namespace OmniSharp.AutoComplete
         public string Description
         {
             get { return _description; }
-            set { _description = value.Replace(Environment.NewLine, "\\n").Replace("\"", "''"); }
+            set { _description = value.Replace("\"", "''"); }
         }
 
         public string CompletionText { get; set; }
