@@ -6,6 +6,7 @@ OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
 completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
+An experimental plugin for Sublime Text 2 can be found here :- https://github.com/PaulCampbell/OmniSharpSublimePlugin
 
 ##Features
 
