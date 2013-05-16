@@ -19,12 +19,17 @@ namespace OmniSharp.AddReference
         {
             var project = _solution.ProjectContainingFile(request.FileName);
 
-            if (project != null)
+            if (IsProjectReference(request.Reference))
             {
                 AddProjectReference(request, project);
             }
             
             return null;
+        }
+
+        private bool IsProjectReference(string referenceName)
+        {
+            return _solution.Projects.Any(p => p.FileName.Contains(referenceName));
         }
 
         private void AddProjectReference(AddReferenceRequest request, IProject project)
@@ -60,7 +65,7 @@ namespace OmniSharp.AddReference
                     projectXml.Element(_msBuildNameSpace + "Project").Add(projectItemGroup);
                 }
 
-
+                project.AddReference(new ProjectReference(_solution, projectToReference.Title));
                 project.Save(projectXml);
             }
         }

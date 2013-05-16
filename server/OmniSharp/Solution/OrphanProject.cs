@@ -18,6 +18,11 @@ namespace OmniSharp.Solution
         public string FileName { get; private set; }
         public Guid ProjectId { get; private set; }
 
+        public void AddReference(IAssemblyReference reference)
+        {
+            References.Add(reference);
+        }
+
         private CSharpFile _file;
 
         public OrphanProject(ISolution solution)

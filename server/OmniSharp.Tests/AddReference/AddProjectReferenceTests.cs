@@ -1,32 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Xml.Linq;
 using NUnit.Framework;
 using OmniSharp.AddReference;
-using OmniSharp.Solution;
 using Should;
 
 namespace OmniSharp.Tests.AddReference
 {
     [TestFixture]
-    public class AddProjectReferenceTests
+    public class AddProjectReferenceTests : AddReferenceBase
     {
-        private IProject CreateDefaultProject()
-        {
-            var projectOne = new FakeProject("fakeone", @"c:\test\one\fake1.csproj", Guid.NewGuid())
-                {
-                    Title = "Project One",
-                    XmlRepresentation = XDocument.Parse(@"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                    <ItemGroup>
-                        <Compile Include=""Test.cs""/>
-                    </ItemGroup>
-                </Project>")
-                };
-            projectOne.AddFile("some content", @"c:\test\one\test.cs");
-            return projectOne;
-        }
-
         [Test]
         public void CanAddProjectReferenceWhenNoProjectReferencesExist()
         {
@@ -56,9 +38,8 @@ namespace OmniSharp.Tests.AddReference
                     </ItemGroup>
                 </Project>", string.Concat("{", projectOne.ProjectId.ToString().ToUpperInvariant(), "}")));
 
-            var solution = new FakeSolution(@"c:\test\fake.sln");
-            solution.Projects.Add(projectOne);
-            solution.Projects.Add(projectTwo);
+            Solution.Projects.Add(projectOne);
+            Solution.Projects.Add(projectTwo);
 
             var request = new AddReferenceRequest
                 {
@@ -66,7 +47,7 @@ namespace OmniSharp.Tests.AddReference
                     FileName = @"c:\test\two\test.cs"
                 };
 
-            var handler = new AddReferenceHandler(solution);
+            var handler = new AddReferenceHandler(Solution);
             handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
@@ -111,9 +92,8 @@ namespace OmniSharp.Tests.AddReference
                     </ItemGroup>
                 </Project>", string.Concat("{", projectOne.ProjectId.ToString().ToUpperInvariant(), "}")));
 
-            var solution = new FakeSolution(@"c:\test\fake.sln");
-            solution.Projects.Add(projectOne);
-            solution.Projects.Add(projectTwo);
+            Solution.Projects.Add(projectOne);
+            Solution.Projects.Add(projectTwo);
 
             var request = new AddReferenceRequest
                 {
@@ -121,7 +101,7 @@ namespace OmniSharp.Tests.AddReference
                     FileName = @"c:\test\two\test.cs"
                 };
 
-            var handler = new AddReferenceHandler(solution);
+            var handler = new AddReferenceHandler(Solution);
             handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
@@ -154,9 +134,8 @@ namespace OmniSharp.Tests.AddReference
 
             var expectedXml = XDocument.Parse(xml);
 
-            var solution = new FakeSolution(@"c:\test\fake.sln");
-            solution.Projects.Add(projectOne);
-            solution.Projects.Add(projectTwo);
+            Solution.Projects.Add(projectOne);
+            Solution.Projects.Add(projectTwo);
 
             var request = new AddReferenceRequest
                 {
@@ -164,7 +143,7 @@ namespace OmniSharp.Tests.AddReference
                     FileName = @"c:\test\two\test.cs"
                 };
 
-            var handler = new AddReferenceHandler(solution);
+            var handler = new AddReferenceHandler(Solution);
             handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());

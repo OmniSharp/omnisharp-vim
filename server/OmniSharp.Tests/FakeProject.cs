@@ -50,6 +50,11 @@ namespace OmniSharp.Tests
         public XDocument XmlRepresentation { get; set; }
         public Guid ProjectId { get; private set; }
 
+        public void AddReference(IAssemblyReference reference)
+        {
+            References.Add(reference);
+        }
+
         public CSharpParser CreateParser()
         {
             var settings = new CompilerSettings();

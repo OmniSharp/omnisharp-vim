@@ -40,6 +40,7 @@ namespace OmniSharp.Solution
         XDocument AsXml();
         void Save(XDocument project);
         Guid ProjectId { get; }
+        void AddReference(IAssemblyReference reference);
     }
 
     public class CSharpProject : IProject
@@ -112,7 +113,7 @@ namespace OmniSharp.Solution
             References = new List<IAssemblyReference>();
             string mscorlib = FindAssembly(AssemblySearchPaths, "mscorlib");
             if (mscorlib != null)
-                References.Add(LoadAssembly(mscorlib));
+                AddReference(LoadAssembly(mscorlib));
             else
                 Console.WriteLine("Could not find mscorlib");
 
@@ -135,10 +136,11 @@ namespace OmniSharp.Solution
                 {
                     if (Path.GetFileName(assemblyFileName).Equals("System.Core.dll", StringComparison.OrdinalIgnoreCase))
                         hasSystemCore = true;
+
                     Console.WriteLine("Loading assembly " + item.EvaluatedInclude);
                     try
                     {
-                        References.Add(LoadAssembly(assemblyFileName));
+                        AddReference(LoadAssembly(assemblyFileName));
                     }
                     catch (Exception e)
                     {
@@ -150,9 +152,10 @@ namespace OmniSharp.Solution
                     Console.WriteLine("Could not find referenced assembly " + item.EvaluatedInclude);
             }
             if (!hasSystemCore && FindAssembly(AssemblySearchPaths, "System.Core") != null)
-                References.Add(LoadAssembly(FindAssembly(AssemblySearchPaths, "System.Core")));
+                AddReference(LoadAssembly(FindAssembly(AssemblySearchPaths, "System.Core")));
+
             foreach (var item in p.GetItems("ProjectReference"))
-                References.Add(new ProjectReference(Solution, item.GetMetadataValue("Name")));
+                AddReference(new ProjectReference(Solution, item.GetMetadataValue("Name")));
 
             this.ProjectContent = new CSharpProjectContent()
                 .SetAssemblyName(this.AssemblyName)
@@ -162,6 +165,11 @@ namespace OmniSharp.Solution
         }
 
         public List<IAssemblyReference> References { get; set; }
+
+        public void AddReference(IAssemblyReference reference)
+        {
+            References.Add(reference);
+        }
 
         public CSharpFile GetFile(string fileName)
         {
