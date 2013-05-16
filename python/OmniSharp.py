@@ -49,7 +49,7 @@ def getCompletions(ret, column, partialWord):
     js = getResponse('/autocomplete', parameters)
 
     command_base = ("add(" + ret +
-            ", {'word': '%(CompletionText)s', 'abbr': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
+            ", {'word': '%(CompletionText)s', 'menu': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
     enc = vim.eval('&encoding')
     if(js != ''):
         completions = json.loads(js)
