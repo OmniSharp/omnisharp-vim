@@ -35,7 +35,7 @@ def getResponse(endPoint, additionalParameters=None):
         response = urllib2.urlopen(target, parameters)
         return response.read()
     except Exception as e:
-        vim.command("call confirm('Could not connect to " + target + ":" + str(e) + "')")
+        print("OmniSharp : Could not connect to " + target + ": " + str(e))
         return ''
 
 
