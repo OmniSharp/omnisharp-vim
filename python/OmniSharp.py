@@ -34,8 +34,8 @@ def getResponse(endPoint, additionalParameters=None):
     try:
         response = urllib2.urlopen(target, parameters)
         return response.read()
-    except:
-        vim.command("call confirm('Could not connect to " + target + "')")
+    except Exception as e:
+        vim.command("call confirm('Could not connect to " + target + ":" + str(e) + "')")
         return ''
 
 
