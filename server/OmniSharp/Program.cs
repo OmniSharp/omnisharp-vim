@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using NDesk.Options;
 using Nancy.Hosting.Self;
 using OmniSharp.Solution;
@@ -57,7 +58,7 @@ namespace OmniSharp
  
             while (Console.ReadLine() != "exit")
             {
-                //Do nothing
+                Thread.Sleep(1000); // To fix CPU spike on linux
             }
             nancyHost.Stop();
         }
