@@ -39,6 +39,7 @@ namespace OmniSharp.Solution
         CSharpParser CreateParser();
         XDocument AsXml();
         void Save(XDocument project);
+        Guid ProjectId { get; }
     }
 
     public class CSharpProject : IProject
@@ -67,6 +68,7 @@ namespace OmniSharp.Solution
         public readonly ISolution Solution;
         public readonly string AssemblyName;
         public string FileName { get; private set; }
+        public Guid ProjectId { get; private set; }
 
         public string Title { get; private set; }
         public IProjectContent ProjectContent { get; set; }
@@ -74,11 +76,12 @@ namespace OmniSharp.Solution
 
         private CompilerSettings _compilerSettings;
 
-        public CSharpProject(ISolution solution, string title, string fileName)
+        public CSharpProject(ISolution solution, string title, string fileName, Guid id)
         {
             Solution = solution;
             Title = title;
             FileName = fileName;
+            ProjectId = id;
             Files = new List<CSharpFile>();
 
             var p = new Microsoft.Build.Evaluation.Project(FileName);
@@ -179,7 +182,7 @@ namespace OmniSharp.Solution
         {
             project.Save(FileName);
         }
-
+        
         public override string ToString()
         {
             return string.Format("[CSharpProject AssemblyName={0}]", AssemblyName);

@@ -15,7 +15,8 @@ namespace OmniSharp.Solution
         public List<CSharpFile> Files { get; private set; }
         public List<IAssemblyReference> References { get; set; }
         public IProjectContent ProjectContent { get; set; }
-		public string FileName { get; private set; }
+        public string FileName { get; private set; }
+        public Guid ProjectId { get; private set; }
 
         private CSharpFile _file;
 
@@ -25,6 +26,8 @@ namespace OmniSharp.Solution
             _file = new CSharpFile(this, "dummy_file", "");
             Files = new List<CSharpFile>();
             Files.Add(_file);
+
+            ProjectId = Guid.NewGuid();
 
             string mscorlib = CSharpProject.FindAssembly(CSharpProject.AssemblySearchPaths, "mscorlib");
             ProjectContent = new CSharpProjectContent()
@@ -51,5 +54,6 @@ namespace OmniSharp.Solution
         {
             throw new NotImplementedException();
         }
+
     }
 }

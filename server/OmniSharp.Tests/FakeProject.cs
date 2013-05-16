@@ -18,11 +18,12 @@ namespace OmniSharp.Tests
         static readonly Lazy<IUnresolvedAssembly> systemCore = new Lazy<IUnresolvedAssembly>(
             () => new CecilLoader().LoadAssemblyFile(typeof (Enumerable).Assembly.Location));
         
-        public FakeProject(string name = "fake", string fileName = "fake.csproj")
+        public FakeProject(string name = "fake", string fileName = "fake.csproj", Guid id = new Guid())
         {
             Name = name;
             FileName = fileName;
             Files = new List<CSharpFile>();
+            ProjectId = id;
             this.ProjectContent = new CSharpProjectContent();
             this.ProjectContent.SetAssemblyName(name);
             this.ProjectContent.SetProjectFileName(name);
@@ -46,7 +47,8 @@ namespace OmniSharp.Tests
         public string FileName { get; private set; }
         public List<CSharpFile> Files { get; private set; }
         public List<IAssemblyReference> References { get; set; }
-        public XDocument XmlRepresentation { get; set; } 
+        public XDocument XmlRepresentation { get; set; }
+        public Guid ProjectId { get; private set; }
 
         public CSharpParser CreateParser()
         {
@@ -63,5 +65,6 @@ namespace OmniSharp.Tests
         {
             XmlRepresentation = project;
         }
+
     }
 }

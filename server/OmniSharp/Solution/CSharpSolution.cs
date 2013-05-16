@@ -76,7 +76,7 @@ namespace OmniSharp.Solution
                         case "{CFBF81BE-A5A8-8323-0E2F-C9B25881C624}":
                         case "{4C2D6F16-28F7-6964-F259-E4608E3E113F}":
                             Console.WriteLine("Loading project - " + title);
-                            Projects.Add(new CSharpProject(this, title, location));
+                            Projects.Add(new CSharpProject(this, title, location, new Guid(guid)));
                             break;
                         default:
                             Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);

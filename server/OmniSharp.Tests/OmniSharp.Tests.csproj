@@ -75,7 +75,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddReference\AddReferenceTests.cs" />
+    <Compile Include="AddReference\AddProjectReferenceTests.cs" />
     <Compile Include="AddToProject\AddToProjectTests.cs" />
     <Compile Include="AutoComplete\BugFixTests.cs" />
     <Compile Include="AutoComplete\CompletionsSpecBase.cs" />
