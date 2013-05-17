@@ -51,7 +51,7 @@ namespace OmniSharp
             }
 
             bool createdNew;
-            using (var mutex = new Mutex(true, "OmniSharp", out createdNew))
+            using (var mutex = new Mutex(true, "OmniSharp" + port, out createdNew))
             {
                 if (createdNew)
                 {
@@ -59,7 +59,7 @@ namespace OmniSharp
                 }
                 else
                 {
-                    Console.WriteLine("Detected an OmniSharp instance already loaded. Press a key.");
+                    Console.WriteLine("Detected an OmniSharp instance already running on port " + port + ". Press a key.");
                     Console.ReadKey();
                 }    
             }
@@ -71,16 +71,7 @@ namespace OmniSharp
 
             var nancyHost = new NancyHost(new Bootstrapper(solution), new Uri("http://localhost:" + port));
 
-            try
-            {
-                nancyHost.Start();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("{0} Exception caught.", e);
-                //Quit gracefully
-                return;
-            }
+            nancyHost.Start();
 
             while (Console.ReadLine() != "exit")
             {

@@ -19,6 +19,8 @@ namespace OmniSharp.Tests.Build
                 @"; expected");
             
         }
+
+             
         [Test]
         public void Should_parse_missing_file_error()
         {

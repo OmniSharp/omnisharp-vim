@@ -15,6 +15,9 @@ let g:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:2000')
 "Default value for the timeout value
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
 
+"Default value for the timeout value
+let g:OmniSharp_quickFixLength = get(g:, 'OmniSharp_quickFixLength', 60)
+
 "Don't use the preview window by default
 let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0)
 

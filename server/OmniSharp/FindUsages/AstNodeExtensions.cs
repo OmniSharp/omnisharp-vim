@@ -6,26 +6,41 @@ namespace OmniSharp.FindUsages
 {
     public static class AstNodeExtensions
     {
-        public static string Preview(this AstNode node, CSharpFile file)
+        public static string Preview(this AstNode node, CSharpFile file, int maxWidth)
         {
-            var location = node.StartLocation;
-            var offset = file.Document.GetOffset(location.Line, location.Column);
-            var line = file.Document.GetLineByNumber(location.Line);
-            if (line.Length < 50)
+            var startLocation = node.StartLocation;
+            var startOffset = file.Document.GetOffset(startLocation.Line, startLocation.Column);
+            
+
+            var line = file.Document.GetLineByNumber(startLocation.Line);
+
+            var lineText = file.Document.GetText(line.Offset, line.Length);
+            
+            if (line.Length < maxWidth)
             {
-                return file.Document.GetText(line.Offset, line.Length);
+                // Don't truncate
+                return lineText;
             }
 
-            var start = Math.Max(line.Offset, offset - 60);
-            var end = Math.Min(line.EndOffset, offset + 60);
+            var endLocation = node.EndLocation;
+            var endOffset = file.Document.GetOffset(endLocation.Line, endLocation.Column);
 
-            return "..." + file.Document.GetText(start, end - start).Trim() + "...";
+            const string ellipsis = "...";
+
+            var charactersEitherSide = (maxWidth - (ellipsis.Length * 2));
+
+            // Place the node text as close as possible to the centre of the returned text
+            var start = Math.Max(line.Offset, startOffset - charactersEitherSide); 
+            var end = Math.Min(line.EndOffset, endOffset + charactersEitherSide); 
+
+            return ellipsis + file.Document.GetText(start, end - start).Trim() + ellipsis;
         }
 
 		public static AstNode GetDefinition(this AstNode node)
 		{
 			if (node is ConstructorInitializer)
 				return null;
+
 			if (node is ObjectCreateExpression)
 				node = ((ObjectCreateExpression)node).Type;
 
@@ -51,14 +66,19 @@ namespace OmniSharp.FindUsages
 			
 			if (node is ParameterDeclaration)
 				node = ((ParameterDeclaration)node).NameToken;
+
 			if (node is ConstructorDeclaration)
 				node = ((ConstructorDeclaration)node).NameToken;
+
 			if (node is DestructorDeclaration)
 				node = ((DestructorDeclaration)node).NameToken;
+
 			if (node is NamedArgumentExpression)
 				node = ((NamedArgumentExpression)node).NameToken;
+
 			if (node is NamedExpression)
 				node = ((NamedExpression)node).NameToken;
+
 			if (node is VariableInitializer)
 				node = ((VariableInitializer)node).NameToken;
 

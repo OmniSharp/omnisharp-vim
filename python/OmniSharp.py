@@ -69,7 +69,10 @@ def getCompletions(ret, column, partialWord):
                 logger.error(command)
 
 def findUsages(ret):
-    js = getResponse('/findusages')
+
+    parameters = {}
+    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
+    js = getResponse('/findusages', parameters)
     if(js != ''):
         usages = json.loads(js)['Usages']
         populateQuickFix(ret, usages)
@@ -112,7 +115,6 @@ def findImplementations(ret):
 def gotoDefinition():
     js = getResponse('/gotodefinition');
     if(js != ''):
-
         definition = json.loads(js)
         filename = definition['FileName']
         if(filename != None):
