@@ -1,4 +1,4 @@
-![OmniSharp](hat.jpg)
+![OmniSharp](logo.jpg)
 
 #OmniSharp
 
