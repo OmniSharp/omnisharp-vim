@@ -15,7 +15,7 @@ namespace OmniSharp.Tests.AutoComplete
         int n;
         n.GetHashCode$;
     }
-}").ShouldContainOnly("GetHashCode()");
+}").ShouldContainOnly("int GetHashCode()");
         }
     }
 }
