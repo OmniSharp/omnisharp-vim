@@ -1,3 +1,5 @@
+![OmniSharp](hat.jpg)
+
 #OmniSharp
 
 OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provided below.
