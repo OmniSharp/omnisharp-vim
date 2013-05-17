@@ -3,12 +3,8 @@ set cpo&vim
 
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 
-let s:V = vital#of('OmniSharp')
-let s:Http = s:V.import('Web.Http')
-let s:Json = s:V.import('Web.Json')
-
 function! s:build()
-	let response = s:getResponse('/build')
+	let response = OmniSharp#request#build()
 	if type(response) == type({}) && get(response,"Success",0)
 		echo "Build succeeded"
 		let quickfixes = get(response,'QuickFixes',[])
@@ -20,7 +16,7 @@ function! s:build()
 endfunction
 
 function! s:findImplementations()
-	let response = s:getResponse('/findimplementations')
+	let response = OmniSharp#request#findimplementations()
 	let ret = []
 	if ! empty(response)
 		let locations = get(response,'Locations',[])
@@ -50,7 +46,7 @@ function! s:findImplementations()
 endfunction
 
 function! s:findSyntaxErrors()
-	let response = s:getResponse('/syntaxerrors')
+	let response = OmniSharp#request#syntaxerrors()
 	let ret = []
 	if ! empty(response)
 		for err in get(response,'Errors',[])
@@ -66,7 +62,7 @@ function! s:findSyntaxErrors()
 endfunction
 
 function! s:findUsages()
-	let response = s:getResponse('/findusages')
+	let response = OmniSharp#request#findusages()
 	let ret = []
 	if ! empty(response)
 		let usages = get(response,'Usages',[])
@@ -76,7 +72,7 @@ function! s:findUsages()
 endfunction
 
 function! s:getCodeActions()
-	let response = s:getResponse('/getcodeactions')
+	let response = OmniSharp#request#getcodeactions()
 	if ! empty(response)
 		let index = 1
 		let actions = get(response,'CodeActions','')
@@ -97,7 +93,7 @@ function! s:getCompletions(column, partialWord, textBuffer)
 	let parameters['column'] = a:column
 	let parameters['wordToComplete'] = a:partialWord
 	let parameters['buffer'] = join(a:textBuffer,"\r\n")
-	let completions = s:getResponse('/autocomplete', parameters)
+	let completions = OmniSharp#request#getcodeactions(parameters)
 	let words = []
 	for completion in completions
 		let words += [ {
@@ -130,7 +126,7 @@ endfunction
 function! s:runCodeAction(option)
 	let parameters = {}
 	let parameters['codeaction'] = a:option
-	let response = s:getResponse('/runcodeaction', parameters)
+	let response = OmniSharp#request#runcodeaction(parameters)
 	let text = get(response,'Text','')
 	if empty(text)
 		return
@@ -149,31 +145,11 @@ function! s:setBuffer(buffer)
 endfunction
 
 function! s:typeLookup()
-	let response = s:getResponse('/typelookup')
+	let response = OmniSharp#request#typelookup()
 	if ! empty(response)
 		return get(response,'Type','')
 	endif
 	return ''
-endfunction
-
-function! s:getResponse(endPoint, ...)
-	let parameters = 0 < a:0 ? a:1 : {}
-	let parameters['line'] = line(".")
-	let parameters['column'] = col(".")
-	let parameters['buffer'] = join(getline(1,'$'),"\r\n")
-	if exists("+shellslash") && &shellslash
-		let parameters['filename'] = substitute(fnamemodify(expand('%'),':p'),'/','\\','g')
-	else
-		let parameters['filename'] = fnamemodify(expand('%'),':p')
-	endif
-
-	let target = g:OmniSharp_host . a:endPoint
-	let res = s:Http.post(target,parameters)
-	try
-		return s:Json.decode(res.content)
-	catch
-		return []
-	endtry
 endfunction
 
 function! s:setCurrBuffer(lines)
@@ -227,7 +203,7 @@ function! OmniSharp#FindImplementations()
 endfunction
 
 function! OmniSharp#GotoDefinition()
-	let response = s:getResponse('/gotodefinition')
+	let response = OmniSharp#request#gotodefinition()
 	if ! empty(response)
 		let filename = get(response,'FileName','')
 		if ! empty(filename)
@@ -312,7 +288,7 @@ endfunction
 function! OmniSharp#RenameTo(renameto)
 	let parameters = {}
 	let parameters['renameto'] = a:renameto
-	let response = s:getResponse('/rename', parameters)
+	let response = OmniSharp#request#rename(parameters)
 	let currentBuffer = expand('%')
 	let pos = getpos('.')
 	for change in get(response,'Changes',[])
@@ -349,11 +325,11 @@ function! OmniSharp#Build()
 endfunction
 
 function! OmniSharp#ReloadSolution()
-	call s:getResponse("/reloadsolution")
+	call OmniSharp#request#reloadsolution()
 endfunction
 
 function! OmniSharp#CodeFormat()
-	let response = s:getResponse('/codeformat')
+	let response = OmniSharp#request#codeformat()
 	if ! empty(response)
 		call s:setBuffer(get(response,"Buffer",''))
 	endif
@@ -407,7 +383,7 @@ function! OmniSharp#StartServerSolution(solutionPath)
 endfunction
 
 function! OmniSharp#AddToProject()
-	call s:getResponse("/addtoproject")
+	call OmniSharp#request#addtoproject()
 endfunction
 
 let &cpo = s:save_cpo
