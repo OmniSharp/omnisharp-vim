@@ -50,6 +50,23 @@ namespace OmniSharp
                 return;
             }
 
+            bool createdNew;
+            using (var mutex = new Mutex(true, "OmniSharp", out createdNew))
+            {
+                if (createdNew)
+                {
+                    StartServer(solutionPath, port);
+                }
+                else
+                {
+                    Console.WriteLine("Detected an OmniSharp instance already loaded. Press a key.");
+                    Console.ReadKey();
+                }    
+            }
+        }
+
+        private static void StartServer(string solutionPath, int port)
+        {
             var solution = new CSharpSolution(solutionPath);
 
             var nancyHost = new NancyHost(new Bootstrapper(solution), new Uri("http://localhost:" + port));
