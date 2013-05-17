@@ -45,4 +45,4 @@ command! -buffer -nargs=1 OmniSharpStartServerSolution
 \	call OmniSharp#StartServerSolution(<q-args>)
 
 
-
+setlocal omnifunc=OmniSharp#Complete
