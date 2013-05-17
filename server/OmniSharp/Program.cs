@@ -53,9 +53,18 @@ namespace OmniSharp
             var solution = new CSharpSolution(solutionPath);
 
             var nancyHost = new NancyHost(new Bootstrapper(solution), new Uri("http://localhost:" + port));
-            
-            nancyHost.Start();
- 
+
+            try
+            {
+                nancyHost.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("{0} Exception caught.", e);
+                //Quit gracefully
+                return;
+            }
+
             while (Console.ReadLine() != "exit")
             {
                 Thread.Sleep(1000); // To fix CPU spike on linux
