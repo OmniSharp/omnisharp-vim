@@ -48,7 +48,7 @@ namespace OmniSharp.Tests.AddReference
                     FileName = @"c:\test\two\test.cs"
                 };
 
-            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution));
+            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution, new IAddToProjectProcessor[] { new AddProjectReferenceProcessor(Solution) }));
             handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
@@ -102,7 +102,7 @@ namespace OmniSharp.Tests.AddReference
                     FileName = @"c:\test\two\test.cs"
                 };
 
-            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution));
+            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution, new IAddToProjectProcessor[] { new AddProjectReferenceProcessor(Solution) }));
             handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
@@ -144,7 +144,7 @@ namespace OmniSharp.Tests.AddReference
                     FileName = @"c:\test\two\test.cs"
                 };
 
-            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution));
+            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution, new IAddToProjectProcessor[] { new AddProjectReferenceProcessor(Solution) }));
             handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
@@ -185,7 +185,7 @@ namespace OmniSharp.Tests.AddReference
                 FileName = @"c:\test\one\test.cs"
             };
 
-            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution));
+            var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution, new IAddToProjectProcessor[] { new AddProjectReferenceProcessor(Solution) }));
             var response = handler.AddReference(request);
 
             response.Message.ShouldEqual("Reference will create circular dependency");

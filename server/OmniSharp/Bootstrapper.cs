@@ -1,6 +1,7 @@
 ﻿using Nancy.Json;
 using Nancy.TinyIoc;
 using Nancy.Bootstrapper;
+using OmniSharp.AddReference;
 using OmniSharp.Solution;
 
 namespace OmniSharp
@@ -28,6 +29,7 @@ namespace OmniSharp
         {
             base.ConfigureApplicationContainer(container);
             container.Register(_solution);
+            container.RegisterMultiple<IAddToProjectProcessor>(new []{typeof(AddProjectReferenceProcessor)});
         }
     }
 }

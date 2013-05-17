@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using OmniSharp.Solution;
 
 namespace OmniSharp.AddReference
@@ -6,10 +7,12 @@ namespace OmniSharp.AddReference
     public class AddToProjectProcessorFactory
     {
         private readonly ISolution _solution;
+        private readonly IList<IAddToProjectProcessor> _processors;
 
-        public AddToProjectProcessorFactory(ISolution solution)
+        public AddToProjectProcessorFactory(ISolution solution, IList<IAddToProjectProcessor> processors)
         {
             _solution = solution;
+            _processors = processors;
         }
 
         public IAddToProjectProcessor CreateProcessorFor(AddReferenceRequest request)
