@@ -109,9 +109,6 @@ let g:OmniSharp_host = "http://localhost:2000"
 "Set the type lookup function to use the preview window instead of the status line
 let g:OmniSharp_typeLookupInPreview = 1
 
-"Set autocomplete function to OmniSharp (if not using YouCompleteMe completion plugin)
-setlocal omnifunc=OmniSharp#Complete
-
 "Showmatch significantly slows down omnicomplete
 "when the first match contains parentheses.
 set noshowmatch
