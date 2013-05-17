@@ -15,6 +15,8 @@ namespace OmniSharp.Solution
             _projectTitle = projectTitle;
         }
 
+        public string ProjectTitle { get { return _projectTitle; } }
+
         public IAssembly Resolve(ITypeResolveContext context)
         {
             var project = _solution.Projects.FirstOrDefault(p => string.Equals(p.Title, _projectTitle, StringComparison.OrdinalIgnoreCase));

@@ -18,13 +18,24 @@ namespace OmniSharp.AddReference
         public AddReferenceResponse AddReference(AddReferenceRequest request)
         {
             var project = _solution.ProjectContainingFile(request.FileName);
+            AddReferenceResponse response = null;
 
             if (IsProjectReference(request.Reference))
             {
-                AddProjectReference(request, project);
+                return AddProjectReference(request, project);
             }
-            
-            return null;
+
+            if (IsGacReference(request.Reference))
+            {
+                //Do something...
+            }
+
+            return response;
+        }
+
+        private bool IsGacReference(string referenceName)
+        {
+            return CSharpProject.FindAssembly(CSharpProject.AssemblySearchPaths, referenceName) != null;
         }
 
         private bool IsProjectReference(string referenceName)
@@ -32,8 +43,10 @@ namespace OmniSharp.AddReference
             return _solution.Projects.Any(p => p.FileName.Contains(referenceName));
         }
 
-        private void AddProjectReference(AddReferenceRequest request, IProject project)
+        private AddReferenceResponse AddProjectReference(AddReferenceRequest request, IProject project)
         {
+            var response = new AddReferenceResponse();
+
             var projectToReference = _solution.Projects.First(p => p.FileName.Contains(request.Reference));
 
             var projectXml = project.AsXml();
@@ -51,6 +64,12 @@ namespace OmniSharp.AddReference
             projectReferenceNode.Add(new XElement(_msBuildNameSpace + "Name", new XText(projectToReference.Title)));
 
             var projectAlreadyAdded = compilationNodes.Any(n => n.Attribute("Include").Value.Equals(relativeProjectPath));
+            
+            if (IsCircularReference(project, projectToReference))
+            {
+                response.Message = "Reference will create circular dependency";
+                return response;
+            }
 
             if (!projectAlreadyAdded)
             {
@@ -68,6 +87,17 @@ namespace OmniSharp.AddReference
                 project.AddReference(new ProjectReference(_solution, projectToReference.Title));
                 project.Save(projectXml);
             }
+            else
+            {
+                response.Message = "Reference already added";
+            }
+
+            return response;
+        }
+
+        private bool IsCircularReference(IProject project, IProject projectToReference)
+        {
+            return projectToReference.References.Cast<ProjectReference>().Any(r => r.ProjectTitle == project.Title);
         }
     }
 }

@@ -78,6 +78,7 @@
     <Compile Include="AddReference\AddGacReferenceTests.cs" />
     <Compile Include="AddReference\AddProjectReferenceTests.cs" />
     <Compile Include="AddReference\AddReferenceBase.cs" />
+    <Compile Include="AddReference\AddReferenceTests.cs" />
     <Compile Include="AddToProject\AddToProjectTests.cs" />
     <Compile Include="AutoComplete\BugFixTests.cs" />
     <Compile Include="AutoComplete\CompletionsSpecBase.cs" />

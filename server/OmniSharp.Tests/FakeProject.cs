@@ -23,6 +23,7 @@ namespace OmniSharp.Tests
             Name = name;
             FileName = fileName;
             Files = new List<CSharpFile>();
+            References = new List<IAssemblyReference>();
             ProjectId = id;
             this.ProjectContent = new CSharpProjectContent();
             this.ProjectContent.SetAssemblyName(name);
