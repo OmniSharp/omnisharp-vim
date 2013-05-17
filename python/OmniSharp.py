@@ -16,7 +16,7 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
 
-def getResponse(endPoint, additionalParameters=None):
+def getResponse(endPoint, additionalParameters=None, timeout=None ):
     parameters = {}
     parameters['line'] = vim.eval('line(".")')
     parameters['column'] = vim.eval('col(".")')
@@ -29,10 +29,14 @@ def getResponse(endPoint, additionalParameters=None):
     if(additionalParameters != None):
         parameters.update(additionalParameters)
 
+	if(timeout == None):
+		timeout=int(vim.eval('g:OmniSharp_timeout'))
+
     target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
     parameters = urllib.urlencode(parameters)
+
     try:
-        response = urllib2.urlopen(target, parameters, timeout=int(vim.eval('g:OmniSharp_timeout')))
+        response = urllib2.urlopen(target, parameters, timeout)
         return response.read()
     except Exception as e:
         print("OmniSharp : Could not connect to " + target + ": " + str(e))
@@ -190,7 +194,7 @@ def setBuffer(buffer):
     vim.current.buffer[:] = lines
 
 def build(ret):
-    response = json.loads(getResponse('/build'))
+    response = json.loads(getResponse('/build', {}, 60))
 
     success = response["Success"]
     if success:
