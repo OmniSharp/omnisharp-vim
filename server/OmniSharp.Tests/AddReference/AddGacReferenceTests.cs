@@ -30,7 +30,7 @@ namespace OmniSharp.Tests.AddReference
                  FileName = @"c:\test\one\test.cs"
              };
 
-             var handler = new AddReferenceHandler(Solution);
+             var handler = new AddReferenceHandler(Solution, new AddToProjectProcessorFactory(Solution));
              handler.AddReference(request);
 
              project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
