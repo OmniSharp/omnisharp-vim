@@ -3,387 +3,279 @@ set cpo&vim
 
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 
-function! s:build()
-	let response = OmniSharp#request#build()
-	if type(response) == type({}) && get(response,"Success",0)
-		echo "Build succeeded"
-		let quickfixes = get(response,'QuickFixes',[])
-		return s:populateQuickFix(quickfixes)
-	else
-		echo "Build failed"
-		return []
-	endif
-endfunction
-
-function! s:findImplementations()
-	let response = OmniSharp#request#findimplementations()
-	let ret = []
-	if ! empty(response)
-		let locations = get(response,'Locations',[])
-
-		if len(locations) == 1
-			let usage = get(locations,0,'')
-			let filename = get(usage,'FileName','')
-			if !empty(filename)
-				if fnamemodify(filename,':p') != expand('%:p')
-					execute printf('e %s', filename)
-				endif
-				" row is 1 based, column is 0 based
-				call setpos('.',[ 0, usage['Line'], usage['Column'] - 1, 0])
-			endif
-		else
-			for usage in locations
-				let usage["FileName"] = fnamemodify(get(usage,"FileName",''),':.')
-				let ret += [ {
-							\ 'filename': get(usage,'FileName',''),
-							\ 'lnum': get(usage,'Line',''),
-							\ 'col': get(usage,'Column',''),
-							\ } ]
-			endfor
-		endif
-	endif
-	return ret
-endfunction
-
-function! s:findSyntaxErrors()
-	let response = OmniSharp#request#syntaxerrors()
-	let ret = []
-	if ! empty(response)
-		for err in get(response,'Errors',[])
-			let ret += [ {
-						\ 'filename': get(err,'FileName',''),
-						\ 'text': get(err,'Message',''),
-						\ 'lnum': get(err,'Line',''),
-						\ 'col': get(err,'Column',''),
-						\ } ]
-		endfor
-	endif
-	return ret
-endfunction
-
-function! s:findUsages()
-	let response = OmniSharp#request#findusages()
-	let ret = []
-	if ! empty(response)
-		let usages = get(response,'Usages',[])
-		let ret = s:populateQuickFix(usages)
-	endif
-	return ret
-endfunction
-
 function! s:getCodeActions()
-	let response = OmniSharp#request#getcodeactions()
-	if ! empty(response)
-		let index = 1
-		let actions = get(response,'CodeActions','')
-		for action in actions
-			echo printf("%d :  %s", index, action)
-			if 0 < len(actions)
-				return 1
-			endif
-			let index += 1
-		endfor
-	endif
-	return 0
-endfunction
-
-function! s:getCompletions(column, partialWord, textBuffer)
-	" All of these functions take vim variable names as parameters
-	let parameters = {}
-	let parameters['column'] = a:column
-	let parameters['wordToComplete'] = a:partialWord
-	let parameters['buffer'] = join(a:textBuffer,"\r\n")
-	let completions = OmniSharp#request#getcodeactions(parameters)
-	let words = []
-	for completion in completions
-		let words += [ {
-					\ 'word' : get(completion,'CompletionText',''),
-					\ 'abbr' : get(completion,'DisplayText',''),
-					\ 'info': get(completion,'Description',''),
-					\ 'icase' : 1,
-					\ 'dup' : 1,
-					\ } ]
-	endfor
-	return words
-endfunction
-
-function! s:populateQuickFix(quickfixes)
-	let ret = []
-	if ! empty(a:quickfixes)
-		for quickfix in a:quickfixes
-			let quickfix["FileName"] = fnamemodify(get(quickfix,"FileName",''),":.")
-			let ret += [ {
-						\ 'filename': get(quickfix,'FileName',''),
-						\ 'text': get(quickfix,'Text',''),
-						\ 'lnum': get(quickfix,'Line',''),
-						\ 'col': get(quickfix,'Column','')
-						\ } ]
-		endfor
-	endif
-	return ret
+  let response = OmniSharp#request#getcodeactions()
+  if ! empty(response)
+    let index = 1
+    for action in response.codeactions
+      call OmniSharp#print(printf("%d :  %s", index, action))
+      if 0 < len(response.codeactions)
+        return 1
+      endif
+      let index += 1
+    endfor
+  endif
+  return 0
 endfunction
 
 function! s:runCodeAction(option)
-	let parameters = {}
-	let parameters['codeaction'] = a:option
-	let response = OmniSharp#request#runcodeaction(parameters)
-	let text = get(response,'Text','')
-	if empty(text)
-		return
-	endif
-	let lines = split(text,"\n")
-	let pos = getpos('.')
-	call s:setBuffer(lines)
-	call setpos('.',pos)
-endfunction
-
-function! s:setBuffer(buffer)
-	let lines = split(a:buffer,"\n")
-	" TODO: fix python code to vim script code
-	" lines = [line.encode('utf-8') for line in lines]
-	call s:setCurrBuffer(lines)
-endfunction
-
-function! s:typeLookup()
-	let response = OmniSharp#request#typelookup()
-	if ! empty(response)
-		return get(response,'Type','')
-	endif
-	return ''
+  let parameters = {}
+  let parameters['codeaction'] = a:option
+  let response = OmniSharp#request#runcodeaction(parameters)
+  if empty(response.text)
+    return
+  endif
+  let lines = split(response.text,"\n")
+  let pos = getpos('.')
+  call s:setCurrBuffer(split(lines,"\n"))
+  call setpos('.',pos)
 endfunction
 
 function! s:setCurrBuffer(lines)
-	silent % delete _
-	silent put =a:lines
-	silent 1 delete _
+  silent % delete _
+  silent put =a:lines
+  silent 1 delete _
 endfunction
 
 function! OmniSharp#Complete(findstart, base)
-	if a:findstart
-		"store the current cursor position
-		let s:column = col(".")
-		"locate the start of the word
-		let line = getline('.')
-		let start = col(".") - 1
-		let s:textBuffer = getline(1,'$')
-		while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]'
-			let start -= 1
-		endwhile
+  if a:findstart
+    "store the current cursor position
+    let s:column = col(".")
+    "locate the start of the word
+    let line = getline('.')
+    let start = col(".") - 1
+    let s:textBuffer = getline(1,'$')
+    while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]'
+      let start -= 1
+    endwhile
 
-		return start
-	else
-		let words = s:getCompletions(s:column, a:base,s:textBuffer)
-		if len(words) == 0
-			return -3
-		endif
-		return words
-	endif
+    return start
+  else
+    let complete_obj = OmniSharp#complete#getCompletions(s:column, a:base, s:textBuffer)
+    " call writefile([s:column,string(s:textBuffer),string(complete_obj)],expand('~/a.log'))
+    if len(complete_obj.candidates) == 0
+      return -3
+    endif
+    return complete_obj.candidates
+  endif
 endfunction
 
 function! OmniSharp#FindUsages()
-	let qf_taglist = s:findUsages()
+  let complete_obj = OmniSharp#complete#findUsages()
 
-	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 0
-		call setqflist(qf_taglist)
-		copen 4
-	else
-		echo "No usages found"
-	endif
+  " Place the tags in the quickfix window, if possible
+  if len(complete_obj.candidates) > 0
+    call setqflist(complete_obj.candidates)
+    copen 4
+  else
+    call OmniSharp#print("No usages found")
+  endif
 endfunction
 
 function! OmniSharp#FindImplementations()
-	let qf_taglist = s:findImplementations()
+  let complete_obj = OmniSharp#complete#findimplementations()
 
-	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 1
-		call setqflist(qf_taglist)
-		copen 4
-	endif
+  if 1 == len(complete_obj.candidates)
+    let cand = complete_obj.candidates[0]
+    if !empty(cand.filename)
+      if fnamemodify(cand.filename,':p') != expand('%:p')
+        execute printf('e %s', cand.filename)
+      endif
+      " row is 1 based, column is 0 based
+      call setpos('.',[ 0, cand.line, cand.column - 1, 0])
+    endif
+  elseif 1 < len(complete_obj.candidates)
+    " Place the tags in the quickfix window, if possible
+    call setqflist(complete_obj.candidates)
+    copen 4
+  endif
 endfunction
 
 function! OmniSharp#GotoDefinition()
-	let response = OmniSharp#request#gotodefinition()
-	if ! empty(response)
-		let filename = get(response,'FileName','')
-		if ! empty(filename)
-			if fnamemodify(filename,':p') != expand('%:p')
-				execute printf('e %s', filename)
-			endif
-			" row is 1 based, column is 0 based
-			call setpos('.',[ 0, response['Line'], response['Column'] - 1, 0])
-		endif
-	endif
+  let response = OmniSharp#request#gotodefinition()
+  if ! empty(response)
+    if ! empty(response.filename)
+      if fnamemodify(response.filename,':p') != expand('%:p')
+        execute printf('e %s', response.filename)
+      endif
+      " row is 1 based, column is 0 based
+      call setpos('.',[ 0, response.line, response.column - 1, 0])
+    endif
+  endif
 endfunction
 
 function! OmniSharp#GetCodeActions()
-	let actions = s:getCodeActions()
-	if actions
-		return 0
-	endif
+  if s:getCodeActions()
+    return 0
+  endif
 
-	let option = nr2char(getchar())
-	if option < '0' || option > '9'
-		return 1
-	endif
+  let option = nr2char(getchar())
+  if option < '0' || option > '9'
+    return 1
+  endif
 
-	call s:runCodeAction(option)
+  call s:runCodeAction(option)
 endfunction
 
 function! OmniSharp#FindSyntaxErrors()
-	if bufname('%') == ''
-		return
-	endif
-	let qf_taglist = s:findSyntaxErrors()
+  if empty(bufname('%'))
+    return
+  endif
+  let complete_obj = OmniSharp#complete#findSyntaxErrors()
 
-	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 0
-		call setqflist(qf_taglist)
-		copen 4
-	else
-		cclose
-	endif
+  " Place the tags in the quickfix window, if possible
+  if len(complete_obj.candidates) > 0
+    call setqflist(complete_obj.candidates)
+    copen 4
+  else
+    cclose
+  endif
 endfunction
 
 function! OmniSharp#TypeLookup()
-	let type = s:typeLookup()
+  let response = OmniSharp#request#typelookup()
+  let type = empty(response) ? '' : response[0].type
 
-	if g:OmniSharp_typeLookupInPreview
-		"Try to go to preview window
-		silent! wincmd P
-		if !&previewwindow
-			"If couldn't goto the preview window, then there is no open preview
-			"window, so make one
-			pedit!
-			wincmd P
-			setlocal winheight=3
-			badd [Scratch]
-			buff \[Scratch\]
+  if g:OmniSharp_typeLookupInPreview
+    "Try to go to preview window
+    silent! wincmd P
+    if !&previewwindow
+      "If couldn't goto the preview window, then there is no open preview
+      "window, so make one
+      pedit!
+      wincmd P
+      setlocal winheight=3
+      badd [Scratch]
+      buff \[Scratch\]
 
-			setlocal noswapfile
-			setlocal filetype=cs
-			"When looking for the buffer to place completion details in Vim
-			"looks for the following options to set
-			setlocal buftype=nofile
-			setlocal bufhidden=wipe
-		endif
-		"Replace the contents of the preview window
-		set modifiable
-		call s:setCurrBuffer([type])
-		set nomodifiable
-		"Return to original window
-		wincmd p
-	else
-		echo type
-	endif
+      setlocal noswapfile
+      setlocal filetype=cs
+      "When looking for the buffer to place completion details in Vim
+      "looks for the following options to set
+      setlocal buftype=nofile
+      setlocal bufhidden=wipe
+    endif
+    "Replace the contents of the preview window
+    set modifiable
+    call s:setCurrBuffer([type])
+    set nomodifiable
+    "Return to original window
+    wincmd p
+  else
+    call OmniSharp#print(type)
+  endif
 endfunction
 
 function! OmniSharp#Rename()
-	let a:renameto = inputdialog("Rename to:")
-	if a:renameto != ''
-		call OmniSharp#RenameTo(a:renameto)
-	endif
+  let a:renameto = inputdialog("Rename to:")
+  if a:renameto != ''
+    call OmniSharp#RenameTo(a:renameto)
+  endif
 endfunction
 
 function! OmniSharp#RenameTo(renameto)
-	let parameters = {}
-	let parameters['renameto'] = a:renameto
-	let response = OmniSharp#request#rename(parameters)
-	let currentBuffer = expand('%')
-	let pos = getpos('.')
-	for change in get(response,'Changes',[])
-		let lines = split(get(change,'Buffer',''),"\n")
-		" TODO
-		" lines = [line.encode('utf-8') for line in lines]
-		let filename = get(change,'FileName','')
-		if ! empty(filename)
-			execute 'argadd ' . filename
-			for buf in filter(range(1, bufnr("$")),"bufexists(v:val) && buflisted(v:val)")
-				if bufname(bnum) == filename
-					execute 'b ' . filename
-					silent % delete _
-					silent put =lines
-					silent 1 delete _
-					break
-				endif
-			endfor
-		endif
-		undojoin
-	endfor
-	execute 'b ' . currentBuffer
-	call setpos('.',pos)
+  let parameters = {}
+  let parameters['renameto'] = a:renameto
+  let response = OmniSharp#request#rename(parameters)
+  let currentBuffer = expand('%')
+  let pos = getpos('.')
+  for change in response[0].changes
+    let lines = split(change.buffer,"\n")
+    if ! empty(change.filename)
+      execute 'argadd ' . change.filename
+      for buf in filter(range(1, bufnr("$")),"bufexists(v:val) && buflisted(v:val)")
+        if bufname(bnum) == filename
+          execute 'b ' . change.filename
+          call s:setCurrBuffer(lines)
+          break
+        endif
+      endfor
+    endif
+    undojoin
+  endfor
+  execute 'b ' . currentBuffer
+  call setpos('.',pos)
 endfunction
 
 function! OmniSharp#Build()
-	let qf_taglist = s:build()
+  let complete_obj = OmniSharp#complete#build()
+  if complete_obj.response[0].success
+    call OmniSharp#print("Build succeeded")
+  else
+    call OmniSharp#print("Build failed")
+  endif
 
-	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 0
-		call setqflist(qf_taglist)
-		copen 4
-	endif
+  " Place the tags in the quickfix window, if possible
+  if len(complete_obj.candidates) > 0
+    call setqflist(complete_obj.candidates)
+    copen 4
+  endif
 endfunction
 
 function! OmniSharp#ReloadSolution()
-	call OmniSharp#request#reloadsolution()
+  call OmniSharp#request#reloadsolution()
 endfunction
 
 function! OmniSharp#CodeFormat()
-	let response = OmniSharp#request#codeformat()
-	if ! empty(response)
-		call s:setBuffer(get(response,"Buffer",''))
-	endif
+  let response = OmniSharp#request#codeformat()
+  if ! empty(response)
+    call s:setCurrBuffer(split(response[0].buffer,"\n"))
+  endif
 endfunction
 
 function! OmniSharp#StartServer()
-	"get the path for the current buffer
-	let folder = expand('%:p:h')
-	let solutionfiles = globpath(folder, "*.sln")
+  "get the path for the current buffer
+  let folder = expand('%:p:h')
+  let solutionfiles = globpath(folder, "*.sln")
 
-	while (solutionfiles == '')
-		let lastfolder = folder
-		"traverse up a level
+  while (solutionfiles == '')
+    let lastfolder = folder
+    "traverse up a level
 
-		let folder = fnamemodify(folder, ':p:h:h')
-		if folder == lastfolder
-			break
-		endif
-		let solutionfiles = globpath(folder , "*.sln")
-	endwhile
+    let folder = fnamemodify(folder, ':p:h:h')
+    if folder == lastfolder
+      break
+    endif
+    let solutionfiles = globpath(folder , "*.sln")
+  endwhile
 
-	if solutionfiles != ''
-		let array = split(solutionfiles, '\n')
-		if len(array) == 1
-			call OmniSharp#StartServerSolution(array[0])
-		else
-			let index = 1
-			for solutionfile in array
-				echo index . ' - '. solutionfile
-				let index = index + 1
-			endfor
-			echo 'Choose a solution file'
-			let option=nr2char(getchar())
-			if option < '1' || option > '9'
-				return
-			endif
-			if option > len(array)
-				return
-			endif
+  if solutionfiles != ''
+    let array = split(solutionfiles, '\n')
+    if len(array) == 1
+      call OmniSharp#StartServerSolution(array[0])
+    else
+      let index = 1
+      for solutionfile in array
+        call OmniSharp#print(index . ' - '. solutionfile)
+        let index += 1
+      endfor
+      call OmniSharp#print('Choose a solution file')
+      let option = nr2char(getchar())
+      if option < '1' || option > '9'
+        return
+      endif
+      if option > len(array)
+        return
+      endif
 
-			call OmniSharp#StartServerSolution(array[option - 1])
-		endif
-	else
-		echoerr "Did not find a solution file"
-	endif
+      call OmniSharp#StartServerSolution(array[option - 1])
+    endif
+  else
+    call OmniSharp#print("Did not find a solution file")
+  endif
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
-	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
-	call dispatch#start(command, {'background': has('win32') ? 0 : 1})
+  let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
+  call dispatch#start(command, {'background': has('win32') ? 0 : 1})
 endfunction
 
 function! OmniSharp#AddToProject()
-	call OmniSharp#request#addtoproject()
+  call OmniSharp#request#addtoproject()
+endfunction
+
+function! OmniSharp#print(msg)
+  echo a:msg
 endfunction
 
 let &cpo = s:save_cpo
