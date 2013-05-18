@@ -75,6 +75,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddReference\AddFileReferenceTests.cs" />
     <Compile Include="AddReference\AddGacReferenceTests.cs" />
     <Compile Include="AddReference\AddProjectReferenceTests.cs" />
     <Compile Include="AddReference\AddReferenceBase.cs" />

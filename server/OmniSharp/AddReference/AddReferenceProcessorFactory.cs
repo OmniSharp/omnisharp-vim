@@ -22,7 +22,7 @@ namespace OmniSharp.AddReference
                 return _processors.First(p => p.GetType() == typeof (AddProjectReferenceProcessor));
             }
 
-            return null;
+            return _processors.First(p => p.GetType() == typeof(AddFileReferenceProcessor));
         }
 
         private bool IsProjectReference(string referenceName)

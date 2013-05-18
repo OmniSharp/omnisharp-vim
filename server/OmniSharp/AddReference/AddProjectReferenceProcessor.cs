@@ -26,14 +26,10 @@ namespace OmniSharp.AddReference
             var compilationNodes = projectXml.Element(_msBuildNameSpace + "Project")
                                              .Elements(_msBuildNameSpace + "ItemGroup")
                                              .Elements(_msBuildNameSpace + "ProjectReference").ToList();
-
-            var projectContainsProjectReferences = compilationNodes.Count > 0;
-
+            
             var relativeProjectPath = new Uri(project.FileName).MakeRelativeUri(new Uri(projectToReference.FileName)).ToString().Replace("/", @"\");
 
-            var projectReferenceNode = new XElement(_msBuildNameSpace + "ProjectReference", new XAttribute("Include", relativeProjectPath));
-            projectReferenceNode.Add(new XElement(_msBuildNameSpace + "Project", new XText(string.Concat("{", projectToReference.ProjectId.ToString().ToUpperInvariant(), "}"))));
-            projectReferenceNode.Add(new XElement(_msBuildNameSpace + "Name", new XText(projectToReference.Title)));
+            var projectReferenceNode = CreateProjectReferenceNode(relativeProjectPath, projectToReference);
 
             var projectAlreadyAdded = compilationNodes.Any(n => n.Attribute("Include").Value.Equals(relativeProjectPath));
 
@@ -45,6 +41,8 @@ namespace OmniSharp.AddReference
 
             if (!projectAlreadyAdded)
             {
+                var projectContainsProjectReferences = compilationNodes.Count > 0;
+
                 if (projectContainsProjectReferences)
                 {
                     compilationNodes.First().Parent.Add(projectReferenceNode);
@@ -66,6 +64,21 @@ namespace OmniSharp.AddReference
             }
 
             return response;
+        }
+
+        XElement CreateProjectReferenceNode(string relativeProjectPath, IProject projectToReference)
+        {
+            var projectReferenceNode = 
+                new XElement(_msBuildNameSpace + "ProjectReference", 
+                    new XAttribute("Include", relativeProjectPath));
+
+            projectReferenceNode.Add(
+                new XElement(_msBuildNameSpace + "Project", 
+                    new XText(string.Concat("{",projectToReference.ProjectId.ToString().ToUpperInvariant(), "}"))));
+
+            projectReferenceNode.Add(new XElement(_msBuildNameSpace + "Name", new XText(projectToReference.Title)));
+
+            return projectReferenceNode;
         }
 
         private bool IsCircularReference(IProject project, IProject projectToReference)

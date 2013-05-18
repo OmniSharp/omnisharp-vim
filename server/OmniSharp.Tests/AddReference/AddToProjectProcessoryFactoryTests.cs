@@ -21,7 +21,8 @@ namespace OmniSharp.Tests.AddReference
             _solution.Projects.Add(project);
             _processors = new List<IReferenceProcessor>
                               {
-                                  new AddProjectReferenceProcessor(_solution)
+                                  new AddProjectReferenceProcessor(_solution),
+                                  new AddFileReferenceProcessor()
                               };
 
             _factory = new AddReferenceProcessorFactory(_solution, _processors);
@@ -38,6 +39,19 @@ namespace OmniSharp.Tests.AddReference
             var processor = _factory.CreateProcessorFor(request);
 
             processor.ShouldBeType<AddProjectReferenceProcessor>();
+        }
+
+        [Test]
+        public void ShouldReturnAddFileReferenceProcessorWhenReferencingFile()
+        {
+            var request = new AddReferenceRequest
+                              {
+                                  Reference = "test.dll"
+                              };
+
+            var processor = _factory.CreateProcessorFor(request);
+
+            processor.ShouldBeType<AddFileReferenceProcessor>();
         }
     }
 }

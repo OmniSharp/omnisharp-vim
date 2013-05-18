@@ -106,6 +106,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddReference\AddFileReferenceProcessor.cs" />
     <Compile Include="AddReference\AddProjectReferenceProcessor.cs" />
     <Compile Include="AddReference\AddReferenceHandler.cs" />
     <Compile Include="AddReference\AddReferenceModule.cs" />
