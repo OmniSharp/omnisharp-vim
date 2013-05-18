@@ -5,7 +5,7 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.AddReference
 {
-    public class AddProjectReferenceProcessor : IAddToProjectProcessor
+    public class AddProjectReferenceProcessor : IReferenceProcessor
     {
         private readonly ISolution _solution;
         private readonly XNamespace _msBuildNameSpace = "http://schemas.microsoft.com/developer/msbuild/2003";

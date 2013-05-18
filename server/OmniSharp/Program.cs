@@ -13,7 +13,7 @@ namespace OmniSharp
             string solutionPath = null;
 
             int port = 2000;
-
+			
             var p = new OptionSet
                         {
                             {
@@ -48,7 +48,7 @@ namespace OmniSharp
                 ShowHelp(p);
                 return;
             }
-
+             
             var solution = new CSharpSolution(solutionPath);
 
             var nancyHost = new NancyHost(new Bootstrapper(solution), new Uri("http://localhost:" + port));

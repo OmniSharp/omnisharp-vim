@@ -29,7 +29,7 @@ namespace OmniSharp
         {
             base.ConfigureApplicationContainer(container);
             container.Register(_solution);
-            container.RegisterMultiple<IAddToProjectProcessor>(new []{typeof(AddProjectReferenceProcessor)});
+			container.RegisterMultiple<IReferenceProcessor>(new []{typeof(AddProjectReferenceProcessor)});			
         }
     }
 }

@@ -4,22 +4,22 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.AddReference
 {
-    public class AddToProjectProcessorFactory
+    public class AddReferenceProcessorFactory
     {
         private readonly ISolution _solution;
-        private readonly IList<IAddToProjectProcessor> _processors;
+        readonly IEnumerable<IReferenceProcessor> _processors;
 
-        public AddToProjectProcessorFactory(ISolution solution, IList<IAddToProjectProcessor> processors)
+        public AddReferenceProcessorFactory(ISolution solution, IEnumerable<IReferenceProcessor> processors)
         {
             _solution = solution;
             _processors = processors;
         }
 
-        public IAddToProjectProcessor CreateProcessorFor(AddReferenceRequest request)
+        public IReferenceProcessor CreateProcessorFor(AddReferenceRequest request)
         {
             if (IsProjectReference(request.Reference))
             {
-                return new AddProjectReferenceProcessor(_solution);
+                return _processors.First(p => p.GetType() == typeof (AddProjectReferenceProcessor));
             }
 
             return null;

@@ -2,7 +2,7 @@
 
 namespace OmniSharp.AddReference
 {
-    public interface IAddToProjectProcessor
+    public interface IReferenceProcessor
     {
         AddReferenceResponse AddReference(IProject project, string reference);
     }
