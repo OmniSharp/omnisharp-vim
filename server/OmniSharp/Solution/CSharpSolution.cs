@@ -33,6 +33,7 @@ namespace OmniSharp.Solution
         CSharpFile GetFile(string filename);
         IProject ProjectContainingFile(string filename);
         void Reload();
+        void Terminate();
     }
 
     public class CSharpSolution : ISolution
@@ -43,6 +44,8 @@ namespace OmniSharp.Solution
         private OrphanProject _orphanProject;
 
         public string FileName { get; private set; }
+
+        public bool Terminated { get; private set; }
 
         public CSharpSolution(string fileName)
         {
@@ -138,9 +141,14 @@ namespace OmniSharp.Solution
             LoadSolution(this.FileName);
         }
 
+        public void Terminate()
+        {
+            Terminated = true;
+        }
+
         private static string MD5(string str)
         {
-            MD5CryptoServiceProvider provider = new MD5CryptoServiceProvider();
+            var provider = new MD5CryptoServiceProvider();
             byte[] bytes = provider.ComputeHash(System.Text.Encoding.UTF8.GetBytes(str));
             return BitConverter.ToString(bytes).ToLower().Replace("-", "");
         }

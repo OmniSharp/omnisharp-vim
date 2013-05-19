@@ -73,10 +73,11 @@ namespace OmniSharp
 
             nancyHost.Start();
 
-            while (Console.ReadLine() != "exit")
+            while (!solution.Terminated)
             {
-                Thread.Sleep(1000); // To fix CPU spike on linux
+                Thread.Sleep(1000);
             }
+
             nancyHost.Stop();
         }
 

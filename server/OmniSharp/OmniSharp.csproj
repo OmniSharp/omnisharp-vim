@@ -144,6 +144,7 @@
     <Compile Include="Rename\RenameResponse.cs" />
     <Compile Include="Solution\OrphanProject.cs" />
     <Compile Include="Solution\StringExtensions.cs" />
+    <Compile Include="StopServer\StopServerModule.cs" />
     <Compile Include="SyntaxErrors\Error.cs" />
     <Compile Include="SyntaxErrors\SyntaxErrorsModule.cs" />
     <Compile Include="Parser\BufferParser.cs" />

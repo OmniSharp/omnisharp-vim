@@ -35,6 +35,7 @@ command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpCodeFormat          call OmniSharp#CodeFormat()
 command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
+command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
 
 

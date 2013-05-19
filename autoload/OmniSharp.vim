@@ -199,5 +199,9 @@ function! OmniSharp#AddToProject()
 	python getResponse("/addtoproject")
 endfunction
 
+function! OmniSharp#StopServer()
+	python getResponse("/stopserver")
+endfunction
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
