@@ -5,10 +5,9 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.AddReference
 {
-    public class AddProjectReferenceProcessor : IReferenceProcessor
+    public class AddProjectReferenceProcessor : ReferenceProcessorBase, IReferenceProcessor
     {
         private readonly ISolution _solution;
-        private readonly XNamespace _msBuildNameSpace = "http://schemas.microsoft.com/developer/msbuild/2003";
         
         public AddProjectReferenceProcessor(ISolution solution)
         {
@@ -23,9 +22,9 @@ namespace OmniSharp.AddReference
 
             var projectXml = project.AsXml();
 
-            var compilationNodes = projectXml.Element(_msBuildNameSpace + "Project")
-                                             .Elements(_msBuildNameSpace + "ItemGroup")
-                                             .Elements(_msBuildNameSpace + "ProjectReference").ToList();
+            var compilationNodes = projectXml.Element(MsBuildNameSpace + "Project")
+                                             .Elements(MsBuildNameSpace + "ItemGroup")
+                                             .Elements(MsBuildNameSpace + "ProjectReference").ToList();
             
             var relativeProjectPath = project.FileName.GetRelativePath(projectToReference.FileName);
 
@@ -49,14 +48,14 @@ namespace OmniSharp.AddReference
                 }
                 else
                 {
-                    var projectItemGroup = new XElement(_msBuildNameSpace + "ItemGroup");
+                    var projectItemGroup = new XElement(MsBuildNameSpace + "ItemGroup");
                     projectItemGroup.Add(projectReferenceNode);
-                    projectXml.Element(_msBuildNameSpace + "Project").Add(projectItemGroup);
+                    projectXml.Element(MsBuildNameSpace + "Project").Add(projectItemGroup);
                 }
 
                 project.AddReference(new ProjectReference(_solution, projectToReference.Title));
                 project.Save(projectXml);
-                response.Message = string.Format("Reference to {0} added successfully", project.Title);
+                response.Message = string.Format("Reference to {0} added successfully", projectToReference.Title);
             }
             else
             {
@@ -68,15 +67,15 @@ namespace OmniSharp.AddReference
 
         XElement CreateProjectReferenceNode(string relativeProjectPath, IProject projectToReference)
         {
-            var projectReferenceNode = 
-                new XElement(_msBuildNameSpace + "ProjectReference", 
+            var projectReferenceNode =
+                new XElement(MsBuildNameSpace + "ProjectReference", 
                     new XAttribute("Include", relativeProjectPath));
 
             projectReferenceNode.Add(
-                new XElement(_msBuildNameSpace + "Project", 
+                new XElement(MsBuildNameSpace + "Project", 
                     new XText(string.Concat("{",projectToReference.ProjectId.ToString().ToUpperInvariant(), "}"))));
 
-            projectReferenceNode.Add(new XElement(_msBuildNameSpace + "Name", new XText(projectToReference.Title)));
+            projectReferenceNode.Add(new XElement(MsBuildNameSpace + "Name", new XText(projectToReference.Title)));
 
             return projectReferenceNode;
         }

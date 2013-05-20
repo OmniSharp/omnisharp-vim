@@ -5,7 +5,7 @@ using OmniSharp.Solution;
 
 namespace OmniSharp.Tests.AddReference
 {
-    public abstract class AddReferenceBase
+    public abstract class AddReferenceTestsBase
     {
         protected ISolution Solution;
         [SetUp]
@@ -16,10 +16,26 @@ namespace OmniSharp.Tests.AddReference
 
         protected IProject CreateDefaultProject()
         {
-            var projectOne = new FakeProject("fakeone", @"c:\test\one\fake1.csproj", Guid.NewGuid())
+            var project = new FakeProject("fakeone", @"c:\test\one\fake1.csproj", Guid.NewGuid())
                 {
                     Title = "Project One",
                     XmlRepresentation = XDocument.Parse(@"
+                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                    <ItemGroup>
+                        <Compile Include=""Test.cs""/>
+                    </ItemGroup>
+                </Project>")
+                };
+            project.AddFile("some content", @"c:\test\one\test.cs");
+            return project;
+        }
+
+        protected IProject CreateDefaultProjectWithFileReference()
+        {
+            var project = new FakeProject("fakeone", @"c:\test\one\fake1.csproj", Guid.NewGuid())
+            {
+                Title = "Project One",
+                XmlRepresentation = XDocument.Parse(@"
                 <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                     <ItemGroup>
                         <Compile Include=""Test.cs""/>
@@ -30,9 +46,9 @@ namespace OmniSharp.Tests.AddReference
                         </Reference>
                     </ItemGroup>
                 </Project>")
-                };
-            projectOne.AddFile("some content", @"c:\test\one\test.cs");
-            return projectOne;
+            };
+            project.AddFile("some content", @"c:\test\one\test.cs");
+            return project;
         }
     }
 }

@@ -6,7 +6,7 @@ using Should;
 namespace OmniSharp.Tests.AddReference
 {
     [TestFixture]
-    public class AddGacReferenceTests : AddReferenceBase
+    public class AddGacReferenceTests : AddReferenceTestsBase
     {
          [Test,Ignore]
          public void CanAddGacAssemblyReference()

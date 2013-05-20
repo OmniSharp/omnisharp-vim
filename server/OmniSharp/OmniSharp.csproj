@@ -114,6 +114,7 @@
     <Compile Include="AddReference\AddReferenceResponse.cs" />
     <Compile Include="AddReference\AddReferenceProcessorFactory.cs" />
     <Compile Include="AddReference\IReferenceProcessor.cs" />
+    <Compile Include="AddReference\ReferenceProcessorBase.cs" />
     <Compile Include="AddToProject\AddToProjectHandler.cs" />
     <Compile Include="AddToProject\AddToProjectModule.cs" />
     <Compile Include="AddToProject\AddToProjectRequest.cs" />

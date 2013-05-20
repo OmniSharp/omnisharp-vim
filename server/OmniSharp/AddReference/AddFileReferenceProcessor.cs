@@ -1,40 +1,53 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using OmniSharp.Solution;
 
 namespace OmniSharp.AddReference
 {
-    public class AddFileReferenceProcessor : IReferenceProcessor
+    public class AddFileReferenceProcessor : ReferenceProcessorBase, IReferenceProcessor
     {
-        private readonly ISolution _solution;
-        private readonly XNamespace _msBuildNameSpace = "http://schemas.microsoft.com/developer/msbuild/2003";
-
-        public AddFileReferenceProcessor(ISolution solution)
-        {
-            _solution = solution;
-        }
-
         public AddReferenceResponse AddReference(IProject project, string reference)
         {
             var response = new AddReferenceResponse();
 
             var projectXml = project.AsXml();
 
-            var compilationNodes = projectXml.Element(_msBuildNameSpace + "Project")
-                                             .Elements(_msBuildNameSpace + "ItemGroup")
-                                             .Elements(_msBuildNameSpace + "Reference").ToList();
+            var compilationNodes = projectXml.Element(MsBuildNameSpace + "Project")
+                                             .Elements(MsBuildNameSpace + "ItemGroup")
+                                             .Elements(MsBuildNameSpace + "Reference").ToList();
 
             var relativeReferencePath = project.FileName.GetRelativePath(reference);
 
             var referenceName = reference.Substring(reference.LastIndexOf(Path.DirectorySeparatorChar) + 1).Replace(".dll", "");
 
-            var projectReferenceNode = CreateReferenceNode(relativeReferencePath, referenceName);
+            var referenceAlreadyAdded = compilationNodes.Any(n => n.Attribute("Include").Value.Equals(referenceName));
 
-            compilationNodes.First().Parent.Add(projectReferenceNode);
+            var fileReferenceNode = CreateReferenceNode(relativeReferencePath, referenceName);
 
-            project.Save(projectXml);
+            if (!referenceAlreadyAdded)
+            {
+                if (compilationNodes.Count > 0)
+                {
+                    compilationNodes.First().Parent.Add(fileReferenceNode);
+                }
+                else
+                {
+                    var projectItemGroup = new XElement(MsBuildNameSpace + "ItemGroup");
+                    projectItemGroup.Add(fileReferenceNode);
+                    projectXml.Element(MsBuildNameSpace + "Project").Add(projectItemGroup);
+                }
+
+                //TODO: Add reference into project
+
+                project.Save(projectXml);
+
+                response.Message = string.Format("Reference to {0} added successfully", referenceName);
+            }
+            else
+            {
+                response.Message = "Reference already added";
+            }
 
             return response;
 
@@ -43,11 +56,11 @@ namespace OmniSharp.AddReference
         XElement CreateReferenceNode(string relativeReferencePath, string referenceName)
         {
             var projectReferenceNode =
-                new XElement(_msBuildNameSpace + "Reference",
+                new XElement(MsBuildNameSpace + "Reference",
                     new XAttribute("Include", referenceName));
 
             projectReferenceNode.Add(
-                new XElement(_msBuildNameSpace + "HintPath",
+                new XElement(MsBuildNameSpace + "HintPath",
                     new XText(relativeReferencePath)));
 
             return projectReferenceNode;

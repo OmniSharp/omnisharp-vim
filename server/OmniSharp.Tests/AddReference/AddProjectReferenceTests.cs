@@ -8,7 +8,7 @@ using Should;
 namespace OmniSharp.Tests.AddReference
 {
     [TestFixture]
-    public class AddProjectReferenceTests : AddReferenceBase
+    public class AddProjectReferenceTests : AddReferenceTestsBase
     {
         [Test]
         public void CanAddProjectReferenceWhenNoProjectReferencesExist()
