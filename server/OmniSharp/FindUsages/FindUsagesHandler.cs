@@ -42,7 +42,7 @@ namespace OmniSharp.FindUsages
                 var usages = result.Select(node => new QuickFix
                 {
                     FileName = node.GetRegion().FileName,
-                    Text = node.Preview(_solution.GetFile(node.GetRegion().FileName)).Replace("'", "''"),
+                    Text = node.Preview(_solution.GetFile(node.GetRegion().FileName), request.MaxWidth).Replace("'", "''"),
                     Line = node.StartLocation.Line,
                     Column = node.StartLocation.Column,
                 });

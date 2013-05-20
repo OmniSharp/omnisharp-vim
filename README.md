@@ -1,3 +1,5 @@
+![OmniSharp](logo.jpg)
+
 #OmniSharp
 
 OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provided below.
@@ -6,6 +8,7 @@ OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
 completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
+[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) now has a completion plugin utilising the OmniSharp server.
 
 ##Features
 
@@ -77,6 +80,13 @@ Verify that Python is working inside Vim with
 	OmniSharp.exe -s (path\to\sln)
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
+Also if you are running OmniSharp as a non-privileged user, or without UAC elevation on Vista or later, you will need to run the following
+
+```
+http add urlacl url=http://+:2000/ user=DOMAIN\user
+```
+
+This will give your user permission to bind to port 2000.
 
 To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
@@ -99,26 +109,40 @@ let g:OmniSharp_host = "http://localhost:2000"
 "Set the type lookup function to use the preview window instead of the status line
 let g:OmniSharp_typeLookupInPreview = 1
 
-nnoremap <F5> :wa!<cr>:call OmniSharp#Build()<cr>
-nnoremap <F12> :call OmniSharp#GotoDefinition()<cr>
-nnoremap gd :call OmniSharp#GotoDefinition()<cr>
-nnoremap fi :call OmniSharp#FindImplementations()<cr>
-nnoremap fu :call OmniSharp#FindUsages()<cr>
-nnoremap <leader>tt :call OmniSharp#TypeLookup()<cr>
+"Showmatch significantly slows down omnicomplete
+"when the first match contains parentheses.
+set noshowmatch
+
+"Super tab settings
+"let g:SuperTabDefaultCompletionType = 'context'
+"let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
+"let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
+"let g:SuperTabClosePreviewOnPopupClose = 1
+
+"don't autoselect first item in omnicomplete, show if only one item (for preview)
+set completeopt=longest,menuone,preview
+
+nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
+nnoremap <F12> :OmniSharpGotoDefinition<cr>
+nnoremap gd :OmniSharpGotoDefinition<cr>
+nnoremap fi :OmniSharpFindImplementations<cr>
+nnoremap fu :OmniSharpFindUsages<cr>
+nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
-nnoremap <space> :call OmniSharp#GetCodeActions()<cr>
+nnoremap <space> :OmniSharpGetCodeActions<cr>
 
 " rename with dialog
-nnoremap nm :call OmniSharp#Rename()<cr>
-nnoremap <F2> :call OmniSharp#Rename()<cr>      
+nnoremap nm :OmniSharpRename<cr>
+nnoremap <F2> :OmniSharpRename<cr>      
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 " Force OmniSharp to reload the solution. Useful when switching branches etc.
-nnoremap <leader>rl :call OmniSharp#ReloadSolution()<cr>
-nnoremap <leader>cf :call OmniSharp#CodeFormat()<cr>
-nnoremap <leader>tp :call OmniSharp#AddToProject()<cr>
+nnoremap <leader>rl :OmniSharpReloadSolution<cr>
+nnoremap <leader>cf :OmniSharpCodeFormat<cr>
+nnoremap <leader>tp :OmniSharpAddToProject<cr>
 " (Experimental - uses vim-dispatch plugin) - Start the omnisharp server for the current solution
-nnoremap <leader>ss :call OmniSharp#StartServer()<cr>
+nnoremap <leader>ss :OmniSharpStartServer<cr>
+nnoremap <leader>sp :OmniSharpStopServer<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
 ```

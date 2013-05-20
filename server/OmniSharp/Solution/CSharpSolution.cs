@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 namespace OmniSharp.Solution
 {
@@ -32,6 +33,7 @@ namespace OmniSharp.Solution
         CSharpFile GetFile(string filename);
         IProject ProjectContainingFile(string filename);
         void Reload();
+        void Terminate();
     }
 
     public class CSharpSolution : ISolution
@@ -42,6 +44,8 @@ namespace OmniSharp.Solution
         private OrphanProject _orphanProject;
 
         public string FileName { get; private set; }
+
+        public bool Terminated { get; private set; }
 
         public CSharpSolution(string fileName)
         {
@@ -73,17 +77,28 @@ namespace OmniSharp.Solution
                             // ignore folders
                             break;
                         case "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}": // C# project
-                        case "{CFBF81BE-A5A8-8323-0E2F-C9B25881C624}":
-                        case "{4C2D6F16-28F7-6964-F259-E4608E3E113F}":
-                            Console.WriteLine("Loading project - " + title);
-                            Projects.Add(new CSharpProject(this, title, location, new Guid(guid)));
+                            LoadProject(title, location, guid);
                             break;
                         default:
-                            Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);
+                            // Unity3D makes type GUID from the MD5 of title.
+                            if (MD5(title) == typeGuid.Substring(1, typeGuid.Length - 2).ToLower().Replace("-", ""))
+                            {
+                                LoadProject(title, location, guid);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Project {0} has unsupported type {1}", location, typeGuid);
+                            }
                             break;
                     }
                 }
             }
+        }
+
+        public void LoadProject(string title, string location, string id)
+        {
+            Console.WriteLine("Loading project - " + title);
+            Projects.Add(new CSharpProject(this, title, location, new Guid(id)));
         }
 
         public CSharpFile GetFile(string filename)
@@ -124,6 +139,18 @@ namespace OmniSharp.Solution
         public void Reload()
         {
             LoadSolution(this.FileName);
+        }
+
+        public void Terminate()
+        {
+            Terminated = true;
+        }
+
+        private static string MD5(string str)
+        {
+            var provider = new MD5CryptoServiceProvider();
+            byte[] bytes = provider.ComputeHash(System.Text.Encoding.UTF8.GetBytes(str));
+            return BitConverter.ToString(bytes).ToLower().Replace("-", "");
         }
     }
 }

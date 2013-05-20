@@ -1,4 +1,4 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi
+import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
 
@@ -16,23 +16,30 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
 
-def getResponse(endPoint, additionalParameters=None):
+def getResponse(endPoint, additionalParameters=None, timeout=None ):
     parameters = {}
     parameters['line'] = vim.eval('line(".")')
     parameters['column'] = vim.eval('col(".")')
     parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-    parameters['filename'] = vim.current.buffer.name
+    if(vim.eval('exists("+shellslash") && &shellslash')):
+        parameters['filename'] = vim.current.buffer.name.replace('/', '\\')
+    else:
+        parameters['filename'] = vim.current.buffer.name
 
     if(additionalParameters != None):
         parameters.update(additionalParameters)
 
+	if(timeout == None):
+		timeout=int(vim.eval('g:OmniSharp_timeout'))
+
     target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
     parameters = urllib.urlencode(parameters)
+
     try:
-        response = urllib2.urlopen(target, parameters)
+        response = urllib2.urlopen(target, parameters, timeout)
         return response.read()
-    except:
-        vim.command("call confirm('Could not connect to " + target + "')")
+    except Exception as e:
+        print("OmniSharp : Could not connect to " + target + ": " + str(e))
         return ''
 
 
@@ -46,18 +53,26 @@ def getCompletions(ret, column, partialWord):
     js = getResponse('/autocomplete', parameters)
 
     command_base = ("add(" + ret +
-            ", {'word': '%(CompletionText)s', 'abbr': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
+            ", {'word': '%(CompletionText)s', 'menu': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
+    enc = vim.eval('&encoding')
     if(js != ''):
         completions = json.loads(js)
         for completion in completions:
             try:
+                completion['Description'] = completion['Description'].replace('\r\n', '\n')
                 command = command_base % completion
-                vim.eval(command)
+                if type(command) == types.StringType:
+                    vim.eval(command)
+                else:
+                    vim.eval(command.encode(enc))
             except:
                 logger.error(command)
 
 def findUsages(ret):
-    js = getResponse('/findusages')
+
+    parameters = {}
+    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
+    js = getResponse('/findusages', parameters)
     if(js != ''):
         usages = json.loads(js)['Usages']
         populateQuickFix(ret, usages)
@@ -100,7 +115,6 @@ def findImplementations(ret):
 def gotoDefinition():
     js = getResponse('/gotodefinition');
     if(js != ''):
-
         definition = json.loads(js)
         filename = definition['FileName']
         if(filename != None):
@@ -182,7 +196,7 @@ def setBuffer(buffer):
     vim.current.buffer[:] = lines
 
 def build(ret):
-    response = json.loads(getResponse('/build'))
+    response = json.loads(getResponse('/build', {}, 60))
 
     success = response["Success"]
     if success:

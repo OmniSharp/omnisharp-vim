@@ -37,5 +37,10 @@ namespace OmniSharp.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void Terminate()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

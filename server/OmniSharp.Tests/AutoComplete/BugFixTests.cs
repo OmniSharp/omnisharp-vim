@@ -31,7 +31,7 @@ namespace OmniSharp.Tests.AutoComplete
         int n;
         n.T$;
     }
-}").First().ShouldEqual("ToString()");
+}").First().ShouldEqual("string ToString()");
         }
 
         [Test]
@@ -50,7 +50,7 @@ public class MyClass
     {
         var i = Process1M$
     }
-}").ShouldContain("Process1More()");
+}").ShouldContain("int Process1More()");
         }
     }
 }
