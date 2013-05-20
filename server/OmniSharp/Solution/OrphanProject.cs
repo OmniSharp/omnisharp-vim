@@ -23,6 +23,11 @@ namespace OmniSharp.Solution
             References.Add(reference);
         }
 
+        public void AddReference(string reference)
+        {
+            AddReference(CSharpProject.LoadAssembly(reference));
+        }
+
         private CSharpFile _file;
 
         public OrphanProject(ISolution solution)

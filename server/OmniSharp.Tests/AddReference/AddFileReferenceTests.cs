@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Linq;
+using System.Xml.Linq;
 using NUnit.Framework;
 using OmniSharp.AddReference;
 using Should;
@@ -40,6 +41,7 @@ namespace OmniSharp.Tests.AddReference
             handler.AddReference(request);
 
             project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
+            ((FakeAssembly)project.References.First(r => r.GetType() == typeof(FakeAssembly))).AssemblyPath.ShouldEqual(@"..\packages\SomeTest\lib\net40\Some.Test.dll");
         }
 
         [Test]
@@ -71,6 +73,7 @@ namespace OmniSharp.Tests.AddReference
             handler.AddReference(request);
 
             project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
+            ((FakeAssembly)project.References.First(r => r.GetType() == typeof(FakeAssembly))).AssemblyPath.ShouldEqual(@"..\packages\SomeTest\lib\net40\Some.Test.dll");
         }
 
         [Test]
@@ -102,6 +105,7 @@ namespace OmniSharp.Tests.AddReference
             handler.AddReference(request);
 
             project.AsXml().ToString().ShouldEqual(expectedXml.ToString());
+            project.References.FirstOrDefault(r => r.GetType() == typeof(FakeAssembly)).ShouldBeNull();
         }
     }
 }

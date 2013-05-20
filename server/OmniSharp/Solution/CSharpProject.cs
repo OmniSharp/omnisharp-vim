@@ -42,6 +42,7 @@ namespace OmniSharp.Solution
         void Save(XDocument project);
         Guid ProjectId { get; }
         void AddReference(IAssemblyReference reference);
+        void AddReference(string reference);
     }
 
     public class CSharpProject : IProject
@@ -170,6 +171,11 @@ namespace OmniSharp.Solution
         public void AddReference(IAssemblyReference reference)
         {
             References.Add(reference);
+        }
+
+        public void AddReference(string reference)
+        {
+            AddReference(LoadAssembly(reference));
         }
 
         public CSharpFile GetFile(string fileName)

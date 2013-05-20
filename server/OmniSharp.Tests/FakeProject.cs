@@ -56,6 +56,11 @@ namespace OmniSharp.Tests
             References.Add(reference);
         }
 
+        public void AddReference(string reference)
+        {
+            References.Add(new FakeAssembly(reference));
+        }
+
         public CSharpParser CreateParser()
         {
             var settings = new CompilerSettings();
