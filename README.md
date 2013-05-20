@@ -7,7 +7,7 @@ OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of cu
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so could be plugged into most editors fairly easily.
+completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily.
 [Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) now has a completion plugin utilising the OmniSharp server.
 
 ##Features
@@ -52,15 +52,19 @@ completions as MonoDevelop/SharpDevelop. The server knows nothing about Vim, so 
 ###OSX / Linux
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
+    git submodule init
+    git submodule update
     cd Omnisharp/server
-	xbuild
+    xbuild
 
 ###Windows
-	c:\
-	cd c:\Users\username\vimfiles\bundle
+    c:\
+    cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
+    git submodule init
+    git submodule update
     cd Omnisharp\server
-	msbuild
+    msbuild
 
 ###Install Python
 Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). Make sure that you pick correct version of Python to match the architecture of Vim. 
@@ -75,7 +79,7 @@ Verify that Python is working inside Vim with
 
 (Optional but highly recommended) Install [SuperTab] (https://github.com/ervandew/supertab) Vim plugin.
 
-### Run the server
+### Run the [server](https://github.com/nosami/OmniSharpServer)
 
 	OmniSharp.exe -s (path\to\sln)
 
