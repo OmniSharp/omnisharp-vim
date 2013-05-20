@@ -8,7 +8,7 @@ namespace OmniSharp.Tests.AddReference
     [TestFixture]
     public class AddGacReferenceTests : AddReferenceBase
     {
-         [Test]
+         [Test,Ignore]
          public void CanAddGacAssemblyReference()
          {
              var project = CreateDefaultProject();
@@ -37,7 +37,7 @@ namespace OmniSharp.Tests.AddReference
 
          }
 
-        [Test]
+        [Test, Ignore]
         public void WillNotAddDuplicateGacAssemblyReference()
         {
             
