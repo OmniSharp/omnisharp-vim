@@ -38,7 +38,7 @@ namespace OmniSharp.AddReference
                     projectXml.Element(MsBuildNameSpace + "Project").Add(projectItemGroup);
                 }
 
-                project.AddReference(relativeReferencePath);
+                project.AddReference(reference.FixPath());
                 project.Save(projectXml);
 
                 response.Message = string.Format("Reference to {0} added successfully", referenceName);
