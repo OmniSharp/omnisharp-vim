@@ -145,9 +145,10 @@ namespace OmniSharp.Tests.AddReference
                 };
 
             var handler = new AddReferenceHandler(Solution, new AddReferenceProcessorFactory(Solution, new IReferenceProcessor[] { new AddProjectReferenceProcessor(Solution) }));
-            handler.AddReference(request);
+            var response = handler.AddReference(request);
 
             projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
+            response.Message.ShouldEqual("Reference already added");
         }
 
         [Test]
@@ -174,6 +175,7 @@ namespace OmniSharp.Tests.AddReference
                     </ItemGroup>
                 </Project>", string.Concat("{", projectOne.ProjectId.ToString().ToUpperInvariant(), "}"));
 
+            var expectedXml = XDocument.Parse(xml);
             projectTwo.XmlRepresentation = XDocument.Parse(xml);
             
             Solution.Projects.Add(projectOne);
@@ -188,6 +190,7 @@ namespace OmniSharp.Tests.AddReference
             var handler = new AddReferenceHandler(Solution, new AddReferenceProcessorFactory(Solution, new IReferenceProcessor[] { new AddProjectReferenceProcessor(Solution) }));
             var response = handler.AddReference(request);
 
+            projectTwo.AsXml().ToString().ShouldEqual(expectedXml.ToString());
             response.Message.ShouldEqual("Reference will create circular dependency");
         }
     }

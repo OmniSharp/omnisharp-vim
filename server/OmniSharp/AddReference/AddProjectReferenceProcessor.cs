@@ -81,7 +81,7 @@ namespace OmniSharp.AddReference
             return projectReferenceNode;
         }
 
-        private bool IsCircularReference(IProject project, IProject projectToReference)
+        bool IsCircularReference(IProject project, IProject projectToReference)
         {
             return projectToReference.References.Cast<ProjectReference>().Any(r => r.ProjectTitle == project.Title);
         }
