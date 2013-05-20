@@ -24,6 +24,11 @@ namespace OmniSharp.Tests.AddReference
                     <ItemGroup>
                         <Compile Include=""Test.cs""/>
                     </ItemGroup>
+                    <ItemGroup>
+                        <Reference Include=""Hello.World"">
+                            <HintPath>..\packages\HelloWorld\lib\net40\Hello.World.dll</HintPath>
+                        </Reference>
+                    </ItemGroup>
                 </Project>")
                 };
             projectOne.AddFile("some content", @"c:\test\one\test.cs");

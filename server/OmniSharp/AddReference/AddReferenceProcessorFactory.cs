@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using OmniSharp.Solution;
 
@@ -7,22 +8,22 @@ namespace OmniSharp.AddReference
     public class AddReferenceProcessorFactory
     {
         private readonly ISolution _solution;
-        readonly IEnumerable<IReferenceProcessor> _processors;
+        private readonly IDictionary<Type, IReferenceProcessor> _processors; 
 
         public AddReferenceProcessorFactory(ISolution solution, IEnumerable<IReferenceProcessor> processors)
         {
             _solution = solution;
-            _processors = processors;
+            _processors = processors.ToDictionary(k => k.GetType(), v => v);
         }
 
         public IReferenceProcessor CreateProcessorFor(AddReferenceRequest request)
         {
             if (IsProjectReference(request.Reference))
             {
-                return _processors.First(p => p.GetType() == typeof (AddProjectReferenceProcessor));
+                return _processors[typeof (AddProjectReferenceProcessor)];
             }
 
-            return _processors.First(p => p.GetType() == typeof(AddFileReferenceProcessor));
+            return _processors[typeof(AddFileReferenceProcessor)];
         }
 
         private bool IsProjectReference(string referenceName)

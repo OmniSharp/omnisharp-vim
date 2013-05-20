@@ -22,7 +22,7 @@ namespace OmniSharp.Tests.AddReference
             _processors = new List<IReferenceProcessor>
                               {
                                   new AddProjectReferenceProcessor(_solution),
-                                  new AddFileReferenceProcessor()
+                                  new AddFileReferenceProcessor(_solution)
                               };
 
             _factory = new AddReferenceProcessorFactory(_solution, _processors);
