@@ -27,7 +27,7 @@ namespace OmniSharp.AddReference
                                              .Elements(_msBuildNameSpace + "ItemGroup")
                                              .Elements(_msBuildNameSpace + "ProjectReference").ToList();
             
-            var relativeProjectPath = new Uri(project.FileName).MakeRelativeUri(new Uri(projectToReference.FileName)).ToString().Replace("/", @"\");
+            var relativeProjectPath = project.FileName.GetRelativePath(projectToReference.FileName);
 
             var projectReferenceNode = CreateProjectReferenceNode(relativeProjectPath, projectToReference);
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace OmniSharp.Solution
 {
@@ -18,6 +19,17 @@ namespace OmniSharp.Solution
                 // TODO: fix hack - vim sends drive letter as uppercase. usually lower case in project files
                 return path.Replace(@"C:\", @"c:\").Replace(@"D:\", @"d:\");
             return Path.GetFullPath(path);
+        }
+
+        /// <summary>
+        /// Returns the relative path of a file to another file
+        /// </summary>
+        /// <param name="path">Base path to create relative path</param>
+        /// <param name="pathToMakeRelative">Path of file to make relative against path</param>
+        /// <returns></returns>
+        public static string GetRelativePath(this string path, string pathToMakeRelative)
+        {
+            return new Uri(path).MakeRelativeUri(new Uri(pathToMakeRelative)).ToString().Replace("/", @"\");
         }
     }
 }
