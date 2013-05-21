@@ -45,5 +45,7 @@ command! -buffer -nargs=1 OmniSharpRenameTo
 command! -buffer -nargs=1 OmniSharpStartServerSolution
 \	call OmniSharp#StartServerSolution(<q-args>)
 
+command! -buffer -nargs=1 -complete=file OmniSharpAddReference         
+\   call OmniSharp#AddReference(<q-args>)
 
 setlocal omnifunc=OmniSharp#Complete

@@ -203,5 +203,10 @@ function! OmniSharp#StopServer()
 	python getResponse("/stopserver")
 endfunction
 
+function! OmniSharp#AddReference(reference)
+	let a:ref = globpath('%:p:h', a:reference)
+	python addReference()
+endfunction
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
