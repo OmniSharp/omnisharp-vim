@@ -42,7 +42,8 @@ command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
 command! -buffer -nargs=1 OmniSharpRenameTo
 \	call OmniSharp#RenameTo(<q-args>)
 
-command! -buffer -nargs=1 OmniSharpStartServerSolution
+command! -buffer -nargs=1 -complete=file
+\	OmniSharpStartServerSolution
 \	call OmniSharp#StartServerSolution(<q-args>)
 
 command! -buffer -nargs=1 -complete=file OmniSharpAddReference         

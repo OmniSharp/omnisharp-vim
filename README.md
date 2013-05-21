@@ -67,7 +67,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
     msbuild
 
 ###Install Python
-Install [Python 2.7.3] (http://www.python.org/download/releases/2.7.3/). Make sure that you pick correct version of Python to match the architecture of Vim. 
+Install [Python 2.7.5] (http://www.python.org/download/releases/2.7.5/). Make sure that you pick correct version of Python to match the architecture of Vim. 
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
 Verify that Python is working inside Vim with 
