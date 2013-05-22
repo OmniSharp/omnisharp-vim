@@ -195,7 +195,14 @@ function! OmniSharp#StartServerSolution(solutionPath)
 	if !has('win32')
 		let command = 'mono ' . command
 	endif
-	call dispatch#start(command, {'background': has('win32') ? 0 : 1})
+
+	let is_vimproc = 0
+	silent! let is_vimproc = vimproc#version()
+	if is_vimproc
+		call vimproc#system_gui(substitute(command, '\\', '\/', 'g'))
+	else
+		call dispatch#start(command, {'background': has('win32') ? 0 : 1})
+	endif
 endfunction
 
 function! OmniSharp#AddToProject()
