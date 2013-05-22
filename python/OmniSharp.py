@@ -215,3 +215,6 @@ def addReference():
     parameters = {}
     parameters["reference"] = vim.eval("a:ref")
     js = getResponse("/addreference", parameters)
+    if(js != ''):
+        message = json.loads(js)['Message']
+        print message
