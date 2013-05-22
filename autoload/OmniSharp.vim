@@ -192,6 +192,9 @@ endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
 	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
+	if !has('win32')
+		let command = 'mono ' . command
+	endif
 	call dispatch#start(command, {'background': has('win32') ? 0 : 1})
 endfunction
 
