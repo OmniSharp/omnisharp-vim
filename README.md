@@ -33,6 +33,8 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Integrated xbuild/msbuild
 * Code formatter
 * Add file to project (currently will only add .cs files to a .csproj file)
+* Add reference. Supports project and file reference. GAC referencing todo.
+	* Usage: :OmniSharpAddReference path_to_reference
 
 
 ##Screenshots
