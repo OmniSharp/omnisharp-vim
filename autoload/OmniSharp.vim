@@ -204,7 +204,7 @@ function! OmniSharp#StopServer()
 endfunction
 
 function! OmniSharp#AddReference(reference)
-	let a:ref = globpath('%:p:h', a:reference)
+	let a:ref = fnamemodify(globpath('%:p:h', a:reference), ':p')
 	python addReference()
 endfunction
 
