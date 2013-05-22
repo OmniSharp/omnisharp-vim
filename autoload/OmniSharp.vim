@@ -118,7 +118,7 @@ function! OmniSharp#TypeLookup()
 endfunction
 
 function! OmniSharp#Rename()
-	let a:renameto = inputdialog("Rename to:")
+	let a:renameto = inputdialog("Rename to:", expand('<cword>'))
 	if a:renameto != ''
 		call OmniSharp#RenameTo(a:renameto)
 	endif
