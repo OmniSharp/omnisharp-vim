@@ -36,7 +36,7 @@ if !exists("g:Omnisharp_start_server")
 endif
 
 if g:Omnisharp_start_server==1
-    au FileType cs call OmniSharp#StartServer()
+    au FileType cs call OmniSharp#StartServerIfNotRunning()
 endif
 
 " Automatically stop server

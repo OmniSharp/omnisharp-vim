@@ -148,6 +148,13 @@ function! OmniSharp#CodeFormat()
 	python codeFormat()
 endfunction
 
+function! OmniSharp#StartServerIfNotRunning()
+    let lockfilename = fnamemodify(shellescape(s:omnisharp_server,1), ':p:h') . 'lockfile-' . g:OmniSharp_host
+    if filereadable(lockfilename) || glob(lockfilename) == ""
+        call OmniSharp#StartServer()
+    endif
+endfunction
+
 function! OmniSharp#StartServer()
 	"get the path for the current buffer
 	let folder = expand('%:p:h')
