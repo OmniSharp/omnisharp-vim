@@ -54,8 +54,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 ###OSX / Linux
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule init
-    git submodule update
+    git submodule update --init
     cd Omnisharp/server
     xbuild /p:Platform="Any CPU"
 
@@ -63,8 +62,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule init
-    git submodule update
+    git submodule update --init
     cd Omnisharp\server
     msbuild /p:Platform="Any CPU"
 
