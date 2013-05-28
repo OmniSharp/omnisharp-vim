@@ -149,7 +149,9 @@ function! OmniSharp#CodeFormat()
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning()
-    let lockfilename = fnamemodify(shellescape(s:omnisharp_server,1), ':p:h') . 'lockfile-' . g:OmniSharp_host
+    let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . matchstr(g:OmniSharp_host,'[0-9]\+$')
+    " If lockfile is not present, or not locked (and thus readable):
+    " Start server
     if filereadable(lockfilename) || glob(lockfilename) == ""
         call OmniSharp#StartServer()
     endif
