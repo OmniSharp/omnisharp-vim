@@ -148,11 +148,14 @@ function! OmniSharp#CodeFormat()
 	python codeFormat()
 endfunction
 
-function! OmniSharp#StartServerIfNotRunning()
+function! OmniSharp#ServerIsRunning()
     let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . matchstr(g:OmniSharp_host,'[0-9]\+$')
     " If lockfile is not present, or not locked (and thus readable):
-    " Start server
-    if filereadable(lockfilename) || glob(lockfilename) == ""
+    return filereadable(lockfilename) || glob(lockfilename) == ""
+endfunction
+
+function! OmniSharp#StartServerIfNotRunning()
+    if OmniSharp#ServerIsRunning()
         call OmniSharp#StartServer()
     endif
 endfunction
@@ -216,6 +219,17 @@ endfunction
 
 function! OmniSharp#AddToProject()
 	python getResponse("/addtoproject")
+endfunction
+
+function! OmniSharp#AskStopServerIfNotRunning()
+    if OmniSharp#ServerIsRunning()
+        call inputsave()
+        let choice = input('Do you want to stop the OmniSharp server? (y/n): ')
+        call inputrestore()
+        if choice == "y"
+            call OmniSharp#StopServer()
+        endif
+    endif
 endfunction
 
 function! OmniSharp#StopServer()
