@@ -34,7 +34,6 @@ let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck
 if !exists("g:Omnisharp_start_server")
     let g:Omnisharp_start_server = 1
 endif
-
 if g:Omnisharp_start_server==1
     au FileType cs call OmniSharp#StartServerIfNotRunning()
 endif
@@ -43,7 +42,6 @@ endif
 if !exists("g:Omnisharp_stop_server")
     let g:Omnisharp_stop_server = 1
 endif
-
 if g:Omnisharp_stop_server==1
-    au VimLeave * call OmniSharp#StopServer()
+    au VimLeavePre * call OmniSharp#AskStopServerIfNotRunning()
 endif
