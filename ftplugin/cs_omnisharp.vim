@@ -32,6 +32,7 @@ command! -buffer -bar OmniSharpFindSyntaxErrors    call OmniSharp#FindSyntaxErro
 command! -buffer -bar OmniSharpGetCodeActions      call OmniSharp#GetCodeActions()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookup()
 command! -buffer -bar OmniSharpBuild               call OmniSharp#Build()
+command! -buffer -bar OmniSharpBuildAsync          call OmniSharp#BuildAsync()
 command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpCodeFormat          call OmniSharp#CodeFormat()

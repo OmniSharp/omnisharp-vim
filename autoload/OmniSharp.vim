@@ -140,6 +140,14 @@ function! OmniSharp#Build()
 	endif
 endfunction
 
+function! OmniSharp#BuildAsync()
+	python buildcommand()
+	set errorformat=\ %#%f(%l\\\,%c):\ %m
+	set errorformat=%f(%l\\,%c):\ error\ CS%n:\ %m
+	let &makeprg=b:buildcommand
+	Make
+endfunction
+
 function! OmniSharp#ReloadSolution()
 	python getResponse("/reloadsolution")
 endfunction
@@ -195,13 +203,16 @@ function! OmniSharp#StartServerSolution(solutionPath)
 	if !has('win32')
 		let command = 'mono ' . command
 	endif
+	call OmniSharp#RunAsyncCommand(command)
+endfunction
 
+function! OmniSharp#RunAsyncCommand(command)
 	let is_vimproc = 0
 	silent! let is_vimproc = vimproc#version()
 	if is_vimproc
-		call vimproc#system_gui(substitute(command, '\\', '\/', 'g'))
+		call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
 	else
-		call dispatch#start(command, {'background': g:OmniSharp_Dispatch_Background})
+		call dispatch#start(a:command, {'background': g:OmniSharp_Dispatch_Background})
 	endif
 endfunction
 

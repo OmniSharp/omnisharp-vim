@@ -207,6 +207,9 @@ def build(ret):
     quickfixes = response['QuickFixes']
     populateQuickFix(ret, quickfixes)
 
+def buildcommand():
+	vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
+
 def codeFormat():
     response = json.loads(getResponse('/codeformat'))
     setBuffer(response["Buffer"])
