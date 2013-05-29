@@ -201,7 +201,7 @@ function! OmniSharp#StartServerSolution(solutionPath)
 	if is_vimproc
 		call vimproc#system_gui(substitute(command, '\\', '\/', 'g'))
 	else
-		call dispatch#start(command, {'background': has('win32') ? 0 : 1})
+		call dispatch#start(command, {'background': g:OmniSharp_Dispatch_Background})
 	endif
 endfunction
 

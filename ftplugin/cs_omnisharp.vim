@@ -4,6 +4,7 @@ if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
 endif
 
+let g:OmniSharp_Dispatch_Background = !get(g:, "OmniSharp_Dispatch_Background", has('win32') ? 0 : 1)
 
 " Auto syntax check.
 augroup plugin-OmniSharp-SyntaxCheck
