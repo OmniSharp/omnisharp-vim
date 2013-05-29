@@ -150,12 +150,13 @@ endfunction
 
 function! OmniSharp#ServerIsRunning()
     let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . matchstr(g:OmniSharp_host,'[0-9]\+$')
-    " If lockfile is not present, or not locked (and thus readable):
-    " exists
-    " echoerr glob(lockfilename) != ""
-    " readable
-    " echoerr filereadable(lockfilename)
-    return !(filereadable(lockfilename) || glob(lockfilename) == "")
+    " If lockfile is present, and locked (and thus not readable)
+    " the server is running
+    " lockfile present
+     echoerr glob(lockfilename) != ""
+    " lockfile locked
+     echoerr !filereadable(lockfilename)
+    return glob(lockfilename) != "" && !filereadable(lockfilename)
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning()
