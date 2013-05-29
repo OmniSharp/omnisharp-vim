@@ -32,7 +32,12 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
 	if(timeout == None):
 		timeout=int(vim.eval('g:OmniSharp_timeout'))
 
-    target = urlparse.urljoin(vim.eval('g:OmniSharp_host'), endPoint)
+    host = vim.eval('g:OmniSharp_host')
+
+    if vim.eval('exists("b:OmniSharp_host")') == '1':
+        host = vim.eval('b:OmniSharp_host')
+
+    target = urlparse.urljoin(host, endPoint)
     parameters = urllib.urlencode(parameters)
 
     try:
