@@ -54,19 +54,17 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 ###OSX / Linux
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule init
-    git submodule update
+    git submodule update --init
     cd Omnisharp/server
-    xbuild
+    xbuild /p:Platform="Any CPU"
 
 ###Windows
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule init
-    git submodule update
+    git submodule update --init
     cd Omnisharp\server
-    msbuild
+    msbuild /p:Platform="Any CPU"
 
 ###Install Python
 Install [Python 2.7.5] (http://www.python.org/download/releases/2.7.5/). Make sure that you pick correct version of Python to match the architecture of Vim. 
