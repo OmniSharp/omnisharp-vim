@@ -153,9 +153,9 @@ function! OmniSharp#ServerIsRunning()
     " If lockfile is present, and locked (and thus not readable)
     " the server is running
     " lockfile present
-     echoerr glob(lockfilename) != ""
+    "echoerr glob(lockfilename) != ""
     " lockfile locked
-     echoerr !filereadable(lockfilename)
+    "echoerr !filereadable(lockfilename)
     return glob(lockfilename) != "" && !filereadable(lockfilename)
 endfunction
 
