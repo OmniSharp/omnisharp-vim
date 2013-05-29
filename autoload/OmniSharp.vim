@@ -142,7 +142,6 @@ endfunction
 
 function! OmniSharp#BuildAsync()
 	python buildcommand()
-	set errorformat=\ %#%f(%l\\\,%c):\ %m
 	set errorformat=%f(%l\\,%c):\ error\ CS%n:\ %m
 	let &makeprg=b:buildcommand
 	Make
@@ -211,8 +210,12 @@ function! OmniSharp#RunAsyncCommand(command)
 	silent! let is_vimproc = vimproc#version()
 	if is_vimproc
 		call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
-	else
-		call dispatch#start(a:command, {'background': g:OmniSharp_Dispatch_Background})
+	else 
+		if(exists(':Make'))
+			call dispatch#start(a:command, {'background': 1})
+		else
+			echoerr 'Please install vim-dispatch or vimproc plugin to use this feature'
+		endif
 	endif
 endfunction
 
