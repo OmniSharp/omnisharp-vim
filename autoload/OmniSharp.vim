@@ -198,11 +198,12 @@ function! OmniSharp#StartServer()
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
-	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
-	if !has('win32')
-		let command = 'mono ' . command
-	endif
-	call OmniSharp#RunAsyncCommand(command)
+    let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
+    let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
+    if !has('win32')
+        let command = 'mono ' . command
+    endif
+    call OmniSharp#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#RunAsyncCommand(command)
