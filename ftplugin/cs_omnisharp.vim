@@ -50,3 +50,34 @@ command! -buffer -nargs=1 -complete=file OmniSharpAddReference
 \   call OmniSharp#AddReference(<q-args>)
 
 setlocal omnifunc=OmniSharp#Complete
+
+
+
+if exists('b:undo_ftplugin')
+	let b:undo_ftplugin .= ' | '
+else
+	let b:undo_ftplugin = ''
+endif
+let b:undo_ftplugin .= '
+\	execute "autocmd! plugin-OmniSharp-SyntaxCheck * <buffer>"
+\
+\|	delcommand OmniSharpFindUsages
+\|	delcommand OmniSharpFindImplementations
+\|	delcommand OmniSharpGotoDefinition
+\|	delcommand OmniSharpFindSyntaxErrors
+\|	delcommand OmniSharpGetCodeActions
+\|	delcommand OmniSharpTypeLookup
+\|	delcommand OmniSharpBuild
+\|	delcommand OmniSharpBuildAsync
+\|	delcommand OmniSharpRename
+\|	delcommand OmniSharpReloadSolution
+\|	delcommand OmniSharpCodeFormat
+\|	delcommand OmniSharpStartServer
+\|	delcommand OmniSharpStopServer
+\|	delcommand OmniSharpAddToProject
+\
+\|	delcommand OmniSharpRenameTo
+\|	delcommand OmniSharpStartServerSolution
+\|	delcommand OmniSharpAddReference
+\
+\|	setlocal omnifunc<'
