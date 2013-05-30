@@ -80,4 +80,4 @@ let b:undo_ftplugin .= '
 \|	delcommand OmniSharpStartServerSolution
 \|	delcommand OmniSharpAddReference
 \
-\|	setlocal omnifunc<'
+\|	setlocal omnifunc< errorformat< makeprg<'
