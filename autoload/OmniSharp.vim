@@ -142,8 +142,8 @@ endfunction
 
 function! OmniSharp#BuildAsync()
 	python buildcommand()
-	set errorformat=%f(%l\\,%c):\ error\ CS%n:\ %m
-	let &makeprg=b:buildcommand
+	setlocal errorformat=%f(%l\\,%c):\ error\ CS%n:\ %m
+	let &l:makeprg=b:buildcommand
 	Make
 endfunction
 
