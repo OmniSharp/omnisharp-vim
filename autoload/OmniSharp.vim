@@ -149,14 +149,16 @@ function! OmniSharp#CodeFormat()
 endfunction
 
 function! OmniSharp#ServerIsRunning()
-    let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . matchstr(g:OmniSharp_host,'[0-9]\+$')
-    " If lockfile is present, and locked (and thus not readable)
-    " the server is running
-    " lockfile present
-    "echoerr glob(lockfilename) != ""
-    " lockfile locked
-    "echoerr !filereadable(lockfilename)
-    return glob(lockfilename) != "" && !filereadable(lockfilename)
+    let port = matchstr(g:OmniSharp_host,'[0-9]\+$')
+    if has('win32')
+        let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . port
+        " If lockfile is present, and locked (and thus not readable)
+        " the server is running
+        return glob(lockfilename) != "" && !filereadable(lockfilename)
+    else
+        let isrunning=system('ps ef | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l')
+        return isrunning > 0
+    endif
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning()
