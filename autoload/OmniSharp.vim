@@ -140,6 +140,13 @@ function! OmniSharp#Build()
 	endif
 endfunction
 
+function! OmniSharp#BuildAsync()
+	python buildcommand()
+	setlocal errorformat=%f(%l\\,%c):\ error\ CS%n:\ %m
+	let &l:makeprg=b:buildcommand
+	Make
+endfunction
+
 function! OmniSharp#ReloadSolution()
 	python getResponse("/reloadsolution")
 endfunction
@@ -210,17 +217,25 @@ function! OmniSharp#StartServer()
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
-	let command = shellescape(s:omnisharp_server,1) . ' -s ' . fnamemodify(a:solutionPath, ':8')
-	if !has('win32')
-		let command = 'mono ' . command
-	endif
+    let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
+    let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
+    if !has('win32')
+        let command = 'mono ' . command
+    endif
+    call OmniSharp#RunAsyncCommand(command)
+endfunction
 
+function! OmniSharp#RunAsyncCommand(command)
 	let is_vimproc = 0
 	silent! let is_vimproc = vimproc#version()
 	if is_vimproc
-		call vimproc#system_gui(substitute(command, '\\', '\/', 'g'))
-	else
-		call dispatch#start(command, {'background': has('win32') ? 0 : 1})
+		call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
+	else 
+		if(exists(':Make'))
+			call dispatch#start(a:command, {'background': 1})
+		else
+			echoerr 'Please install vim-dispatch or vimproc plugin to use this feature'
+		endif
 	endif
 endfunction
 

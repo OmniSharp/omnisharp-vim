@@ -30,7 +30,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
 * Simple syntax error highlighting
-* Integrated xbuild/msbuild
+* Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
 * Add file to project (currently will only add .cs files to a .csproj file)
 * Add reference. Supports project and file reference. GAC referencing todo.
@@ -54,8 +54,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 ###OSX / Linux
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule init
-    git submodule update
+    git submodule update --init
     cd Omnisharp/server
     xbuild /p:Platform="Any CPU"
 
@@ -63,8 +62,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule init
-    git submodule update
+    git submodule update --init
     cd Omnisharp\server
     msbuild /p:Platform="Any CPU"
 
@@ -129,6 +127,9 @@ set noshowmatch
 set completeopt=longest,menuone,preview
 
 nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
+" Builds can run asynchronously with vim-dispatch installed
+"nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
+
 nnoremap <F12> :OmniSharpGotoDefinition<cr>
 nnoremap gd :OmniSharpGotoDefinition<cr>
 nnoremap fi :OmniSharpFindImplementations<cr>
@@ -146,7 +147,7 @@ command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 nnoremap <leader>rl :OmniSharpReloadSolution<cr>
 nnoremap <leader>cf :OmniSharpCodeFormat<cr>
 nnoremap <leader>tp :OmniSharpAddToProject<cr>
-" (Experimental - uses vim-dispatch plugin) - Start the omnisharp server for the current solution
+" (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)

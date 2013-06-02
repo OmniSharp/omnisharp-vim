@@ -4,7 +4,6 @@ if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
 endif
 
-
 " Auto syntax check.
 augroup plugin-OmniSharp-SyntaxCheck
 	autocmd! * <buffer>
@@ -31,6 +30,7 @@ command! -buffer -bar OmniSharpFindSyntaxErrors    call OmniSharp#FindSyntaxErro
 command! -buffer -bar OmniSharpGetCodeActions      call OmniSharp#GetCodeActions()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookup()
 command! -buffer -bar OmniSharpBuild               call OmniSharp#Build()
+command! -buffer -bar OmniSharpBuildAsync          call OmniSharp#BuildAsync()
 command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpCodeFormat          call OmniSharp#CodeFormat()
@@ -50,3 +50,34 @@ command! -buffer -nargs=1 -complete=file OmniSharpAddReference
 \   call OmniSharp#AddReference(<q-args>)
 
 setlocal omnifunc=OmniSharp#Complete
+
+
+
+if exists('b:undo_ftplugin')
+	let b:undo_ftplugin .= ' | '
+else
+	let b:undo_ftplugin = ''
+endif
+let b:undo_ftplugin .= '
+\	execute "autocmd! plugin-OmniSharp-SyntaxCheck * <buffer>"
+\
+\|	delcommand OmniSharpFindUsages
+\|	delcommand OmniSharpFindImplementations
+\|	delcommand OmniSharpGotoDefinition
+\|	delcommand OmniSharpFindSyntaxErrors
+\|	delcommand OmniSharpGetCodeActions
+\|	delcommand OmniSharpTypeLookup
+\|	delcommand OmniSharpBuild
+\|	delcommand OmniSharpBuildAsync
+\|	delcommand OmniSharpRename
+\|	delcommand OmniSharpReloadSolution
+\|	delcommand OmniSharpCodeFormat
+\|	delcommand OmniSharpStartServer
+\|	delcommand OmniSharpStopServer
+\|	delcommand OmniSharpAddToProject
+\
+\|	delcommand OmniSharpRenameTo
+\|	delcommand OmniSharpStartServerSolution
+\|	delcommand OmniSharpAddReference
+\
+\|	setlocal omnifunc< errorformat< makeprg<'

@@ -8,9 +8,11 @@ let g:OmniSharp_loaded = 1
 let s:py_path = join([expand('<sfile>:p:h:h'), "python", "OmniSharp.py"], '/')
 exec "pyfile " . fnameescape(s:py_path)
 
+let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
+
 "Setup variable defaults
 "Default value for the server address
-let g:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:2000')
+let g:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:' . g:OmniSharp_port)
 
 "Default value for the timeout value
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
