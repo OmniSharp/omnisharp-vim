@@ -39,7 +39,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 
 ##Screenshots
 ####Auto Complete
-![Omnisharp screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/Omnisharp.png)
+![OmniSharp screenshot](https://f.cloud.github.com/assets/667194/514371/dc03e2bc-be56-11e2-9745-c3202335e5ab.png)
 
 ####Find Usages
 ![Find Usages screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/FindUsages.png)
