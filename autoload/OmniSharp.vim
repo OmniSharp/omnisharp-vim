@@ -155,6 +155,25 @@ function! OmniSharp#CodeFormat()
 	python codeFormat()
 endfunction
 
+function! OmniSharp#ServerIsRunning()
+    let port = matchstr(g:OmniSharp_host,'[0-9]\+$')
+    if has('win32')
+        let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . port
+        " If lockfile is present, and locked (and thus not readable)
+        " the server is running
+        return glob(lockfilename) != "" && !filereadable(lockfilename)
+    else
+        let isrunning=system('ps ef | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l')
+        return isrunning > 0
+    endif
+endfunction
+
+function! OmniSharp#StartServerIfNotRunning()
+    if !OmniSharp#ServerIsRunning()
+        call OmniSharp#StartServer()
+    endif
+endfunction
+
 function! OmniSharp#StartServer()
 	"get the path for the current buffer
 	let folder = expand('%:p:h')
@@ -222,6 +241,17 @@ endfunction
 
 function! OmniSharp#AddToProject()
 	python getResponse("/addtoproject")
+endfunction
+
+function! OmniSharp#AskStopServerIfNotRunning()
+    if OmniSharp#ServerIsRunning()
+        call inputsave()
+        let choice = input('Do you want to stop the OmniSharp server? (y/n): ')
+        call inputrestore()
+        if choice == "y"
+            call OmniSharp#StopServer()
+        endif
+    endif
 endfunction
 
 function! OmniSharp#StopServer()
