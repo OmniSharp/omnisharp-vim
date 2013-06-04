@@ -174,7 +174,21 @@ function! OmniSharp#StartServerIfNotRunning()
     endif
 endfunction
 
+function! OmniSharp#FugitiveCheck()
+	if match( expand( '<afile>:p' ), "fugitive:///" ) == 0
+		echom "fug true " . match( expand( '<afile>:p' ), "fugitive:///" ) 
+		return 1
+	else
+		echom "fug false " . match( expand( '<afile>:p' ), "fugitive:///" ) 
+	   return 0
+	endif
+endfunction
+
 function! OmniSharp#StartServer()
+	if OmniSharp#FugitiveCheck()
+		return
+	endif
+
 	"get the path for the current buffer
 	let folder = expand('%:p:h')
 	let solutionfiles = globpath(folder, "*.sln")
@@ -212,7 +226,7 @@ function! OmniSharp#StartServer()
 			call OmniSharp#StartServerSolution(array[option - 1])
 		endif
 	else
-		echoerr "Did not find a solution file"
+		echoerr "Did not find a solution file "
 	endif
 endfunction
 
