@@ -176,10 +176,8 @@ endfunction
 
 function! OmniSharp#FugitiveCheck()
 	if match( expand( '<afile>:p' ), "fugitive:///" ) == 0
-		echom "fug true " . match( expand( '<afile>:p' ), "fugitive:///" ) 
 		return 1
 	else
-		echom "fug false " . match( expand( '<afile>:p' ), "fugitive:///" ) 
 	   return 0
 	endif
 endfunction
