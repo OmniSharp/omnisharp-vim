@@ -163,7 +163,7 @@ function! OmniSharp#ServerIsRunning()
         " the server is running
         return glob(lockfilename) != "" && !filereadable(lockfilename)
     else
-        let isrunning=system('ps ef | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l')
+        let isrunning=system('ps aux | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l')
         return isrunning > 0
     endif
 endfunction
@@ -208,6 +208,14 @@ function! OmniSharp#StartServer()
 			call OmniSharp#StartServerSolution(array[0])
 		else
 			let index = 1
+			if g:OmniSharp_autoselect_existing_sln 
+				for solutionfile in array
+					if index( g:OmniSharp_running_slns, solutionfile ) >= 0
+						return
+					endif
+				endfor
+			endif
+
 			for solutionfile in array
 				echo index . ' - '. solutionfile
 				let index = index + 1
@@ -229,6 +237,8 @@ function! OmniSharp#StartServer()
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
+
+	let g:OmniSharp_running_slns += [a:solutionPath]
     let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
     let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
     if !has('win32')
