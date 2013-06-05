@@ -13,7 +13,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 ##Features
 
 * Contextual code completion
-	* Code documentation is displayed in the preview window when available
+	* Code documentation is displayed in the preview window when available (Xml Documentation for Window, MonoDoc documentation for Mono)
 	* CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
 	* "Subsequence" completions are also supported. e.g. Console.Wline would also complete to Console.WriteLine
 	* Completions are ranked in the following order
@@ -39,7 +39,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 
 ##Screenshots
 ####Auto Complete
-![Omnisharp screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/Omnisharp.png)
+![OmniSharp screenshot](https://f.cloud.github.com/assets/667194/514371/dc03e2bc-be56-11e2-9745-c3202335e5ab.png)
 
 ####Find Usages
 ![Find Usages screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/FindUsages.png)
@@ -81,7 +81,17 @@ Verify that Python is working inside Vim with
 
 ### Run the [server](https://github.com/nosami/OmniSharpServer)
 
-	OmniSharp.exe -s (path\to\sln)
+By default, the server is started automatically if you have vim-dispatch installed when you open a .cs file.
+It tries to detect your solution file (.sln) and starts the OmniSharp server passing the path to the solution file.
+This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in your vimrc.
+
+When your close vim, and the omnisharp server is running, vim will ask you if you want to stop the OmniSharp server.
+This behaviour can be disabled by setting `let g:Omnisharp_stop_server = 0` in your vimrc.
+
+You can alternatively start the Omnisharp server manually:
+
+	[mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
+
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 Also if you are running OmniSharp as a non-privileged user, or without UAC elevation on Vista or later, you will need to run the following
