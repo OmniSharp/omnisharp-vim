@@ -216,7 +216,9 @@ def buildcommand():
 	vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
 
 def codeFormat():
-    response = json.loads(getResponse('/codeformat'))
+    parameters = {}
+    parameters['ExpandTab'] = bool(int(vim.eval('&expandtab')))
+    response = json.loads(getResponse('/codeformat', parameters))
     setBuffer(response["Buffer"])
 
 def addReference():
