@@ -51,14 +51,14 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 
 [pathogen.vim](https://github.com/tpope/vim-pathogen) is the recommended way to install OmniSharp.
 
-###OSX / Linux
+####OSX / Linux
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
     git submodule update --init
     cd Omnisharp/server
     xbuild /p:Platform="Any CPU"
 
-###Windows
+####Windows
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
@@ -76,10 +76,13 @@ Verify that Python is working inside Vim with
 :python print "hi"
 ```
 
+###Install vim-dispatch
+The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically.
+Use your favorite way to install it.
 
 (Optional but highly recommended) Install [SuperTab] (https://github.com/ervandew/supertab) Vim plugin.
 
-### Run the [server](https://github.com/nosami/OmniSharpServer)
+## How to use (read: run the server)
 
 By default, the server is started automatically if you have vim-dispatch installed when you open a .cs file.
 It tries to detect your solution file (.sln) and starts the OmniSharp server passing the path to the solution file.
@@ -109,7 +112,7 @@ Simple syntax error highlighting is automatically performed when saving the curr
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
 
-
+##Configuration
 
 ### Example vimrc
 
