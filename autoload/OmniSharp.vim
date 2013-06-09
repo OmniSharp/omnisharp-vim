@@ -147,6 +147,10 @@ function! OmniSharp#BuildAsync()
 	Make
 endfunction
 
+function! OmniSharp#HighlightTypes()
+    python highlightTypes()
+endfunction
+
 function! OmniSharp#ReloadSolution()
 	python getResponse("/reloadsolution")
 endfunction
