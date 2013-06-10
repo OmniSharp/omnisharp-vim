@@ -2,6 +2,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
+let s:allUserTypes = ''
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -147,8 +148,14 @@ function! OmniSharp#BuildAsync()
 	Make
 endfunction
 
-function! OmniSharp#HighlightTypes()
-    python highlightTypes()
+function! OmniSharp#HighlightTypesForBuffer()
+
+    if empty(s:allUserTypes)
+        python lookupAllUserTypes()
+    endif
+
+    hi link CSharpUserType Type
+    exec "syn keyword CSharpUserType " . s:allUserTypes
 endfunction
 
 function! OmniSharp#ReloadSolution()
@@ -288,6 +295,16 @@ function! OmniSharp#AddReference(reference)
 	let a:ref = fnamemodify(a:reference, ':p')
 	python addReference()
 endfunction
+
+if g:Omnisharp_highlight_user_types==1
+    augroup _omnisharp
+        au!
+        autocmd BufRead *.cs call OmniSharp#HighlightTypesForBuffer()  
+    augroup END
+
+    " Perform highlighting for existing buffers as well:
+    bufdo if &ft == 'cs' | call OmniSharp#HighlightTypesForBuffer() | endif
+endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

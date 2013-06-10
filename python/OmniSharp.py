@@ -229,11 +229,10 @@ def addReference():
         message = json.loads(js)['Message']
         print message
 
-def highlightTypes():
+def lookupAllUserTypes():
     js = getResponse('/lookupalltypes');
     if (js != ''):
-        type = json.loads(js)['AllTypes']
-        if(type != None):
-            vim.command('hi link CSharpUserType Type')
-            vim.command('syn keyword CSharpUserType %s' % (type))
+        allTypes = json.loads(js)['AllTypes']
+        if (allTypes != None):
+            vim.command("let s:allUserTypes = '%s'" % (allTypes))
 
