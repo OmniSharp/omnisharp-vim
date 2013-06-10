@@ -27,6 +27,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
 * Rename refactoring
+* Semantic type highlighting
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
 * Simple syntax error highlighting
@@ -163,6 +164,7 @@ nnoremap <leader>tp :OmniSharpAddToProject<cr>
 " (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
+nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
 ```
