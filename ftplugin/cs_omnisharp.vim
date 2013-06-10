@@ -37,6 +37,7 @@ command! -buffer -bar OmniSharpCodeFormat          call OmniSharp#CodeFormat()
 command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
 command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
+command! -buffer -bar OmniSharpHighlightTypes      call OmniSharp#EnableTypeHighlighting()
 
 
 command! -buffer -nargs=1 OmniSharpRenameTo
