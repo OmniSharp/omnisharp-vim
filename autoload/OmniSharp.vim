@@ -163,6 +163,8 @@ function! OmniSharp#EnableTypeHighlighting()
 
     " Perform highlighting for existing buffers
     bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
+    " Return to start buffer
+    exec "normal! \<c-o>"
 
     augroup _omnisharp
         au!
