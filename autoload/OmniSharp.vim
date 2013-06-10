@@ -148,14 +148,26 @@ function! OmniSharp#BuildAsync()
 	Make
 endfunction
 
-function! OmniSharp#HighlightTypesForBuffer()
-
-    if empty(s:allUserTypes)
-        python lookupAllUserTypes()
-    endif
-
+function! OmniSharp#EnableTypeHighlightingForBuffer()
     hi link CSharpUserType Type
     exec "syn keyword CSharpUserType " . s:allUserTypes
+endfunction
+
+function! OmniSharp#EnableTypeHighlighting()
+
+    if !OmniSharp#ServerIsRunning() || !empty(s:allUserTypes)
+        return
+    endif
+
+    python lookupAllUserTypes()
+
+    " Perform highlighting for existing buffers
+    bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
+
+    augroup _omnisharp
+        au!
+        autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()  
+    augroup END
 endfunction
 
 function! OmniSharp#ReloadSolution()
@@ -295,16 +307,6 @@ function! OmniSharp#AddReference(reference)
 	let a:ref = fnamemodify(a:reference, ':p')
 	python addReference()
 endfunction
-
-if g:Omnisharp_highlight_user_types==1
-    augroup _omnisharp
-        au!
-        autocmd BufRead *.cs call OmniSharp#HighlightTypesForBuffer()  
-    augroup END
-
-    " Perform highlighting for existing buffers as well:
-    bufdo if &ft == 'cs' | call OmniSharp#HighlightTypesForBuffer() | endif
-endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
