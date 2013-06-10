@@ -161,10 +161,12 @@ function! OmniSharp#EnableTypeHighlighting()
 
     python lookupAllUserTypes()
 
+    let startBuf = bufnr("%")
     " Perform highlighting for existing buffers
     bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
-    " Return to start buffer
-    exec "normal! \<c-o>"
+    exec "b ". startBuf
+
+    call OmniSharp#EnableTypeHighlightingForBuffer()
 
     augroup _omnisharp
         au!
