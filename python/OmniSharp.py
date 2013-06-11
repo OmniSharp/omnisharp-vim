@@ -148,7 +148,6 @@ def runCodeAction(option):
     lines = text.splitlines()
 
     cursor = vim.current.window.cursor
-    vim.command('normal ggdG')
     lines = [line.encode('utf-8') for line in lines]
     vim.current.buffer[:] = lines
     vim.current.window.cursor = cursor
@@ -232,7 +231,8 @@ def addReference():
 def lookupAllUserTypes():
     js = getResponse('/lookupalltypes');
     if (js != ''):
-        allTypes = json.loads(js)['AllTypes']
-        if (allTypes != None):
-            vim.command("let s:allUserTypes = '%s'" % (allTypes))
+        response = json.loads(js)
+        if (response != None):
+            vim.command("let s:allUserTypes = '%s'" % (response['Types']))
+            vim.command("let s:allUserInterfaces = '%s'" % (response['Interfaces']))
 

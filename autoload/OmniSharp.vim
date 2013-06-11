@@ -3,6 +3,7 @@ set cpo&vim
 
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 let s:allUserTypes = ''
+let s:allUserInterfaces = ''
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -151,6 +152,7 @@ endfunction
 function! OmniSharp#EnableTypeHighlightingForBuffer()
     hi link CSharpUserType Type
     exec "syn keyword CSharpUserType " . s:allUserTypes
+    exec "syn keyword csInterfaceDeclaration " . s:allUserInterfaces
 endfunction
 
 function! OmniSharp#EnableTypeHighlighting()

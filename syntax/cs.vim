@@ -123,6 +123,7 @@ syn match   csNumber		"\<\d\+\([eE][-+]\=\d\+\)\=[fFdD]\>"
 
 " The default highlighting.
 hi def link csType			Type
+hi def link csInterfaceDeclaration      Include
 hi def link csNewType			Type
 hi def link csClassType			Type
 hi def link csAttributeType		Type
