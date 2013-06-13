@@ -297,9 +297,9 @@ endfunction
 function! OmniSharp#AskStopServerIfNotRunning()
     if OmniSharp#ServerIsRunning()
         call inputsave()
-        let choice = input('Do you want to stop the OmniSharp server? (y/n): ')
+        let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
         call inputrestore()
-        if choice == "y"
+        if choice != "n"
             call OmniSharp#StopServer()
         endif
     endif
