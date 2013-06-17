@@ -192,7 +192,8 @@ function! OmniSharp#ServerIsRunning()
         " the server is running
         return glob(lockfilename) != "" && !filereadable(lockfilename)
     else
-        let isrunning=system('ps aux | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l')
+		let cmd='ps ax | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l | tr -d " "'
+        let isrunning=system(cmd)
         return isrunning > 0
     endif
 endfunction
