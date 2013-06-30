@@ -31,8 +31,14 @@ let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, "OmniSharp_BufWritePreSyntaxChe
 let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck", 0)
 
 
+let g:OmniSharp_sln_list_index =
+	\ get( g:, "g:OmniSharp_sln_list_index", -1 )
+
+let g:OmniSharp_sln_list_name =
+	\get( g:, "g:OmniSharp_sln_list_name", "" )
+
 let g:OmniSharp_autoselect_existing_sln =
-	\ get( g:, "g:OmniSharp_autoselect_existing_sln ", 1 )
+	\ get( g:, "g:OmniSharp_autoselect_existing_sln", 1 )
 
 let g:OmniSharp_running_slns = []
 
