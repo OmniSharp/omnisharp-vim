@@ -32,13 +32,13 @@ let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck
 
 
 let g:OmniSharp_sln_list_index =
-	\ get( g:, "g:OmniSharp_sln_list_index", -1 )
+	\ get( g:, "OmniSharp_sln_list_index", -1 )
 
 let g:OmniSharp_sln_list_name =
-	\get( g:, "g:OmniSharp_sln_list_name", "" )
+	\get( g:, "OmniSharp_sln_list_name", "" )
 
 let g:OmniSharp_autoselect_existing_sln =
-	\ get( g:, "g:OmniSharp_autoselect_existing_sln", 1 )
+	\ get( g:, "OmniSharp_autoselect_existing_sln", 1 )
 
 let g:OmniSharp_running_slns = []
 
