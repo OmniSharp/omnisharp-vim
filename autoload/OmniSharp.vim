@@ -311,7 +311,11 @@ function! OmniSharp#StopServer()
 endfunction
 
 function! OmniSharp#AddReference(reference)
-	let a:ref = fnamemodify(a:reference, ':p')
+	if findfile(fnamemodify(a:reference, ':p')) != ''
+		let a:ref = fnamemodify(a:reference, ':p')
+	else
+		let a:ref = a:reference
+	endif
 	python addReference()
 endfunction
 
