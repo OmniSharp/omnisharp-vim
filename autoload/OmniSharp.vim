@@ -77,7 +77,7 @@ function! OmniSharp#FindSyntaxErrors()
 	python findSyntaxErrors("qf_taglist")
 
 	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 0 && g:OmniSharp_populate_quickfix_list
+	if len(qf_taglist) > 0
 		call setqflist(qf_taglist)
 		copen 4
 	else

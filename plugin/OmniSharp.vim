@@ -30,9 +30,6 @@ let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0
 let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, "OmniSharp_BufWritePreSyntaxCheck", 1)
 let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck", 0)
 
-let g:OmniSharp_populate_quickfix_list =
-	\ get( g:, "OmniSharp_populate_quickfix_list", 1 )
-
 let g:OmniSharp_sln_list_index =
 	\ get( g:, "OmniSharp_sln_list_index", -1 )
 
