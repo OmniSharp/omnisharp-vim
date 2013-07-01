@@ -236,7 +236,14 @@ function! OmniSharp#StartServer()
 		let array = split(solutionfiles, '\n')
 		if len(array) == 1
 			call OmniSharp#StartServerSolution(array[0])
+		elseif g:OmniSharp_sln_list_name != "" 
+			echom "Started with sln: " . g:OmniSharp_sln_list_name
+			call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
+		elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
+			echom "Started with sln: " . array[g:OmniSharp_sln_list_index]
+			call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
 		else
+			echom "sln: " . g:OmniSharp_sln_list_name
 			let index = 1
 			if g:OmniSharp_autoselect_existing_sln
 				for solutionfile in array
