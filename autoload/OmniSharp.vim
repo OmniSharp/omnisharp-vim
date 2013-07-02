@@ -144,36 +144,36 @@ endfunction
 
 function! OmniSharp#BuildAsync()
 	python buildcommand()
-    setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
+	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
 	let &l:makeprg=b:buildcommand
 	Make
 endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer()
-    hi link CSharpUserType Type
-    exec "syn keyword CSharpUserType " . s:allUserTypes
-    exec "syn keyword csInterfaceDeclaration " . s:allUserInterfaces
+	hi link CSharpUserType Type
+	exec "syn keyword CSharpUserType " . s:allUserTypes
+	exec "syn keyword csInterfaceDeclaration " . s:allUserInterfaces
 endfunction
 
 function! OmniSharp#EnableTypeHighlighting()
 
-    if !OmniSharp#ServerIsRunning() || !empty(s:allUserTypes)
-        return
-    endif
+	if !OmniSharp#ServerIsRunning() || !empty(s:allUserTypes)
+		return
+	endif
 
-    python lookupAllUserTypes()
+	python lookupAllUserTypes()
 
-    let startBuf = bufnr("%")
-    " Perform highlighting for existing buffers
-    bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
-    exec "b ". startBuf
+	let startBuf = bufnr("%")
+	" Perform highlighting for existing buffers
+	bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
+	exec "b ". startBuf
 
-    call OmniSharp#EnableTypeHighlightingForBuffer()
+	call OmniSharp#EnableTypeHighlightingForBuffer()
 
-    augroup _omnisharp
-        au!
-        autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()  
-    augroup END
+	augroup _omnisharp
+		au!
+		autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
+	augroup END
 endfunction
 
 function! OmniSharp#ReloadSolution()
@@ -185,23 +185,23 @@ function! OmniSharp#CodeFormat()
 endfunction
 
 function! OmniSharp#ServerIsRunning()
-    let port = matchstr(g:OmniSharp_host,'[0-9]\+$')
-    if has('win32')
-        let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . port
-        " If lockfile is present, and locked (and thus not readable)
-        " the server is running
-        return glob(lockfilename) != "" && !filereadable(lockfilename)
-    else
+	let port = matchstr(g:OmniSharp_host,'[0-9]\+$')
+	if has('win32')
+		let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . port
+		" If lockfile is present, and locked (and thus not readable)
+		" the server is running
+		return glob(lockfilename) != "" && !filereadable(lockfilename)
+	else
 		let cmd='ps ax | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l | tr -d " "'
-        let isrunning=system(cmd)
-        return isrunning > 0
-    endif
+		let isrunning=system(cmd)
+		return isrunning > 0
+	endif
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning()
-    if !OmniSharp#ServerIsRunning()
-        call OmniSharp#StartServer()
-    endif
+	if !OmniSharp#ServerIsRunning()
+		call OmniSharp#StartServer()
+	endif
 endfunction
 
 function! OmniSharp#FugitiveCheck()
@@ -232,13 +232,20 @@ function! OmniSharp#StartServer()
 		let solutionfiles = globpath(folder , "*.sln")
 	endwhile
 
-    if solutionfiles != ''
+	if solutionfiles != ''
 		let array = split(solutionfiles, '\n')
 		if len(array) == 1
 			call OmniSharp#StartServerSolution(array[0])
+		elseif g:OmniSharp_sln_list_name != "" 
+			echom "Started with sln: " . g:OmniSharp_sln_list_name
+			call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
+		elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
+			echom "Started with sln: " . array[g:OmniSharp_sln_list_index]
+			call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
 		else
+			echom "sln: " . g:OmniSharp_sln_list_name
 			let index = 1
-			if g:OmniSharp_autoselect_existing_sln 
+			if g:OmniSharp_autoselect_existing_sln
 				for solutionfile in array
 					if index( g:OmniSharp_running_slns, solutionfile ) >= 0
 						return
@@ -269,12 +276,12 @@ endfunction
 function! OmniSharp#StartServerSolution(solutionPath)
 
 	let g:OmniSharp_running_slns += [a:solutionPath]
-    let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-    let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
-    if !has('win32')
-        let command = 'mono ' . command
-    endif
-    call OmniSharp#RunAsyncCommand(command)
+	let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
+	let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
+	if !has('win32')
+		let command = 'mono ' . command
+	endif
+	call OmniSharp#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#RunAsyncCommand(command)
@@ -282,8 +289,8 @@ function! OmniSharp#RunAsyncCommand(command)
 	silent! let is_vimproc = vimproc#version()
 	if is_vimproc
 		call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
-	else 
-		if(exists(':Make'))
+	else
+		if exists(':Make')
 			call dispatch#start(a:command, {'background': 1})
 		else
 			echoerr 'Please install vim-dispatch or vimproc plugin to use this feature'
@@ -296,14 +303,14 @@ function! OmniSharp#AddToProject()
 endfunction
 
 function! OmniSharp#AskStopServerIfNotRunning()
-    if OmniSharp#ServerIsRunning()
-        call inputsave()
-        let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
-        call inputrestore()
-        if choice != "n"
-            call OmniSharp#StopServer()
-        endif
-    endif
+	if OmniSharp#ServerIsRunning()
+		call inputsave()
+		let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
+		call inputrestore()
+		if choice != "n"
+			call OmniSharp#StopServer()
+		endif
+	endif
 endfunction
 
 function! OmniSharp#StopServer()
@@ -311,7 +318,11 @@ function! OmniSharp#StopServer()
 endfunction
 
 function! OmniSharp#AddReference(reference)
-	let a:ref = fnamemodify(a:reference, ':p')
+	if findfile(fnamemodify(a:reference, ':p')) != ''
+		let a:ref = fnamemodify(a:reference, ':p')
+	else
+		let a:ref = a:reference
+	endif
 	python addReference()
 endfunction
 
