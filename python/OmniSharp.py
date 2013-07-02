@@ -74,12 +74,11 @@ def getCompletions(ret, column, partialWord):
                 logger.error(command)
 
 def findUsages(ret):
-
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/findusages', parameters)
     if(js != ''):
-        usages = json.loads(js)['Usages']
+        usages = json.loads(js)['QuickFixes']
         populateQuickFix(ret, usages)
 
 def populateQuickFix(ret, quickfixes):
@@ -95,8 +94,11 @@ def populateQuickFix(ret, quickfixes):
 
 def findImplementations(ret):
     js = getResponse('/findimplementations')
+    parameters = {}
+    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
+    js = getResponse('/findimplementations',parameters)
     if(js != ''):
-        usages = json.loads(js)['Locations']
+        usages = json.loads(js)['QuickFixes']
 
         command_base = ("add(" + ret + 
                 ", {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
@@ -109,13 +111,7 @@ def findImplementations(ret):
                 #row is 1 based, column is 0 based
                 vim.current.window.cursor = (usage['Line'], usage['Column'] - 1 )
         else:
-            for usage in usages:
-                usage["FileName"] = os.path.relpath(usage["FileName"])
-                try:
-                    command = command_base % usage
-                    vim.eval(command)
-                except:
-                    logger.error(command)
+            populateQuickFix(ret, usages)
 
 def gotoDefinition():
     js = getResponse('/gotodefinition');
