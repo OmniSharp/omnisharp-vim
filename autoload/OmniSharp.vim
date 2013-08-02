@@ -52,6 +52,17 @@ function! OmniSharp#FindImplementations()
 	endif
 endfunction
 
+function! OmniSharp#FindMembers()
+	let qf_taglist = []
+	python findMembers("qf_taglist")
+
+	" Place the tags in the quickfix window, if possible
+	if len(qf_taglist) > 1
+		call setqflist(qf_taglist)
+		copen 4
+	endif
+endfunction
+
 function! OmniSharp#GotoDefinition()
 	python gotoDefinition()
 endfunction

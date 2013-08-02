@@ -29,8 +29,8 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
     if(additionalParameters != None):
         parameters.update(additionalParameters)
 
-	if(timeout == None):
-		timeout=int(vim.eval('g:OmniSharp_timeout'))
+    if(timeout == None):
+        timeout=int(vim.eval('g:OmniSharp_timeout'))
 
     host = vim.eval('g:OmniSharp_host')
 
@@ -91,6 +91,14 @@ def populateQuickFix(ret, quickfixes):
                 vim.eval(command)
             except:
                 logger.error(command)
+
+def findMembers(ret):
+    parameters = {}
+    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
+    js = getResponse('/currentfilemembersasflat',parameters)
+    if(js != ''):
+        quickfixes = json.loads(js)
+        populateQuickFix(ret, quickfixes)
 
 def findImplementations(ret):
     js = getResponse('/findimplementations')
@@ -208,7 +216,7 @@ def build(ret):
     populateQuickFix(ret, quickfixes)
 
 def buildcommand():
-	vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
+    vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
 
 def codeFormat():
     parameters = {}
