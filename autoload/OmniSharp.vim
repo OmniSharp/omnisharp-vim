@@ -197,7 +197,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning()
 	let port = matchstr(g:OmniSharp_host,'[0-9]\+$')
-	if has('win32')
+	if has('win32') || has('win32unix')
 		let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . port
 		" If lockfile is present, and locked (and thus not readable)
 		" the server is running
@@ -289,7 +289,7 @@ function! OmniSharp#StartServerSolution(solutionPath)
 	let g:OmniSharp_running_slns += [a:solutionPath]
 	let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
 	let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
-	if !has('win32')
+	if !has('win32') && !has('win32unix')
 		let command = 'mono ' . command
 	endif
 	call OmniSharp#RunAsyncCommand(command)
