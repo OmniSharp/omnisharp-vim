@@ -13,7 +13,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 ##Features
 
 * Contextual code completion
-	* Code documentation is displayed in the preview window when available (Xml Documentation for Window, MonoDoc documentation for Mono)
+	* Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
 	* CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
 	* "Subsequence" completions are also supported. e.g. Console.Wline would also complete to Console.WriteLine
 	* Completions are ranked in the following order
@@ -23,7 +23,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 		* Subsequence match completions
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin 
+* Find types/symbols (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
