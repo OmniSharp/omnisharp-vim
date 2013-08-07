@@ -8,8 +8,8 @@ endif
 augroup plugin-OmniSharp-SyntaxCheck
 	autocmd! * <buffer>
 	autocmd BufWritePre <buffer>
-	\	if g:OmniSharp_BufWritePreSyntaxCheck
-	\|		let b:OmniSharp_SyntaxChecked = 1
+    \   if g:OmniSharp_BufWritePreSyntaxCheck
+    \|      let b:OmniSharp_SyntaxChecked = 1
 	\|		call OmniSharp#FindSyntaxErrors()
 	\|	else
 	\|		let b:OmniSharp_SyntaxChecked = 0
@@ -24,6 +24,7 @@ augroup END
 
 " Commands
 command! -buffer -bar OmniSharpFindType            call ctrlp#init(findtype#id())
+command! -buffer -bar OmniSharpFindSymbols         call ctrlp#init(findsymbols#id())
 command! -buffer -bar OmniSharpFindMembers         call OmniSharp#FindMembers()
 command! -buffer -bar OmniSharpFindUsages          call OmniSharp#FindUsages()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
@@ -64,6 +65,8 @@ endif
 let b:undo_ftplugin .= '
 \	execute "autocmd! plugin-OmniSharp-SyntaxCheck * <buffer>"
 \
+\|	delcommand OmniSharpFindTypes
+\|	delcommand OmniSharpFindSymbols
 \|	delcommand OmniSharpFindUsages
 \|	delcommand OmniSharpFindImplementations
 \|	delcommand OmniSharpGotoDefinition

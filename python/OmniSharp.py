@@ -234,6 +234,13 @@ def addReference():
 
 def findTypes():
     js = getResponse('/findtypes')
+    findThings(js)
+
+def findSymbols():
+    js = getResponse('/findsymbols')
+    findThings(js)
+
+def findThings(js):
     if (js != ''):
         response = json.loads(js)
         if (response != None):

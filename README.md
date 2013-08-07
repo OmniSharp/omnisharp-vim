@@ -23,6 +23,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 		* Subsequence match completions
 
 * Jump to the definition of a type/variable/method
+* Find types/symbols (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin 
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
@@ -147,8 +148,10 @@ nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
 nnoremap <F12> :OmniSharpGotoDefinition<cr>
 nnoremap gd :OmniSharpGotoDefinition<cr>
 nnoremap <leader>fi :OmniSharpFindImplementations<cr>
+nnoremap <leader>ft :OmniSharpFindType<cr>
+nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
-nnoremap <leader>fm :OmniSharpFindMembers<cr>
+nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
 nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nnoremap <space> :OmniSharpGetCodeActions<cr>

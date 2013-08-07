@@ -2,7 +2,7 @@ if exists("g:OmniSharp_loaded")
 	finish
 endif
 
-let g:ctrlp_extensions = ['findtype']
+let g:ctrlp_extensions = ['findtype', 'findsymbols']
 
 let g:OmniSharp_loaded = 1
 
