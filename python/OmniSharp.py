@@ -232,8 +232,23 @@ def addReference():
         message = json.loads(js)['Message']
         print message
 
+def findTypes():
+    js = getResponse('/findtypes')
+    if (js != ''):
+        response = json.loads(js)
+        if (response != None):
+            quickfixes = response['QuickFixes']
+            command_base = "{'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'}"
+            l = []
+            if(quickfixes != None):
+                for quickfix in quickfixes:
+                    quickfix["FileName"] = os.path.relpath(quickfix["FileName"])
+                    l.append(command_base % quickfix)
+                vim_quickfixes = "[" + ",".join(l) + "]"
+                vim.command("let s:quickfixes = " + vim_quickfixes)
+
 def lookupAllUserTypes():
-    js = getResponse('/lookupalltypes');
+    js = getResponse('/lookupalltypes')
     if (js != ''):
         response = json.loads(js)
         if (response != None):

@@ -23,6 +23,7 @@ augroup plugin-OmniSharp-SyntaxCheck
 augroup END
 
 " Commands
+command! -buffer -bar OmniSharpFindType            call ctrlp#init(findtype#id())
 command! -buffer -bar OmniSharpFindMembers         call OmniSharp#FindMembers()
 command! -buffer -bar OmniSharpFindUsages          call OmniSharp#FindUsages()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()

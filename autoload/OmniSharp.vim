@@ -67,6 +67,14 @@ function! OmniSharp#GotoDefinition()
 	python gotoDefinition()
 endfunction
 
+function! OmniSharp#JumpToLocation(filename, line, column)
+	if a:filename != bufname('%')
+		exec 'e ' . a:filename
+	endif
+	"row is 1 based, column is 0 based
+	call cursor(a:line, a:column)
+endfunction
+
 function! OmniSharp#GetCodeActions()
 	let actions = []
 	python actions = getCodeActions()

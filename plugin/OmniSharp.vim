@@ -2,6 +2,8 @@ if exists("g:OmniSharp_loaded")
 	finish
 endif
 
+let g:ctrlp_extensions = ['findtype']
+
 let g:OmniSharp_loaded = 1
 
 "Load python/OmniSharp.py
