@@ -86,7 +86,6 @@ Verify that Python is working inside Vim with
 The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically.
 Use your favorite way to install it.
 
-(Optional but highly recommended) Install [SuperTab] (https://github.com/ervandew/supertab) Vim plugin.
 
 ## How to use (read: run the server)
 
@@ -111,8 +110,12 @@ netsh http add urlacl url=http://+:2000/ user=DOMAIN\user
 
 This will give your user permission to bind to port 2000.
 
-To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
+To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode 
+(or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
+
+If you prefer to get completions as you are typing, then you should take a look at [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
+or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
 
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
