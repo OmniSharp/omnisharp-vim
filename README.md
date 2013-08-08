@@ -24,7 +24,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 		* Subsequence match completions
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
+* Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
