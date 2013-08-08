@@ -7,8 +7,9 @@ OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of cu
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily.
-[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) now has a completion plugin utilising the OmniSharp server.
+completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
+[Emacs](https://github.com/sp3ctum/omnisharp-emacs) and 
+[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) both have completion plugin utilising the OmniSharp server.
 
 ##Features
 
