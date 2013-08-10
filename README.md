@@ -7,8 +7,9 @@ OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of cu
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily.
-[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) now has a completion plugin utilising the OmniSharp server.
+completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
+[Emacs](https://github.com/sp3ctum/omnisharp-emacs) and 
+[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) both have completion plugins utilising the OmniSharp server.
 
 ##Features
 
@@ -23,7 +24,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 		* Subsequence match completions
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
+* Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
@@ -85,7 +86,6 @@ Verify that Python is working inside Vim with
 The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically.
 Use your favorite way to install it.
 
-(Optional but highly recommended) Install [SuperTab] (https://github.com/ervandew/supertab) Vim plugin.
 
 ## How to use (read: run the server)
 
@@ -110,8 +110,12 @@ netsh http add urlacl url=http://+:2000/ user=DOMAIN\user
 
 This will give your user permission to bind to port 2000.
 
-To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode (or just TAB if you have SuperTab installed). 
+To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode 
+(or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
+
+If you prefer to get completions as you are typing, then you should take a look at [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
+or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
 
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
