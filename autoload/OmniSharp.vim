@@ -104,32 +104,33 @@ function! OmniSharp#FindSyntaxErrors()
 	endif
 endfunction
 
+" Jump to first scratch window visible in current tab, or create it.
+" This is useful to accumulate results from successive operations.
+" Global function that can be called from other scripts.
+function! GoScratch()
+  let done = 0
+  for i in range(1, winnr('$'))
+    execute i . 'wincmd w'
+    if &buftype == 'nofile'
+      let done = 1
+      break
+    endif
+  endfor
+  if !done
+    new
+    setlocal buftype=nofile bufhidden=hide noswapfile
+  endif
+endfunction
+
 function! OmniSharp#TypeLookup()
 	let type = ""
 	python typeLookup("type")
 
 	if g:OmniSharp_typeLookupInPreview
-		"Try to go to preview window
-		silent! wincmd P
-		if !&previewwindow
-			"If couldn't goto the preview window, then there is no open preview
-			"window, so make one
-			pedit!
-			wincmd P
-			python vim.current.window.height = 3
-			badd [Scratch]
-			buff \[Scratch\]
-
-			setlocal noswapfile
-			setlocal filetype=cs
-			"When looking for the buffer to place completion details in Vim
-			"looks for the following options to set
-			setlocal buftype=nofile
-			setlocal bufhidden=wipe
-		endif
-		"Replace the contents of the preview window
+		call GoScratch()
+		python vim.current.window.height = 5
 		set modifiable
-		exec "python vim.current.buffer[:] = ['" . type . "']"
+		exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . s:documentation . '""".splitlines()'
 		set nomodifiable
 		"Return to original window
 		wincmd p

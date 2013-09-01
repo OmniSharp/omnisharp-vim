@@ -173,9 +173,14 @@ def findSyntaxErrors(ret):
 def typeLookup(ret):
     js = getResponse('/typelookup');
     if(js != ''):
-        type = json.loads(js)['Type']
+        response = json.loads(js)
+        type = response['Type']
+        documentation = response['Documentation']
+        if(documentation == None):
+            documentation = ''
         if(type != None):
             vim.command("let %s = '%s'" % (ret, type)) 
+            vim.command("let s:documentation = '%s'" % documentation) 
 
 def renameTo(renameTo):
     parameters = {} 

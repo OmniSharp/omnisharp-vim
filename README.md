@@ -32,6 +32,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Semantic type highlighting
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
+	* Displays documentation for an entity when using preview window
 * Simple syntax error highlighting
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
