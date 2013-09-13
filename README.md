@@ -165,7 +165,7 @@ nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <space> :OmniSharpGetCodeActions<cr>
 
 " rename with dialog
-nnoremap nm :OmniSharpRename<cr>
+nnoremap <leader>nm :OmniSharpRename<cr>
 nnoremap <F2> :OmniSharpRename<cr>      
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
