@@ -52,12 +52,15 @@ if g:Omnisharp_start_server==1
 endif
 
 " Automatically stop server
+" g:Omnisharp_stop_server == 0  :: never stop server
+" g:Omnisharp_stop_server == 1  :: always ask
+" g:Omnisharp_stop_server == 2  :: stop if this vim started
 if !exists("g:Omnisharp_stop_server")
-	let g:Omnisharp_stop_server = 1
+	let g:Omnisharp_stop_server = 2
 endif
 
 if g:Omnisharp_stop_server==1
-	au VimLeavePre * call OmniSharp#AskStopServerIfNotRunning()
+	au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
 if !exists("g:Omnisharp_highlight_user_types")

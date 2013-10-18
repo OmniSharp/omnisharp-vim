@@ -221,6 +221,9 @@ endfunction
 function! OmniSharp#StartServerIfNotRunning()
 	if !OmniSharp#ServerIsRunning()
 		call OmniSharp#StartServer()
+		if g:Omnisharp_stop_server==2
+			au VimLeavePre * call OmniSharp#StopServer()
+		endif
 	endif
 endfunction
 
@@ -256,7 +259,7 @@ function! OmniSharp#StartServer()
 		let array = split(solutionfiles, '\n')
 		if len(array) == 1
 			call OmniSharp#StartServerSolution(array[0])
-		elseif g:OmniSharp_sln_list_name != "" 
+		elseif g:OmniSharp_sln_list_name != ""
 			echom "Started with sln: " . g:OmniSharp_sln_list_name
 			call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
 		elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
@@ -322,19 +325,27 @@ function! OmniSharp#AddToProject()
 	python getResponse("/addtoproject")
 endfunction
 
-function! OmniSharp#AskStopServerIfNotRunning()
+function! OmniSharp#AskStopServerIfRunning()
 	if OmniSharp#ServerIsRunning()
 		call inputsave()
 		let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
 		call inputrestore()
 		if choice != "n"
-			call OmniSharp#StopServer()
+			call OmniSharp#StopServer(1)
 		endif
 	endif
 endfunction
 
-function! OmniSharp#StopServer()
-	python getResponse("/stopserver")
+function! OmniSharp#StopServer(...)
+	if a:0 > 0
+		let force = a:1
+	else
+		let force = 0
+	endif
+
+	if force || OmniSharp#ServerIsRunning()
+		python getResponse("/stopserver")
+	endif
 endfunction
 
 function! OmniSharp#AddReference(reference)
