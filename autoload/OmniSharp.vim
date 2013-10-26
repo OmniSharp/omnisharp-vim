@@ -169,6 +169,14 @@ function! OmniSharp#BuildAsync()
 	Make
 endfunction
 
+function! OmniSharp#GetContextInfo()
+	python getContextInfo()
+	"exec ":ConqueTermSplit " . b:testcommand
+	echo b:testcommand
+	"let &l:makeprg=b:testcommand
+	call OmniSharp#RunAsyncCommand(b:testcommand)
+endfunction
+
 function! OmniSharp#EnableTypeHighlightingForBuffer()
 	hi link CSharpUserType Type
 	exec "syn keyword CSharpUserType " . s:allUserTypes
@@ -313,7 +321,7 @@ function! OmniSharp#RunAsyncCommand(command)
 		if exists(':Make')
 			call dispatch#start(a:command, {'background': 1})
 		else
-			echoerr 'Please install vim-dispatch or vimproc plugin to use this feature'
+			echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
 		endif
 	endif
 endfunction

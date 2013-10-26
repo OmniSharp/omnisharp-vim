@@ -223,6 +223,10 @@ def build(ret):
 def buildcommand():
     vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
 
+def getContextInfo():
+    response = json.loads(getResponse('/getcontext'))
+    vim.command("let b:testcommand = 'nunit-console %(AssemblyName)s /nologo /run=%(TypeName)s.%(MethodName)s'" % response) 
+		
 def codeFormat():
     parameters = {}
     parameters['ExpandTab'] = bool(int(vim.eval('&expandtab')))
