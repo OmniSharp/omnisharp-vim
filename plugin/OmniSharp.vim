@@ -2,7 +2,10 @@ if exists("g:OmniSharp_loaded")
 	finish
 endif
 
-let g:ctrlp_extensions = ['findtype', 'findsymbols']
+augroup OmniSharpCtrlP
+	au!
+	au FileType cs call OmniSharp#AppendCtrlPExtensions()
+augroup END
 
 let g:OmniSharp_loaded = 1
 

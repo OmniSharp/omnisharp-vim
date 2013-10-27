@@ -357,5 +357,16 @@ function! OmniSharp#AddReference(reference)
 	python addReference()
 endfunction
 
+function! OmniSharp#AppendCtrlPExtensions()
+	" Don't override settings made elsewhere
+	if !exists("g:ctrlp_extensions")
+		let g:ctrlp_extensions = []
+	endif
+	if !exists("g:OmniSharp_ctrlp_extensions_added")
+		let g:OmniSharp_ctrlp_extensions_added = 1
+		let g:ctrlp_extensions += ['findtype', 'findsymbols']
+	endif
+endfunction
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
