@@ -92,15 +92,15 @@ function! OmniSharp#FindSyntaxErrors()
 	if bufname('%') == ''
 		return
 	endif
-	let qf_taglist = []
-	python findSyntaxErrors("qf_taglist")
+	let loc_taglist = []
+	python findSyntaxErrors("loc_taglist")
 
-	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 0
-		call setqflist(qf_taglist)
-		copen 4
+	" Place the tags in the location-list window, if possible
+	if len(loc_taglist) > 0
+		call setloclist(0, loc_taglist)
+		lopen 4
 	else
-		cclose
+		lclose
 	endif
 endfunction
 
