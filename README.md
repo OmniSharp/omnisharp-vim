@@ -148,6 +148,8 @@ set noshowmatch
 
 "don't autoselect first item in omnicomplete, show if only one item (for preview)
 set completeopt=longest,menuone,preview
+"move the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
+set completeopt=longest,menuone,preview
 
 nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
 " Builds can run asynchronously with vim-dispatch installed
