@@ -36,7 +36,8 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Simple syntax error highlighting
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
-* Add file to project (currently will only add .cs files to a .csproj file)
+* Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
+	:OmniSharpAddToProject
 * Add reference. Supports project and file reference. GAC referencing todo.
 	* Usage: :OmniSharpAddReference path_to_reference
 
@@ -178,6 +179,7 @@ nnoremap <leader>tp :OmniSharpAddToProject<cr>
 " (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
+" Add syntax highlighting for types and interfaces
 nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
