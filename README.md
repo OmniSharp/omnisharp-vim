@@ -37,9 +37,13 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
+```
 	:OmniSharpAddToProject
+```
 * Add reference. Supports project and file reference. GAC referencing todo.
-	* Usage: :OmniSharpAddReference path_to_reference
+```
+	:OmniSharpAddReference path_to_reference
+```
 
 
 ##Screenshots
