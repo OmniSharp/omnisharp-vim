@@ -160,6 +160,8 @@ nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
 " Builds can run asynchronously with vim-dispatch installed
 "nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
 
+"The following commands are contextual, based on the current cursor position.
+
 nnoremap <F12> :OmniSharpGotoDefinition<cr>
 nnoremap gd :OmniSharpGotoDefinition<cr>
 nnoremap <leader>fi :OmniSharpFindImplementations<cr>
@@ -176,13 +178,16 @@ nnoremap <leader>nm :OmniSharpRename<cr>
 nnoremap <F2> :OmniSharpRename<cr>      
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
+
 " Force OmniSharp to reload the solution. Useful when switching branches etc.
 nnoremap <leader>rl :OmniSharpReloadSolution<cr>
 nnoremap <leader>cf :OmniSharpCodeFormat<cr>
+" Load the current .cs file to the nearest project
 nnoremap <leader>tp :OmniSharpAddToProject<cr>
 " (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
+
 " Add syntax highlighting for types and interfaces
 nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
