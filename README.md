@@ -145,7 +145,7 @@ let g:OmniSharp_typeLookupInPreview = 1
 "when the first match contains parentheses.
 set noshowmatch
 "Set autocomplete function to OmniSharp (if not using YouCompleteMe completion plugin)
-setlocal omnifunc=OmniSharp#Complete
+autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
 
 "Super tab settings
 "let g:SuperTabDefaultCompletionType = 'context'
