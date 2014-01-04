@@ -284,3 +284,7 @@ It may eat your code.
 
 Pull requests welcome!
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/nosami/omnisharp/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
