@@ -92,15 +92,15 @@ function! OmniSharp#FindSyntaxErrors()
 	if bufname('%') == ''
 		return
 	endif
-	let qf_taglist = []
-	python findSyntaxErrors("qf_taglist")
+	let loc_taglist = []
+	python findSyntaxErrors("loc_taglist")
 
-	" Place the tags in the quickfix window, if possible
-	if len(qf_taglist) > 0
-		call setqflist(qf_taglist)
-		copen 4
+	" Place the tags in the location-list window, if possible
+	if len(loc_taglist) > 0
+		call setloclist(0, loc_taglist)
+		lopen 4
 	else
-		cclose
+		lclose
 	endif
 endfunction
 
@@ -229,6 +229,9 @@ endfunction
 function! OmniSharp#StartServerIfNotRunning()
 	if !OmniSharp#ServerIsRunning()
 		call OmniSharp#StartServer()
+		if g:Omnisharp_stop_server==2
+			au VimLeavePre * call OmniSharp#StopServer()
+		endif
 	endif
 endfunction
 
@@ -264,7 +267,7 @@ function! OmniSharp#StartServer()
 		let array = split(solutionfiles, '\n')
 		if len(array) == 1
 			call OmniSharp#StartServerSolution(array[0])
-		elseif g:OmniSharp_sln_list_name != "" 
+		elseif g:OmniSharp_sln_list_name != ""
 			echom "Started with sln: " . g:OmniSharp_sln_list_name
 			call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
 		elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
@@ -330,19 +333,27 @@ function! OmniSharp#AddToProject()
 	python getResponse("/addtoproject")
 endfunction
 
-function! OmniSharp#AskStopServerIfNotRunning()
+function! OmniSharp#AskStopServerIfRunning()
 	if OmniSharp#ServerIsRunning()
 		call inputsave()
 		let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
 		call inputrestore()
 		if choice != "n"
-			call OmniSharp#StopServer()
+			call OmniSharp#StopServer(1)
 		endif
 	endif
 endfunction
 
-function! OmniSharp#StopServer()
-	python getResponse("/stopserver")
+function! OmniSharp#StopServer(...)
+	if a:0 > 0
+		let force = a:1
+	else
+		let force = 0
+	endif
+
+	if force || OmniSharp#ServerIsRunning()
+		python getResponse("/stopserver")
+	endif
 endfunction
 
 function! OmniSharp#AddReference(reference)
@@ -352,6 +363,17 @@ function! OmniSharp#AddReference(reference)
 		let a:ref = a:reference
 	endif
 	python addReference()
+endfunction
+
+function! OmniSharp#AppendCtrlPExtensions()
+	" Don't override settings made elsewhere
+	if !exists("g:ctrlp_extensions")
+		let g:ctrlp_extensions = []
+	endif
+	if !exists("g:OmniSharp_ctrlp_extensions_added")
+		let g:OmniSharp_ctrlp_extensions_added = 1
+		let g:ctrlp_extensions += ['findtype', 'findsymbols']
+	endif
 endfunction
 
 let &cpo = s:save_cpo
