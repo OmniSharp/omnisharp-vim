@@ -222,7 +222,10 @@ def buildcommand():
 
 def getContextInfo():
     response = json.loads(getResponse('/getcontext'))
-    vim.command("let b:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s.%(MethodName)s'" % response) 
+    if response["MethodName"] != None:
+        vim.command("let b:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s.%(MethodName)s'" % response) 
+    else:
+        vim.command("let b:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s'" % response) 
 		
 def codeFormat():
     parameters = {}

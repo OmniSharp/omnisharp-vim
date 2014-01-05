@@ -171,11 +171,11 @@ endfunction
 
 function! OmniSharp#GetContextInfo()
 	python getContextInfo()
-	"exec ":ConqueTermSplit " . b:testcommand
-	echo b:testcommand
-	"let &l:makeprg=b:testcommand
-	"call OmniSharp#RunAsyncCommand(b:testcommand)
-	call Send_to_Tmux(b:testcommand . "\<cr>")	
+    if exists("g:tmux_sessionname") && exists("g:tmux_windowname") && exists("g:tmux_panenumber")
+		silent! call Send_to_Tmux(b:testcommand . "\<cr>")	
+	else
+		call Send_to_Tmux(b:testcommand . "\<cr>")	
+	endif
 endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer()
