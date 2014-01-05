@@ -174,7 +174,8 @@ function! OmniSharp#GetContextInfo()
 	"exec ":ConqueTermSplit " . b:testcommand
 	echo b:testcommand
 	"let &l:makeprg=b:testcommand
-	call OmniSharp#RunAsyncCommand(b:testcommand)
+	"call OmniSharp#RunAsyncCommand(b:testcommand)
+	call Send_to_Tmux(b:testcommand . "\<cr>")	
 endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer()
