@@ -170,10 +170,14 @@ function! OmniSharp#BuildAsync()
 endfunction
 
 function! OmniSharp#GetContextInfo()
+	python buildcommand()
 	python getContextInfo()
     if exists("g:tmux_sessionname") && exists("g:tmux_windowname") && exists("g:tmux_panenumber")
+		silent! call Send_to_Tmux(b:buildcommand . "\<cr>")
+
 		silent! call Send_to_Tmux(b:testcommand . "\<cr>")	
 	else
+		call Send_to_Tmux(b:buildcommand . "\<cr>")
 		call Send_to_Tmux(b:testcommand . "\<cr>")	
 	endif
 endfunction
