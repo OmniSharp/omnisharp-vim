@@ -169,6 +169,22 @@ function! OmniSharp#BuildAsync()
 	Make
 endfunction
 
+function! OmniSharp#RunTests(mode)
+	write 
+	python buildcommand()
+
+	if a:mode != 'last'
+		python getTestCommand()
+	endif
+
+    if exists("g:tmux_sessionname") && exists("g:tmux_windowname") && exists("g:tmux_panenumber")
+		silent! call Send_to_Tmux(b:buildcommand . " && " . s:testcommand . "\<cr>")
+	else
+		call Send_to_Tmux(b:buildcommand . " && " . s:testcommand . "\<cr>")
+	endif
+
+endfunction
+
 function! OmniSharp#EnableTypeHighlightingForBuffer()
 	hi link CSharpUserType Type
 	exec "syn keyword CSharpUserType " . s:allUserTypes
@@ -316,7 +332,7 @@ function! OmniSharp#RunAsyncCommand(command)
 		if exists(':Make')
 			call dispatch#start(a:command, {'background': 1})
 		else
-			echoerr 'Please install vim-dispatch or vimproc plugin to use this feature'
+			echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
 		endif
 	endif
 endfunction
