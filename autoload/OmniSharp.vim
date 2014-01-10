@@ -169,17 +169,20 @@ function! OmniSharp#BuildAsync()
 	Make
 endfunction
 
-function! OmniSharp#GetContextInfo()
+function! OmniSharp#RunTests(mode)
+	write 
 	python buildcommand()
-	python getContextInfo()
-    if exists("g:tmux_sessionname") && exists("g:tmux_windowname") && exists("g:tmux_panenumber")
-		silent! call Send_to_Tmux(b:buildcommand . "\<cr>")
 
-		silent! call Send_to_Tmux(b:testcommand . "\<cr>")	
-	else
-		call Send_to_Tmux(b:buildcommand . "\<cr>")
-		call Send_to_Tmux(b:testcommand . "\<cr>")	
+	if a:mode != 'last'
+		python getTestCommand()
 	endif
+
+    if exists("g:tmux_sessionname") && exists("g:tmux_windowname") && exists("g:tmux_panenumber")
+		silent! call Send_to_Tmux(b:buildcommand . " && " . s:testcommand . "\<cr>")
+	else
+		call Send_to_Tmux(b:buildcommand . " && " . s:testcommand . "\<cr>")
+	endif
+
 endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer()

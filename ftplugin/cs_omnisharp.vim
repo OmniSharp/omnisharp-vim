@@ -24,7 +24,7 @@ augroup END
 
 " Commands
 command! -buffer -bar OmniSharpFindType            call ctrlp#init(findtype#id())
-command! -buffer -bar OmniSharpFindSymbol         call ctrlp#init(findsymbols#id())
+command! -buffer -bar OmniSharpFindSymbol          call ctrlp#init(findsymbols#id())
 command! -buffer -bar OmniSharpFindMembers         call OmniSharp#FindMembers()
 command! -buffer -bar OmniSharpFindUsages          call OmniSharp#FindUsages()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
@@ -41,7 +41,10 @@ command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
 command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
 command! -buffer -bar OmniSharpHighlightTypes      call OmniSharp#EnableTypeHighlighting()
-command! -buffer -bar OmniSharpRunTests      	   call OmniSharp#GetContextInfo()
+command! -buffer -bar OmniSharpRunTests      	   call OmniSharp#RunTests('single')
+command! -buffer -bar OmniSharpRunTestFixture      call OmniSharp#RunTests('fixture')
+command! -buffer -bar OmniSharpRunAllTests         call OmniSharp#RunTests('all')
+command! -buffer -bar OmniSharpRunLastTests        call OmniSharp#RunTests('last')
 
 
 command! -buffer -nargs=1 OmniSharpRenameTo

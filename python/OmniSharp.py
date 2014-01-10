@@ -220,12 +220,16 @@ def build(ret):
 def buildcommand():
     vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
 
-def getContextInfo():
+def getTestCommand():
     response = json.loads(getResponse('/getcontext'))
-    if response["MethodName"] != None:
-        vim.command("let b:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s.%(MethodName)s'" % response) 
+    mode = vim.eval('a:mode')
+    if mode == 'all':
+        testCommand = "let s:testcommand = 'nunit -nologo -labels %(AssemblyName)s'" % response
+    elif response["MethodName"] == None or mode == 'fixture':
+        testCommand = "let s:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s'" % response
     else:
-        vim.command("let b:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s'" % response) 
+        testCommand = "let s:testcommand = 'nunit -nologo -labels %(AssemblyName)s -run=%(TypeName)s.%(MethodName)s'" % response
+    vim.command(testCommand)
 		
 def codeFormat():
     parameters = {}
