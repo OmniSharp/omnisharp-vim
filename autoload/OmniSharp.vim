@@ -216,6 +216,10 @@ function! OmniSharp#ReloadSolution()
 	python getResponse("/reloadsolution")
 endfunction
 
+function! OmniSharp#UpdateBuffer()
+	python getResponse("/updatebuffer")
+endfunction
+
 function! OmniSharp#CodeFormat()
 	python codeFormat()
 endfunction

@@ -20,6 +20,9 @@ augroup plugin-OmniSharp-SyntaxCheck
 	\|		let b:OmniSharp_SyntaxChecked = 1
 	\|		call OmniSharp#FindSyntaxErrors()
 	\|	endif
+
+	autocmd BufLeave <buffer>
+	\		call OmniSharp#UpdateBuffer()
 augroup END
 
 " Commands
