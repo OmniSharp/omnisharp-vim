@@ -22,7 +22,9 @@ augroup plugin-OmniSharp-SyntaxCheck
 	\|	endif
 
 	autocmd BufLeave <buffer>
-	\		call OmniSharp#UpdateBuffer()
+	\ 	if !pumvisible()
+	\|		call OmniSharp#UpdateBuffer()
+	\|	endif	
 augroup END
 
 " Commands
