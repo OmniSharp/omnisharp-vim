@@ -4,9 +4,9 @@ if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
 endif
 
-" Auto syntax check.
-augroup plugin-OmniSharp-SyntaxCheck
-	autocmd! * <buffer>
+augroup plugin-OmniSharp
+	autocmd! * <buffer
+	" Auto syntax check.
 	autocmd BufWritePre <buffer>
     \   if g:OmniSharp_BufWritePreSyntaxCheck
     \|      let b:OmniSharp_SyntaxChecked = 1
@@ -25,6 +25,11 @@ augroup plugin-OmniSharp-SyntaxCheck
 	\ 	if !pumvisible()
 	\|		call OmniSharp#UpdateBuffer()
 	\|	endif	
+	
+	autocmd BufWritePost <buffer>
+	\	if exists('g:OmniSharp_AutoAddFilesToProject') && g:OmniSharp_AutoAddFilesToProject 
+	\|		call OmniSharp#AddToProject()
+
 augroup END
 
 " Commands
@@ -72,7 +77,7 @@ else
 	let b:undo_ftplugin = ''
 endif
 let b:undo_ftplugin .= '
-\	execute "autocmd! plugin-OmniSharp-SyntaxCheck * <buffer>"
+\	execute "autocmd! plugin-OmniSharp * <buffer>"
 \
 \|	delcommand OmniSharpFindType
 \|	delcommand OmniSharpFindSymbol
@@ -94,5 +99,9 @@ let b:undo_ftplugin .= '
 \|	delcommand OmniSharpRenameTo
 \|	delcommand OmniSharpStartServerSolution
 \|	delcommand OmniSharpAddReference
+\|  delcommand OmniSharpRunTests
+\|  delcommand OmniSharpRunTestFixture
+\|  delcommand OmniSharpRunAllTests
+\|  delcommand OmniSharpRunLastTests
 \
 \|	setlocal omnifunc< errorformat< makeprg<'

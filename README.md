@@ -186,6 +186,8 @@ nnoremap <leader>rl :OmniSharpReloadSolution<cr>
 nnoremap <leader>cf :OmniSharpCodeFormat<cr>
 " Load the current .cs file to the nearest project
 nnoremap <leader>tp :OmniSharpAddToProject<cr>
+" Automatically add new cs files to the nearest project on save
+:autocmd BufWritePost *.cs call OmniSharp#AddToProject()
 " (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
