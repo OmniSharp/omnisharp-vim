@@ -26,10 +26,6 @@ augroup plugin-OmniSharp
 	\|		call OmniSharp#UpdateBuffer()
 	\|	endif	
 	
-	autocmd BufWritePost <buffer>
-	\	if exists('g:OmniSharp_AutoAddFilesToProject') && g:OmniSharp_AutoAddFilesToProject 
-	\|		call OmniSharp#AddToProject()
-
 augroup END
 
 " Commands
