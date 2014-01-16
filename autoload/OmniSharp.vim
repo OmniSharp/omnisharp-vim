@@ -187,7 +187,6 @@ endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer()
 	hi link CSharpUserType Type
-	hi link csInterfaceDeclaration Type
 	exec "syn keyword CSharpUserType " . s:allUserTypes
 	exec "syn keyword csInterfaceDeclaration " . s:allUserInterfaces
 endfunction
