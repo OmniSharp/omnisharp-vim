@@ -154,6 +154,7 @@ autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
 "let g:SuperTabClosePreviewOnPopupClose = 1
 
 "don't autoselect first item in omnicomplete, show if only one item (for preview)
+"remove preview if you don't want to see documentation
 set completeopt=longest,menuone,preview
 "move the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
 set splitbelow
@@ -171,7 +172,12 @@ nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
 nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
-nnoremap <leader>tt :OmniSharpTypeLookup<cr>
+nnoremap <leader>tt :OmniSharpTypeLookupWithoutDocumentation<cr>
+nnoremap <leader>dc :OmniSharpTypeLookupWithDocumentation<cr>
+"show type information automatically when the cursor stops moving
+autocmd CursorHold,CursorHoldI *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+set updatetime=300
+set cmdheight=2
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nnoremap <space> :OmniSharpGetCodeActions<cr>
 
@@ -187,7 +193,7 @@ nnoremap <leader>cf :OmniSharpCodeFormat<cr>
 " Load the current .cs file to the nearest project
 nnoremap <leader>tp :OmniSharpAddToProject<cr>
 " Automatically add new cs files to the nearest project on save
-:autocmd BufWritePost *.cs call OmniSharp#AddToProject()
+autocmd BufWritePost *.cs call OmniSharp#AddToProject()
 " (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>

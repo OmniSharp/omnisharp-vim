@@ -122,11 +122,20 @@ function! GoScratch()
   endif
 endfunction
 
-function! OmniSharp#TypeLookup()
+
+function! OmniSharp#TypeLookupWithoutDocumentation()
+	call OmniSharp#TypeLookup('False')
+endfunction
+
+function! OmniSharp#TypeLookupWithDocumentation()
+	call OmniSharp#TypeLookup('True')
+endfunction
+
+function! OmniSharp#TypeLookup(includeDocumentation)
 	let type = ""
 	python typeLookup("type")
 
-	if g:OmniSharp_typeLookupInPreview
+	if g:OmniSharp_typeLookupInPreview || a:includeDocumentation == 'True'
 		call GoScratch()
 		python vim.current.window.height = 5
 		set modifiable

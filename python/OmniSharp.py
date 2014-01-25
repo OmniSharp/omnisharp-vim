@@ -51,6 +51,7 @@ def getCompletions(ret, column, partialWord):
     parameters['column'] = vim.eval(column)
     parameters['wordToComplete'] = vim.eval(partialWord)
 
+    parameters['WantDocumentationForEveryCompletionResult'] = 'false'
     parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
     js = getResponse('/autocomplete', parameters)
 
@@ -168,7 +169,9 @@ def findSyntaxErrors(ret):
                 logger.error(command)
 
 def typeLookup(ret):
-    js = getResponse('/typelookup');
+    parameters = {} 
+    parameters['includeDocumentation'] = vim.eval('a:includeDocumentation')
+    js = getResponse('/typelookup', parameters);
     if(js != ''):
         response = json.loads(js)
         type = response['Type']
