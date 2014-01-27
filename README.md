@@ -124,6 +124,7 @@ If you prefer to get completions as you are typing, then you should take a look 
 or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
 
 [NeoComplCache example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplCache-Settings)
+
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
@@ -210,6 +211,7 @@ set hidden
 
 - Code Issues - Highlight potential problems / possible improvements in your code
 - Extract method
+
 Pull requests welcome!
 
 
