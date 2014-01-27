@@ -226,7 +226,9 @@ function! OmniSharp#ReloadSolution()
 endfunction
 
 function! OmniSharp#UpdateBuffer()
-	python getResponse("/updatebuffer")
+	if OmniSharp#ServerIsRunning()
+		python getResponse("/updatebuffer")
+	endif
 endfunction
 
 function! OmniSharp#CodeFormat()
