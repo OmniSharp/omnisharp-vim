@@ -123,6 +123,7 @@ Repeat to cycle through completions, or use the cursor keys (eugh!)
 If you prefer to get completions as you are typing, then you should take a look at [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
 or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
 
+[NeoComplCache example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplCache-Settings)
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
@@ -204,92 +205,11 @@ nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 set hidden
 ```
 
-OmniSharp works very well with the [NeoComplCache] (https://github.com/Shougo/neocomplcache) plugin. Used in conjunction with
-NeoComplCache, OmniSharp can provide an experience matching or even bettering
-Visual Studio intellisense. Completions are provided as you type.
-These are my settings to use with this plugin. Don't set these unless you use this plugin! 
-If you improve these settings, I'd like to hear about it!
-
-```vim
-let g:neocomplcache_enable_at_startup = 1
-" Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
-" Use camel case completion.
-let g:neocomplcache_enable_camel_case_completion = 1
-" Use underscore completion.
-let g:neocomplcache_enable_underbar_completion = 1
-" Sets minimum char length of syntax keyword.
-let g:neocomplcache_min_syntax_length = 0
-" buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder 
-"let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
-
-let g:neocomplcache_enable_auto_close_preview = 0
-" Define keyword, for minor languages
-if !exists('g:neocomplcache_keyword_patterns')
-  let g:neocomplcache_keyword_patterns = {}
-endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplcache#undo_completion()
-inoremap <expr><C-l>     neocomplcache#complete_common_string()
-
-" SuperTab like snippets behavior.
-"imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <expr><CR> pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-inoremap <expr>.  neocomplcache#close_popup() . "."
-inoremap <expr>(  neocomplcache#close_popup() . "("
-inoremap <expr>)  neocomplcache#close_popup() . ")"
-inoremap <expr><space>  neocomplcache#close_popup() . " "
-inoremap <expr>;  neocomplcache#close_popup() . ";"
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
-inoremap <expr><ESC> pumvisible() ? neocomplcache#cancel_popup() : "\<esc>"
-
-" AutoComplPop like behavior.
-let g:neocomplcache_enable_auto_select = 1
-
-" Shell like behavior(not recommended).
-set completeopt+=longest
-"let g:neocomplcache_disable_auto_complete = 1
-"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<TAB>"
-"inoremap <expr><CR>  neocomplcache#smart_close_popup() . "\<CR>"
-
-
-" Enable heavy omni completion, which require computational power and may stall the vim. 
-if !exists('g:neocomplcache_omni_patterns')
-  let g:neocomplcache_omni_patterns = {}
-endif
-let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.cs = '.*'
-"autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
-let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
-```
-
-###Disclaimer
-
-This project is very much incomplete/buggy. 
-
-It may eat your code.
-
 
 #####TODO
 
-- Refactorings
-- Add files to project
-- Highlight syntax errors as you type
-- Start the server from within Vim and auto discover the solution file where possible
-- Fix bugs
-
+- Code Issues - Highlight potential problems / possible improvements in your code
+- Extract method
 Pull requests welcome!
 
 
