@@ -174,8 +174,8 @@ nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
 nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
-nnoremap <leader>tt :OmniSharpTypeLookupWithoutDocumentation<cr>
-nnoremap <leader>dc :OmniSharpTypeLookupWithDocumentation<cr>
+nnoremap <leader>tt :OmniSharpTypeLookup<cr>
+nnoremap <leader>dc :OmniSharpDocumentation<cr>
 "show type information automatically when the cursor stops moving
 autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 set updatetime=300
