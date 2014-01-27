@@ -141,7 +141,7 @@ filetype plugin on
 let g:OmniSharp_host = "http://localhost:2000"
 
 "Set the type lookup function to use the preview window instead of the status line
-let g:OmniSharp_typeLookupInPreview = 1
+"let g:OmniSharp_typeLookupInPreview = 1
 
 "Showmatch significantly slows down omnicomplete
 "when the first match contains parentheses.
@@ -177,7 +177,7 @@ nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
 nnoremap <leader>tt :OmniSharpTypeLookupWithoutDocumentation<cr>
 nnoremap <leader>dc :OmniSharpTypeLookupWithDocumentation<cr>
 "show type information automatically when the cursor stops moving
-autocmd CursorHold,CursorHoldI *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 set updatetime=300
 set cmdheight=2
 "I find contextual code actions so useful that I have it mapped to the spacebar
