@@ -124,6 +124,7 @@ If you prefer to get completions as you are typing, then you should take a look 
 or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
 
 [NeoComplCache example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplCache-Settings)
+
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
@@ -140,7 +141,7 @@ filetype plugin on
 let g:OmniSharp_host = "http://localhost:2000"
 
 "Set the type lookup function to use the preview window instead of the status line
-let g:OmniSharp_typeLookupInPreview = 1
+"let g:OmniSharp_typeLookupInPreview = 1
 
 "Showmatch significantly slows down omnicomplete
 "when the first match contains parentheses.
@@ -173,10 +174,10 @@ nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
 nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
-nnoremap <leader>tt :OmniSharpTypeLookupWithoutDocumentation<cr>
-nnoremap <leader>dc :OmniSharpTypeLookupWithDocumentation<cr>
+nnoremap <leader>tt :OmniSharpTypeLookup<cr>
+nnoremap <leader>dc :OmniSharpDocumentation<cr>
 "show type information automatically when the cursor stops moving
-autocmd CursorHold,CursorHoldI *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 set updatetime=300
 set cmdheight=2
 "I find contextual code actions so useful that I have it mapped to the spacebar
@@ -210,6 +211,7 @@ set hidden
 
 - Code Issues - Highlight potential problems / possible improvements in your code
 - Extract method
+
 Pull requests welcome!
 
 
