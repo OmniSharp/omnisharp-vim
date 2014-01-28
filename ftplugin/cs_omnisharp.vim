@@ -1,4 +1,3 @@
-
 "Set a default value for the server address
 if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
@@ -63,9 +62,6 @@ command! -buffer -nargs=1 -complete=file
 
 command! -buffer -nargs=1 -complete=file OmniSharpAddReference         
 \   call OmniSharp#AddReference(<q-args>)
-
-setlocal omnifunc=OmniSharp#Complete
-
 
 
 if exists('b:undo_ftplugin')
