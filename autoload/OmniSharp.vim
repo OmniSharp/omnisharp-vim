@@ -107,7 +107,7 @@ endfunction
 " Jump to first scratch window visible in current tab, or create it.
 " This is useful to accumulate results from successive operations.
 " Global function that can be called from other scripts.
-function! GoScratch()
+function! s:GoScratch()
   let done = 0
   for i in range(1, winnr('$'))
     execute i . 'wincmd w'
@@ -136,7 +136,7 @@ function! OmniSharp#TypeLookup(includeDocumentation)
 	python typeLookup("type")
 
 	if g:OmniSharp_typeLookupInPreview || a:includeDocumentation == 'True'
-		call GoScratch()
+		call s:GoScratch()
 		python vim.current.window.height = 5
 		set modifiable
 		exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . s:documentation . '""".splitlines()'
