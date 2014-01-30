@@ -120,8 +120,13 @@ To get completions, open one of the C# files from the solution within Vim and pr
 (or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
 
-If you prefer to get completions as you are typing, then you should take a look at [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
+If you prefer to get completions as you are typing, then you should take a look at [NeoComplete](https://github.com/Shougo/neocomplete.vim), [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
 or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
+
+
+NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no longer maintained. NeoComplete is the successor to NeoComplCache. It is faster than NeoComplCache but requires Vim to be compiled with +lua. YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux or OSX.
+
+[NeoComplete example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplete-Settings)
 
 [NeoComplCache example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplCache-Settings)
 
