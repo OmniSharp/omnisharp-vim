@@ -37,8 +37,10 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
     target = urlparse.urljoin(host, endPoint)
     parameters = urllib.urlencode(parameters)
 
+    proxy = urllib2.ProxyHandler({})
+    opener = urllib2.build_opener(proxy)
     try:
-        response = urllib2.urlopen(target, parameters, timeout)
+        response = opener.open(target, parameters, timeout)
         return response.read()
     except Exception as e:
         print("OmniSharp : Could not connect to " + target + ": " + str(e))
