@@ -53,7 +53,7 @@ def getCompletions(ret, column, partialWord):
     parameters['column'] = vim.eval(column)
     parameters['wordToComplete'] = vim.eval(partialWord)
 
-    parameters['WantDocumentationForEveryCompletionResult'] = 'false'
+    parameters['WantDocumentationForEveryCompletionResult'] = bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
     parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
     js = getResponse('/autocomplete', parameters)
 

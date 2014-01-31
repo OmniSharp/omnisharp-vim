@@ -161,9 +161,16 @@ autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
 "let g:SuperTabClosePreviewOnPopupClose = 1
 
 "don't autoselect first item in omnicomplete, show if only one item (for preview)
-"remove preview if you don't want to see documentation
+"remove preview if you don't want to see any documentation whatsoever.
 set completeopt=longest,menuone,preview
-"move the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
+" Fetch full documentation during omnicomplete requests. 
+" There is a performance penalty with this (especially on Mono)
+" By default, only Type/Method signatures are fetched. Full documentation can still be fetched when
+" you need it with the :OmniSharpDocumentation command.
+" let g:omnicomplete_fetch_documentation=1
+
+"Move the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
+"You might also want to look at the echodoc plugin
 set splitbelow
 
 nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
@@ -183,7 +190,7 @@ nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
 "show type information automatically when the cursor stops moving
 autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
-set updatetime=300
+set updatetime=500
 set cmdheight=2
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nnoremap <space> :OmniSharpGetCodeActions<cr>

@@ -2,6 +2,9 @@
 if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'
 endif
+if !exists('g:omnicomplete_fetch_full_documentation')
+    let g:omnicomplete_fetch_full_documentation = 0
+endif
 
 augroup plugin-OmniSharp
 	autocmd! * <buffer
