@@ -117,7 +117,9 @@ If you prefer to get completions as you are typing, then you should take a look 
 or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
 
 
-NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no longer maintained. NeoComplete is the successor to NeoComplCache. It is faster than NeoComplCache but requires Vim to be compiled with +lua. YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux or OSX.
+NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no longer maintained. NeoComplete is the successor to NeoComplCache. It is faster than NeoComplCache but requires Vim to be compiled with +lua. (Windows users can find [vim compiled with +lua](http://tuxproject.de/projects/vim/) and [Lua 5.2](http://sourceforge.net/projects/luabinaries/files/5.2.1/Executables/) - place lua52.dll in the same folder as gvim.exe) 
+
+YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux or OSX.
 
 [NeoComplete example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplete-Settings)
 
