@@ -335,7 +335,7 @@ function! OmniSharp#StartServerSolution(solutionPath)
 
 	let g:OmniSharp_running_slns += [a:solutionPath]
 	let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-	let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . fnamemodify(a:solutionPath, ':8')
+	let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':8'))
 	if !has('win32') && !has('win32unix')
 		let command = 'mono ' . command
 	endif
