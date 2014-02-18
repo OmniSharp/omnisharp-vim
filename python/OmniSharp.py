@@ -22,7 +22,6 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
     parameters['column'] = vim.eval('col(".")')
     parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
     parameters['filename'] = vim.current.buffer.name
-    print endPoint
     if(additionalParameters != None):
         parameters.update(additionalParameters)
 
