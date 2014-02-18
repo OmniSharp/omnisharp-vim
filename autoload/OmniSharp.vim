@@ -246,7 +246,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning()
 	try
-		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 50) + "'");
+		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 0.2) + "'");
 		return s:alive == 'true'
 	catch
 		return 0
