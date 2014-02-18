@@ -5,6 +5,7 @@ let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', '
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let s:gotmakeprg = 0
+let s:seenRunning = 0
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -21,7 +22,9 @@ function! OmniSharp#Complete(findstart, base)
 		return start
 	else
 		let words=[]
-		python getCompletions("words", "s:column", "a:base")
+		if s:serverSeenRunning == 1
+			python getCompletions("words", "s:column", "a:base")
+		endif
 		if len(words) == 0
 			return -3
 		endif
@@ -125,7 +128,9 @@ endfunction
 
 
 function! OmniSharp#TypeLookupWithoutDocumentation()
-	call OmniSharp#TypeLookup('False')
+	if s:serverSeenRunning == 1
+		call OmniSharp#TypeLookup('False')
+	endif
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation()
@@ -230,7 +235,7 @@ function! OmniSharp#ReloadSolution()
 endfunction
 
 function! OmniSharp#UpdateBuffer()
-	if OmniSharp#ServerIsRunning()
+	if s:serverSeenRunning == 1
 		python getResponse("/updatebuffer")
 	endif
 endfunction
@@ -242,6 +247,7 @@ endfunction
 function! OmniSharp#ServerIsRunning()
 	try
 		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 50) + "'");
+		let s:serverSeenRunning = 1
 		return s:alive == 'true'
 	catch
 		return 0
