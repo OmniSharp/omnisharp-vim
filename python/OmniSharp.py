@@ -43,7 +43,6 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
         response = opener.open(target, parameters, timeout)
         return response.read()
     except Exception as e:
-        print("OmniSharp : Could not connect to " + target + ": " + str(e))
         return ''
 
 
@@ -128,7 +127,6 @@ def gotoDefinition():
         filename = definition['FileName']
         if(filename != None):
             if(filename != vim.current.buffer.name):
-                print filename + ' ' + vim.current.buffer.name
                 vim.command('e ' + definition['FileName'])
             #row is 1 based, column is 0 based
             vim.current.window.cursor = (definition['Line'], definition['Column'] - 1 )

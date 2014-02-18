@@ -240,17 +240,12 @@ function! OmniSharp#CodeFormat()
 endfunction
 
 function! OmniSharp#ServerIsRunning()
-	let port = matchstr(g:OmniSharp_host,'[0-9]\+$')
-	if has('win32') || has('win32unix')
-		let lockfilename = fnamemodify(s:omnisharp_server, ':p:h') . '/lockfile-' . port
-		" If lockfile is present, and locked (and thus not readable)
-		" the server is running
-		return glob(lockfilename) != "" && !filereadable(lockfilename)
-	else
-		let cmd='ps ax | grep "OmniSharp.exe -p ' . port . '" | grep -v "grep" | wc -l | tr -d " "'
-		let isrunning=system(cmd)
-		return isrunning > 0
-	endif
+	try
+		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 50) + "'");
+		return s:alive == 'true'
+	catch
+		return 0
+	endtry
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning()
@@ -345,11 +340,11 @@ endfunction
 function! OmniSharp#RunAsyncCommand(command)
 	let is_vimproc = 0
 	silent! let is_vimproc = vimproc#version()
-	if is_vimproc
-		call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
+	if exists(':Make')
+		call dispatch#start(a:command, {'background': 1})
 	else
-		if exists(':Make')
-			call dispatch#start(a:command, {'background': 1})
+		if is_vimproc
+			call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
 		else
 			echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
 		endif
