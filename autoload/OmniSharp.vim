@@ -22,9 +22,7 @@ function! OmniSharp#Complete(findstart, base)
 		return start
 	else
 		let words=[]
-		if g:serverSeenRunning == 1
-			python getCompletions("words", "s:column", "a:base")
-		endif
+		python getCompletions("words", "s:column", "a:base")
 		if len(words) == 0
 			return -3
 		endif
