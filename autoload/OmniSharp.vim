@@ -234,7 +234,10 @@ endfunction
 
 function! OmniSharp#UpdateBuffer()
 	if g:serverSeenRunning == 1
-		python getResponse("/updatebuffer")
+        if b:changedtick != get(b:, "Omnisharp_UpdateChangeTick", -1)
+            python getResponse("/updatebuffer")
+            let b:Omnisharp_UpdateChangeTick = b:changedtick
+        endif
 	endif
 endfunction
 
