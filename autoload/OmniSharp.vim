@@ -5,6 +5,7 @@ let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', '
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let s:gotmakeprg = 0
+let g:serverSeenRunning = 0
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -125,7 +126,9 @@ endfunction
 
 
 function! OmniSharp#TypeLookupWithoutDocumentation()
-	call OmniSharp#TypeLookup('False')
+	if g:serverSeenRunning == 1
+		call OmniSharp#TypeLookup('False')
+	endif
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation()
@@ -230,12 +233,12 @@ function! OmniSharp#ReloadSolution()
 endfunction
 
 function! OmniSharp#UpdateBuffer()
-    if OmniSharp#ServerIsRunning()
+	if g:serverSeenRunning == 1
         if b:changedtick != get(b:, "Omnisharp_UpdateChangeTick", -1)
             python getResponse("/updatebuffer")
             let b:Omnisharp_UpdateChangeTick = b:changedtick
         endif
-    endif
+	endif
 endfunction
 
 function! OmniSharp#CodeFormat()
@@ -244,7 +247,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning()
 	try
-		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 50) + "'");
+		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 0.2) + "'");
 		return s:alive == 'true'
 	catch
 		return 0

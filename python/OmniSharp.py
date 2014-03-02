@@ -22,7 +22,6 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
     parameters['column'] = vim.eval('col(".")')
     parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
     parameters['filename'] = vim.current.buffer.name
-
     if(additionalParameters != None):
         parameters.update(additionalParameters)
 
@@ -41,8 +40,10 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
     opener = urllib2.build_opener(proxy)
     try:
         response = opener.open(target, parameters, timeout)
+        vim.command("let g:serverSeenRunning = 1")
         return response.read()
     except Exception as e:
+        vim.command("let g:serverSeenRunning = 0")
         return ''
 
 
