@@ -230,9 +230,12 @@ function! OmniSharp#ReloadSolution()
 endfunction
 
 function! OmniSharp#UpdateBuffer()
-	if OmniSharp#ServerIsRunning()
-		python getResponse("/updatebuffer")
-	endif
+    if OmniSharp#ServerIsRunning()
+        if b:changedtick != get(b:, "Omnisharp_UpdateChangeTick", -1)
+            python getResponse("/updatebuffer")
+            let b:Omnisharp_UpdateChangeTick = b:changedtick
+        endif
+    endif
 endfunction
 
 function! OmniSharp#CodeFormat()
