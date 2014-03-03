@@ -22,9 +22,7 @@ function! OmniSharp#Complete(findstart, base)
 		return start
 	else
 		let words=[]
-		if g:serverSeenRunning == 1
-			python getCompletions("words", "s:column", "a:base")
-		endif
+		python getCompletions("words", "s:column", "a:base")
 		if len(words) == 0
 			return -3
 		endif
@@ -236,7 +234,10 @@ endfunction
 
 function! OmniSharp#UpdateBuffer()
 	if g:serverSeenRunning == 1
-		python getResponse("/updatebuffer")
+        if b:changedtick != get(b:, "Omnisharp_UpdateChangeTick", -1)
+            python getResponse("/updatebuffer")
+            let b:Omnisharp_UpdateChangeTick = b:changedtick
+        endif
 	endif
 endfunction
 
@@ -277,7 +278,7 @@ function! OmniSharp#StartServer()
 
 	"get the path for the current buffer
 	let folder = expand('%:p:h')
-	let solutionfiles = globpath(folder, "*.sln")
+	let solutionfiles = globpath(folder, "*.sln", 1)
 
 	while (solutionfiles == '')
 		let lastfolder = folder
@@ -287,7 +288,7 @@ function! OmniSharp#StartServer()
 		if folder == lastfolder
 			break
 		endif
-		let solutionfiles = globpath(folder , "*.sln")
+		let solutionfiles = globpath(folder , "*.sln", 1)
 	endwhile
 
 	if solutionfiles != ''
