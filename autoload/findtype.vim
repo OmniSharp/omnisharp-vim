@@ -41,11 +41,7 @@ call add(g:ctrlp_ext_vars, {
 	\ 'lname': 'Find Types',
 	\ 'sname': 'types',
 	\ 'type': 'tabs',
-	\ 'enter': 'findtype#enter()',
-	\ 'exit': 'findtype#exit()',
-	\ 'opts': 'findtype#opts()',
 	\ 'sort': 1,
-	\ 'specinput': 0,
 	\ })
 
 
@@ -75,13 +71,13 @@ endfunction
 "  a:str    the selected string
 "
 function! findtype#accept(mode, str)
+	"call findtype#exit()
 	for quickfix in s:quickfixes
 		if quickfix.text == a:str
-			call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
 			break
 		endif
 	endfor
-	call findtype#exit()
+  call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
 endfunction
 
 
