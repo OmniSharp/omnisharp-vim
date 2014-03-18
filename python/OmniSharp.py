@@ -112,7 +112,7 @@ def findImplementations(ret):
                 ", {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
         if(len(usages) == 1):
             usage = usages[0]
-            openFile(usage['FileName'], usage['Line'], usage['Column'] - 1)
+            openFile(usage['FileName'], usage['Line'], usage['Column'])
         else:
             populateQuickFix(ret, usages)
 
@@ -121,7 +121,7 @@ def gotoDefinition():
     if(js != ''):
         definition = json.loads(js)
         if(definition['FileName'] != None):
-            openFile(definition['FileName'], definition['Line'], definition['Column'] - 1)
+            openFile(definition['FileName'], definition['Line'], definition['Column'])
         else:
             print "Not found"
 
