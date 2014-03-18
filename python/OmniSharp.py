@@ -126,7 +126,8 @@ def gotoDefinition():
             print "Not found"
 
 def openFile(filename, line, column):
-    vim.command('call OmniSharp#JumpToLocation("%(filename)s", %(line)s, %(column)s)' % locals())
+    filename = "'%(filename)s'" % locals() 
+    vim.command('call OmniSharp#JumpToLocation(%(filename)s, %(line)s, %(column)s)' % locals())
 
 def getCodeActions():
     js = getResponse('/getcodeactions')
