@@ -112,12 +112,7 @@ def findImplementations(ret):
                 ", {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
         if(len(usages) == 1):
             usage = usages[0]
-            filename = usage['FileName']
-            if(filename != None):
-                if(filename != vim.current.buffer.name):
-                    vim.command('e ' + usage['FileName'])
-                #row is 1 based, column is 0 based
-                vim.current.window.cursor = (usage['Line'], usage['Column'] - 1 )
+            openFile(usage['FileName'], usage['Line'], usage['Column'] - 1)
         else:
             populateQuickFix(ret, usages)
 
@@ -125,14 +120,13 @@ def gotoDefinition():
     js = getResponse('/gotodefinition');
     if(js != ''):
         definition = json.loads(js)
-        filename = definition['FileName']
-        if(filename != None):
-            if(filename != vim.current.buffer.name):
-                vim.command('e ' + definition['FileName'])
-            #row is 1 based, column is 0 based
-            vim.current.window.cursor = (definition['Line'], definition['Column'] - 1 )
+        if(definition['FileName'] != None):
+            openFile(definition['FileName'], definition['Line'], definition['Column'] - 1)
         else:
             print "Not found"
+
+def openFile(filename, line, column):
+    vim.command('call OmniSharp#JumpToLocation("%(filename)s", %(line)s, %(column)s)' % locals())
 
 def getCodeActions():
     js = getResponse('/getcodeactions')
