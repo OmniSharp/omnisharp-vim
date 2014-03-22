@@ -178,7 +178,7 @@ def typeLookup(ret):
             documentation = ''
         if(type != None):
             vim.command("let %s = '%s'" % (ret, type)) 
-            vim.command("let s:documentation = '%s'" % documentation) 
+            vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
 def renameTo(renameTo):
     parameters = {} 
