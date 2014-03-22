@@ -4,7 +4,6 @@ set cpo&vim
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
-let s:gotmakeprg = 0
 let g:serverSeenRunning = 0
 
 function! OmniSharp#Complete(findstart, base)
@@ -178,10 +177,10 @@ function! OmniSharp#Build()
 endfunction
 
 function! OmniSharp#BuildAsync()
-	if s:gotmakeprg == 0
+	if !exists("b:omnisharp_gotmakeprg")
 		python buildcommand()
 		let &l:makeprg=b:buildcommand
-		let s:gotmakeprg = 1
+		let b:omnisharp_gotmakeprg = 1
 	endif
 	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
 	Make
