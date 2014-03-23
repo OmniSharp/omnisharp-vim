@@ -152,6 +152,12 @@ def runCodeAction(option):
     vim.current.buffer[:] = lines
     vim.current.window.cursor = cursor
 
+def getCodeIssues(ret):
+    js = getResponse('/getcodeissues')
+    if(js != ''):
+        issues = json.loads(js)["QuickFixes"]
+        populateQuickFix(ret, issues)
+
 def findSyntaxErrors(ret):
     js = getResponse('/syntaxerrors')
     if(js != ''):

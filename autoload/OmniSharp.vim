@@ -91,6 +91,34 @@ function! OmniSharp#GetCodeActions()
 	python runCodeAction("option")
 endfunction
 
+function! OmniSharp#GetIssues()
+	let issues = []
+	python getCodeIssues("issues")
+    return issues
+
+	" Place the tags in the quickfix window, if possible
+	"if len(issues) > 0
+		"call setqflist(issues)
+		"copen 4
+	"else
+		"echo "No issues found"
+	"endif
+	"sign define issue text=>> texthl=Search
+    "sign unplace 2
+    "for issue in issues 
+        "echo issue
+        "exe ":sign place 2 line=" . issue["lnum"] . " name=issue file=" . issue["filename"]
+    "endfor
+	"python if actions == False: vim.command("return 0")
+
+	"let option=nr2char(getchar())
+	"if option < '0' || option > '9'
+		"return 1
+	"endif
+
+	"python runCodeIssue("option")
+endfunction
+
 function! OmniSharp#FindSyntaxErrors()
 	if bufname('%') == ''
 		return
