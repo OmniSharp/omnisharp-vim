@@ -18,7 +18,7 @@ set cpo&vim
 
 
 " type
-syn keyword csType			bool byte char decimal double float int long object sbyte short string T uint ulong ushort var void
+syn keyword csType			bool byte char decimal double float int long object sbyte short string T uint ulong ushort var void dynamic
 " storage
 syn keyword csStorage			delegate enum interface namespace struct
 " repeat / condition / label
@@ -45,6 +45,7 @@ syn keyword csUnsupportedStatement	add remove value
 " TODO:
 syn keyword csUnspecifiedKeyword	explicit implicit
 
+syn keyword csAsyncKeyword		async await
 
 " Contextual Keywords
 syn match csContextualStatement	/\<yield[[:space:]\n]\+\(return\|break\)/me=s+5
@@ -142,6 +143,7 @@ hi def link csLinqWords			Statement
 hi def link csUnsupportedStatement	Statement
 hi def link csUnspecifiedKeyword	Keyword
 hi def link csIsAs 			Keyword
+hi def link csAsyncKeyword              Keyword
 hi def link csContextualStatement	Statement
 hi def link csOperatorError		Error
 hi def link csInterfaceDeclaration      Include
