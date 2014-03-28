@@ -28,12 +28,13 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
+* Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
 * Rename refactoring
 * Semantic type highlighting
 * Lookup type information of an type/variable/method
 	* Can be printed to the status line or in the preview window
 	* Displays documentation for an entity when using preview window
-* Simple syntax error highlighting
+* Syntax error highlighting
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
@@ -89,9 +90,12 @@ Verify that Python is working inside Vim with
 ```
 
 ###Install vim-dispatch
-The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically.
-Use your favorite way to install it.
+The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically. 
+Use your favourite way to install it.
 
+###Install syntastic
+The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
+Use your favourite way to install it.
 
 ## How to use (read: run the server)
 
@@ -168,9 +172,10 @@ set completeopt=longest,menuone,preview
 "You might also want to look at the echodoc plugin
 set splitbelow
 
-nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
-" Builds can run asynchronously with vim-dispatch installed
-"nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
+" Synchronous build (blocks Vim)
+"nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
+" Builds can also run asynchronously with vim-dispatch installed
+nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
 
 "The following commands are contextual, based on the current cursor position.
 
@@ -181,12 +186,19 @@ nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
 nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
+" cursor can be anywhere on the line containing an issue for this one
+nnoremap <leader>x  :OmniSharpFixIssue<cr>
 nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
+
+" Get Code Issues and syntax errors
+autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
+
 "show type information automatically when the cursor stops moving
 autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 set updatetime=500
 set cmdheight=2
+
 "I find contextual code actions so useful that I have it mapped to the spacebar
 nnoremap <space> :OmniSharpGetCodeActions<cr>
 

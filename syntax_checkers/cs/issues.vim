@@ -23,21 +23,13 @@ function! SyntaxCheckers_cs_issues_IsAvailable() dict
 endfunction
 
 function! SyntaxCheckers_cs_issues_GetLocList() dict
-
     let loc_list = OmniSharp#GetIssues()
     for loc in loc_list
         let loc.valid = 1
         let loc.bufnr = bufnr('%')
+        let loc.type = 'W'
     endfor
     return loc_list
-    "let makeprg = self.makeprgBuild({ 'args_after': '--parse' })
-
-    "let errorformat = '%f(%l\,%c): %trror %m'
-
-    "return SyntasticMake({
-        "\ 'makeprg': makeprg,
-        "\ 'errorformat': errorformat,
-        "\ 'defaults': {'bufnr': bufnr("")} })
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({

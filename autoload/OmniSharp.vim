@@ -5,6 +5,8 @@ let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', '
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let g:serverSeenRunning = 0
+let b:issues = [] 
+let b:syntaxerrors = [] 
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -92,47 +94,30 @@ function! OmniSharp#GetCodeActions()
 endfunction
 
 function! OmniSharp#GetIssues()
+    if pumvisible()
+        return b:issues
+    endif
 	let issues = []
 	python getCodeIssues("issues")
+    let b:issues = issues
     return issues
+endfunction
 
-	" Place the tags in the quickfix window, if possible
-	"if len(issues) > 0
-		"call setqflist(issues)
-		"copen 4
-	"else
-		"echo "No issues found"
-	"endif
-	"sign define issue text=>> texthl=Search
-    "sign unplace 2
-    "for issue in issues 
-        "echo issue
-        "exe ":sign place 2 line=" . issue["lnum"] . " name=issue file=" . issue["filename"]
-    "endfor
-	"python if actions == False: vim.command("return 0")
-
-	"let option=nr2char(getchar())
-	"if option < '0' || option > '9'
-		"return 1
-	"endif
-
-	"python runCodeIssue("option")
+function! OmniSharp#FixIssue()
+	python fixCodeIssue()
 endfunction
 
 function! OmniSharp#FindSyntaxErrors()
+    if pumvisible()
+        return b:syntaxerrors
+    endif
 	if bufname('%') == ''
 		return
 	endif
 	let loc_taglist = []
 	python findSyntaxErrors("loc_taglist")
-
-	" Place the tags in the location-list window, if possible
-	if len(loc_taglist) > 0
-		call setloclist(0, loc_taglist)
-		lopen 4
-	else
-		lclose
-	endif
+    let b:syntaxerrors = loc_taglist
+    return loc_taglist
 endfunction
 
 " Jump to first scratch window visible in current tab, or create it.
@@ -166,9 +151,9 @@ endfunction
 
 function! OmniSharp#TypeLookup(includeDocumentation)
 	let type = ""
-	python typeLookup("type")
 
 	if g:OmniSharp_typeLookupInPreview || a:includeDocumentation == 'True'
+        python typeLookup("type")
 		call s:GoScratch()
 		python vim.current.window.height = 5
 		set modifiable
@@ -176,8 +161,20 @@ function! OmniSharp#TypeLookup(includeDocumentation)
 		set nomodifiable
 		"Return to original window
 		wincmd p
-	else
-		echo type
+    else
+		let line = line('.')
+        let found_line_in_loc_list = 0
+        SyntasticSetLoclist
+        for issue in getloclist(0)
+            if(issue['lnum'] == line)
+                let found_line_in_loc_list = 1
+                break
+            endif
+        endfor
+        if(found_line_in_loc_list == 0)
+            python typeLookup("type")
+            echo type
+        endif
 	endif
 endfunction
 

@@ -85,6 +85,7 @@ def populateQuickFix(ret, quickfixes):
     command_base = ("add(" + ret + ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
     if(quickfixes != None):
         for quickfix in quickfixes:
+            quickfix["Text"] = quickfix["Text"].replace("'", "''")
             quickfix["FileName"] = os.path.relpath(quickfix["FileName"])
             try:
                 command = command_base % quickfix
@@ -143,6 +144,9 @@ def runCodeAction(option):
     parameters['codeaction'] = vim.eval(option)
     js = getResponse('/runcodeaction', parameters);
     text = json.loads(js)['Text']
+    setBufferText(text)
+
+def setBufferText(text):
     if(text == None):
         return
     lines = text.splitlines()
@@ -151,6 +155,11 @@ def runCodeAction(option):
     lines = [line.encode('utf-8') for line in lines]
     vim.current.buffer[:] = lines
     vim.current.window.cursor = cursor
+
+def fixCodeIssue():
+    js = getResponse('/fixcodeissue');
+    text = json.loads(js)['Text']
+    setBufferText(text)
 
 def getCodeIssues(ret):
     js = getResponse('/getcodeissues')
