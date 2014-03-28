@@ -231,8 +231,8 @@ set hidden
 
 #####TODO
 
-- Code Issues - Highlight potential problems / possible improvements in your code
 - Extract method
+- Move type to own file
 
 Pull requests welcome!
 
