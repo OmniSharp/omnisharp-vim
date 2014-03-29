@@ -195,6 +195,7 @@ nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
 
 " Get Code Issues and syntax errors
+let g:syntastic_cs_checkers = ['syntax', 'issues']
 autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
 
 "show type information automatically when the cursor stops moving
