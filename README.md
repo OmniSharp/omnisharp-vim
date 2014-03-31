@@ -208,7 +208,9 @@ autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
 
 "show type information automatically when the cursor stops moving
 autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+" this setting controls how long to pause (in ms) before fetching type / symbol information.
 set updatetime=500
+" Remove 'Press Enter to continue' message when type information is longer than one line.
 set cmdheight=2
 
 "I find contextual code actions so useful that I have it mapped to the spacebar
@@ -242,6 +244,7 @@ set hidden
 
 - Extract method
 - Move type to own file
+- Unite plugin for find types / symbols
 
 Pull requests welcome!
 
