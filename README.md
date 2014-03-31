@@ -93,17 +93,21 @@ Verify that Python is working inside Vim with
 ```
 
 ###Install vim-dispatch
-The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically. 
+The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically and for running asynchronous builds.
 Use your favourite way to install it.
 
 ###Install syntastic
 The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
-## How to use (read: run the server)
+## How to use
 
 By default, the server is started automatically if you have vim-dispatch installed when you open a .cs file.
 It tries to detect your solution file (.sln) and starts the OmniSharp server passing the path to the solution file.
+
+If you are using Tmux, the server will start in a new tmux session. In iterm2, a new tab is opened. Windows starts the server with a minimised cmd shell. For any other configuration, the server will start invisibly in the background. 
+
+
 This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in your vimrc.
 
 When your close vim, and the omnisharp server is running, vim will ask you if you want to stop the OmniSharp server.
@@ -113,6 +117,7 @@ You can alternatively start the Omnisharp server manually:
 
 	[mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
 
+Add ``` -v Verbose``` to get extra information from the server.
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
