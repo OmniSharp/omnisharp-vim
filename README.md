@@ -92,15 +92,15 @@ Verify that Python is working inside Vim with
 :python print "hi"
 ```
 
-###Install vim-dispatch
+###(optional) Install vim-dispatch
 The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically and for running asynchronous builds.
 Use your favourite way to install it.
 
-###Install syntastic
+###(optional) Install syntastic
 The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
-###Install ctrl-p
+###(optional) Install ctrl-p
 [CtrlP](https://github.com/kien/ctrlp.vim) is needed if you want to use the Find Type and Find Symbol features.
 
 ## How to use
