@@ -100,6 +100,9 @@ Use your favourite way to install it.
 The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
+###Install ctrl-p
+[CtrlP](https://github.com/kien/ctrlp.vim) is needed if you want to use the Find Type and Find Symbol features.
+
 ## How to use
 
 By default, the server is started automatically if you have vim-dispatch installed when you open a .cs file.
