@@ -155,6 +155,9 @@ let g:OmniSharp_host = "http://localhost:2000"
 "Set the type lookup function to use the preview window instead of the status line
 "let g:OmniSharp_typeLookupInPreview = 1
 
+"Timeout in seconds to wait for a response from the server
+let g:OmniSharp_timeout = 1
+
 "Showmatch significantly slows down omnicomplete
 "when the first match contains parentheses.
 set noshowmatch
