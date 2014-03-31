@@ -184,14 +184,13 @@ set completeopt=longest,menuone,preview
 set splitbelow
 
 " Synchronous build (blocks Vim)
-"nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
+"autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
 " Builds can also run asynchronously with vim-dispatch installed
-nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
+autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
 
 "The following commands are contextual, based on the current cursor position.
 
-nnoremap <F12> :OmniSharpGotoDefinition<cr>
-nnoremap gd :OmniSharpGotoDefinition<cr>
+autocmd FileType cs nnoremap gd :OmniSharpGotoDefinition<cr>
 nnoremap <leader>fi :OmniSharpFindImplementations<cr>
 nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
