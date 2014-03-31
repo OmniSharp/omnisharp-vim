@@ -164,13 +164,15 @@ function! OmniSharp#TypeLookup(includeDocumentation)
     else
 		let line = line('.')
         let found_line_in_loc_list = 0
-        SyntasticSetLoclist
-        for issue in getloclist(0)
-            if(issue['lnum'] == line)
-                let found_line_in_loc_list = 1
-                break
-            endif
-        endfor
+        if exists(':SyntasticCheck')
+            SyntasticSetLoclist
+            for issue in getloclist(0)
+                if(issue['lnum'] == line)
+                    let found_line_in_loc_list = 1
+                    break
+                endif
+            endfor
+        endif
         if(found_line_in_loc_list == 0)
             python typeLookup("type")
             echo type
