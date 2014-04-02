@@ -210,6 +210,7 @@ function! OmniSharp#BuildAsync()
 		let b:omnisharp_gotmakeprg = 1
 	endif
 	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
+    echo &l:makeprg
 	Make
 endfunction
 

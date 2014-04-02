@@ -130,7 +130,8 @@ def openFile(filename, line, column):
     vim.command("call OmniSharp#JumpToLocation('%(filename)s', %(line)s, %(column)s)" % locals())
 
 def getCodeActions():
-    js = getResponse('/getcodeactions')
+    parameters = codeActionParameters()
+    js = getResponse('/getcodeactions', parameters)
     if(js != ''):
         actions = json.loads(js)['CodeActions']
         for index, action in enumerate(actions):
@@ -140,11 +141,21 @@ def getCodeActions():
     return False
 
 def runCodeAction(option):
-    parameters = {}
+    parameters = codeActionParameters()
     parameters['codeaction'] = vim.eval(option)
     js = getResponse('/runcodeaction', parameters);
     text = json.loads(js)['Text']
     setBufferText(text)
+
+def codeActionParameters():
+    parameters = {}
+    start = vim.eval('getpos("\'<")')
+    end = vim.eval('getpos("\'>")')
+    parameters['SelectionStartLine'] = start[1]
+    parameters['SelectionStartColumn'] = start[2]
+    parameters['SelectionEndLine'] = end[1]
+    parameters['SelectionEndColumn'] = end[2]
+    return parameters;
 
 def setBufferText(text):
     if(text == None):
