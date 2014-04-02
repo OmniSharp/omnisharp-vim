@@ -73,7 +73,7 @@ endfunction
 function! OmniSharp#JumpToLocation(filename, line, column)
     if(a:filename != '')
         if a:filename != bufname('%')
-            exec 'e ' . fnameescape(a:filename)
+            exec 'e! ' . fnameescape(a:filename)
         endif
         "row is 1 based, column is 0 based
         call cursor(a:line, a:column)
@@ -204,11 +204,8 @@ function! OmniSharp#Build()
 endfunction
 
 function! OmniSharp#BuildAsync()
-	if !exists("b:omnisharp_gotmakeprg")
-		python buildcommand()
-		let &l:makeprg=b:buildcommand
-		let b:omnisharp_gotmakeprg = 1
-	endif
+    python buildcommand()
+    let &l:makeprg=b:buildcommand
 	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
     echo &l:makeprg
 	Make
