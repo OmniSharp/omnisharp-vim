@@ -28,6 +28,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.)
+    * Extract method
 * Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
 * Rename refactoring
 * Semantic type highlighting
@@ -215,8 +216,10 @@ set updatetime=500
 " Remove 'Press Enter to continue' message when type information is longer than one line.
 set cmdheight=2
 
-"I find contextual code actions so useful that I have it mapped to the spacebar
-nnoremap <space> :OmniSharpGetCodeActions<cr>
+" Contextual code actions 
+nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
+" Run code actions with text selected in visual mode to extract method
+vnoremap <leader><space> :OmniSharpGetCodeActions<cr>
 
 " rename with dialog
 nnoremap <leader>nm :OmniSharpRename<cr>
