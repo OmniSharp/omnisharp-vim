@@ -1,9 +1,9 @@
 " Load guard
-if ( exists('g:loaded_ctrlp_findtype') && g:loaded_ctrlp_findtype )
-	\ || v:version < 700 || &cp
-	finish
-endif
-let g:loaded_ctrlp_findtype = 1
+"if ( exists('g:loaded_ctrlp_findsymbols') && g:loaded_ctrlp_findsymbols )
+"	\ || v:version < 700 || &cp
+"	finish
+"endif
+"let g:loaded_ctrlp_findsymbols = 1
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -36,30 +36,28 @@ let g:loaded_ctrlp_findtype = 1
 " + specinput: enable special inputs '..' and '@cd' (disabled by default)
 "
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'findtype#init()',
-	\ 'accept': 'findtype#accept',
-	\ 'lname': 'Find Types',
-	\ 'sname': 'types',
-	\ 'type': 'tabs',
+	\ 'init': 'findcodeactions#init()',
+	\ 'accept': 'findcodeactions#accept',
+	\ 'lname': 'Find Code Actions',
+	\ 'sname': 'code actions',
+	\ 'type': 'line',
 	\ 'sort': 1,
 	\ })
 
+
+function! findcodeactions#setactions(actions)
+  let s:actions = a:actions
+endfunction
 
 " Provide a list of strings to search in
 "
 " Return: a Vim's List
 "
-function! findtype#init()
-	if !OmniSharp#ServerIsRunning() 
-		return
-	endif
+"
 
-	python findTypes()
-	let types = []
-	for quickfix in s:quickfixes
-		call add(types, quickfix.text)
-	endfor
-	return types
+function! findcodeactions#init()
+  let g:codeactionsinprogress = 1
+  return s:actions
 endfunction
 
 
@@ -70,37 +68,18 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! findtype#accept(mode, str)
-	call findtype#exit()
-	for quickfix in s:quickfixes
-		if quickfix.text == a:str
-			break
-		endif
-	endfor
-  call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
+function! findcodeactions#accept(mode, str)
+  let g:codeactionsinprogress = 0
+  call ctrlp#exit()
+  let s:action = index(s:actions, a:str)
+  python runCodeAction()
 endfunction
-
-
-" (optional) Do something before enterting ctrlp
-function! findtype#enter()
-endfunction
-
-
-" (optional) Do something after exiting ctrlp
-function! findtype#exit()
-endfunction
-
-
-" (optional) Set or check for user options specific to this extension
-function! findtype#opts()
-endfunction
-
 
 " Give the extension an ID
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! findtype#id()
+function! findcodeactions#id()
 	return s:id
 endfunction
 

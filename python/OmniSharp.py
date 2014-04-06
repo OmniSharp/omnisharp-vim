@@ -1,7 +1,4 @@
 import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from SocketServer import ThreadingMixIn
-
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
@@ -10,23 +7,23 @@ log_dir = os.path.join(vim.eval('expand("<sfile>:p:h")'), '..', 'log')
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 hdlr = logging.FileHandler(os.path.join(log_dir, 'python.log'))
-logger.addHandler(hdlr) 
+logger.addHandler(hdlr)
 
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
 
-def getResponse(endPoint, additionalParameters=None, timeout=None ):
+def getResponse(endPoint, additional_parameters=None, timeout=None ):
     parameters = {}
     parameters['line'] = vim.eval('line(".")')
     parameters['column'] = vim.eval('col(".")')
     parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
     parameters['filename'] = vim.current.buffer.name
-    if(additionalParameters != None):
-        parameters.update(additionalParameters)
+    if additional_parameters != None:
+        parameters.update(additional_parameters)
 
-    if(timeout == None):
-        timeout=int(vim.eval('g:OmniSharp_timeout'))
+    if timeout == None:
+        timeout = int(vim.eval('g:OmniSharp_timeout'))
 
     host = vim.eval('g:OmniSharp_host')
 
@@ -42,7 +39,7 @@ def getResponse(endPoint, additionalParameters=None, timeout=None ):
         response = opener.open(target, parameters, timeout)
         vim.command("let g:serverSeenRunning = 1")
         return response.read()
-    except Exception as e:
+    except Exception:
         vim.command("let g:serverSeenRunning = 0")
         return ''
 
@@ -53,18 +50,21 @@ def getCompletions(ret, column, partialWord):
     parameters['column'] = vim.eval(column)
     parameters['wordToComplete'] = vim.eval(partialWord)
 
-    parameters['WantDocumentationForEveryCompletionResult'] = bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
+    parameters['WantDocumentationForEveryCompletionResult'] = \
+        bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
+
     parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
     js = getResponse('/autocomplete', parameters)
 
     command_base = ("add(" + ret +
             ", {'word': '%(CompletionText)s', 'menu': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
     enc = vim.eval('&encoding')
-    if(js != ''):
+    if js != '':
         completions = json.loads(js)
         for completion in completions:
             try:
-                completion['Description'] = completion['Description'].replace('\r\n', '\n')
+                completion['Description'] = \
+                    completion['Description'].replace('\r\n', '\n')
                 command = command_base % completion
                 if type(command) == types.StringType:
                     vim.eval(command)
@@ -82,7 +82,8 @@ def findUsages(ret):
         populateQuickFix(ret, usages)
 
 def populateQuickFix(ret, quickfixes):
-    command_base = ("add(" + ret + ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
+    command_base = ("add(" + ret + \
+        ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
     if(quickfixes != None):
         for quickfix in quickfixes:
             quickfix["Text"] = quickfix["Text"].replace("'", "''")
@@ -96,8 +97,8 @@ def populateQuickFix(ret, quickfixes):
 def findMembers(ret):
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    js = getResponse('/currentfilemembersasflat',parameters)
-    if(js != ''):
+    js = getResponse('/currentfilemembersasflat', parameters)
+    if js != '':
         quickfixes = json.loads(js)
         populateQuickFix(ret, quickfixes)
 
@@ -105,13 +106,11 @@ def findImplementations(ret):
     js = getResponse('/findimplementations')
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    js = getResponse('/findimplementations',parameters)
-    if(js != ''):
+    js = getResponse('/findimplementations', parameters)
+    if js != '':
         usages = json.loads(js)['QuickFixes']
 
-        command_base = ("add(" + ret + 
-                ", {'filename': '%(FileName)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
-        if(len(usages) == 1):
+        if len(usages) == 1:
             usage = usages[0]
             openFile(usage['FileName'], usage['Line'], usage['Column'])
         else:
@@ -132,17 +131,14 @@ def openFile(filename, line, column):
 def getCodeActions():
     parameters = codeActionParameters()
     js = getResponse('/getcodeactions', parameters)
-    if(js != ''):
+    if js != '':
         actions = json.loads(js)['CodeActions']
-        for index, action in enumerate(actions):
-            print "%d :  %s" % (index, action)
-        if len(actions) > 0:
-            return True
-    return False
+        return actions
+    return []
 
-def runCodeAction(option):
+def runCodeAction():
     parameters = codeActionParameters()
-    parameters['codeaction'] = vim.eval(option)
+    parameters['codeaction'] = vim.eval("s:action")
     js = getResponse('/runcodeaction', parameters);
     text = json.loads(js)['Text']
     setBufferText(text)
@@ -155,10 +151,10 @@ def codeActionParameters():
     parameters['SelectionStartColumn'] = start[2]
     parameters['SelectionEndLine'] = end[1]
     parameters['SelectionEndColumn'] = end[2]
-    return parameters;
+    return parameters
 
 def setBufferText(text):
-    if(text == None):
+    if text == None:
         return
     lines = text.splitlines()
 
@@ -193,10 +189,10 @@ def findSyntaxErrors(ret):
                 logger.error(command)
 
 def typeLookup(ret):
-    parameters = {} 
+    parameters = {}
     parameters['includeDocumentation'] = vim.eval('a:includeDocumentation')
     js = getResponse('/typelookup', parameters);
-    if(js != ''):
+    if js != '':
         response = json.loads(js)
         type = response['Type']
         documentation = response['Documentation']
@@ -206,7 +202,7 @@ def typeLookup(ret):
             vim.command("let %s = '%s'" % (ret, type)) 
             vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
-def renameTo(renameTo):
+def renameTo():
     parameters = {} 
     parameters['renameto'] = vim.eval("a:renameto") 
     js = getResponse('/rename', parameters)

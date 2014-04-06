@@ -27,7 +27,7 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 * Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
 * Find implementations/derived types
 * Find usages
-* Contextual code actions (sort usings, use var....etc.)
+* Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
     * Extract method
 * Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
 * Rename refactoring
@@ -102,7 +102,7 @@ The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed f
 Use your favourite way to install it.
 
 ###(optional) Install ctrl-p
-[CtrlP](https://github.com/kien/ctrlp.vim) is needed if you want to use the Find Type and Find Symbol features.
+[CtrlP](https://github.com/kien/ctrlp.vim) is needed if you want to use the Code Actions, Find Type and Find Symbol features.
 
 ## How to use
 
@@ -216,7 +216,7 @@ set updatetime=500
 " Remove 'Press Enter to continue' message when type information is longer than one line.
 set cmdheight=2
 
-" Contextual code actions 
+" Contextual code actions (requires CtrlP)
 nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
 " Run code actions with text selected in visual mode to extract method
 vnoremap <leader><space> :call OmniSharp#GetCodeActions()<cr>

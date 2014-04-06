@@ -5,6 +5,7 @@ let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', '
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let g:serverSeenRunning = 0
+let g:codeactionsinprogress = 0
 let b:issues = [] 
 let b:syntaxerrors = [] 
 
@@ -81,16 +82,19 @@ function! OmniSharp#JumpToLocation(filename, line, column)
 endfunction
 
 function! OmniSharp#GetCodeActions()
-	let actions = []
-	python actions = getCodeActions()
-	python if actions == False: vim.command("return 0")
-
-	let option=nr2char(getchar())
-	if option < '0' || option > '9'
-		return 1
-	endif
-
-	python runCodeAction("option")
+    " I can't figure out how to prevent this method
+    " being called multiple times for each line in
+    " the visual selection. This is a workaround.
+    if g:codeactionsinprogress == 1
+        return
+    endif
+    let actions = pyeval('getCodeActions()')
+    if(len(actions) > 0)
+        call findcodeactions#setactions(actions)
+        call ctrlp#init(findcodeactions#id())
+    else
+        echo 'No code actions found'
+    endif
 endfunction
 
 function! OmniSharp#GetIssues()
@@ -181,15 +185,15 @@ function! OmniSharp#TypeLookup(includeDocumentation)
 endfunction
 
 function! OmniSharp#Rename()
-	let a:renameto = inputdialog("Rename to:", expand('<cword>'))
-	if a:renameto != ''
-		call OmniSharp#RenameTo(a:renameto)
+	let renameto = inputdialog("Rename to:", expand('<cword>'))
+	if renameto != ''
+		call OmniSharp#RenameTo(renameto)
 	endif
 endfunction
 
 function! OmniSharp#RenameTo(renameto)
 	let qf_taglist = []
-	python renameTo(renameTo)
+	python renameTo()
 endfunction
 
 function! OmniSharp#Build()
@@ -426,7 +430,7 @@ function! OmniSharp#AppendCtrlPExtensions()
 	endif
 	if !exists("g:OmniSharp_ctrlp_extensions_added")
 		let g:OmniSharp_ctrlp_extensions_added = 1
-		let g:ctrlp_extensions += ['findtype', 'findsymbols']
+		let g:ctrlp_extensions += ['findtype', 'findsymbols', 'findcodeactions']
 	endif
 endfunction
 

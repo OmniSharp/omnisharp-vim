@@ -72,6 +72,7 @@ endfunction
 "  a:str    the selected string
 "
 function! findsymbols#accept(mode, str)
+  call ctrlp#exit()
 	for quickfix in s:quickfixes
 		if quickfix.text == a:str
 			break
