@@ -90,7 +90,7 @@ For example, if you installed Vim using the default Windows installer, you will 
 Verify that Python is working inside Vim with 
 
 ```vim
-:python print "hi"
+:echo has('python')
 ```
 
 ###(optional) Install vim-dispatch
