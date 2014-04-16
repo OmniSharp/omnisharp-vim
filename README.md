@@ -69,19 +69,22 @@ completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/
 [pathogen.vim](https://github.com/tpope/vim-pathogen) is the recommended way to install OmniSharp.
 
 ####OSX / Linux
+Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
+    
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule update --init
+    git submodule update --init --recursive
     cd Omnisharp/server
-    xbuild /p:Platform="Any CPU"
+    xbuild
 
 ####Windows
+    
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
-    git submodule update --init
+    git submodule update --init --recursive
     cd Omnisharp\server
-    msbuild /p:Platform="Any CPU"
+    msbuild
 
 ###Install Python
 Install [Python 2.7.5] (http://www.python.org/download/releases/2.7.5/). Make sure that you pick correct version of Python to match the architecture of Vim. 
