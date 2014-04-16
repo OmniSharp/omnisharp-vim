@@ -12,7 +12,6 @@ logger.addHandler(hdlr)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
-
 def getResponse(endPoint, additional_parameters=None, timeout=None ):
     parameters = {}
     parameters['line'] = vim.eval('line(".")')
@@ -128,29 +127,31 @@ def gotoDefinition():
 def openFile(filename, line, column):
     vim.command("call OmniSharp#JumpToLocation('%(filename)s', %(line)s, %(column)s)" % locals())
 
-def getCodeActions():
-    parameters = codeActionParameters()
+def getCodeActions(mode):
+    parameters = codeActionParameters(mode)
     js = getResponse('/getcodeactions', parameters)
     if js != '':
         actions = json.loads(js)['CodeActions']
         return actions
     return []
 
-def runCodeAction():
-    parameters = codeActionParameters()
+def runCodeAction(mode):
+    parameters = codeActionParameters(mode)
     parameters['codeaction'] = vim.eval("s:action")
     js = getResponse('/runcodeaction', parameters);
     text = json.loads(js)['Text']
     setBufferText(text)
+    return True
 
-def codeActionParameters():
+def codeActionParameters(mode):
     parameters = {}
-    start = vim.eval('getpos("\'<")')
-    end = vim.eval('getpos("\'>")')
-    parameters['SelectionStartLine'] = start[1]
-    parameters['SelectionStartColumn'] = start[2]
-    parameters['SelectionEndLine'] = end[1]
-    parameters['SelectionEndColumn'] = end[2]
+    if mode == 'visual':
+        start = vim.eval('getpos("\'<")')
+        end = vim.eval('getpos("\'>")')
+        parameters['SelectionStartLine'] = start[1]
+        parameters['SelectionStartColumn'] = start[2]
+        parameters['SelectionEndLine'] = end[1]
+        parameters['SelectionEndColumn'] = end[2]
     return parameters
 
 def setBufferText(text):
@@ -294,4 +295,5 @@ def lookupAllUserTypes():
         if (response != None):
             vim.command("let s:allUserTypes = '%s'" % (response['Types']))
             vim.command("let s:allUserInterfaces = '%s'" % (response['Interfaces']))
+
 

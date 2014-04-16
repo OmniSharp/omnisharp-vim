@@ -45,8 +45,9 @@ call add(g:ctrlp_ext_vars, {
 	\ })
 
 
-function! findcodeactions#setactions(actions)
+function! findcodeactions#setactions(mode, actions)
   let s:actions = a:actions
+  let s:mode = a:mode
 endfunction
 
 " Provide a list of strings to search in
@@ -72,7 +73,7 @@ function! findcodeactions#accept(mode, str)
   let g:codeactionsinprogress = 0
   call ctrlp#exit()
   let s:action = index(s:actions, a:str)
-  python runCodeAction()
+  let res = pyeval("runCodeAction('" . s:mode . "')")
 endfunction
 
 " Give the extension an ID

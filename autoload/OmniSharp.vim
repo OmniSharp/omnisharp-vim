@@ -81,16 +81,17 @@ function! OmniSharp#JumpToLocation(filename, line, column)
     endif
 endfunction
 
-function! OmniSharp#GetCodeActions()
+function! OmniSharp#GetCodeActions(mode)
     " I can't figure out how to prevent this method
     " being called multiple times for each line in
     " the visual selection. This is a workaround.
     if g:codeactionsinprogress == 1
         return
     endif
-    let actions = pyeval('getCodeActions()')
+    let actions = pyeval('getCodeActions("' . a:mode . '")')
+    echo actions
     if(len(actions) > 0)
-        call findcodeactions#setactions(actions)
+        call findcodeactions#setactions(a:mode, actions)
         call ctrlp#init(findcodeactions#id())
     else
         echo 'No code actions found'

@@ -219,7 +219,7 @@ set cmdheight=2
 " Contextual code actions (requires CtrlP)
 nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
 " Run code actions with text selected in visual mode to extract method
-vnoremap <leader><space> :call OmniSharp#GetCodeActions()<cr>
+vnoremap <leader><space> :call OmniSharp#GetCodeActions('visual')<cr>
 
 " rename with dialog
 nnoremap <leader>nm :OmniSharpRename<cr>
