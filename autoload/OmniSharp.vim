@@ -89,7 +89,6 @@ function! OmniSharp#GetCodeActions(mode)
         return
     endif
     let actions = pyeval('getCodeActions("' . a:mode . '")')
-    echo actions
     if(len(actions) > 0)
         call findcodeactions#setactions(a:mode, actions)
         call ctrlp#init(findcodeactions#id())
