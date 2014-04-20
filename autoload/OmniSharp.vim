@@ -97,8 +97,10 @@ function! OmniSharp#GetIssues()
         return b:issues
     endif
 	let issues = []
-	python getCodeIssues("issues")
-    let b:issues = issues
+	if g:serverSeenRunning == 1
+        python getCodeIssues("issues")
+        let b:issues = issues
+    endif
     return issues
 endfunction
 
@@ -114,8 +116,10 @@ function! OmniSharp#FindSyntaxErrors()
 		return
 	endif
 	let loc_taglist = []
-	python findSyntaxErrors("loc_taglist")
-    let b:syntaxerrors = loc_taglist
+	if g:serverSeenRunning == 1
+        python findSyntaxErrors("loc_taglist")
+        let b:syntaxerrors = loc_taglist
+    endif
     return loc_taglist
 endfunction
 
