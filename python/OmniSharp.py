@@ -255,7 +255,6 @@ def findThings(js):
             l = []
             if(quickfixes != None):
                 for quickfix in quickfixes:
-                    quickfix["FileName"] = os.path.relpath(quickfix["FileName"])
                     l.append(command_base % quickfix)
                 vim_quickfixes = "[" + ",".join(l) + "]"
                 vim.command("let s:quickfixes = " + vim_quickfixes)
