@@ -1,4 +1,5 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types
+import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types, threading
+import asyncrequest
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
@@ -12,7 +13,8 @@ logger.addHandler(hdlr)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
-def getResponse(endPoint, additional_parameters=None, timeout=None ):
+
+def getResponse(endPoint, additional_parameters=None, timeout=None):
     parameters = {}
     parameters['line'] = vim.eval('line(".")')
     parameters['column'] = vim.eval('col(".")')
@@ -40,37 +42,7 @@ def getResponse(endPoint, additional_parameters=None, timeout=None ):
         return response.read()
     except Exception:
         vim.command("let g:serverSeenRunning = 0")
-        return ''
-
-
-#All of these functions take vim variable names as parameters
-def getCompletions(ret, column, partialWord):
-    parameters = {}
-    parameters['column'] = vim.eval(column)
-    parameters['wordToComplete'] = vim.eval(partialWord)
-
-    parameters['WantDocumentationForEveryCompletionResult'] = \
-        bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
-
-    parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
-    js = getResponse('/autocomplete', parameters)
-
-    command_base = ("add(" + ret +
-            ", {'word': '%(CompletionText)s', 'menu': '%(DisplayText)s', 'info': \"%(Description)s\", 'icase': 1, 'dup':1 })")
-    enc = vim.eval('&encoding')
-    if js != '':
-        completions = json.loads(js)
-        for completion in completions:
-            try:
-                completion['Description'] = \
-                    completion['Description'].replace('\r\n', '\n')
-                command = command_base % completion
-                if type(command) == types.StringType:
-                    vim.eval(command)
-                else:
-                    vim.eval(command.encode(enc))
-            except:
-                logger.error(command)
+        return None
 
 def findUsages(ret):
     parameters = {}

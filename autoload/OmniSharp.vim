@@ -23,12 +23,7 @@ function! OmniSharp#Complete(findstart, base)
 
 		return start
 	else
-		let words=[]
-		python getCompletions("words", "s:column", "a:base")
-		if len(words) == 0
-			return -3
-		endif
-		return words
+		return pyeval('Completion().get_completions("s:column", "a:base")')
 	endif
 endfunction
 
