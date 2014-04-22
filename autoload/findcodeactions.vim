@@ -38,6 +38,7 @@
 call add(g:ctrlp_ext_vars, {
 	\ 'init': 'findcodeactions#init()',
 	\ 'accept': 'findcodeactions#accept',
+	\ 'exit': 'findcodeactions#exit()',
 	\ 'lname': 'Find Code Actions',
 	\ 'sname': 'code actions',
 	\ 'type': 'line',
@@ -74,6 +75,10 @@ function! findcodeactions#accept(mode, str)
   call ctrlp#exit()
   let s:action = index(s:actions, a:str)
   let res = pyeval("runCodeAction('" . s:mode . "')")
+endfunction
+
+function! findcodeactions#exit()
+  let g:codeactionsinprogress = 0
 endfunction
 
 " Give the extension an ID
