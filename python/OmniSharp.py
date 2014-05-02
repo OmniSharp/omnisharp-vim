@@ -92,7 +92,7 @@ def gotoDefinition():
     if(js != ''):
         definition = json.loads(js)
         if(definition['FileName'] != None):
-            openFile(definition['FileName'], definition['Line'], definition['Column'])
+            openFile(definition['FileName'].replace("'","''"), definition['Line'], definition['Column'])
         else:
             print "Not found"
 
