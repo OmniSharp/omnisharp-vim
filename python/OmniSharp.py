@@ -42,7 +42,7 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
         return response.read()
     except Exception:
         vim.command("let g:serverSeenRunning = 0")
-        return None
+        return ''
 
 def findUsages(ret):
     parameters = {}
@@ -147,20 +147,6 @@ def getCodeIssues(ret):
         issues = json.loads(js)["QuickFixes"]
         populateQuickFix(ret, issues)
 
-def findSyntaxErrors(ret):
-    js = getResponse('/syntaxerrors')
-    if(js != ''):
-        errors = json.loads(js)['Errors']
-
-        command_base = ("add(" + ret +
-                ", {'filename': '%(FileName)s', 'text': '%(Message)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
-        for err in errors:
-            try:
-                command = command_base % err
-                vim.eval(command)
-            except:
-                logger.error(command)
-
 def typeLookup(ret):
     parameters = {}
     parameters['includeDocumentation'] = vim.eval('a:includeDocumentation')
@@ -234,36 +220,49 @@ def addReference():
     parameters = {}
     parameters["reference"] = vim.eval("a:ref")
     js = getResponse("/addreference", parameters)
-    if(js != ''):
+    if js != '':
         message = json.loads(js)['Message']
         print message
 
+def findSyntaxErrors():
+    js = getResponse('/syntaxerrors')
+    return get_quickfix_list(js, 'Errors')
+
 def findTypes():
     js = getResponse('/findtypes')
-    findThings(js)
+    return get_quickfix_list(js, 'QuickFixes')
 
 def findSymbols():
     js = getResponse('/findsymbols')
-    findThings(js)
+    return get_quickfix_list(js, 'QuickFixes')
 
-def findThings(js):
-    if (js != ''):
+def get_quickfix_list(js, key):
+    items = []
+    if js != '':
         response = json.loads(js)
-        if (response != None):
-            quickfixes = response['QuickFixes']
-            command_base = "{'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'}"
-            l = []
-            if(quickfixes != None):
-                for quickfix in quickfixes:
-                    l.append(command_base % quickfix)
-                vim_quickfixes = "[" + ",".join(l) + "]"
-                vim.command("let s:quickfixes = " + vim_quickfixes)
+        if response is not None:
+            for quickfix in response[key]:
+                if 'Text' in quickfix:
+                    text = quickfix['Text']
+                #syntax errors returns 'Message' instead of 'Text'. I need to sort this out.
+                if 'Message' in quickfix:
+                    text = quickfix['Message']
+
+                item = {
+                    'filename': quickfix['FileName'],
+                    'text': text,
+                    'lnum': quickfix['Line'],
+                    'col': quickfix['Column']
+                }
+                items.append(item)
+
+    return items
 
 def lookupAllUserTypes():
     js = getResponse('/lookupalltypes')
-    if (js != ''):
+    if js != '':
         response = json.loads(js)
-        if (response != None):
+        if response != None:
             vim.command("let s:allUserTypes = '%s'" % (response['Types']))
             vim.command("let s:allUserInterfaces = '%s'" % (response['Interfaces']))
 

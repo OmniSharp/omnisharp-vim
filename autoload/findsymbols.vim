@@ -55,7 +55,7 @@ function! findsymbols#init()
 		return
 	endif
 
-	python findSymbols()
+	let s:quickfixes = pyeval("findSymbols()")
 	let symbols = []
 	for quickfix in s:quickfixes
 		call add(symbols, quickfix.text)
@@ -78,6 +78,7 @@ function! findsymbols#accept(mode, str)
 			break
 		endif
 	endfor
+  echo quickfix.filename
 	call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
 endfunction
 

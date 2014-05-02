@@ -54,7 +54,7 @@ function! findtype#init()
 		return
 	endif
 
-	python findTypes()
+	let s:quickfixes = pyeval("findTypes()")
 	let types = []
 	for quickfix in s:quickfixes
 		call add(types, quickfix.text)

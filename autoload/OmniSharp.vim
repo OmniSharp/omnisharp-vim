@@ -115,12 +115,10 @@ function! OmniSharp#FindSyntaxErrors()
 	if bufname('%') == ''
 		return
 	endif
-	let loc_taglist = []
 	if g:serverSeenRunning == 1
-        python findSyntaxErrors("loc_taglist")
-        let b:syntaxerrors = loc_taglist
+        let b:syntaxerrors = pyeval("findSyntaxErrors()")
     endif
-    return loc_taglist
+    return b:syntaxerrors
 endfunction
 
 " Jump to first scratch window visible in current tab, or create it.
