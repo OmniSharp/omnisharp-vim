@@ -190,8 +190,7 @@ function! OmniSharp#RenameTo(renameto)
 endfunction
 
 function! OmniSharp#Build()
-	let qf_taglist = []
-	python build("qf_taglist")
+    let qf_taglist = pyeval("build()")
 
 	" Place the tags in the quickfix window, if possible
 	if len(qf_taglist) > 0

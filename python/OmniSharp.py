@@ -177,8 +177,7 @@ def build(ret):
     else:
         print "Build failed"
 
-    quickfixes = response['QuickFixes']
-    populateQuickFix(ret, quickfixes)
+    return get_quickfix_list(js, 'QuickFixes')
 
 def buildcommand():
     vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
