@@ -51,8 +51,7 @@ function! OmniSharp#FindImplementations()
 endfunction
 
 function! OmniSharp#FindMembers()
-	let qf_taglist = []
-	python findMembers("qf_taglist")
+	let qf_taglist = pyeval("findMembers()")
 
 	" Place the tags in the quickfix window, if possible
 	if len(qf_taglist) > 1
@@ -95,12 +94,10 @@ function! OmniSharp#GetIssues()
     if pumvisible()
         return b:issues
     endif
-	let issues = []
 	if g:serverSeenRunning == 1
-        python getCodeIssues("issues")
-        let b:issues = issues
+        let b:issues = pyeval("getCodeIssues()")
     endif
-    return issues
+    return b:issues
 endfunction
 
 function! OmniSharp#FixIssue()

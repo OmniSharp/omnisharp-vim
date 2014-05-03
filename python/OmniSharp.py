@@ -50,13 +50,11 @@ def findUsages():
     js = getResponse('/findusages', parameters)
     return get_quickfix_list(js, 'QuickFixes')
 
-def findMembers(ret):
+def findMembers():
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/currentfilemembersasflat', parameters)
-    if js != '':
-        quickfixes = json.loads(js)
-        populateQuickFix(ret, quickfixes)
+    return get_quickfix_list(js, 'QuickFixes')
 
 def findImplementations(ret):
     js = getResponse('/findimplementations')
@@ -126,11 +124,9 @@ def fixCodeIssue():
     text = json.loads(js)['Text']
     setBufferText(text)
 
-def getCodeIssues(ret):
+def getCodeIssues():
     js = getResponse('/getcodeissues')
-    if(js != ''):
-        issues = json.loads(js)["QuickFixes"]
-        populateQuickFix(ret, issues)
+    return get_quickfix_list(js, 'QuickFixes')
 
 def typeLookup(ret):
     parameters = {}
