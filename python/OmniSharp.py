@@ -44,26 +44,11 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
         vim.command("let g:serverSeenRunning = 0")
         return ''
 
-def findUsages(ret):
+def findUsages():
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/findusages', parameters)
-    if(js != ''):
-        usages = json.loads(js)['QuickFixes']
-        populateQuickFix(ret, usages)
-
-def populateQuickFix(ret, quickfixes):
-    command_base = ("add(" + ret + \
-        ", {'filename': '%(FileName)s', 'text': '%(Text)s', 'lnum': '%(Line)s', 'col': '%(Column)s'})")
-    if(quickfixes != None):
-        for quickfix in quickfixes:
-            quickfix["Text"] = quickfix["Text"].replace("'", "''")
-            quickfix["FileName"] = os.path.relpath(quickfix["FileName"])
-            try:
-                command = command_base % quickfix
-                vim.eval(command)
-            except:
-                logger.error(command)
+    return get_quickfix_list(js, 'QuickFixes')
 
 def findMembers(ret):
     parameters = {}

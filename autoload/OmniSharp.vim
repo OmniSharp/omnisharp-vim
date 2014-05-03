@@ -28,8 +28,7 @@ function! OmniSharp#Complete(findstart, base)
 endfunction
 
 function! OmniSharp#FindUsages()
-	let qf_taglist = []
-	python findUsages("qf_taglist")
+	let qf_taglist = pyeval('findUsages()')
 
 	" Place the tags in the quickfix window, if possible
 	if len(qf_taglist) > 0
