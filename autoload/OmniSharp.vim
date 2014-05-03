@@ -40,10 +40,17 @@ function! OmniSharp#FindUsages()
 endfunction
 
 function! OmniSharp#FindImplementations()
-	let qf_taglist = []
-	python findImplementations("qf_taglist")
+	let qf_taglist = pyeval("findImplementations()")
 
-	" Place the tags in the quickfix window, if possible
+	if len(qf_taglist) == 0
+        echo "No implementations found"
+    endif 
+
+	if len(qf_taglist) == 1
+        let usage = qf_taglist[0]
+        call OmniSharp#JumpToLocation(usage.filename, usage.lnum, usage.col)
+    endif
+
 	if len(qf_taglist) > 1
 		call setqflist(qf_taglist)
 		copen 4

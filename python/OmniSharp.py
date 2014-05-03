@@ -56,19 +56,12 @@ def findMembers():
     js = getResponse('/currentfilemembersasflat', parameters)
     return get_quickfix_list(js, 'QuickFixes')
 
-def findImplementations(ret):
+def findImplementations():
     js = getResponse('/findimplementations')
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/findimplementations', parameters)
-    if js != '':
-        usages = json.loads(js)['QuickFixes']
-
-        if len(usages) == 1:
-            usage = usages[0]
-            openFile(usage['FileName'], usage['Line'], usage['Column'])
-        else:
-            populateQuickFix(ret, usages)
+    return get_quickfix_list(js, 'QuickFixes')
 
 def gotoDefinition():
     js = getResponse('/gotodefinition');
