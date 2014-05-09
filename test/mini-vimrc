@@ -1,0 +1,16 @@
+set nocompatible
+filetype off
+
+" Assuming that plugins are installed under ~/.vim/bundle
+
+" Dependency to vader.vim
+set rtp^=~/.vim/bundle/vader.vim
+
+" The plugin under test
+set rtp^=~/.vim/bundle/Omnisharp
+set rtp^=~/.vim/bundle/vim-dispatch
+
+" Enable loading plugins and indent files for specific file types
+filetype plugin indent on
+syntax on
+set cmdheight=3

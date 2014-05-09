@@ -1,0 +1,21 @@
+Include: startserver.vader
+
+Given (cs):
+  public class Test
+  {
+    public Test()
+    {
+    }
+  }
+
+Execute (rename constructor):
+  call search("Test()")
+  call OmniSharp#RenameTo("Renamed")
+
+Expect (should rename class):
+  public class Renamed
+  {
+    public Renamed()
+    {
+    }
+  }

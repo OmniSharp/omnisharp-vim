@@ -1,0 +1,15 @@
+Include: startserver.vader
+
+Given (cs):
+  public class Test {
+
+  }
+
+Execute (run code format):
+  OmniSharpCodeFormat
+
+Expect (should format document):
+  public class Test
+  {
+
+  }

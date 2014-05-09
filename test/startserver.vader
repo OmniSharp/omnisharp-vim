@@ -1,0 +1,7 @@
+Execute (start server):
+  e! ../server/OmniSharp.Tests/Solution/minimal/minimal/test.cs
+  let i = 1
+  while i < 20 && pyeval('getResponse("/checkreadystatus")') != 'true'
+    sleep 100m
+    let i += 1
+  endwhile

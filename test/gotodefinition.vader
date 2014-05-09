@@ -1,0 +1,17 @@
+Include: startserver.vader
+
+Given (cs):
+  public class Test
+  {
+    int i;
+    public Test()
+    {
+      i = 0;
+    }
+
+  }
+
+Execute (go to definition):
+  call search("i = 0")
+  OmniSharpGotoDefinition
+  AssertEqual line("."), 3 
