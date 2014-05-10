@@ -7,9 +7,9 @@ OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of cu
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
-[Emacs](https://github.com/sp3ctum/omnisharp-emacs) and 
-[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) both have completion plugins utilising the OmniSharp server.
+completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
+[Emacs](https://github.com/sp3ctum/omnisharp-emacs),
+[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) and [Sublime Text 3](https://github.com/moonrabbit/OmniSharpSublime) all have completion plugins utilising the OmniSharp server.
 
 ##Features
 
@@ -121,7 +121,7 @@ This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in 
 When your close vim, and the omnisharp server is running, vim will ask you if you want to stop the OmniSharp server.
 This behaviour can be disabled by setting `let g:Omnisharp_stop_server = 0` in your vimrc.
 
-You can alternatively start the Omnisharp server manually:
+Alternatively, you can start the Omnisharp server manually:
 
 	[mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
 
@@ -251,7 +251,6 @@ set hidden
 
 #####TODO
 
-- Extract method
 - Move type to own file
 - Unite plugin for find types / symbols
 
