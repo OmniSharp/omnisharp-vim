@@ -147,7 +147,13 @@ YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux
 
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
-To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
+To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
+
+### Other useful tools
+
+- [grunt-init-csharpsolution](https://github.com/nosami/grunt-init-csharpsolution) Useful for quickly creating a C# solution with a couple of projects. Easily adaptable.
+- [WarmUp](https://github.com/chucknorris/warmup/issues) Same as above, but it didn't work for me on OSX when I tried.
+- [OpenIDE](https://github.com/continuoustests/OpenIDE) Lots of uses. I use it for creating new project files and generating classes with the namespace and class pre-populated. It's very extensible.
 
 ##Configuration
 
