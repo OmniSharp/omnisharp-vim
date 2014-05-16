@@ -7,9 +7,9 @@ OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of cu
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop/SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
-[Emacs](https://github.com/sp3ctum/omnisharp-emacs) and 
-[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) both have completion plugins utilising the OmniSharp server.
+completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
+[Emacs](https://github.com/sp3ctum/omnisharp-emacs),
+[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) and [Sublime Text 3](https://github.com/moonrabbit/OmniSharpSublime) all have completion plugins utilising the OmniSharp server.
 
 ##Features
 
@@ -121,7 +121,7 @@ This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in 
 When your close vim, and the omnisharp server is running, vim will ask you if you want to stop the OmniSharp server.
 This behaviour can be disabled by setting `let g:Omnisharp_stop_server = 0` in your vimrc.
 
-You can alternatively start the Omnisharp server manually:
+Alternatively, you can start the Omnisharp server manually:
 
 	[mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
 
@@ -147,7 +147,13 @@ YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux
 
 Simple syntax error highlighting is automatically performed when saving the current buffer.
 
-To use the other features, you'll want to create key bindings for them. See the example vimrc for more info.
+To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
+
+### Other useful tools
+
+- [grunt-init-csharpsolution](https://github.com/nosami/grunt-init-csharpsolution) Useful for quickly creating a C# solution with a couple of projects. Easily adaptable.
+- [WarmUp](https://github.com/chucknorris/warmup/issues) Same as above, but it didn't work for me on OSX when I tried.
+- [OpenIDE](https://github.com/continuoustests/OpenIDE) Lots of uses. I use it for creating new project files and generating classes with the namespace and class pre-populated. It's very extensible.
 
 ##Configuration
 
@@ -251,7 +257,6 @@ set hidden
 
 #####TODO
 
-- Extract method
 - Move type to own file
 - Unite plugin for find types / symbols
 
