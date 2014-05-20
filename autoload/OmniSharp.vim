@@ -222,12 +222,11 @@ function! OmniSharp#RunTests(mode)
 		python getTestCommand()
 	endif
 
-    if exists("g:tmux_sessionname") && exists("g:tmux_windowname") && exists("g:tmux_panenumber")
-		silent! call Send_to_Tmux(b:buildcommand . " && " . s:testcommand . "\<cr>")
-	else
-		call Send_to_Tmux(b:buildcommand . " && " . s:testcommand . "\<cr>")
-	endif
-
+    let s:cmdheight=&cmdheight
+    set cmdheight=5 
+    let b:dispatch = b:buildcommand . " && " . s:testcommand
+    Dispatch
+    let &cmdheight = s:cmdheight
 endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer()
