@@ -29,6 +29,7 @@ command! -buffer -bar OmniSharpFindSyntaxErrors    call OmniSharp#FindSyntaxErro
 command! -buffer -bar OmniSharpFindType            call ctrlp#init(findtype#id())
 command! -buffer -bar OmniSharpFindUsages          call OmniSharp#FindUsages()
 command! -buffer -bar OmniSharpFixIssue            call OmniSharp#FixIssue()
+command! -buffer -bar OmniSharpFixUsings           call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions      call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGotoDefinition      call OmniSharp#GotoDefinition()
 command! -buffer -bar OmniSharpHighlightTypes      call OmniSharp#EnableTypeHighlighting()
@@ -73,6 +74,7 @@ let b:undo_ftplugin .= '
 \|	delcommand OmniSharpFindType
 \|	delcommand OmniSharpFindUsages
 \|	delcommand OmniSharpFixIssue
+\|	delcommand OmniSharpFixUsings
 \|	delcommand OmniSharpGetCodeActions
 \|	delcommand OmniSharpGotoDefinition
 \|	delcommand OmniSharpReloadSolution

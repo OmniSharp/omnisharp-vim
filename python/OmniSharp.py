@@ -189,6 +189,12 @@ def codeFormat():
     response = json.loads(getResponse('/codeformat', parameters))
     setBuffer(response["Buffer"])
 
+def fix_usings():
+    response = getResponse('/fixusings')
+    js = json.loads(response)
+    setBuffer(js["Buffer"])
+    return get_quickfix_list(response, 'AmbiguousResults')
+
 def addReference():
     parameters = {}
     parameters["reference"] = vim.eval("a:ref")
