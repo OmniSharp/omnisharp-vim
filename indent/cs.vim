@@ -19,7 +19,7 @@ function! GetCSIndent()
   let previous_line = getline(v:lnum - 1)
 
   " Hit the start of the file, use zero indent.
-  if a:lnum == 0
+  if v:lnum == 0
     return 0
   endif
 
