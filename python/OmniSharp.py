@@ -219,7 +219,7 @@ def get_quickfix_list(js, key):
     items = []
     if js != '':
         response = json.loads(js)
-        if response is not None:
+        if response[key] is not None:
             for quickfix in response[key]:
                 if 'Text' in quickfix:
                     text = quickfix['Text']
