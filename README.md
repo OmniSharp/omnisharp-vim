@@ -154,7 +154,8 @@ To use the other features, you'll want to create key bindings for them. See the 
 - [grunt-init-csharpsolution](https://github.com/nosami/grunt-init-csharpsolution) Useful for quickly creating a C# solution with a couple of projects. Easily adaptable.
 - [WarmUp](https://github.com/chucknorris/warmup/issues) Same as above, but it didn't work for me on OSX when I tried.
 - [OpenIDE](https://github.com/continuoustests/OpenIDE) Lots of uses. I use it for creating new project files and generating classes with the namespace and class pre-populated. It's very extensible.
-
+- [OrangeT/vim-csharp](https://github.com/OrangeT/vim-csharp) Advanced syntax highlighting including razor support. Contains snippets for Razor, Xunit and Moq. 
+ 
 ##Configuration
 
 ### Example vimrc
