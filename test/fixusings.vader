@@ -1,0 +1,112 @@
+Include: startserver.vader
+
+Given (cs):
+  using System;
+  public class Test
+  {
+
+  }
+
+Execute (run fix usings):
+  OmniSharpFixUsings
+
+Expect (should remove unused using):
+  public class Test
+  {
+
+  }
+
+
+
+Given (cs):
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine("test");
+    }
+  }
+
+Execute (run fix usings):
+  OmniSharpFixUsings
+
+Expect (should remove unused using):
+  using System;
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine("test");
+    }
+  }
+
+
+
+
+Given (cs):
+  using System.Collections.Generic;
+  using System;
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine("test");
+        var l = new List<string>();
+    }
+  }
+
+Execute (run fix usings):
+  OmniSharpFixUsings
+
+Expect (should sort usings):
+  using System;
+  using System.Collections.Generic;
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine("test");
+        var l = new List<string>();
+    }
+  }
+
+
+
+
+Given (cs):
+  public class test {
+      class1 ns1 = new class1();
+  }
+  
+  namespace ns1
+  {
+      public class class1{}
+  }
+  
+  namespace ns2
+  {
+      public class class1{}
+  }
+
+Execute (run fix usings):
+  OmniSharpFixUsings
+
+Expect (should not add ambiguous using):
+  public class test {
+      class1 ns1 = new class1();
+  }
+  
+  namespace ns1
+  {
+      public class class1{}
+  }
+  
+  namespace ns2
+  {
+      public class class1{}
+  }
+
+Execute (should add ambiguous usings to quickfix):
+  call search("i = 0")
+  OmniSharpGotoDefinition
+  AssertEqual line("."), 3 

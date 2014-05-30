@@ -30,6 +30,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 * Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
     * Extract method
 * Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
+* Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
 * Semantic type highlighting
 * Lookup type information of an type/variable/method
@@ -213,6 +214,7 @@ nnoremap <leader>fu :OmniSharpFindUsages<cr>
 nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
 " cursor can be anywhere on the line containing an issue for this one
 nnoremap <leader>x  :OmniSharpFixIssue<cr>
+nnoremap <leader>fx :OmniSharpFixUsings<cr>
 nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
 

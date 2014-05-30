@@ -273,6 +273,15 @@ function! OmniSharp#CodeFormat()
 	python codeFormat()
 endfunction
 
+function! OmniSharp#FixUsings()
+	let qf_taglist = pyeval('fix_usings()')
+
+	if len(qf_taglist) > 0
+		call setqflist(qf_taglist)
+		copen
+	endif
+endfunction
+
 function! OmniSharp#ServerIsRunning()
 	try
 		python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 0.2) + "'");
