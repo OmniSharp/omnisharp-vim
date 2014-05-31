@@ -168,6 +168,7 @@ function! OmniSharp#TypeLookup(includeDocumentation)
     else
 		let line = line('.')
         let found_line_in_loc_list = 0
+        "don't display type lookup if we have a syntastic error
         if exists(':SyntasticCheck')
             SyntasticSetLoclist
             for issue in getloclist(0)
@@ -179,9 +180,13 @@ function! OmniSharp#TypeLookup(includeDocumentation)
         endif
         if(found_line_in_loc_list == 0)
             python typeLookup("type")
-            echo type
+            call OmniSharp#Echo(type)
         endif
 	endif
+endfunction
+
+function! OmniSharp#Echo(message)
+    echo a:message[0:&columns * &cmdheight - 2]
 endfunction
 
 function! OmniSharp#Rename()
@@ -210,7 +215,6 @@ function! OmniSharp#BuildAsync()
     python buildcommand()
     let &l:makeprg=b:buildcommand
 	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
-    echo &l:makeprg
 	Make
 endfunction
 
