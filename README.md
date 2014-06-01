@@ -74,8 +74,9 @@ Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then ch
 ```    
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
+    cd Omnisharp
     git submodule update --init --recursive
-    cd Omnisharp/server
+    cd server
     xbuild
 ```
 ####Windows
@@ -83,8 +84,9 @@ Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then ch
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
+    cd Omnisharp
     git submodule update --init --recursive
-    cd Omnisharp\server
+    cd server
     msbuild
 ```
 
