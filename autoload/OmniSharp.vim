@@ -229,7 +229,10 @@ function! OmniSharp#RunTests(mode)
     let s:cmdheight=&cmdheight
     set cmdheight=5 
     let b:dispatch = b:buildcommand . " && " . s:testcommand
-    Dispatch
+    let &l:makeprg=b:dispatch
+    "errorformat=msbuild,nunit stack trace
+	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m,%m\ in\ %#%f:%l
+	Make
     let &cmdheight = s:cmdheight
 endfunction
 
