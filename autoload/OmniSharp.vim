@@ -219,7 +219,7 @@ function! OmniSharp#BuildAsync()
 endfunction
 
 function! OmniSharp#RunTests(mode)
-	write 
+	wall 
 	python buildcommand()
 
 	if a:mode != 'last'
