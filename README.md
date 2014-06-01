@@ -47,7 +47,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 ```
 	:OmniSharpAddReference path_to_reference
 ```
-
+* [Test runner](https://github.com/nosami/Omnisharp/wiki/Test-Runner)
 
 ##Screenshots
 ####Auto Complete
