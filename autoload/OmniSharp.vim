@@ -6,8 +6,6 @@ let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let g:serverSeenRunning = 0
 let g:codeactionsinprogress = 0
-let b:issues = [] 
-let b:syntaxerrors = [] 
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -99,12 +97,12 @@ endfunction
 
 function! OmniSharp#GetIssues()
     if pumvisible()
-        return b:issues
+        return get(b:, "issues", [])
     endif
 	if g:serverSeenRunning == 1
         let b:issues = pyeval("getCodeIssues()")
     endif
-    return b:issues
+    return get(b:, "issues", [])
 endfunction
 
 function! OmniSharp#FixIssue()
@@ -113,15 +111,15 @@ endfunction
 
 function! OmniSharp#FindSyntaxErrors()
     if pumvisible()
-        return b:syntaxerrors
+        return get(b:, "syntaxerrors", [])
     endif
 	if bufname('%') == ''
-		return
+		return []
 	endif
 	if g:serverSeenRunning == 1
         let b:syntaxerrors = pyeval("findSyntaxErrors()")
     endif
-    return b:syntaxerrors
+    return get(b:, "syntaxerrors", [])
 endfunction
 
 " Jump to first scratch window visible in current tab, or create it.
@@ -272,12 +270,20 @@ function! OmniSharp#ReloadSolution()
 endfunction
 
 function! OmniSharp#UpdateBuffer()
+	if OmniSharp#BufferHasChanged() == 1
+        python getResponse("/updatebuffer")
+    endif
+endfunction
+
+function! OmniSharp#BufferHasChanged()
 	if g:serverSeenRunning == 1
         if b:changedtick != get(b:, "Omnisharp_UpdateChangeTick", -1)
-            python getResponse("/updatebuffer")
             let b:Omnisharp_UpdateChangeTick = b:changedtick
+            return 1
+            echoerr 'wtf'
         endif
 	endif
+    return 0
 endfunction
 
 function! OmniSharp#CodeFormat()
