@@ -229,9 +229,13 @@ function! OmniSharp#RunTests(mode)
     let s:cmdheight=&cmdheight
     set cmdheight=5 
     let b:dispatch = b:buildcommand . " && " . s:testcommand
+    if executable("sed")
+        " don't match on <filename unknown>:0
+        let b:dispatch .= ' | sed "s/:0//"'
+    endif
     let &l:makeprg=b:dispatch
     "errorformat=msbuild,nunit stack trace
-	setlocal errorformat=\ %#%f(%l\\\,%c):\ %m,%m\ in\ %#%f:%l
+    setlocal errorformat=\ %#%f(%l\\\,%c):\ %m,%m\ in\ %#%f:%l
 	Make
     let &cmdheight = s:cmdheight
 endfunction
