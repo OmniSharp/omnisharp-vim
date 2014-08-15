@@ -122,6 +122,19 @@ function! OmniSharp#FindSyntaxErrors()
     return get(b:, "syntaxerrors", [])
 endfunction
 
+function! OmniSharp#FindSemanticErrors()
+    if pumvisible()
+        return get(b:, "semanticerrors", [])
+    endif
+	if bufname('%') == ''
+		return []
+	endif
+	if g:serverSeenRunning == 1
+        let b:semanticerrors = pyeval("findSemanticErrors()")
+    endif
+    return get(b:, "semanticerrors", [])
+endfunction
+
 " Jump to first scratch window visible in current tab, or create it.
 " This is useful to accumulate results from successive operations.
 " Global function that can be called from other scripts.

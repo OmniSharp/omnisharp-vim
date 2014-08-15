@@ -207,6 +207,10 @@ def findSyntaxErrors():
     js = getResponse('/syntaxerrors')
     return get_quickfix_list(js, 'Errors')
 
+def findSemanticErrors():
+    js = getResponse('/semanticerrors')
+    return get_quickfix_list(js, 'Errors')
+
 def findTypes():
     js = getResponse('/findtypes')
     return get_quickfix_list(js, 'QuickFixes')

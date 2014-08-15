@@ -37,6 +37,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 	* Can be printed to the status line or in the preview window
 	* Displays documentation for an entity when using preview window
 * Syntax error highlighting
+* On the fly semantic error highlighting (nearly as good as a full compilation!)
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
@@ -148,7 +149,7 @@ YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux
 
 [NeoComplCache example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplCache-Settings)
 
-Simple syntax error highlighting is automatically performed when saving the current buffer.
+Simple syntax error highlighting is automatically performed when saving the current buffer or leaving insert mode.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
 
@@ -221,7 +222,7 @@ nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
 
 " Get Code Issues and syntax errors
-let g:syntastic_cs_checkers = ['syntax', 'issues']
+let g:syntastic_cs_checkers = ['syntax', 'issues', 'semantic']
 autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
 
 "show type information automatically when the cursor stops moving
