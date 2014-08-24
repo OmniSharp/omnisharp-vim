@@ -180,10 +180,8 @@ let g:OmniSharp_timeout = 1
 "Showmatch significantly slows down omnicomplete
 "when the first match contains parentheses.
 set noshowmatch
-"Set autocomplete function to OmniSharp (if not using YouCompleteMe completion plugin)
-autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
 
-"Super tab settings
+"Super tab settings - uncomment the next 4 lines
 "let g:SuperTabDefaultCompletionType = 'context'
 "let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
 "let g:SuperTabDefaultCompletionTypeDiscovery = ["&omnifunc:<c-x><c-o>","&completefunc:<c-x><c-n>"]
@@ -220,6 +218,9 @@ let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
 
 augroup omnisharp_commands
     autocmd!
+    "Set autocomplete function to OmniSharp (if not using YouCompleteMe completion plugin)
+    autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
+
     autocmd FileType cs nnoremap gd :OmniSharpGotoDefinition<cr>
     " Synchronous build (blocks Vim)
     "autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
