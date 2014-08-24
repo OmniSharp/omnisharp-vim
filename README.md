@@ -214,7 +214,7 @@ nnoremap <leader>fi :OmniSharpFindImplementations<cr>
 nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
-nnoremap <leader>fm :OmniSharpFindMembersInBuffer<cr>
+nnoremap <leader>fm :OmniSharpFindMembers<cr> "finds members in the current buffer
 " cursor can be anywhere on the line containing an issue for this one
 nnoremap <leader>x  :OmniSharpFixIssue<cr>
 nnoremap <leader>fx :OmniSharpFixUsings<cr>
