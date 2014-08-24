@@ -202,32 +202,40 @@ set completeopt=longest,menuone,preview
 "You might also want to look at the echodoc plugin
 set splitbelow
 
-" Synchronous build (blocks Vim)
-"autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
-" Builds can also run asynchronously with vim-dispatch installed
-autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuildAsync<cr>
-
 "The following commands are contextual, based on the current cursor position.
 
-autocmd FileType cs nnoremap gd :OmniSharpGotoDefinition<cr>
 nnoremap <leader>fi :OmniSharpFindImplementations<cr>
 nnoremap <leader>ft :OmniSharpFindType<cr>
 nnoremap <leader>fs :OmniSharpFindSymbol<cr>
 nnoremap <leader>fu :OmniSharpFindUsages<cr>
 nnoremap <leader>fm :OmniSharpFindMembers<cr> "finds members in the current buffer
-" cursor can be anywhere on the line containing an issue for this one
-nnoremap <leader>x  :OmniSharpFixIssue<cr>
+" cursor can be anywhere on the line containing an issue 
+nnoremap <leader>x  :OmniSharpFixIssue<cr>  
 nnoremap <leader>fx :OmniSharpFixUsings<cr>
 nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
 
 " Get Code Issues and syntax errors
 let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
-autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
 
-"show type information automatically when the cursor stops moving
-autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
-" this setting controls how long to pause (in ms) before fetching type / symbol information.
+augroup omnisharp_commands
+    autocmd!
+    autocmd FileType cs nnoremap gd :OmniSharpGotoDefinition<cr>
+    " Synchronous build (blocks Vim)
+    "autocmd FileType cs nnoremap <F5> :wa!<cr>:OmniSharpBuild<cr>
+    " Builds can also run asynchronously with vim-dispatch installed
+    autocmd FileType cs nnoremap <leader>b :wa!<cr>:OmniSharpBuildAsync<cr>
+    autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
+    
+    " Automatically add new cs files to the nearest project on save
+    autocmd BufWritePost *.cs call OmniSharp#AddToProject()
+    
+    "show type information automatically when the cursor stops moving
+    autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+augroup END
+
+
+" this setting controls how long to wait (in ms) before fetching type / symbol information.
 set updatetime=500
 " Remove 'Press Enter to continue' message when type information is longer than one line.
 set cmdheight=2
@@ -248,8 +256,7 @@ nnoremap <leader>rl :OmniSharpReloadSolution<cr>
 nnoremap <leader>cf :OmniSharpCodeFormat<cr>
 " Load the current .cs file to the nearest project
 nnoremap <leader>tp :OmniSharpAddToProject<cr>
-" Automatically add new cs files to the nearest project on save
-autocmd BufWritePost *.cs call OmniSharp#AddToProject()
+
 " (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
