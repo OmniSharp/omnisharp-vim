@@ -133,7 +133,7 @@ Add ``` -v Verbose``` to get extra information from the server.
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
-To get completions, open one of the C# files from the solution within Vim and press Ctrl-X Ctrl-O in Insert mode 
+To get completions, open one of the C# files from the solution within Vim and press <C-x><C-o> (that is ctrl x followed by ctrl o) in Insert mode 
 (or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed). 
 Repeat to cycle through completions, or use the cursor keys (eugh!)
 
