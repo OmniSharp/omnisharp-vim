@@ -235,7 +235,8 @@ def get_quickfix_list(js, key):
                     'filename': quickfix['FileName'],
                     'text': text,
                     'lnum': quickfix['Line'],
-                    'col': quickfix['Column']
+                    'col': quickfix['Column'],
+                    'vcol': 0
                 }
                 items.append(item)
 
