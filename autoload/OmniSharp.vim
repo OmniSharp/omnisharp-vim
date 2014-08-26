@@ -65,6 +65,40 @@ function! OmniSharp#FindMembers()
 	endif
 endfunction
 
+function! OmniSharp#NavigateUp()
+	let qf_taglist = pyeval("findMembers()")
+    let column = col(".")
+    let line = line('.')
+    let l = len(qf_taglist) - 1
+
+    if(l >= 0)
+        while l >= 0
+            let qf_line = qf_taglist[l].lnum
+            let qf_col = qf_taglist[l].col
+            if qf_line < line || (qf_line == line && qf_col < column)
+                call cursor(qf_taglist[l].lnum, qf_taglist[l].col)
+                break
+            endif
+            let l -= 1
+        endwhile
+    endif
+endfunction
+
+function! OmniSharp#NavigateDown()
+	let qf_taglist = pyeval("findMembers()")
+    let column = col(".")
+    let line = line('.')
+    for l in range(0, len(qf_taglist) - 1)
+        let qf_line = qf_taglist[l].lnum
+        let qf_col = qf_taglist[l].col
+        if qf_line > line || (qf_line == line && qf_col > column)
+            call cursor(qf_taglist[l].lnum, qf_taglist[l].col)
+            break
+        endif
+        let l += 1
+    endfor
+endfunction
+
 function! OmniSharp#GotoDefinition()
 	python gotoDefinition()
 endfunction

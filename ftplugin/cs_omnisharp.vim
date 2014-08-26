@@ -33,6 +33,8 @@ command! -buffer -bar OmniSharpFixUsings           call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions      call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGotoDefinition      call OmniSharp#GotoDefinition()
 command! -buffer -bar OmniSharpHighlightTypes      call OmniSharp#EnableTypeHighlighting()
+command! -buffer -bar OmniSharpNavigateUp          call OmniSharp#NavigateUp()
+command! -buffer -bar OmniSharpNavigateDown        call OmniSharp#NavigateDown()
 command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRunAllTests         call OmniSharp#RunTests('all')
@@ -77,6 +79,8 @@ let b:undo_ftplugin .= '
 \|	delcommand OmniSharpFixUsings
 \|	delcommand OmniSharpGetCodeActions
 \|	delcommand OmniSharpGotoDefinition
+\|	delcommand OmniSharpNavigateUp
+\|	delcommand OmniSharpNavigateDown
 \|	delcommand OmniSharpReloadSolution
 \|	delcommand OmniSharpRename
 \|	delcommand OmniSharpRenameTo

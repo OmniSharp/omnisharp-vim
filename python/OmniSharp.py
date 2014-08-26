@@ -54,10 +54,9 @@ def findMembers():
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/currentfilemembersasflat', parameters)
-    return get_quickfix_list(js, 'QuickFixes')
+    return quickfixes_from_response(json.loads(js));
 
 def findImplementations():
-    js = getResponse('/findimplementations')
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/findimplementations', parameters)
@@ -201,7 +200,6 @@ def addReference():
     js = getResponse("/addreference", parameters)
     if js != '':
         message = json.loads(js)['Message']
-        print message
 
 def findSyntaxErrors():
     js = getResponse('/syntaxerrors')
@@ -220,25 +218,29 @@ def findSymbols():
     return get_quickfix_list(js, 'QuickFixes')
 
 def get_quickfix_list(js, key):
-    items = []
     if js != '':
         response = json.loads(js)
         if response[key] is not None:
-            for quickfix in response[key]:
-                if 'Text' in quickfix:
-                    text = quickfix['Text']
-                #syntax errors returns 'Message' instead of 'Text'. I need to sort this out.
-                if 'Message' in quickfix:
-                    text = quickfix['Message']
+            return quickfixes_from_response(response[key])
+    return [];
 
-                item = {
-                    'filename': quickfix['FileName'],
-                    'text': text,
-                    'lnum': quickfix['Line'],
-                    'col': quickfix['Column'],
-                    'vcol': 0
-                }
-                items.append(item)
+def quickfixes_from_response(response):
+    items = []
+    for quickfix in response:
+        if 'Text' in quickfix:
+            text = quickfix['Text']
+        #syntax errors returns 'Message' instead of 'Text'. I need to sort this out.
+        if 'Message' in quickfix:
+            text = quickfix['Message']
+
+        item = {
+            'filename': quickfix['FileName'],
+            'text': text,
+            'lnum': quickfix['Line'],
+            'col': quickfix['Column'],
+            'vcol': 0
+        }
+        items.append(item)
 
     return items
 
