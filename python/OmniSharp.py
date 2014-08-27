@@ -200,6 +200,7 @@ def addReference():
     js = getResponse("/addreference", parameters)
     if js != '':
         message = json.loads(js)['Message']
+        print message
 
 def findSyntaxErrors():
     js = getResponse('/syntaxerrors')
