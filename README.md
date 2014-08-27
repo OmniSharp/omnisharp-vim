@@ -212,8 +212,8 @@ nnoremap <leader>x  :OmniSharpFixIssue<cr>
 nnoremap <leader>fx :OmniSharpFixUsings<cr>
 nnoremap <leader>tt :OmniSharpTypeLookup<cr>
 nnoremap <leader>dc :OmniSharpDocumentation<cr>
-nnoremap <C-K> :OmniSharpNavigateUp<cr>
-nnoremap <C-J> :OmniSharpNavigateDown<cr>
+nnoremap <C-K> :OmniSharpNavigateUp<cr> "navigate up by method/property/field
+nnoremap <C-J> :OmniSharpNavigateDown<cr> "navigate down by method/property/field
 
 " Get Code Issues and syntax errors
 let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
