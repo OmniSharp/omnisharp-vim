@@ -16,6 +16,17 @@ endif
 let s:cs_cpo_save = &cpo
 set cpo&vim
 
+" Fold Message Function
+func! SummaryFolds()
+    let line = getline(v:foldstart + 1)
+    let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
+    return "+--" . " Summary: " . sub
+endfunc
+
+augroup cs_folds
+    autocmd!
+    autocmd BufEnter *.cs setlocal foldtext=SummaryFolds()
+augroup END
 
 " type
 syn keyword csType			bool byte char decimal double float int long object sbyte short string T uint ulong ushort var void dynamic
@@ -90,8 +101,9 @@ hi def link xmlRegion Comment
 syn region	csPreCondit
     \ start="^\s*#\s*\(define\|undef\|if\|elif\|else\|endif\|line\|error\|warning\)"
     \ skip="\\$" end="$" contains=csComment keepend
-syn region	csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
+syn region csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
+syn region csSummary start=".*<summary" end="\zs\w\+>\ze\n\s*\w" fold
 
 
 syn region csAttributeType start="\s*\["hs=e+1 end="[\(\]]"he=e-1 oneline
