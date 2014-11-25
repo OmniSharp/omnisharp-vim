@@ -103,7 +103,7 @@ syn region	csPreCondit
     \ skip="\\$" end="$" contains=csComment keepend
 syn region csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
-syn region csSummary start=".*<summary" end="\zs\w\+>\ze\n\s*\w" fold
+syn region csSummary start="\s*/// <summary" end="\zs\w\+>\ze\n\s*\w" fold
 
 
 syn region csAttributeType start="\s*\["hs=e+1 end="[\(\]]"he=e-1 oneline
