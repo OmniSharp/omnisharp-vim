@@ -18,6 +18,7 @@ set cpo&vim
 
 " Fold Message Function
 func! SummaryFolds()
+    " let firstLine = getline(v:foldstart)
     let line = getline(v:foldstart + 1)
     let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
     return "+--" . " Summary: " . sub
@@ -103,7 +104,7 @@ syn region	csPreCondit
     \ skip="\\$" end="$" contains=csComment keepend
 syn region csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
-syn region csSummary start="\s*/// <summary" end="\zs\w\+>\ze\n\s*\w" fold
+syn region csSummary start="\s*/// <summary" end="\zs\w\+>\ze\n\(\s*///\)\@!" fold
 
 
 syn region csAttributeType start="\s*\["hs=e+1 end="[\(\]]"he=e-1 oneline
