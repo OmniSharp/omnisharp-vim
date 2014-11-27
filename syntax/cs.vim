@@ -18,10 +18,17 @@ set cpo&vim
 
 " Fold Message Function
 func! SummaryFolds()
-    " let firstLine = getline(v:foldstart)
-    let line = getline(v:foldstart + 1)
-    let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
-    return "+--" . " Summary: " . sub
+    let firstLine = getline(v:foldstart)
+    if firstLine =~ "<summary>"
+	let line = getline(v:foldstart + 1)
+	let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
+	return "+--" . " Summary: " . sub
+    elseif firstLine =~ "# region"
+	let sub = substitute(firstLine, '\s*\# region ', '', 'g')
+	return "+-- Region: " . sub
+    else
+	return "+-- " . firstLine
+    endif
 endfunc
 
 augroup cs_folds
@@ -104,11 +111,10 @@ syn region	csPreCondit
     \ skip="\\$" end="$" contains=csComment keepend
 syn region csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
-syn region csSummary start="\s*/// <summary" end="\zs\w\+>\ze\n\(\s*///\)\@!" fold
+syn region csSummary start="\s*/// <summary" end="\zs\w\+>\ze\n\s*\(///\)\@!" transparent fold keepend
 
 
 syn region csAttributeType start="\s*\["hs=e+1 end="[\(\]]"he=e-1 oneline
-"syn region csType start="[\<]"hs=s+1 end="[\>]"he=e-1 oneline contains=csNewType, csNew
 syn region csClassType start="class"hs=s+6 end="[:\n{]"he=e-1 contains=csClass
 syn region csNewType start="new\>"hs=s+4 end="[\(\<{\[]"he=e-1 contains=csNew contains=csNewType
 syn region csIsType start="\v (is|as) "hs=s+4 end="\v[A-Za-z0-9]+" oneline contains=csIsAs
