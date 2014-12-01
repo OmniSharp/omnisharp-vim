@@ -40,6 +40,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 * On the fly semantic error highlighting (nearly as good as a full compilation!)
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
+* Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`) 
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
 ```
 	:OmniSharpAddToProject
