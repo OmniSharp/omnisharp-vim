@@ -16,6 +16,25 @@ endif
 let s:cs_cpo_save = &cpo
 set cpo&vim
 
+" Fold Message Function
+func! SummaryFolds()
+    let firstLine = getline(v:foldstart)
+    if firstLine =~ "<summary>"
+	let line = getline(v:foldstart + 1)
+	let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
+	return "+--" . " Summary: " . sub
+    elseif firstLine =~ "# region"
+	let sub = substitute(firstLine, '\s*\# region ', '', 'g')
+	return "+-- Region: " . sub
+    else
+	return "+-- " . firstLine
+    endif
+endfunc
+
+augroup cs_folds
+    autocmd!
+    autocmd BufEnter *.cs setlocal foldtext=SummaryFolds()
+augroup END
 
 " type
 syn keyword csType			bool byte char decimal double float int long object sbyte short string T uint ulong ushort var void dynamic
@@ -90,12 +109,12 @@ hi def link xmlRegion Comment
 syn region	csPreCondit
     \ start="^\s*#\s*\(define\|undef\|if\|elif\|else\|endif\|line\|error\|warning\)"
     \ skip="\\$" end="$" contains=csComment keepend
-syn region	csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
+syn region csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
     \ end="^\s*#\s*endregion" transparent fold contains=TOP
+syn region csSummary start="^\s*/// <summary" end="^\(\s*///\)\@!" transparent fold keepend
 
 
 syn region csAttributeType start="\s*\["hs=e+1 end="[\(\]]"he=e-1 oneline
-"syn region csType start="[\<]"hs=s+1 end="[\>]"he=e-1 oneline contains=csNewType, csNew
 syn region csClassType start="class"hs=s+6 end="[:\n{]"he=e-1 contains=csClass
 syn region csNewType start="new\>"hs=s+4 end="[\(\<{\[]"he=e-1 contains=csNew contains=csNewType
 syn region csIsType start="\v (is|as) "hs=s+4 end="\v[A-Za-z0-9]+" oneline contains=csIsAs
