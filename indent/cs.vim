@@ -10,13 +10,13 @@ endif
 let b:did_indent = 1
 
 
-setlocal indentexpr=GetCSIndent()
+setlocal indentexpr=GetCSIndent(v:lnum)
 
 
-function! GetCSIndent()
+function! GetCSIndent(lnum)
 
-  let this_line = getline(v:lnum)
-  let previous_line = getline(v:lnum - 1)
+  let this_line = getline(a:lnum)
+  let previous_line = getline(a:lnum - 1)
 
   " Hit the start of the file, use zero indent.
   if a:lnum == 0
@@ -25,10 +25,10 @@ function! GetCSIndent()
 
   " If previous_line is an attribute line:
   if previous_line =~? '^\s*\[[A-Za-z]' && previous_line =~? '\]$'
-    let ind = indent(v:lnum - 1)
+    let ind = indent(a:lnum - 1)
     return ind
   else
-    return cindent(v:lnum)
+    return cindent(a:lnum)
   endif
 
 endfunction
