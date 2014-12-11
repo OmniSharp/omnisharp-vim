@@ -122,8 +122,8 @@ function! OmniSharp#GetCodeActions(mode)
     endif
     let actions = pyeval('getCodeActions("' . a:mode . '")')
     if(len(actions) > 0)
-        call findcodeactions#setactions(a:mode, actions)
-        call ctrlp#init(findcodeactions#id())
+        call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
+        call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
     else
         echo 'No code actions found'
     endif

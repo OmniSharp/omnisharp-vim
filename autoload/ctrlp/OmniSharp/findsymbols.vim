@@ -1,10 +1,10 @@
 
 " Load guard
-if ( exists('g:loaded_ctrlp_findsymbols') && g:loaded_ctrlp_findsymbols )
+if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_findsymbols )
 	\ || v:version < 700 || &cp
 	finish
 endif
-let g:loaded_ctrlp_findsymbols = 1
+let g:loaded_ctrlp_OmniSharp_findsymbols = 1
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -37,8 +37,8 @@ let g:loaded_ctrlp_findsymbols = 1
 " + specinput: enable special inputs '..' and '@cd' (disabled by default)
 "
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'findsymbols#init()',
-	\ 'accept': 'findsymbols#accept',
+	\ 'init': 'ctrlp#OmniSharp#findsymbols#init()',
+	\ 'accept': 'ctrlp#OmniSharp#findsymbols#accept',
 	\ 'lname': 'Find Symbols',
 	\ 'sname': 'symbols',
 	\ 'type': 'tabs',
@@ -50,7 +50,7 @@ call add(g:ctrlp_ext_vars, {
 "
 " Return: a Vim's List
 "
-function! findsymbols#init()
+function! ctrlp#OmniSharp#findsymbols#init()
 	if !OmniSharp#ServerIsRunning() 
 		return
 	endif
@@ -71,7 +71,7 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! findsymbols#accept(mode, str)
+function! ctrlp#OmniSharp#findsymbols#accept(mode, str)
   call ctrlp#exit()
 	for quickfix in s:quickfixes
 		if quickfix.text == a:str
@@ -86,7 +86,7 @@ endfunction
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! findsymbols#id()
+function! ctrlp#OmniSharp#findsymbols#id()
 	return s:id
 endfunction
 
