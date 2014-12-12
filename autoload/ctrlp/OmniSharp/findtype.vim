@@ -1,9 +1,9 @@
 " Load guard
-"if ( exists('g:loaded_ctrlp_findsymbols') && g:loaded_ctrlp_findsymbols )
-"	\ || v:version < 700 || &cp
-"	finish
-"endif
-"let g:loaded_ctrlp_findsymbols = 1
+if ( exists('g:loaded_ctrlp_OmniSharp_findtype') && g:loaded_ctrlp_OmniSharp_findtype )
+	\ || v:version < 700 || &cp
+	finish
+endif
+let g:loaded_ctrlp_OmniSharp_findtype = 1
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -36,30 +36,30 @@
 " + specinput: enable special inputs '..' and '@cd' (disabled by default)
 "
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'findcodeactions#init()',
-	\ 'accept': 'findcodeactions#accept',
-	\ 'exit': 'findcodeactions#exit()',
-	\ 'lname': 'Find Code Actions',
-	\ 'sname': 'code actions',
-	\ 'type': 'line',
+	\ 'init': 'ctrlp#OmniSharp#findtype#init()',
+	\ 'accept': 'ctrlp#OmniSharp#findtype#accept',
+	\ 'lname': 'Find Types',
+	\ 'sname': 'types',
+	\ 'type': 'tabs',
 	\ 'sort': 1,
 	\ })
 
-
-function! findcodeactions#setactions(mode, actions)
-  let s:actions = a:actions
-  let s:mode = a:mode
-endfunction
 
 " Provide a list of strings to search in
 "
 " Return: a Vim's List
 "
-"
+function! ctrlp#OmniSharp#findtype#init()
+	if !OmniSharp#ServerIsRunning() 
+		return
+	endif
 
-function! findcodeactions#init()
-  let g:codeactionsinprogress = 1
-  return s:actions
+	let s:quickfixes = pyeval("findTypes()")
+	let types = []
+	for quickfix in s:quickfixes
+		call add(types, quickfix.text)
+	endfor
+	return types
 endfunction
 
 
@@ -70,22 +70,37 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! findcodeactions#accept(mode, str)
-  let g:codeactionsinprogress = 0
-  call ctrlp#exit()
-  let s:action = index(s:actions, a:str)
-  let res = pyeval("runCodeAction('" . s:mode . "')")
+function! ctrlp#OmniSharp#findtype#accept(mode, str)
+	call ctrlp#OmniSharp#findtype#exit()
+	for quickfix in s:quickfixes
+		if quickfix.text == a:str
+			break
+		endif
+	endfor
+  call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
 endfunction
 
-function! findcodeactions#exit()
-  let g:codeactionsinprogress = 0
+
+" (optional) Do something before enterting ctrlp
+function! ctrlp#OmniSharp#findtype#enter()
 endfunction
+
+
+" (optional) Do something after exiting ctrlp
+function! ctrlp#OmniSharp#findtype#exit()
+endfunction
+
+
+" (optional) Set or check for user options specific to this extension
+function! ctrlp#OmniSharp#findtype#opts()
+endfunction
+
 
 " Give the extension an ID
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! findcodeactions#id()
+function! ctrlp#OmniSharp#findtype#id()
 	return s:id
 endfunction
 
