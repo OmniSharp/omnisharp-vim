@@ -418,32 +418,24 @@ function! OmniSharp#StartServer()
 				let index = index + 1
 			endfor
 
-                        let option = 0
-			if (len(array) < 10)
-                                echo 'Choose a solution file'
-                                let option = nr2char(getchar())
-                                if option < '1' || option > '9'
-                                        return
-                                endif
-                        else
-                                let optionstring = input('Choose a solution file and press enter ')
-                                let len = strlen(optionstring) - 1
-                                let i = 0
-                                while i <= len
-                                        let c = strpart(optionstring, len-i, 1)
-                                        if (c < '0' && c > '9')
-                                                return
-                                        endif
-                                        let option += c * float2nr(pow(10, i))
-                                        let i += 1
-                                endwhile
-                        endif
+			let option = 0
+			let optionstring = input('Choose a solution file and press enter ')
+			let len = strlen(optionstring) - 1
+			let i = 0
+			while i <= len
+				let c = strpart(optionstring, len-i, 1)
+				if (c < '0' && c > '9')
+					return
+				endif
+				let option += c * float2nr(pow(10, i))
+				let i += 1
+			endwhile
 
 			if (option == 0 || option > len(array))
 				return
 			endif
 
-			call OmniSharp#StartServerSolution(array[option - 1])                        
+			call OmniSharp#StartServerSolution(array[option - 1])
 		endif
 	else
 		echoerr "Did not find a solution file "
