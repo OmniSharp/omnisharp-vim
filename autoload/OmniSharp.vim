@@ -390,6 +390,9 @@ function! OmniSharp#StartServer()
 			break
 		endif
 		let solutionfiles = globpath(folder , "*.sln", 1)
+        if isdirectory(solutionfiles)
+            let solutionfiles = ''
+        endif
 	endwhile
 
 	if solutionfiles != ''
