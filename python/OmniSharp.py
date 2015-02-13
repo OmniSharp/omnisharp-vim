@@ -33,10 +33,13 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
 
     target = urlparse.urljoin(host, endPoint)
 
+    proxy = urllib2.ProxyHandler({})
+    opener = urllib2.build_opener(proxy)
     req = urllib2.Request(target)
     req.add_header('Content-Type', 'application/json')
+
     try:
-        response = urllib2.urlopen(req, json.dumps(parameters), timeout)
+        response = opener.open(req, json.dumps(parameters), timeout)
         vim.command("let g:serverSeenRunning = 1")
         return response.read()
     except Exception:
