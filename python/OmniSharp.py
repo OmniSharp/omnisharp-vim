@@ -189,12 +189,6 @@ def codeFormat():
 
 def fix_usings():
     response = getResponse('/fixusings')
-    f = open('/home/sdevadas/tmp/testfile.txt', 'w+')
-    f.write(response)
-    f.write("Hello world")
-    f.close()
-
-
     js = json.loads(response)
     setBuffer(js["Buffer"])
     return get_quickfix_list(response, 'AmbiguousResults')
