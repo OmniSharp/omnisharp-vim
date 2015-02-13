@@ -32,12 +32,11 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
         host = vim.eval('b:OmniSharp_host')
 
     target = urlparse.urljoin(host, endPoint)
-    parameters = urllib.urlencode(parameters)
 
-    proxy = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy)
+    req = urllib2.Request(target)
+    req.add_header('Content-Type', 'application/json')
     try:
-        response = opener.open(target, parameters, timeout)
+        response = urllib2.urlopen(req, json.dumps(parameters))
         vim.command("let g:serverSeenRunning = 1")
         return response.read()
     except Exception:
