@@ -36,7 +36,7 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     req = urllib2.Request(target)
     req.add_header('Content-Type', 'application/json')
     try:
-        response = urllib2.urlopen(req, json.dumps(parameters))
+        response = urllib2.urlopen(req, json.dumps(parameters), timeout)
         vim.command("let g:serverSeenRunning = 1")
         return response.read()
     except Exception:
