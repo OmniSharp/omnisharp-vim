@@ -13,16 +13,10 @@ augroup plugin-OmniSharp
 	
 augroup END
 
-augroup OmniSharpCtrlP
-	au!
-	au FileType cs call OmniSharp#AppendCtrlPExtensions()
-augroup END
+call OmniSharp#AppendCtrlPExtensions()
 
 if get(g:, 'Omnisharp_start_server', 0) == 1
-	augroup OmniSharpStartServer
-		au!
-		au FileType cs call OmniSharp#StartServerIfNotRunning()
-	augroup END
+	call OmniSharp#StartServerIfNotRunning()
 endif
 
 " Commands
