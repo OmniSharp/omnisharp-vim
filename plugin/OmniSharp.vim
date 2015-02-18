@@ -4,12 +4,6 @@ endif
 
 let g:OmniSharp_loaded = 1
 
-augroup OmniSharpCtrlP
-	au!
-	au FileType cs call OmniSharp#AppendCtrlPExtensions()
-augroup END
-
-
 "Load python/OmniSharp.py
 let s:py_path = join([expand('<sfile>:p:h:h'), "python"], '/')
 exec "python sys.path.append(r'" . s:py_path . "')"
@@ -54,9 +48,6 @@ let g:OmniSharp_running_slns = []
 if !exists("g:Omnisharp_start_server")
 	let g:Omnisharp_start_server = 1
 endif
-if g:Omnisharp_start_server==1
-	au FileType cs call OmniSharp#StartServerIfNotRunning()
-endif
 
 " Automatically stop server
 " g:Omnisharp_stop_server == 0  :: never stop server
@@ -64,10 +55,6 @@ endif
 " g:Omnisharp_stop_server == 2  :: stop if this vim started
 if !exists("g:Omnisharp_stop_server")
 	let g:Omnisharp_stop_server = 2
-endif
-
-if g:Omnisharp_stop_server==1
-	au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
 if !exists("g:Omnisharp_highlight_user_types")
