@@ -4,12 +4,6 @@ endif
 
 let g:OmniSharp_loaded = 1
 
-augroup OmniSharpCtrlP
-	au!
-	au FileType cs call OmniSharp#AppendCtrlPExtensions()
-augroup END
-
-
 "Load python/OmniSharp.py
 let s:py_path = join([expand('<sfile>:p:h:h'), "python"], '/')
 exec "python sys.path.append(r'" . s:py_path . "')"
@@ -53,9 +47,6 @@ let g:OmniSharp_running_slns = []
 " Automatically start server
 if !exists("g:Omnisharp_start_server")
 	let g:Omnisharp_start_server = 1
-endif
-if g:Omnisharp_start_server==1
-	au FileType cs call OmniSharp#StartServerIfNotRunning()
 endif
 
 " Automatically stop server

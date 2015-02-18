@@ -1,7 +1,4 @@
 "Set a default value for the server address
-if !exists('g:OmniSharp_host')
-	let g:OmniSharp_host='http://localhost:2000'
-endif
 if !exists('g:omnicomplete_fetch_full_documentation')
     let g:omnicomplete_fetch_full_documentation = 0
 endif
@@ -15,6 +12,12 @@ augroup plugin-OmniSharp
 	\|	endif	
 	
 augroup END
+
+call OmniSharp#AppendCtrlPExtensions()
+
+if get(g:, 'Omnisharp_start_server', 0) == 1
+	call OmniSharp#StartServerIfNotRunning()
+endif
 
 " Commands
 command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
