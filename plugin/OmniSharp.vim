@@ -57,6 +57,10 @@ if !exists("g:Omnisharp_stop_server")
 	let g:Omnisharp_stop_server = 2
 endif
 
+if g:Omnisharp_stop_server==1
+	au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
+endif
+
 if !exists("g:Omnisharp_highlight_user_types")
 	let g:Omnisharp_highlight_user_types = 0
 endif
