@@ -74,7 +74,9 @@ function! ctrlp#OmniSharp#findcodeactions#accept(mode, str)
   let g:codeactionsinprogress = 0
   call ctrlp#exit()
   let s:action = index(s:actions, a:str)
-  let res = pyeval("runCodeAction('" . s:mode . "')")
+  if OmniSharp#IsSupported()
+    let res = pyeval("runCodeAction('" . s:mode . "')")
+  endif
 endfunction
 
 function! ctrlp#OmniSharp#findcodeactions#exit()
@@ -89,4 +91,4 @@ function! ctrlp#OmniSharp#findcodeactions#id()
 	return s:id
 endfunction
 
-" vim:nofen:fdl=0:ts=2:sw=2:sts=2
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2
