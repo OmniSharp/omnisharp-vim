@@ -1,10 +1,14 @@
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 " Load guard
 "if ( exists('g:loaded_ctrlp_findsymbols') && g:loaded_ctrlp_findsymbols )
 "	\ || v:version < 700 || &cp
 "	finish
 "endif
 "let g:loaded_ctrlp_findsymbols = 1
-
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "

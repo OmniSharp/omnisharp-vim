@@ -4,11 +4,15 @@ endif
 
 let g:OmniSharp_loaded = 1
 
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 augroup OmniSharpCtrlP
   au!
   au FileType cs call OmniSharp#AppendCtrlPExtensions()
 augroup END
-
 
 "Load python/OmniSharp.py
 let s:py_path = join([expand('<sfile>:p:h:h'), "python"], '/')

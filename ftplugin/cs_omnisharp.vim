@@ -1,3 +1,8 @@
+" Ensure python is supported.
+if !has('python')
+    finish
+endif
+
 "Set a default value for the server address
 if !exists('g:OmniSharp_host')
 	let g:OmniSharp_host='http://localhost:2000'

@@ -1,10 +1,14 @@
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 " Load guard
 if ( exists('g:loaded_ctrlp_OmniSharp_findtype') && g:loaded_ctrlp_OmniSharp_findtype )
 	\ || v:version < 700 || &cp
 	finish
 endif
 let g:loaded_ctrlp_OmniSharp_findtype = 1
-
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
