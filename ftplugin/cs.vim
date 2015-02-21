@@ -4,9 +4,6 @@ if !has('python')
 endif
 
 "Set a default value for the server address
-if !exists('g:OmniSharp_host')
-	let g:OmniSharp_host='http://localhost:2000'
-endif
 if !exists('g:omnicomplete_fetch_full_documentation')
     let g:omnicomplete_fetch_full_documentation = 0
 endif
@@ -17,9 +14,14 @@ augroup plugin-OmniSharp
 	autocmd BufLeave <buffer>
 	\ 	if !pumvisible()
 	\|		call OmniSharp#UpdateBuffer()
-	\|	endif	
-	
+	\|	endif
 augroup END
+
+call OmniSharp#AppendCtrlPExtensions()
+
+if get(g:, 'Omnisharp_start_server', 0) == 1
+	call OmniSharp#StartServerIfNotRunning()
+endif
 
 " Commands
 command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
@@ -58,7 +60,7 @@ command! -buffer -nargs=1 -complete=file
 \	OmniSharpStartServerSolution
 \	call OmniSharp#StartServerSolution(<q-args>)
 
-command! -buffer -nargs=1 -complete=file OmniSharpAddReference         
+command! -buffer -nargs=1 -complete=file OmniSharpAddReference
 \   call OmniSharp#AddReference(<q-args>)
 
 
