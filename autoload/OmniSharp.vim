@@ -10,7 +10,6 @@ let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let g:serverSeenRunning = 0
-let g:codeactionsinprogress = 0
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -118,13 +117,7 @@ function! OmniSharp#JumpToLocation(filename, line, column)
     endif
 endfunction
 
-function! OmniSharp#GetCodeActions(mode)
-    " I can't figure out how to prevent this method
-    " being called multiple times for each line in
-    " the visual selection. This is a workaround.
-    if g:codeactionsinprogress == 1
-        return
-    endif
+function! OmniSharp#GetCodeActions(mode) range
     let actions = pyeval('getCodeActions("' . a:mode . '")')
     if(len(actions) > 0)
         call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
