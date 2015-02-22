@@ -49,23 +49,23 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 ```vim
 :OmniSharpAddReference path_to_reference
 ```
-* [Test runner](https://github.com/nosami/Omnisharp/wiki/Test-Runner)
+* [Test runner](https://github.com/OmniSharp/omnisharp-vim/wiki/Test-Runner)
 
 ##Screenshots
 ####Auto Complete
 ![OmniSharp screenshot](https://f.cloud.github.com/assets/667194/514371/dc03e2bc-be56-11e2-9745-c3202335e5ab.png)
 
 ####Find (and fix) Code Issues
-![Code issues screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/codeissues.png)
+![Code issues screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/codeissues.png)
 
 ####Find Types / Symbols
-![Find Types screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/FindTypes.png)
+![Find Types screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindTypes.png)
 
 ####Find Usages
-![Find Usages screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/FindUsages.png)
+![Find Usages screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindUsages.png)
 
 ####Code Actions
-![Code Actions screenshot](https://raw.github.com/nosami/Omnisharp/gh-pages/CodeActions.png)
+![Code Actions screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/CodeActions.png)
 
 ##Installation
 
@@ -75,7 +75,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
 ```sh
 cd ~/.vim/bundle
-git clone https://github.com/nosami/Omnisharp.git
+git clone https://github.com/OmniSharp/omnisharp-vim.git
 cd Omnisharp
 git submodule update --init --recursive
 cd server
@@ -85,7 +85,7 @@ xbuild
 ```dosbatch
 c:\
 cd c:\Users\username\vimfiles\bundle
-git clone https://github.com/nosami/Omnisharp.git
+git clone https://github.com/OmniSharp/omnisharp-vim.git
 cd Omnisharp
 git submodule update --init --recursive
 cd server
@@ -148,9 +148,9 @@ NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no
 
 YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux or OSX.
 
-[NeoComplete example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplete-Settings)
+[NeoComplete example settings](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-NeoComplete-Settings)
 
-[NeoComplCache example settings](https://github.com/nosami/Omnisharp/wiki/Example-NeoComplCache-Settings)
+[NeoComplCache example settings](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-NeoComplCache-Settings)
 
 Simple syntax error highlighting is automatically performed when saving the current buffer or leaving insert mode.
 
