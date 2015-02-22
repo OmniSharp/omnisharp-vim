@@ -84,9 +84,9 @@ def getCodeActions(mode):
         return actions
     return []
 
-def runCodeAction(mode):
+def runCodeAction(mode, action):
     parameters = codeActionParameters(mode)
-    parameters['codeaction'] = vim.eval("s:action")
+    parameters['codeaction'] = action
     js = getResponse('/runcodeaction', parameters);
     text = json.loads(js)['Text']
     setBufferText(text)

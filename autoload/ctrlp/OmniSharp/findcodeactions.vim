@@ -73,8 +73,8 @@ endfunction
 function! ctrlp#OmniSharp#findcodeactions#accept(mode, str)
   let g:codeactionsinprogress = 0
   call ctrlp#exit()
-  let s:action = index(s:actions, a:str)
-  let res = pyeval("runCodeAction('" . s:mode . "')")
+  let action = index(s:actions, a:str)
+  call pyeval(printf('runCodeAction(%s, %d)', string(s:mode), action))
 endfunction
 
 function! ctrlp#OmniSharp#findcodeactions#exit()
