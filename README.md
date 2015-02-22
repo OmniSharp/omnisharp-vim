@@ -43,11 +43,11 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 * Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`)
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
 ```
-	:OmniSharpAddToProject
+:OmniSharpAddToProject
 ```
 * Add reference. Supports project and file reference. GAC referencing todo.
 ```
-	:OmniSharpAddReference path_to_reference
+:OmniSharpAddReference path_to_reference
 ```
 * [Test runner](https://github.com/nosami/Omnisharp/wiki/Test-Runner)
 
@@ -74,22 +74,22 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 ####OSX / Linux
 Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
 ```
-    cd ~/.vim/bundle
-    git clone https://github.com/nosami/Omnisharp.git
-    cd Omnisharp
-    git submodule update --init --recursive
-    cd server
-    xbuild
+cd ~/.vim/bundle
+git clone https://github.com/nosami/Omnisharp.git
+cd Omnisharp
+git submodule update --init --recursive
+cd server
+xbuild
 ```
 ####Windows
 ```
-    c:\
-    cd c:\Users\username\vimfiles\bundle
-    git clone https://github.com/nosami/Omnisharp.git
-    cd Omnisharp
-    git submodule update --init --recursive
-    cd server
-    msbuild
+c:\
+cd c:\Users\username\vimfiles\bundle
+git clone https://github.com/nosami/Omnisharp.git
+cd Omnisharp
+git submodule update --init --recursive
+cd server
+msbuild
 ```
 
 ###Install Python
