@@ -14,28 +14,28 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 ##Features
 
 * Contextual code completion
-	* Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
-	* CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
-	* "Subsequence" completions are also supported. e.g. Console.Wline would also complete to Console.WriteLine
-	* Completions are ranked in the following order
-		* Exact start match (case sensitive)
-		* Exact start match (case insensitive)
-		* CamelCase completions
-		* Subsequence match completions
+  * Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
+  * CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
+  * "Subsequence" completions are also supported. e.g. Console.Wline would also complete to Console.WriteLine
+  * Completions are ranked in the following order
+    * Exact start match (case sensitive)
+    * Exact start match (case insensitive)
+    * CamelCase completions
+    * Subsequence match completions
 
 * Jump to the definition of a type/variable/method
 * Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
-    * Extract method
+  * Extract method
 * Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
 * Semantic type highlighting
 * Lookup type information of an type/variable/method
-	* Can be printed to the status line or in the preview window
-	* Displays documentation for an entity when using preview window
+  * Can be printed to the status line or in the preview window
+  * Displays documentation for an entity when using preview window
 * Syntax error highlighting
 * On the fly semantic error highlighting (nearly as good as a full compilation!)
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
