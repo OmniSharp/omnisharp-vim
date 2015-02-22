@@ -42,11 +42,11 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 * Code formatter
 * Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`)
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
-```
+```vim
 :OmniSharpAddToProject
 ```
 * Add reference. Supports project and file reference. GAC referencing todo.
-```
+```vim
 :OmniSharpAddReference path_to_reference
 ```
 * [Test runner](https://github.com/nosami/Omnisharp/wiki/Test-Runner)
@@ -73,7 +73,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 
 ####OSX / Linux
 Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
-```
+```sh
 cd ~/.vim/bundle
 git clone https://github.com/nosami/Omnisharp.git
 cd Omnisharp
@@ -82,7 +82,7 @@ cd server
 xbuild
 ```
 ####Windows
-```
+```dosbatch
 c:\
 cd c:\Users\username\vimfiles\bundle
 git clone https://github.com/nosami/Omnisharp.git
