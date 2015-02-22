@@ -7,7 +7,7 @@ OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of cu
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
 OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily. 
+completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily.
 [Emacs](https://github.com/sp3ctum/omnisharp-emacs),
 [Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) and [Sublime Text 3](https://github.com/moonrabbit/OmniSharpSublime) all have completion plugins utilising the OmniSharp server.
 
@@ -40,7 +40,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 * On the fly semantic error highlighting (nearly as good as a full compilation!)
 * Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
 * Code formatter
-* Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`) 
+* Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`)
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
 ```
 	:OmniSharpAddToProject
@@ -73,7 +73,7 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
 
 ####OSX / Linux
 Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
-```    
+```
     cd ~/.vim/bundle
     git clone https://github.com/nosami/Omnisharp.git
     cd Omnisharp
@@ -82,7 +82,7 @@ Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then ch
     xbuild
 ```
 ####Windows
-```    
+```
     c:\
     cd c:\Users\username\vimfiles\bundle
     git clone https://github.com/nosami/Omnisharp.git
@@ -93,10 +93,10 @@ Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then ch
 ```
 
 ###Install Python
-Install [Python 2.7.5] (http://www.python.org/download/releases/2.7.5/). Make sure that you pick correct version of Python to match the architecture of Vim. 
+Install [Python 2.7.5] (http://www.python.org/download/releases/2.7.5/). Make sure that you pick correct version of Python to match the architecture of Vim.
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
-Verify that Python is working inside Vim with 
+Verify that Python is working inside Vim with
 
 ```vim
 :echo has('python')
@@ -118,7 +118,7 @@ Use your favourite way to install it.
 By default, the server is started automatically if you have vim-dispatch installed when you open a .cs file.
 It tries to detect your solution file (.sln) and starts the OmniSharp server passing the path to the solution file.
 
-If you are using Tmux, the server will start in a new tmux session. In iterm2, a new tab is opened. Windows starts the server with a minimised cmd shell. For any other configuration, the server will start invisibly in the background. 
+If you are using Tmux, the server will start in a new tmux session. In iterm2, a new tab is opened. Windows starts the server with a minimised cmd shell. For any other configuration, the server will start invisibly in the background.
 
 
 This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in your vimrc.
@@ -134,12 +134,12 @@ Add `-v Verbose` to get extra information from the server.
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
-To get completions, open one of the C# files from the solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode 
-(or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed). 
+To get completions, open one of the C# files from the solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode
+(or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed).
 Repeat to cycle through completions, or use the cursor keys (eugh!)
 
 If you prefer to get completions as you are typing, then you should take a look at [NeoComplete](https://github.com/Shougo/neocomplete.vim), [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
-or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim). 
+or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim).
 
 
 NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no longer maintained. NeoComplete is the successor to NeoComplCache. It is faster than NeoComplCache but requires Vim to be compiled with +lua. (Windows users can find [vim compiled with +lua](http://tuxproject.de/projects/vim/) and [Lua 5.2](http://sourceforge.net/projects/luabinaries/files/5.2.1/Executables/) - place lua52.dll in the same folder as gvim.exe) . OSX users can `brew install vim --HEAD --with-lua`
@@ -160,10 +160,10 @@ To use the other features, you'll want to create key bindings for them. See the 
 ![screenshot](https://raw.githubusercontent.com/nosami/nosami.github.io/master/grunt-init-csharpsolution.gif)
 - [WarmUp](https://github.com/chucknorris/warmup/issues) Same as above, but it didn't work for me on OSX when I tried.
 - [OpenIDE](https://github.com/continuoustests/OpenIDE) Lots of uses. I use it for creating new project files and generating classes with the namespace and class pre-populated. It's very extensible.
-- [OrangeT/vim-csharp](https://github.com/OrangeT/vim-csharp) Advanced syntax highlighting including razor support. Contains snippets for Razor, Xunit and Moq. 
+- [OrangeT/vim-csharp](https://github.com/OrangeT/vim-csharp) Advanced syntax highlighting including razor support. Contains snippets for Razor, Xunit and Moq.
 - [devtools-terminal](http://blog.dfilimonov.com/2013/09/12/devtools-terminal.html) Embed OmniSharp inside Chrome
 ![dev-tools screenshot](https://raw.githubusercontent.com/nosami/nosami.github.io/master/aspvnext.gif)
- 
+
 ##Configuration
 
 ### Example vimrc
@@ -194,7 +194,7 @@ set noshowmatch
 "don't autoselect first item in omnicomplete, show if only one item (for preview)
 "remove preview if you don't want to see any documentation whatsoever.
 set completeopt=longest,menuone,preview
-" Fetch full documentation during omnicomplete requests. 
+" Fetch full documentation during omnicomplete requests.
 " There is a performance penalty with this (especially on Mono)
 " By default, only Type/Method signatures are fetched. Full documentation can still be fetched when
 " you need it with the :OmniSharpDocumentation command.
@@ -219,10 +219,10 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <leader>b :wa!<cr>:OmniSharpBuildAsync<cr>
     " automatic syntax check on events (TextChanged requires Vim 7.4)
     autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
-    
+
     " Automatically add new cs files to the nearest project on save
     autocmd BufWritePost *.cs call OmniSharp#AddToProject()
-    
+
     "show type information automatically when the cursor stops moving
     autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 
@@ -235,8 +235,8 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <leader>fu :OmniSharpFindUsages<cr>
     "finds members in the current buffer
     autocmd FileType cs nnoremap <leader>fm :OmniSharpFindMembers<cr>
-    " cursor can be anywhere on the line containing an issue 
-    autocmd FileType cs nnoremap <leader>x  :OmniSharpFixIssue<cr>  
+    " cursor can be anywhere on the line containing an issue
+    autocmd FileType cs nnoremap <leader>x  :OmniSharpFixIssue<cr>
     autocmd FileType cs nnoremap <leader>fx :OmniSharpFixUsings<cr>
     autocmd FileType cs nnoremap <leader>tt :OmniSharpTypeLookup<cr>
     autocmd FileType cs nnoremap <leader>dc :OmniSharpDocumentation<cr>
@@ -260,7 +260,7 @@ vnoremap <leader><space> :call OmniSharp#GetCodeActions('visual')<cr>
 
 " rename with dialog
 nnoremap <leader>nm :OmniSharpRename<cr>
-nnoremap <F2> :OmniSharpRename<cr>      
+nnoremap <F2> :OmniSharpRename<cr>
 " rename without dialog - with cursor on the symbol to rename... ':Rename newname'
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 
