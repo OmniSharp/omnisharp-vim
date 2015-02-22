@@ -128,7 +128,9 @@ This behaviour can be disabled by setting `let g:Omnisharp_stop_server = 0` in y
 
 Alternatively, you can start the Omnisharp server manually:
 
-	[mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
+```
+[mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
+```
 
 Add `-v Verbose` to get extra information from the server.
 
