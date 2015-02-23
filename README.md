@@ -76,7 +76,7 @@ Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then ch
 ```sh
 cd ~/.vim/bundle
 git clone https://github.com/OmniSharp/omnisharp-vim.git
-cd Omnisharp
+cd omnisharp-vim
 git submodule update --init --recursive
 cd server
 xbuild
