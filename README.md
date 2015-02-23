@@ -81,6 +81,9 @@ git submodule update --init --recursive
 cd server
 xbuild
 ```
+
+Note that if you have Mono installed outside of the ["standard" paths](https://github.com/OmniSharp/omnisharp-server/blob/master/OmniSharp/Solution/AssemblySearch.cs#L35-L52) (for example, if it is installed via Boxen where your homebrew root is not `/usr/local/`, you'll need to either add the path to the `AssemblySearch.cs` before building, or symlink your installation to one of the standard paths.
+
 ####Windows
 ```dosbatch
 c:\
