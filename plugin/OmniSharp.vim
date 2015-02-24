@@ -68,3 +68,10 @@ endif
 if !exists("g:Omnisharp_highlight_user_types")
 	let g:Omnisharp_highlight_user_types = 0
 endif
+
+if !exists('g:OmniSharp_selector_ui')
+  let g:OmniSharp_selector_ui = get(filter(
+  \   ['unite', 'ctrlp'],
+  \   '!empty(globpath(&runtimepath, printf("autoload/%s.vim", v:val), 1))'
+  \ ), 0, '')
+endif

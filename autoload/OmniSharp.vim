@@ -118,12 +118,19 @@ function! OmniSharp#JumpToLocation(filename, line, column)
 endfunction
 
 function! OmniSharp#GetCodeActions(mode) range
-    let actions = pyeval('getCodeActions("' . a:mode . '")')
-    if(len(actions) > 0)
+    if g:OmniSharp_selector_ui ==? 'unite'
+        let context = {'empty': 0, 'auto_resize': 1}
+        call unite#start([['omnisharp/findcodeactions', a:mode]], context)
+    elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+        let actions = pyeval(printf('getCodeActions(%s)', string(a:mode)))
+        if empty(actions)
+            echo 'No code actions found'
+            return
+        endif
         call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
         call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
     else
-        echo 'No code actions found'
+        echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
     endif
 endfunction
 
