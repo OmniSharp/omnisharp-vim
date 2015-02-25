@@ -126,8 +126,21 @@ If you are using Tmux, the server will start in a new tmux session. In iterm2, a
 
 This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in your vimrc.
 
-When your close vim, and the omnisharp server is running, vim will ask you if you want to stop the OmniSharp server.
+When your close vim, and the OmniSharp server is running, vim will ask you if you want to stop the OmniSharp server.
 This behaviour can be disabled by setting `let g:Omnisharp_stop_server = 0` in your vimrc.
+
+In addition you can tweak some OmniSharp server behaviour by changing the global configuration file placed:
+
+####OSX / Linux
+```sh
+~/.vim/bundle/omnisharp-vim/server/config.json
+```
+####Windows
+```dosbatch
+c:\Users\<username>\vimfiles\bundle\omnisharp-vim\server\config.json
+```
+Or by providing a local version, that by default called `omnisharp.json` and placed in the same solution directory.
+If you want use another configuration file name, you should set `let g:Omnisharp_server_config_name = '<your file name>.json'` variable in the vimrc.
 
 Alternatively, you can start the Omnisharp server manually:
 
@@ -135,6 +148,7 @@ Alternatively, you can start the Omnisharp server manually:
 [mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
 ```
 
+Add `-config (path\to\json) Configuration` to provide a server configuration file.
 Add `-v Verbose` to get extra information from the server.
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
