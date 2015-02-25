@@ -1,15 +1,19 @@
 if exists("g:OmniSharp_loaded")
-	finish
+  finish
 endif
 
 let g:OmniSharp_loaded = 1
+
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
 
 "Load python/OmniSharp.py
 let s:py_path = join([expand('<sfile>:p:h:h'), "python"], '/')
 exec "python sys.path.append(r'" . s:py_path . "')"
 exec "pyfile " . fnameescape(s:py_path . '/Completion.py')
 exec "pyfile " . fnameescape(s:py_path . '/OmniSharp.py')
-
 
 let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
 
@@ -34,19 +38,19 @@ let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, "OmniSharp_BufWritePreSyntaxChe
 let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck", 0)
 
 let g:OmniSharp_sln_list_index =
-	\ get( g:, "OmniSharp_sln_list_index", -1 )
+      \ get( g:, "OmniSharp_sln_list_index", -1 )
 
 let g:OmniSharp_sln_list_name =
-	\get( g:, "OmniSharp_sln_list_name", "" )
+      \ get( g:, "OmniSharp_sln_list_name", "" )
 
 let g:OmniSharp_autoselect_existing_sln =
-	\ get( g:, "OmniSharp_autoselect_existing_sln", 1 )
+      \ get( g:, "OmniSharp_autoselect_existing_sln", 1 )
 
 let g:OmniSharp_running_slns = []
 
 " Automatically start server
 if !exists("g:Omnisharp_start_server")
-	let g:Omnisharp_start_server = 1
+  let g:Omnisharp_start_server = 1
 endif
 
 " Automatically stop server
@@ -54,13 +58,15 @@ endif
 " g:Omnisharp_stop_server == 1  :: always ask
 " g:Omnisharp_stop_server == 2  :: stop if this vim started
 if !exists("g:Omnisharp_stop_server")
-	let g:Omnisharp_stop_server = 2
+  let g:Omnisharp_stop_server = 2
 endif
 
 if g:Omnisharp_stop_server==1
-	au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
+  au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
 if !exists("g:Omnisharp_highlight_user_types")
-	let g:Omnisharp_highlight_user_types = 0
+  let g:Omnisharp_highlight_user_types = 0
 endif
+
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2

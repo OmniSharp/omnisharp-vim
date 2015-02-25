@@ -1,10 +1,14 @@
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 " Load guard
 if ( exists('g:loaded_ctrlp_OmniSharp_findtype') && g:loaded_ctrlp_OmniSharp_findtype )
 	\ || v:version < 700 || &cp
 	finish
 endif
 let g:loaded_ctrlp_OmniSharp_findtype = 1
-
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -50,9 +54,13 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findtype#init()
-	if !OmniSharp#ServerIsRunning() 
+	if !OmniSharp#ServerIsRunning()
 		return
 	endif
+
+  if !OmniSharp#IsSupported()
+    finish
+  endif
 
 	let s:quickfixes = pyeval("findTypes()")
 	let types = []
@@ -104,4 +112,4 @@ function! ctrlp#OmniSharp#findtype#id()
 	return s:id
 endfunction
 
-" vim:nofen:fdl=0:ts=2:sw=2:sts=2
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2

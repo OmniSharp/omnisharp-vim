@@ -1,3 +1,8 @@
+" Ensure python is supported.
+if !has('python')
+    finish
+endif
+
 "Set a default value for the server address
 if !exists('g:omnicomplete_fetch_full_documentation')
     let g:omnicomplete_fetch_full_documentation = 0
@@ -9,8 +14,7 @@ augroup plugin-OmniSharp
 	autocmd BufLeave <buffer>
 	\ 	if !pumvisible()
 	\|		call OmniSharp#UpdateBuffer()
-	\|	endif	
-	
+	\|	endif
 augroup END
 
 call OmniSharp#AppendCtrlPExtensions()
@@ -56,7 +60,7 @@ command! -buffer -nargs=1 -complete=file
 \	OmniSharpStartServerSolution
 \	call OmniSharp#StartServerSolution(<q-args>)
 
-command! -buffer -nargs=1 -complete=file OmniSharpAddReference         
+command! -buffer -nargs=1 -complete=file OmniSharpAddReference
 \   call OmniSharp#AddReference(<q-args>)
 
 

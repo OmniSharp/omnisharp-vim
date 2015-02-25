@@ -1,3 +1,7 @@
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
 
 " Load guard
 if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_findsymbols )
@@ -5,7 +9,6 @@ if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_
 	finish
 endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
-
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -51,9 +54,13 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findsymbols#init()
-	if !OmniSharp#ServerIsRunning() 
+	if !OmniSharp#ServerIsRunning()
 		return
 	endif
+
+  if !OmniSharp#IsSupported()
+    finish
+  endif
 
 	let s:quickfixes = pyeval("findSymbols()")
 	let symbols = []
@@ -90,4 +97,4 @@ function! ctrlp#OmniSharp#findsymbols#id()
 	return s:id
 endfunction
 
-" vim:nofen:fdl=0:ts=2:sw=2:sts=2
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2
