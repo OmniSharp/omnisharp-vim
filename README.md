@@ -96,7 +96,7 @@ msbuild
 ```
 
 ###Install Python
-Install [Python 2.7.5] (http://www.python.org/download/releases/2.7.5/). Make sure that you pick correct version of Python to match the architecture of Vim.
+Install last version of 2.7 series ([Python 2.7.8] (http://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
 Verify that Python is working inside Vim with
