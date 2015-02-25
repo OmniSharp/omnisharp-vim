@@ -447,7 +447,13 @@ endfunction
 
 function! OmniSharp#ResolveLocalConfig(solutionPath)
 	let result = ''
-	let configPath = fnamemodify(a:solutionPath, ':p:h') . '\omnisharp.json'
+	echom g:OmniSharp_server_config_name
+	let configPath = fnamemodify(a:solutionPath, ':p:h')
+						\ . '\'
+						\ . g:OmniSharp_server_config_name
+
+	echom configPath
+
 	if filereadable(configPath)
 		let result = ' -config ' . configPath
 	endif
@@ -459,9 +465,9 @@ function! OmniSharp#StartServerSolution(solutionPath)
 	let g:OmniSharp_running_slns += [a:solutionPath]
 	let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
 	let command = shellescape(s:omnisharp_server,1)
-		\ . ' -p ' . port
-		\ . ' -s ' . shellescape(a:solutionPath, 1)
-		\ . OmniSharp#ResolveLocalConfig(a:solutionPath)
+					\ . ' -p ' . port
+					\ . ' -s ' . shellescape(a:solutionPath, 1)
+					\ . OmniSharp#ResolveLocalConfig(a:solutionPath)
 
 	if !has('win32') && !has('win32unix')
 		let command = 'mono ' . command
