@@ -20,14 +20,14 @@ set cpo&vim
 func! SummaryFolds()
     let firstLine = getline(v:foldstart)
     if firstLine =~ "<summary>"
-	let line = getline(v:foldstart + 1)
-	let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
-	return "+--" . " Summary: " . sub
+        let line = getline(v:foldstart + 1)
+        let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
+        return "+--" . " Summary: " . sub
     elseif firstLine =~ "# region"
-	let sub = substitute(firstLine, '\s*\# region ', '', 'g')
-	return "+-- Region: " . sub
+        let sub = substitute(firstLine, '\s*\# region ', '', 'g')
+        return "+-- Region: " . sub
     else
-	return "+-- " . firstLine
+        return "+-- " . firstLine
     endif
 endfunc
 
@@ -107,10 +107,10 @@ hi def link xmlRegion Comment
 
 " [1] 9.5 Pre-processing directives
 syn region	csPreCondit
-    \ start="^\s*#\s*\(define\|undef\|if\|elif\|else\|endif\|line\|error\|warning\)"
-    \ skip="\\$" end="$" contains=csComment keepend
+            \ start="^\s*#\s*\(define\|undef\|if\|elif\|else\|endif\|line\|error\|warning\)"
+                \ skip="\\$" end="$" contains=csComment keepend
 syn region csRegion matchgroup=csPreCondit start="^\s*#\s*region.*$"
-    \ end="^\s*#\s*endregion" transparent fold contains=TOP
+            \ end="^\s*#\s*endregion" transparent fold contains=TOP
 syn region csSummary start="^\s*/// <summary" end="^\(\s*///\)\@!" transparent fold keepend
 
 
@@ -192,4 +192,4 @@ let b:current_syntax = "cs"
 let &cpo = s:cs_cpo_save
 unlet s:cs_cpo_save
 
-" vim: ts=8
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2
