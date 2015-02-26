@@ -3,6 +3,11 @@ if exists("g:loaded_syntastic_cs_syntax_checker")
 endif
 let g:loaded_syntastic_cs_syntax_checker = 1
 
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 let s:save_cpo = &cpo
 set cpo&vim
 

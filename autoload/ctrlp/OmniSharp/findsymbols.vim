@@ -1,3 +1,7 @@
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
 
 " Load guard
 if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_findsymbols )
@@ -5,7 +9,6 @@ if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_
   finish
 endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
-
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "

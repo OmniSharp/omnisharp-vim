@@ -1,3 +1,8 @@
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 "Set a default value for the server address
 if !exists('g:omnicomplete_fetch_full_documentation')
     let g:omnicomplete_fetch_full_documentation = 0
