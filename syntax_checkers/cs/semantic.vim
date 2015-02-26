@@ -20,10 +20,10 @@ function! SyntaxCheckers_cs_semantic_GetLocList() dict
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
-    \ 'filetype': 'cs',
-    \ 'name': 'semantic'})
+            \ 'filetype': 'cs',
+            \ 'name': 'semantic'})
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
 
-" vim: set et sts=4 sw=4:
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2
