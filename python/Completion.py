@@ -19,8 +19,8 @@ class Completion:
             for completion in response:
                 complete = {
                     'word': completion['CompletionText'],
-                    'menu' : completion['DisplayText'],
-                    'info': completion['Description'].replace('\r\n', '\n'),
+                    'menu' : completion['DisplayText'] if completion['DisplayText'] is not None else '',
+                    'info': completion['Description'].replace('\r\n', '\n') if completion['Description'] is not None else '',
                     'icase': 1,
                     'dup':1
                 }
