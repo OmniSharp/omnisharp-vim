@@ -19,12 +19,14 @@ def get_response(endPoint, params=None, timeout=None):
         host = vim.eval('b:OmniSharp_host')
 
     target = urlparse.urljoin(host, endPoint)
-    data = urllib.urlencode(parameters).encode('utf-8')
 
     proxy = urllib2.ProxyHandler({})
     opener = urllib2.build_opener(proxy)
+    req = urllib2.Request(target)
+    req.add_header('Content-Type', 'application/json')
+    
     try:
-        response = opener.open(target, data, timeout)
+        response = opener.open(req, json.dumps(parameters), timeout)
         vim.command("let g:serverSeenRunning = 1")
     except Exception:
         vim.command("let g:serverSeenRunning = 0")
