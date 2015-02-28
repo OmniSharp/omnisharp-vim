@@ -3,6 +3,11 @@ if exists("g:loaded_syntastic_cs_syntax_checker")
 endif
 let g:loaded_syntastic_cs_syntax_checker = 1
 
+" Ensure python is supported.
+if !has('python')
+  finish
+endif
+
 let s:save_cpo = &cpo
 set cpo&vim
 
@@ -20,10 +25,10 @@ function! SyntaxCheckers_cs_syntax_GetLocList() dict
 endfunction
 
 call g:SyntasticRegistry.CreateAndRegisterChecker({
-    \ 'filetype': 'cs',
-    \ 'name': 'syntax'})
+            \ 'filetype': 'cs',
+            \ 'name': 'syntax'})
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
 
-" vim: set et sts=4 sw=4:
+" vim:nofen:fdl=0:et:ts=2:sw=2:sts=2
