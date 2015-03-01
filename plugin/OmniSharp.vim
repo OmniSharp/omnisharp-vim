@@ -57,6 +57,10 @@ if !exists("g:Omnisharp_stop_server")
 	let g:Omnisharp_stop_server = 2
 endif
 
+" Provide custom server configuration file name
+let g:OmniSharp_server_config_name =
+	\ get(g:, "OmniSharp_server_config_name", "omnisharp.json")
+
 if g:Omnisharp_stop_server==1
 	au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif

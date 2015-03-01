@@ -42,7 +42,7 @@ function! OmniSharp#FindImplementations()
 
 	if len(qf_taglist) == 0
         echo "No implementations found"
-    endif 
+    endif
 
 	if len(qf_taglist) == 1
         let usage = qf_taglist[0]
@@ -264,7 +264,7 @@ function! OmniSharp#BuildAsync()
 endfunction
 
 function! OmniSharp#RunTests(mode)
-	wall 
+	wall
 	python buildcommand()
 
 	if a:mode != 'last'
@@ -272,7 +272,7 @@ function! OmniSharp#RunTests(mode)
 	endif
 
     let s:cmdheight=&cmdheight
-    set cmdheight=5 
+    set cmdheight=5
     let b:dispatch = b:buildcommand . " && " . s:testcommand
     if executable("sed")
         " don't match on <filename unknown>:0
@@ -445,11 +445,27 @@ function! OmniSharp#StartServer()
 	endif
 endfunction
 
+function! OmniSharp#ResolveLocalConfig(solutionPath)
+	let result = ''
+	let configPath = fnamemodify(a:solutionPath, ':p:h')
+						\ . '\'
+						\ . g:OmniSharp_server_config_name
+
+	if filereadable(configPath)
+		let result = ' -config ' . configPath
+	endif
+	return result
+endfunction
+
 function! OmniSharp#StartServerSolution(solutionPath)
 
 	let g:OmniSharp_running_slns += [a:solutionPath]
 	let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-	let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . shellescape(a:solutionPath, 1)
+	let command = shellescape(s:omnisharp_server,1)
+					\ . ' -p ' . port
+					\ . ' -s ' . shellescape(a:solutionPath, 1)
+					\ . OmniSharp#ResolveLocalConfig(a:solutionPath)
+
 	if !has('win32') && !has('win32unix')
 		let command = 'mono ' . command
 	endif
