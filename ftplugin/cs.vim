@@ -29,7 +29,7 @@ command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementa
 command! -buffer -bar OmniSharpFindMembers         call OmniSharp#FindMembers()
 command! -buffer -bar OmniSharpFindSymbol          call OmniSharp#FindSymbol()
 command! -buffer -bar OmniSharpFindSyntaxErrors    call OmniSharp#FindSyntaxErrors()
-command! -buffer -bar OmniSharpFindType            call ctrlp#init(ctrlp#OmniSharp#findtype#id())
+command! -buffer -bar OmniSharpFindType            call OmniSharp#FindType()
 command! -buffer -bar OmniSharpFindUsages          call OmniSharp#FindUsages()
 command! -buffer -bar OmniSharpFixIssue            call OmniSharp#FixIssue()
 command! -buffer -bar OmniSharpFixUsings           call OmniSharp#FixUsings()

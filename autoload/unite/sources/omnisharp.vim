@@ -54,8 +54,28 @@ function! s:findsymbols.gather_candidates(args, context) abort
 endfunction
 
 
+let s:findtype = {
+\   'name': 'omnisharp/findtype',
+\   'description': 'candidates from C# types via OmniSharp',
+\   'default_kind': 'jump_list',
+\ }
+function! s:findtype.gather_candidates(args, context) abort
+  if !OmniSharp#ServerIsRunning()
+    return []
+  endif
+  let symbols = pyeval('findTypes()')
+  return map(symbols, '{
+  \   "word": get(split(v:val.text, "\t"), 0),
+  \   "abbr": v:val.text,
+  \   "action__path": v:val.filename,
+  \   "action__line": v:val.lnum,
+  \   "action__col": v:val.col,
+  \ }')
+endfunction
+
+
 function! unite#sources#omnisharp#define()
-  return [s:findcodeactions, s:findsymbols]
+  return [s:findcodeactions, s:findsymbols, s:findtype]
 endfunction
 
 let &cpoptions = s:save_cpo
