@@ -117,6 +117,16 @@ function! OmniSharp#JumpToLocation(filename, line, column)
     endif
 endfunction
 
+function! OmniSharp#FindSymbol()
+    if g:OmniSharp_selector_ui ==? 'unite'
+        call unite#start([['omnisharp/findsymbols']])
+    elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+        call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
+    else
+        echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
+    endif
+endfunction
+
 function! OmniSharp#GetCodeActions(mode) range
     if g:OmniSharp_selector_ui ==? 'unite'
         let context = {'empty': 0, 'auto_resize': 1}

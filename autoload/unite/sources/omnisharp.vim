@@ -34,8 +34,28 @@ endfunction
 let s:findcodeactions.action_table = s:findcodeactions_action_table
 
 
+let s:findsymbols = {
+\   'name': 'omnisharp/findsymbols',
+\   'description': 'candidates from C# symbols via OmniSharp',
+\   'default_kind': 'jump_list',
+\ }
+function! s:findsymbols.gather_candidates(args, context) abort
+  if !OmniSharp#ServerIsRunning()
+    return []
+  endif
+  let symbols = pyeval('findSymbols()')
+  return map(symbols, '{
+  \   "word": get(split(v:val.text, "\t"), 0),
+  \   "abbr": v:val.text,
+  \   "action__path": v:val.filename,
+  \   "action__line": v:val.lnum,
+  \   "action__col": v:val.col,
+  \ }')
+endfunction
+
+
 function! unite#sources#omnisharp#define()
-  return [s:findcodeactions]
+  return [s:findcodeactions, s:findsymbols]
 endfunction
 
 let &cpoptions = s:save_cpo
