@@ -447,12 +447,9 @@ endfunction
 
 function! OmniSharp#ResolveLocalConfig(solutionPath)
 	let result = ''
-	echom g:OmniSharp_server_config_name
 	let configPath = fnamemodify(a:solutionPath, ':p:h')
 						\ . '\'
 						\ . g:OmniSharp_server_config_name
-
-	echom configPath
 
 	if filereadable(configPath)
 		let result = ' -config ' . configPath
