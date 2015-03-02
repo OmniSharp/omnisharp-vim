@@ -2,7 +2,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 "Set g:omnisharp_server_type to 'roslyn' or 'v1'
-let g:omnisharp_server_type = 'roslyn'
+let g:omnisharp_server_type = 'v1'
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 let s:omnisharp_roslyn_server = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
 let s:server_files = '*.sln'
@@ -483,8 +483,6 @@ function! OmniSharp#StartServerSolution(solutionPath)
 					\ . ' -p ' . port
 					\ . ' -s ' . shellescape(a:solutionPath, 1)
 					\ . OmniSharp#ResolveLocalConfig(a:solutionPath)
-
-
         endif
 	if !has('win32') && !has('win32unix') && g:omnisharp_server_type != 'roslyn'
 		let command = 'mono ' . command
