@@ -1,7 +1,12 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+"Set g:omnisharp_server_type to 'roslyn' or 'v1'
+let g:omnisharp_server_type = 'roslyn'
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
+let s:omnisharp_roslyn_server = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
+let s:server_files = '*.sln'
+let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let g:serverSeenRunning = 0
@@ -380,6 +385,9 @@ function! OmniSharp#StartServer()
 	"get the path for the current buffer
 	let folder = expand('%:p:h')
 	let solutionfiles = globpath(folder, "*.sln", 1)
+	if g:omnisharp_server_type == 'roslyn'
+		let solutionfiles = globpath(folder, "project.json", 1)
+	endif
 
 	while (solutionfiles == '')
 		let lastfolder = folder
@@ -390,6 +398,10 @@ function! OmniSharp#StartServer()
 			break
 		endif
 		let solutionfiles = globpath(folder , "*.sln", 1)
+		if g:omnisharp_server_type == 'roslyn'
+			let solutionfiles = globpath(folder, "project.json", 1)
+		endif
+
 		if isdirectory(solutionfiles)
 			let solutionfiles = ''
 		endif
@@ -446,11 +458,18 @@ function! OmniSharp#StartServer()
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath)
-
-	let g:OmniSharp_running_slns += [a:solutionPath]
+	if g:omnisharp_server_type == 'roslyn'
+		let g:OmniSharp_running_slns += [fnamemodify(a:solutionPath, ':h')]
+	else
+		let g:OmniSharp_running_slns += [a:solutionPath]
+	endif
 	let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-	let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . shellescape(a:solutionPath, 1)
-	if !has('win32') && !has('win32unix')
+	if g:omnisharp_server_type == 'roslyn'
+		let command = shellescape(s:omnisharp_roslyn_server,1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
+	else
+		let command = shellescape(s:omnisharp_server,1) . ' -p ' . port . ' -s ' . shellescape(a:solutionPath, 1)
+        endif
+	if !has('win32') && !has('win32unix') && g:omnisharp_server_type != 'roslyn'
 		let command = 'mono ' . command
 	endif
 	call OmniSharp#RunAsyncCommand(command)
@@ -493,7 +512,17 @@ function! OmniSharp#StopServer(...)
 	endif
 
 	if force || OmniSharp#ServerIsRunning()
-		python getResponse("/stopserver")
+		if g:omnisharp_server_type == 'roslyn'
+			"Kill process - temporary hack till /stop is
+                        "implemented in the roslyn server
+			if !has('win32') && !has('win32unix')
+				call system('pkill -f omnisharp-roslyn')
+			else
+				call system('taskkill /IM /f Omnisharp')
+			endif
+ 		else
+			python getResponse("/stopserver")
+		endif
 	endif
 endfunction
 
