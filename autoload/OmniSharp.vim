@@ -174,6 +174,19 @@ function! OmniSharp#FindSemanticErrors()
     return get(b:, "semanticerrors", [])
 endfunction
 
+function! OmniSharp#CodeCheck()
+    if pumvisible()
+        return get(b:, "codecheck", [])
+    endif
+	if bufname('%') == ''
+		return []
+	endif
+	if g:serverSeenRunning == 1
+        let b:codecheck = pyeval("codeCheck()")
+    endif
+    return get(b:, "codecheck", [])
+endfunction
+
 " Jump to first scratch window visible in current tab, or create it.
 " This is useful to accumulate results from successive operations.
 " Global function that can be called from other scripts.

@@ -122,6 +122,10 @@ def getCodeIssues():
     js = getResponse('/getcodeissues')
     return get_quickfix_list(js, 'QuickFixes')
 
+def codeCheck():
+    js = getResponse('/codecheck')
+    return get_quickfix_list(js, 'QuickFixes')
+
 def typeLookup(ret):
     parameters = {}
     parameters['includeDocumentation'] = vim.eval('a:includeDocumentation')

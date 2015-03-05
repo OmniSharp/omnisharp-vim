@@ -225,7 +225,8 @@ set splitbelow
 
 " Get Code Issues and syntax errors
 let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
-
+" If you are using the omnisharp-roslyn backend, use the following
+" let g:syntastic_cs_checkers = ['code_checker']
 augroup omnisharp_commands
     autocmd!
 
