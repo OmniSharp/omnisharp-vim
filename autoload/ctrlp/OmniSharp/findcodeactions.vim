@@ -38,7 +38,6 @@
 call add(g:ctrlp_ext_vars, {
 	\ 'init': 'ctrlp#OmniSharp#findcodeactions#init()',
 	\ 'accept': 'ctrlp#OmniSharp#findcodeactions#accept',
-	\ 'exit': 'ctrlp#OmniSharp#findcodeactions#exit()',
 	\ 'lname': 'Find Code Actions',
 	\ 'sname': 'code actions',
 	\ 'type': 'line',
@@ -58,7 +57,6 @@ endfunction
 "
 
 function! ctrlp#OmniSharp#findcodeactions#init()
-  let g:codeactionsinprogress = 1
   return s:actions
 endfunction
 
@@ -71,14 +69,9 @@ endfunction
 "  a:str    the selected string
 "
 function! ctrlp#OmniSharp#findcodeactions#accept(mode, str)
-  let g:codeactionsinprogress = 0
   call ctrlp#exit()
-  let s:action = index(s:actions, a:str)
-  let res = pyeval("runCodeAction('" . s:mode . "')")
-endfunction
-
-function! ctrlp#OmniSharp#findcodeactions#exit()
-  let g:codeactionsinprogress = 0
+  let action = index(s:actions, a:str)
+  call pyeval(printf('runCodeAction(%s, %d)', string(s:mode), action))
 endfunction
 
 " Give the extension an ID

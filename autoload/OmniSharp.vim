@@ -10,7 +10,6 @@ let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let g:serverSeenRunning = 0
-let g:codeactionsinprogress = 0
 
 function! OmniSharp#Complete(findstart, base)
 	if a:findstart
@@ -118,19 +117,40 @@ function! OmniSharp#JumpToLocation(filename, line, column)
     endif
 endfunction
 
-function! OmniSharp#GetCodeActions(mode)
-    " I can't figure out how to prevent this method
-    " being called multiple times for each line in
-    " the visual selection. This is a workaround.
-    if g:codeactionsinprogress == 1
-        return
+function! OmniSharp#FindSymbol()
+    if g:OmniSharp_selector_ui ==? 'unite'
+        call unite#start([['omnisharp/findsymbols']])
+    elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+        call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
+    else
+        echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
     endif
-    let actions = pyeval('getCodeActions("' . a:mode . '")')
-    if(len(actions) > 0)
+endfunction
+
+function! OmniSharp#FindType()
+    if g:OmniSharp_selector_ui ==? 'unite'
+        call unite#start([['omnisharp/findtype']])
+    elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+        call ctrlp#init(ctrlp#OmniSharp#findtype#id())
+    else
+        echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
+    endif
+endfunction
+
+function! OmniSharp#GetCodeActions(mode) range
+    if g:OmniSharp_selector_ui ==? 'unite'
+        let context = {'empty': 0, 'auto_resize': 1}
+        call unite#start([['omnisharp/findcodeactions', a:mode]], context)
+    elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+        let actions = pyeval(printf('getCodeActions(%s)', string(a:mode)))
+        if empty(actions)
+            echo 'No code actions found'
+            return
+        endif
         call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
         call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
     else
-        echo 'No code actions found'
+        echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
     endif
 endfunction
 

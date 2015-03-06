@@ -24,10 +24,10 @@ completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nos
     * Subsequence match completions
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
+* Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
 * Find implementations/derived types
 * Find usages
-* Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin)
+* Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
   * Extract method
 * Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
@@ -113,8 +113,14 @@ Use your favourite way to install it.
 The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
-###(optional) Install ctrl-p
-[CtrlP](https://github.com/kien/ctrlp.vim) is needed if you want to use the Code Actions, Find Type and Find Symbol features.
+###(optional) Install ctrlp.vim or unite.vim
+[CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim) is needed if you want to use the Code Actions, Find Type and Find Symbol features.
+If you have installed both, you can choose one by `g:OmniSharp_selector_ui` variable.
+
+```vim
+let g:OmniSharp_selector_ui = 'unite'  " Use unite.vim
+let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
+```
 
 ## How to use
 
@@ -273,7 +279,7 @@ set updatetime=500
 " Remove 'Press Enter to continue' message when type information is longer than one line.
 set cmdheight=2
 
-" Contextual code actions (requires CtrlP)
+" Contextual code actions (requires CtrlP or unite.vim)
 nnoremap <leader><space> :OmniSharpGetCodeActions<cr>
 " Run code actions with text selected in visual mode to extract method
 vnoremap <leader><space> :call OmniSharp#GetCodeActions('visual')<cr>
@@ -304,7 +310,6 @@ set hidden
 #####TODO
 
 - Move type to own file
-- Unite plugin for find types / symbols
 
 Pull requests welcome!
 
