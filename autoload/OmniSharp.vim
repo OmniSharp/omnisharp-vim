@@ -75,7 +75,7 @@ function! OmniSharp#NavigateUp()
   let line = line('.')
   let l = len(qf_taglist) - 1
 
-  if(l >= 0)
+  if l >= 0
     while l >= 0
       let qf_line = qf_taglist[l].lnum
       let qf_col = qf_taglist[l].col
@@ -108,7 +108,7 @@ function! OmniSharp#GotoDefinition()
 endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column)
-  if(a:filename != '')
+  if a:filename != ''
     if a:filename != bufname('%')
       exec 'e! ' . fnameescape(a:filename)
     endif
@@ -255,13 +255,13 @@ function! OmniSharp#TypeLookup(includeDocumentation)
     if exists(':SyntasticCheck')
       SyntasticSetLoclist
       for issue in getloclist(0)
-        if(issue['lnum'] == line)
+        if issue['lnum'] == line
           let found_line_in_loc_list = 1
           break
         endif
       endfor
     endif
-    if(found_line_in_loc_list == 0)
+    if found_line_in_loc_list == 0
       python typeLookup("type")
       call OmniSharp#Echo(type)
     endif
@@ -472,14 +472,14 @@ function! OmniSharp#StartServer()
       let i = 0
       while i <= len
         let c = strpart(optionstring, len-i, 1)
-        if (c < '0' && c > '9')
+        if c < '0' && c > '9'
           return
         endif
         let option += c * float2nr(pow(10, i))
         let i += 1
       endwhile
 
-      if (option == 0 || option > len(array))
+      if option == 0 || option > len(array)
         return
       endif
 
