@@ -50,7 +50,7 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findtype#init()
-	if !OmniSharp#ServerIsRunning() 
+	if !OmniSharp#ServerIsRunning()
 		return
 	endif
 

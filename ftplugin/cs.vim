@@ -9,8 +9,8 @@ augroup plugin-OmniSharp
 	autocmd BufLeave <buffer>
 	\ 	if !pumvisible()
 	\|		call OmniSharp#UpdateBuffer()
-	\|	endif	
-	
+	\|	endif
+
 augroup END
 
 call OmniSharp#AppendCtrlPExtensions()
@@ -56,7 +56,7 @@ command! -buffer -nargs=1 -complete=file
 \	OmniSharpStartServerSolution
 \	call OmniSharp#StartServerSolution(<q-args>)
 
-command! -buffer -nargs=1 -complete=file OmniSharpAddReference         
+command! -buffer -nargs=1 -complete=file OmniSharpAddReference
 \   call OmniSharp#AddReference(<q-args>)
 
 
