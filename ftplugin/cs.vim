@@ -4,19 +4,19 @@ if !exists('g:omnicomplete_fetch_full_documentation')
 endif
 
 augroup plugin-OmniSharp
-	autocmd! * <buffer>
+  autocmd! * <buffer>
 
-	autocmd BufLeave <buffer>
-	\ 	if !pumvisible()
-	\|		call OmniSharp#UpdateBuffer()
-	\|	endif
+  autocmd BufLeave <buffer>
+  \   if !pumvisible()
+  \|    call OmniSharp#UpdateBuffer()
+  \|  endif
 
 augroup END
 
 call OmniSharp#AppendCtrlPExtensions()
 
 if get(g:, 'Omnisharp_start_server', 0) == 1
-	call OmniSharp#StartServerIfNotRunning()
+  call OmniSharp#StartServerIfNotRunning()
 endif
 
 " Commands
@@ -43,57 +43,57 @@ command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRunAllTests         call OmniSharp#RunTests('all')
 command! -buffer -bar OmniSharpRunLastTests        call OmniSharp#RunTests('last')
 command! -buffer -bar OmniSharpRunTestFixture      call OmniSharp#RunTests('fixture')
-command! -buffer -bar OmniSharpRunTests      	   call OmniSharp#RunTests('single')
+command! -buffer -bar OmniSharpRunTests            call OmniSharp#RunTests('single')
 command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
 command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookupWithoutDocumentation()
 
 
 command! -buffer -nargs=1 OmniSharpRenameTo
-\	call OmniSharp#RenameTo(<q-args>)
+\ call OmniSharp#RenameTo(<q-args>)
 
 command! -buffer -nargs=1 -complete=file
-\	OmniSharpStartServerSolution
-\	call OmniSharp#StartServerSolution(<q-args>)
+\ OmniSharpStartServerSolution
+\ call OmniSharp#StartServerSolution(<q-args>)
 
 command! -buffer -nargs=1 -complete=file OmniSharpAddReference
-\   call OmniSharp#AddReference(<q-args>)
+\ call OmniSharp#AddReference(<q-args>)
 
 
 if exists('b:undo_ftplugin')
-	let b:undo_ftplugin .= ' | '
+  let b:undo_ftplugin .= ' | '
 else
-	let b:undo_ftplugin = ''
+  let b:undo_ftplugin = ''
 endif
 let b:undo_ftplugin .= '
-\	execute "autocmd! plugin-OmniSharp * <buffer>"
+\ execute "autocmd! plugin-OmniSharp * <buffer>"
 \
-\|	delcommand OmniSharpAddReference
-\|	delcommand OmniSharpAddToProject
-\|	delcommand OmniSharpBuild
-\|	delcommand OmniSharpBuildAsync
-\|	delcommand OmniSharpCodeFormat
-\|	delcommand OmniSharpFindImplementations
-\|	delcommand OmniSharpFindSymbol
-\|	delcommand OmniSharpFindSyntaxErrors
-\|	delcommand OmniSharpFindType
-\|	delcommand OmniSharpFindUsages
-\|	delcommand OmniSharpFixIssue
-\|	delcommand OmniSharpFixUsings
-\|	delcommand OmniSharpGetCodeActions
-\|	delcommand OmniSharpGotoDefinition
-\|	delcommand OmniSharpNavigateUp
-\|	delcommand OmniSharpNavigateDown
-\|	delcommand OmniSharpReloadSolution
-\|	delcommand OmniSharpRename
-\|	delcommand OmniSharpRenameTo
-\|	delcommand OmniSharpStartServer
-\|	delcommand OmniSharpStartServerSolution
-\|	delcommand OmniSharpStopServer
-\|	delcommand OmniSharpTypeLookup
+\|  delcommand OmniSharpAddReference
+\|  delcommand OmniSharpAddToProject
+\|  delcommand OmniSharpBuild
+\|  delcommand OmniSharpBuildAsync
+\|  delcommand OmniSharpCodeFormat
+\|  delcommand OmniSharpFindImplementations
+\|  delcommand OmniSharpFindSymbol
+\|  delcommand OmniSharpFindSyntaxErrors
+\|  delcommand OmniSharpFindType
+\|  delcommand OmniSharpFindUsages
+\|  delcommand OmniSharpFixIssue
+\|  delcommand OmniSharpFixUsings
+\|  delcommand OmniSharpGetCodeActions
+\|  delcommand OmniSharpGotoDefinition
+\|  delcommand OmniSharpNavigateUp
+\|  delcommand OmniSharpNavigateDown
+\|  delcommand OmniSharpReloadSolution
+\|  delcommand OmniSharpRename
+\|  delcommand OmniSharpRenameTo
+\|  delcommand OmniSharpStartServer
+\|  delcommand OmniSharpStartServerSolution
+\|  delcommand OmniSharpStopServer
+\|  delcommand OmniSharpTypeLookup
 \|  delcommand OmniSharpRunAllTests
 \|  delcommand OmniSharpRunLastTests
 \|  delcommand OmniSharpRunTestFixture
 \|  delcommand OmniSharpRunTests
 \
-\|	setlocal omnifunc< errorformat< makeprg<'
+\|  setlocal omnifunc< errorformat< makeprg<'

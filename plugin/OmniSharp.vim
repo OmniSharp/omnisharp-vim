@@ -1,5 +1,5 @@
 if exists("g:OmniSharp_loaded")
-	finish
+  finish
 endif
 
 let g:OmniSharp_loaded = 1
@@ -34,19 +34,19 @@ let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, "OmniSharp_BufWritePreSyntaxChe
 let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, "OmniSharp_CursorHoldSyntaxCheck", 0)
 
 let g:OmniSharp_sln_list_index =
-	\ get( g:, "OmniSharp_sln_list_index", -1 )
+\ get( g:, "OmniSharp_sln_list_index", -1 )
 
 let g:OmniSharp_sln_list_name =
-	\get( g:, "OmniSharp_sln_list_name", "" )
+\ get( g:, "OmniSharp_sln_list_name", "" )
 
 let g:OmniSharp_autoselect_existing_sln =
-	\ get( g:, "OmniSharp_autoselect_existing_sln", 1 )
+\ get( g:, "OmniSharp_autoselect_existing_sln", 1 )
 
 let g:OmniSharp_running_slns = []
 
 " Automatically start server
 if !exists("g:Omnisharp_start_server")
-	let g:Omnisharp_start_server = 1
+  let g:Omnisharp_start_server = 1
 endif
 
 " Automatically stop server
@@ -54,19 +54,19 @@ endif
 " g:Omnisharp_stop_server == 1  :: always ask
 " g:Omnisharp_stop_server == 2  :: stop if this vim started
 if !exists("g:Omnisharp_stop_server")
-	let g:Omnisharp_stop_server = 2
+  let g:Omnisharp_stop_server = 2
 endif
 
 " Provide custom server configuration file name
 let g:OmniSharp_server_config_name =
-	\ get(g:, "OmniSharp_server_config_name", "omnisharp.json")
+\ get(g:, "OmniSharp_server_config_name", "omnisharp.json")
 
 if g:Omnisharp_stop_server==1
-	au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
+  au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
 if !exists("g:Omnisharp_highlight_user_types")
-	let g:Omnisharp_highlight_user_types = 0
+  let g:Omnisharp_highlight_user_types = 0
 endif
 
 if !exists('g:OmniSharp_selector_ui')

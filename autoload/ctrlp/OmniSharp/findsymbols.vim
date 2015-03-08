@@ -1,8 +1,8 @@
 
 " Load guard
 if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_findsymbols )
-	\ || v:version < 700 || &cp
-	finish
+\ || v:version < 700 || &cp
+  finish
 endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
 
@@ -37,13 +37,13 @@ let g:loaded_ctrlp_OmniSharp_findsymbols = 1
 " + specinput: enable special inputs '..' and '@cd' (disabled by default)
 "
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'ctrlp#OmniSharp#findsymbols#init()',
-	\ 'accept': 'ctrlp#OmniSharp#findsymbols#accept',
-	\ 'lname': 'Find Symbols',
-	\ 'sname': 'symbols',
-	\ 'type': 'tabs',
-	\ 'sort': 1,
-	\ })
+\ 'init': 'ctrlp#OmniSharp#findsymbols#init()',
+\ 'accept': 'ctrlp#OmniSharp#findsymbols#accept',
+\ 'lname': 'Find Symbols',
+\ 'sname': 'symbols',
+\ 'type': 'tabs',
+\ 'sort': 1,
+\ })
 
 
 " Provide a list of strings to search in
@@ -51,16 +51,16 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findsymbols#init()
-	if !OmniSharp#ServerIsRunning()
-		return
-	endif
+  if !OmniSharp#ServerIsRunning()
+    return
+  endif
 
-	let s:quickfixes = pyeval("findSymbols()")
-	let symbols = []
-	for quickfix in s:quickfixes
-		call add(symbols, quickfix.text)
-	endfor
-	return symbols
+  let s:quickfixes = pyeval("findSymbols()")
+  let symbols = []
+  for quickfix in s:quickfixes
+    call add(symbols, quickfix.text)
+  endfor
+  return symbols
 endfunction
 
 
@@ -73,13 +73,13 @@ endfunction
 "
 function! ctrlp#OmniSharp#findsymbols#accept(mode, str)
   call ctrlp#exit()
-	for quickfix in s:quickfixes
-		if quickfix.text == a:str
-			break
-		endif
-	endfor
+  for quickfix in s:quickfixes
+    if quickfix.text == a:str
+      break
+    endif
+  endfor
   echo quickfix.filename
-	call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
+  call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
 endfunction
 
 " Give the extension an ID
@@ -87,7 +87,7 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
 function! ctrlp#OmniSharp#findsymbols#id()
-	return s:id
+  return s:id
 endfunction
 
 " vim:nofen:fdl=0:ts=2:sw=2:sts=2

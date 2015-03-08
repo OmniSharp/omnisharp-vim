@@ -1,7 +1,7 @@
 " Load guard
 if ( exists('g:loaded_ctrlp_OmniSharp_findtype') && g:loaded_ctrlp_OmniSharp_findtype )
-	\ || v:version < 700 || &cp
-	finish
+\ || v:version < 700 || &cp
+  finish
 endif
 let g:loaded_ctrlp_OmniSharp_findtype = 1
 
@@ -36,13 +36,13 @@ let g:loaded_ctrlp_OmniSharp_findtype = 1
 " + specinput: enable special inputs '..' and '@cd' (disabled by default)
 "
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'ctrlp#OmniSharp#findtype#init()',
-	\ 'accept': 'ctrlp#OmniSharp#findtype#accept',
-	\ 'lname': 'Find Types',
-	\ 'sname': 'types',
-	\ 'type': 'tabs',
-	\ 'sort': 1,
-	\ })
+\ 'init': 'ctrlp#OmniSharp#findtype#init()',
+\ 'accept': 'ctrlp#OmniSharp#findtype#accept',
+\ 'lname': 'Find Types',
+\ 'sname': 'types',
+\ 'type': 'tabs',
+\ 'sort': 1,
+\ })
 
 
 " Provide a list of strings to search in
@@ -50,16 +50,16 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findtype#init()
-	if !OmniSharp#ServerIsRunning()
-		return
-	endif
+  if !OmniSharp#ServerIsRunning()
+    return
+  endif
 
-	let s:quickfixes = pyeval("findTypes()")
-	let types = []
-	for quickfix in s:quickfixes
-		call add(types, quickfix.text)
-	endfor
-	return types
+  let s:quickfixes = pyeval("findTypes()")
+  let types = []
+  for quickfix in s:quickfixes
+    call add(types, quickfix.text)
+  endfor
+  return types
 endfunction
 
 
@@ -71,12 +71,12 @@ endfunction
 "  a:str    the selected string
 "
 function! ctrlp#OmniSharp#findtype#accept(mode, str)
-	call ctrlp#OmniSharp#findtype#exit()
-	for quickfix in s:quickfixes
-		if quickfix.text == a:str
-			break
-		endif
-	endfor
+  call ctrlp#OmniSharp#findtype#exit()
+  for quickfix in s:quickfixes
+    if quickfix.text == a:str
+      break
+    endif
+  endfor
   call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
 endfunction
 
@@ -101,7 +101,7 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
 function! ctrlp#OmniSharp#findtype#id()
-	return s:id
+  return s:id
 endfunction
 
 " vim:nofen:fdl=0:ts=2:sw=2:sts=2

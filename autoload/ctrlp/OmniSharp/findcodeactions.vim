@@ -1,7 +1,7 @@
 " Load guard
 "if ( exists('g:loaded_ctrlp_findsymbols') && g:loaded_ctrlp_findsymbols )
-"	\ || v:version < 700 || &cp
-"	finish
+" \ || v:version < 700 || &cp
+" finish
 "endif
 "let g:loaded_ctrlp_findsymbols = 1
 
@@ -36,13 +36,13 @@
 " + specinput: enable special inputs '..' and '@cd' (disabled by default)
 "
 call add(g:ctrlp_ext_vars, {
-	\ 'init': 'ctrlp#OmniSharp#findcodeactions#init()',
-	\ 'accept': 'ctrlp#OmniSharp#findcodeactions#accept',
-	\ 'lname': 'Find Code Actions',
-	\ 'sname': 'code actions',
-	\ 'type': 'line',
-	\ 'sort': 1,
-	\ })
+\ 'init': 'ctrlp#OmniSharp#findcodeactions#init()',
+\ 'accept': 'ctrlp#OmniSharp#findcodeactions#accept',
+\ 'lname': 'Find Code Actions',
+\ 'sname': 'code actions',
+\ 'type': 'line',
+\ 'sort': 1,
+\ })
 
 
 function! ctrlp#OmniSharp#findcodeactions#setactions(mode, actions)
@@ -79,7 +79,7 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
 function! ctrlp#OmniSharp#findcodeactions#id()
-	return s:id
+  return s:id
 endfunction
 
 " vim:nofen:fdl=0:ts=2:sw=2:sts=2
