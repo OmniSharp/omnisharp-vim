@@ -19,7 +19,7 @@ function! OmniSharp#Complete(findstart, base) abort
     let line = getline('.')
     let start = col('.') - 1
     let s:textBuffer = getline(1,'$')
-    while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]'
+    while start > 0 && line[start - 1] =~# '\v[a-zA-z0-9_]'
       let start -= 1
     endwhile
 
@@ -108,8 +108,8 @@ function! OmniSharp#GotoDefinition() abort
 endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column) abort
-  if a:filename != ''
-    if a:filename != bufname('%')
+  if a:filename !=# ''
+    if a:filename !=# bufname('%')
       exec 'e! ' . fnameescape(a:filename)
     endif
     "row is 1 based, column is 0 based
@@ -172,7 +172,7 @@ function! OmniSharp#FindSyntaxErrors() abort
   if pumvisible()
     return get(b:, 'syntaxerrors', [])
   endif
-  if bufname('%') == ''
+  if bufname('%') ==# ''
     return []
   endif
   if g:serverSeenRunning == 1
@@ -185,7 +185,7 @@ function! OmniSharp#FindSemanticErrors() abort
   if pumvisible()
     return get(b:, 'semanticerrors', [])
   endif
-  if bufname('%') == ''
+  if bufname('%') ==# ''
     return []
   endif
   if g:serverSeenRunning == 1
@@ -198,7 +198,7 @@ function! OmniSharp#CodeCheck() abort
   if pumvisible()
     return get(b:, 'codecheck', [])
   endif
-  if bufname('%') == ''
+  if bufname('%') ==# ''
     return []
   endif
   if g:serverSeenRunning == 1
@@ -214,7 +214,7 @@ function! s:GoScratch() abort
   let done = 0
   for i in range(1, winnr('$'))
     execute i . 'wincmd w'
-    if &buftype == 'nofile'
+    if &buftype ==# 'nofile'
       let done = 1
       break
     endif
@@ -239,7 +239,7 @@ endfunction
 function! OmniSharp#TypeLookup(includeDocumentation) abort
   let type = ''
 
-  if g:OmniSharp_typeLookupInPreview || a:includeDocumentation == 'True'
+  if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
     python typeLookup("type")
     call s:GoScratch()
     python vim.current.window.height = 5
@@ -274,7 +274,7 @@ endfunction
 
 function! OmniSharp#Rename() abort
   let renameto = inputdialog('Rename to:', expand('<cword>'))
-  if renameto != ''
+  if renameto !=# ''
     call OmniSharp#RenameTo(renameto)
   endif
 endfunction
@@ -305,7 +305,7 @@ function! OmniSharp#RunTests(mode) abort
   wall
   python buildcommand()
 
-  if a:mode != 'last'
+  if a:mode !=# 'last'
     python getTestCommand()
   endif
 
@@ -387,7 +387,7 @@ endfunction
 function! OmniSharp#ServerIsRunning() abort
   try
     python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 0.2) + "'");
-    return s:alive == 'true'
+    return s:alive ==# 'true'
   catch
     return 0
   endtry
@@ -418,11 +418,11 @@ function! OmniSharp#StartServer() abort
   "get the path for the current buffer
   let folder = expand('%:p:h')
   let solutionfiles = globpath(folder, '*.sln', 1)
-  if g:omnisharp_server_type == 'roslyn'
+  if g:omnisharp_server_type ==# 'roslyn'
     let solutionfiles = globpath(folder, 'project.json', 1)
   endif
 
-  while (solutionfiles == '')
+  while (solutionfiles ==# '')
     let lastfolder = folder
     "traverse up a level
 
@@ -431,7 +431,7 @@ function! OmniSharp#StartServer() abort
       break
     endif
     let solutionfiles = globpath(folder , '*.sln', 1)
-    if g:omnisharp_server_type == 'roslyn'
+    if g:omnisharp_server_type ==# 'roslyn'
       let solutionfiles = globpath(folder, 'project.json', 1)
     endif
 
@@ -440,11 +440,11 @@ function! OmniSharp#StartServer() abort
     endif
   endwhile
 
-  if solutionfiles != ''
+  if solutionfiles !=# ''
     let array = split(solutionfiles, '\n')
     if len(array) == 1
       call OmniSharp#StartServerSolution(array[0])
-    elseif g:OmniSharp_sln_list_name != ''
+    elseif g:OmniSharp_sln_list_name !=# ''
       echom 'Started with sln: ' . g:OmniSharp_sln_list_name
       call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
     elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
@@ -472,7 +472,7 @@ function! OmniSharp#StartServer() abort
       let i = 0
       while i <= len
         let c = strpart(optionstring, len-i, 1)
-        if c < '0' && c > '9'
+        if c <# '0' && c ># '9'
           return
         endif
         let option += c * float2nr(pow(10, i))
@@ -503,13 +503,13 @@ function! OmniSharp#ResolveLocalConfig(solutionPath) abort
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath) abort
-  if g:omnisharp_server_type == 'roslyn'
+  if g:omnisharp_server_type ==# 'roslyn'
     let g:OmniSharp_running_slns += [fnamemodify(a:solutionPath, ':h')]
   else
     let g:OmniSharp_running_slns += [a:solutionPath]
   endif
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  if g:omnisharp_server_type == 'roslyn'
+  if g:omnisharp_server_type ==# 'roslyn'
     let command = shellescape(s:omnisharp_roslyn_server,1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
   else
     let command = shellescape(s:omnisharp_server,1)
@@ -517,7 +517,7 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
     \ . ' -s ' . shellescape(a:solutionPath, 1)
     \ . OmniSharp#ResolveLocalConfig(a:solutionPath)
   endif
-  if !has('win32') && !has('win32unix') && g:omnisharp_server_type != 'roslyn'
+  if !has('win32') && !has('win32unix') && g:omnisharp_server_type !=# 'roslyn'
     let command = 'mono ' . command
   endif
   call OmniSharp#RunAsyncCommand(command)
@@ -546,7 +546,7 @@ function! OmniSharp#AskStopServerIfRunning() abort
     call inputsave()
     let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
     call inputrestore()
-    if choice != 'n'
+    if choice !=? 'n'
       call OmniSharp#StopServer(1)
     endif
   endif
@@ -560,7 +560,7 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    if g:omnisharp_server_type == 'roslyn'
+    if g:omnisharp_server_type ==# 'roslyn'
       "Kill process - temporary hack till /stop is
       "implemented in the roslyn server
       if !has('win32') && !has('win32unix')
@@ -575,7 +575,7 @@ function! OmniSharp#StopServer(...) abort
 endfunction
 
 function! OmniSharp#AddReference(reference) abort
-  if findfile(fnamemodify(a:reference, ':p')) != ''
+  if findfile(fnamemodify(a:reference, ':p')) !=# ''
     let a:ref = fnamemodify(a:reference, ':p')
   else
     let a:ref = a:reference
