@@ -422,7 +422,7 @@ function! OmniSharp#StartServer() abort
     let solutionfiles = globpath(folder, 'project.json', 1)
   endif
 
-  while (solutionfiles ==# '')
+  while solutionfiles ==# ''
     let lastfolder = folder
     "traverse up a level
 
