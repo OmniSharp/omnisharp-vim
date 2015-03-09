@@ -42,6 +42,7 @@ call add(g:ctrlp_ext_vars, {
 \ 'sname': 'types',
 \ 'type': 'tabs',
 \ 'sort': 1,
+\ 'nolim': 1,
 \ })
 
 

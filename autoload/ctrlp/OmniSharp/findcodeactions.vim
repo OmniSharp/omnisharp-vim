@@ -42,6 +42,7 @@ call add(g:ctrlp_ext_vars, {
 \ 'sname': 'code actions',
 \ 'type': 'line',
 \ 'sort': 1,
+\ 'nolim': 1,
 \ })
 
 
