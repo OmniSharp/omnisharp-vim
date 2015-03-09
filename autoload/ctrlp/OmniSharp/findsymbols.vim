@@ -43,6 +43,7 @@ call add(g:ctrlp_ext_vars, {
 \ 'sname': 'symbols',
 \ 'type': 'tabs',
 \ 'sort': 1,
+\ 'nolim': 1,
 \ })
 
 
