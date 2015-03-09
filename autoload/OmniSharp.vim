@@ -119,7 +119,7 @@ endfunction
 
 function! OmniSharp#FindSymbol()
   if g:OmniSharp_selector_ui ==? 'unite'
-    call unite#start([['omnisharp/findsymbols']])
+    call unite#start([['OmniSharp/findsymbols']])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
   else
@@ -129,7 +129,7 @@ endfunction
 
 function! OmniSharp#FindType()
   if g:OmniSharp_selector_ui ==? 'unite'
-    call unite#start([['omnisharp/findtype']])
+    call unite#start([['OmniSharp/findtype']])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     call ctrlp#init(ctrlp#OmniSharp#findtype#id())
   else
@@ -140,7 +140,7 @@ endfunction
 function! OmniSharp#GetCodeActions(mode) range
   if g:OmniSharp_selector_ui ==? 'unite'
     let context = {'empty': 0, 'auto_resize': 1}
-    call unite#start([['omnisharp/findcodeactions', a:mode]], context)
+    call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     let actions = pyeval(printf('getCodeActions(%s)', string(a:mode)))
     if empty(actions)
