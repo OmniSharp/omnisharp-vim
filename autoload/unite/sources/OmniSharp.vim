@@ -74,7 +74,7 @@ function! s:findtype.gather_candidates(args, context) abort
 endfunction
 
 
-function! unite#sources#OmniSharp#define()
+function! unite#sources#OmniSharp#define() abort
   return [s:findcodeactions, s:findsymbols, s:findtype]
 endfunction
 

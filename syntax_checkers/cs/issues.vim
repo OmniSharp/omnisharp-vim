@@ -6,11 +6,11 @@ let g:loaded_syntastic_cs_issues_checker = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SyntaxCheckers_cs_issues_IsAvailable() dict
+function! SyntaxCheckers_cs_issues_IsAvailable() dict abort
     return 1
 endfunction
 
-function! SyntaxCheckers_cs_issues_GetLocList() dict
+function! SyntaxCheckers_cs_issues_GetLocList() dict abort
     let loc_list = OmniSharp#GetIssues()
     for loc in loc_list
         let loc.valid = 1

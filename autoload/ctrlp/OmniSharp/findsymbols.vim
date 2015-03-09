@@ -51,7 +51,7 @@ call add(g:ctrlp_ext_vars, {
 "
 " Return: a Vim's List
 "
-function! ctrlp#OmniSharp#findsymbols#init()
+function! ctrlp#OmniSharp#findsymbols#init() abort
   if !OmniSharp#ServerIsRunning()
     return
   endif
@@ -72,7 +72,7 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! ctrlp#OmniSharp#findsymbols#accept(mode, str)
+function! ctrlp#OmniSharp#findsymbols#accept(mode, str) abort
   call ctrlp#exit()
   for quickfix in s:quickfixes
     if quickfix.text == a:str
@@ -87,7 +87,7 @@ endfunction
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! ctrlp#OmniSharp#findsymbols#id()
+function! ctrlp#OmniSharp#findsymbols#id() abort
   return s:id
 endfunction
 

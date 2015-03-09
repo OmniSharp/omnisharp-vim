@@ -46,7 +46,7 @@ call add(g:ctrlp_ext_vars, {
 \ })
 
 
-function! ctrlp#OmniSharp#findcodeactions#setactions(mode, actions)
+function! ctrlp#OmniSharp#findcodeactions#setactions(mode, actions) abort
   let s:actions = a:actions
   let s:mode = a:mode
 endfunction
@@ -57,7 +57,7 @@ endfunction
 "
 "
 
-function! ctrlp#OmniSharp#findcodeactions#init()
+function! ctrlp#OmniSharp#findcodeactions#init() abort
   return s:actions
 endfunction
 
@@ -69,7 +69,7 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! ctrlp#OmniSharp#findcodeactions#accept(mode, str)
+function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
   call ctrlp#exit()
   let action = index(s:actions, a:str)
   call pyeval(printf('runCodeAction(%s, %d)', string(s:mode), action))
@@ -79,7 +79,7 @@ endfunction
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! ctrlp#OmniSharp#findcodeactions#id()
+function! ctrlp#OmniSharp#findcodeactions#id() abort
   return s:id
 endfunction
 

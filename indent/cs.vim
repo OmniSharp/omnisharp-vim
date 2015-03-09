@@ -13,7 +13,7 @@ let b:did_indent = 1
 setlocal indentexpr=GetCSIndent(v:lnum)
 
 
-function! GetCSIndent(lnum)
+function! GetCSIndent(lnum) abort
 
   let this_line = getline(a:lnum)
   let previous_line = getline(a:lnum - 1)

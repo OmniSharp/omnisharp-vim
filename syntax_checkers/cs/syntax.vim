@@ -6,11 +6,11 @@ let g:loaded_syntastic_cs_syntax_checker = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-function! SyntaxCheckers_cs_syntax_IsAvailable() dict
+function! SyntaxCheckers_cs_syntax_IsAvailable() dict abort
     return 1
 endfunction
 
-function! SyntaxCheckers_cs_syntax_GetLocList() dict
+function! SyntaxCheckers_cs_syntax_GetLocList() dict abort
     let loc_list = OmniSharp#FindSyntaxErrors()
     for loc in loc_list
         let loc.valid = 1

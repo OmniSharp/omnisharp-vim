@@ -50,7 +50,7 @@ call add(g:ctrlp_ext_vars, {
 "
 " Return: a Vim's List
 "
-function! ctrlp#OmniSharp#findtype#init()
+function! ctrlp#OmniSharp#findtype#init() abort
   if !OmniSharp#ServerIsRunning()
     return
   endif
@@ -71,7 +71,7 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
-function! ctrlp#OmniSharp#findtype#accept(mode, str)
+function! ctrlp#OmniSharp#findtype#accept(mode, str) abort
   call ctrlp#OmniSharp#findtype#exit()
   for quickfix in s:quickfixes
     if quickfix.text == a:str
@@ -83,17 +83,17 @@ endfunction
 
 
 " (optional) Do something before enterting ctrlp
-function! ctrlp#OmniSharp#findtype#enter()
+function! ctrlp#OmniSharp#findtype#enter() abort
 endfunction
 
 
 " (optional) Do something after exiting ctrlp
-function! ctrlp#OmniSharp#findtype#exit()
+function! ctrlp#OmniSharp#findtype#exit() abort
 endfunction
 
 
 " (optional) Set or check for user options specific to this extension
-function! ctrlp#OmniSharp#findtype#opts()
+function! ctrlp#OmniSharp#findtype#opts() abort
 endfunction
 
 
@@ -101,7 +101,7 @@ endfunction
 let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 
 " Allow it to be called later
-function! ctrlp#OmniSharp#findtype#id()
+function! ctrlp#OmniSharp#findtype#id() abort
   return s:id
 endfunction
 
