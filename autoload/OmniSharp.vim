@@ -14,10 +14,10 @@ let g:serverSeenRunning = 0
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
     "store the current cursor position
-    let s:column = col(".")
+    let s:column = col('.')
     "locate the start of the word
     let line = getline('.')
-    let start = col(".") - 1
+    let start = col('.') - 1
     let s:textBuffer = getline(1,'$')
     while start > 0 && line[start - 1] =~ '\v[a-zA-z0-9_]'
       let start -= 1
@@ -37,15 +37,15 @@ function! OmniSharp#FindUsages() abort
     call setqflist(qf_taglist)
     copen 4
   else
-    echo "No usages found"
+    echo 'No usages found'
   endif
 endfunction
 
 function! OmniSharp#FindImplementations() abort
-  let qf_taglist = pyeval("findImplementations()")
+  let qf_taglist = pyeval('findImplementations()')
 
   if len(qf_taglist) == 0
-    echo "No implementations found"
+    echo 'No implementations found'
   endif
 
   if len(qf_taglist) == 1
@@ -60,7 +60,7 @@ function! OmniSharp#FindImplementations() abort
 endfunction
 
 function! OmniSharp#FindMembers() abort
-  let qf_taglist = pyeval("findMembers()")
+  let qf_taglist = pyeval('findMembers()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 1
@@ -70,8 +70,8 @@ function! OmniSharp#FindMembers() abort
 endfunction
 
 function! OmniSharp#NavigateUp() abort
-  let qf_taglist = pyeval("findMembers()")
-  let column = col(".")
+  let qf_taglist = pyeval('findMembers()')
+  let column = col('.')
   let line = line('.')
   let l = len(qf_taglist) - 1
 
@@ -89,8 +89,8 @@ function! OmniSharp#NavigateUp() abort
 endfunction
 
 function! OmniSharp#NavigateDown() abort
-  let qf_taglist = pyeval("findMembers()")
-  let column = col(".")
+  let qf_taglist = pyeval('findMembers()')
+  let column = col('.')
   let line = line('.')
   for l in range(0, len(qf_taglist) - 1)
     let qf_line = qf_taglist[l].lnum
@@ -156,12 +156,12 @@ endfunction
 
 function! OmniSharp#GetIssues() abort
   if pumvisible()
-    return get(b:, "issues", [])
+    return get(b:, 'issues', [])
   endif
   if g:serverSeenRunning == 1
-    let b:issues = pyeval("getCodeIssues()")
+    let b:issues = pyeval('getCodeIssues()')
   endif
-  return get(b:, "issues", [])
+  return get(b:, 'issues', [])
 endfunction
 
 function! OmniSharp#FixIssue() abort
@@ -170,41 +170,41 @@ endfunction
 
 function! OmniSharp#FindSyntaxErrors() abort
   if pumvisible()
-    return get(b:, "syntaxerrors", [])
+    return get(b:, 'syntaxerrors', [])
   endif
   if bufname('%') == ''
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:syntaxerrors = pyeval("findSyntaxErrors()")
+    let b:syntaxerrors = pyeval('findSyntaxErrors()')
   endif
-  return get(b:, "syntaxerrors", [])
+  return get(b:, 'syntaxerrors', [])
 endfunction
 
 function! OmniSharp#FindSemanticErrors() abort
   if pumvisible()
-    return get(b:, "semanticerrors", [])
+    return get(b:, 'semanticerrors', [])
   endif
   if bufname('%') == ''
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:semanticerrors = pyeval("findSemanticErrors()")
+    let b:semanticerrors = pyeval('findSemanticErrors()')
   endif
-  return get(b:, "semanticerrors", [])
+  return get(b:, 'semanticerrors', [])
 endfunction
 
 function! OmniSharp#CodeCheck() abort
   if pumvisible()
-    return get(b:, "codecheck", [])
+    return get(b:, 'codecheck', [])
   endif
   if bufname('%') == ''
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:codecheck = pyeval("codeCheck()")
+    let b:codecheck = pyeval('codeCheck()')
   endif
-  return get(b:, "codecheck", [])
+  return get(b:, 'codecheck', [])
 endfunction
 
 " Jump to first scratch window visible in current tab, or create it.
@@ -237,7 +237,7 @@ function! OmniSharp#TypeLookupWithDocumentation() abort
 endfunction
 
 function! OmniSharp#TypeLookup(includeDocumentation) abort
-  let type = ""
+  let type = ''
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation == 'True'
     python typeLookup("type")
@@ -273,7 +273,7 @@ function! OmniSharp#Echo(message) abort
 endfunction
 
 function! OmniSharp#Rename() abort
-  let renameto = inputdialog("Rename to:", expand('<cword>'))
+  let renameto = inputdialog('Rename to:', expand('<cword>'))
   if renameto != ''
     call OmniSharp#RenameTo(renameto)
   endif
@@ -285,7 +285,7 @@ function! OmniSharp#RenameTo(renameto) abort
 endfunction
 
 function! OmniSharp#Build() abort
-  let qf_taglist = pyeval("build()")
+  let qf_taglist = pyeval('build()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
@@ -311,8 +311,8 @@ function! OmniSharp#RunTests(mode) abort
 
   let s:cmdheight=&cmdheight
   set cmdheight=5
-  let b:dispatch = b:buildcommand . " && " . s:testcommand
-  if executable("sed")
+  let b:dispatch = b:buildcommand . ' && ' . s:testcommand
+  if executable('sed')
     " don't match on <filename unknown>:0
     let b:dispatch .= ' | sed "s/:0//"'
   endif
@@ -325,8 +325,8 @@ endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer() abort
   hi link CSharpUserType Type
-  exec "syn keyword CSharpUserType " . s:allUserTypes
-  exec "syn keyword csInterfaceDeclaration " . s:allUserInterfaces
+  exec 'syn keyword CSharpUserType ' . s:allUserTypes
+  exec 'syn keyword csInterfaceDeclaration ' . s:allUserInterfaces
 endfunction
 
 function! OmniSharp#EnableTypeHighlighting() abort
@@ -337,10 +337,10 @@ function! OmniSharp#EnableTypeHighlighting() abort
 
   python lookupAllUserTypes()
 
-  let startBuf = bufnr("%")
+  let startBuf = bufnr('%')
   " Perform highlighting for existing buffers
   bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
-exec "b ". startBuf
+exec 'b '. startBuf
 
 call OmniSharp#EnableTypeHighlightingForBuffer()
 
@@ -362,7 +362,7 @@ endfunction
 
 function! OmniSharp#BufferHasChanged() abort
   if g:serverSeenRunning == 1
-    if b:changedtick != get(b:, "Omnisharp_UpdateChangeTick", -1)
+    if b:changedtick != get(b:, 'Omnisharp_UpdateChangeTick', -1)
       let b:Omnisharp_UpdateChangeTick = b:changedtick
       return 1
       echoerr 'wtf'
@@ -403,7 +403,7 @@ function! OmniSharp#StartServerIfNotRunning() abort
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  if match( expand( '<afile>:p' ), "fugitive:///" ) == 0
+  if match( expand( '<afile>:p' ), 'fugitive:///' ) == 0
     return 1
   else
     return 0
@@ -417,9 +417,9 @@ function! OmniSharp#StartServer() abort
 
   "get the path for the current buffer
   let folder = expand('%:p:h')
-  let solutionfiles = globpath(folder, "*.sln", 1)
+  let solutionfiles = globpath(folder, '*.sln', 1)
   if g:omnisharp_server_type == 'roslyn'
-    let solutionfiles = globpath(folder, "project.json", 1)
+    let solutionfiles = globpath(folder, 'project.json', 1)
   endif
 
   while (solutionfiles == '')
@@ -430,9 +430,9 @@ function! OmniSharp#StartServer() abort
     if folder == lastfolder
       break
     endif
-    let solutionfiles = globpath(folder , "*.sln", 1)
+    let solutionfiles = globpath(folder , '*.sln', 1)
     if g:omnisharp_server_type == 'roslyn'
-      let solutionfiles = globpath(folder, "project.json", 1)
+      let solutionfiles = globpath(folder, 'project.json', 1)
     endif
 
     if isdirectory(solutionfiles)
@@ -444,14 +444,14 @@ function! OmniSharp#StartServer() abort
     let array = split(solutionfiles, '\n')
     if len(array) == 1
       call OmniSharp#StartServerSolution(array[0])
-    elseif g:OmniSharp_sln_list_name != ""
-      echom "Started with sln: " . g:OmniSharp_sln_list_name
+    elseif g:OmniSharp_sln_list_name != ''
+      echom 'Started with sln: ' . g:OmniSharp_sln_list_name
       call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
     elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
-      echom "Started with sln: " . array[g:OmniSharp_sln_list_index]
+      echom 'Started with sln: ' . array[g:OmniSharp_sln_list_index]
       call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
     else
-      echom "sln: " . g:OmniSharp_sln_list_name
+      echom 'sln: ' . g:OmniSharp_sln_list_name
       let index = 1
       if g:OmniSharp_autoselect_existing_sln
         for solutionfile in array
@@ -486,7 +486,7 @@ function! OmniSharp#StartServer() abort
       call OmniSharp#StartServerSolution(array[option - 1])
     endif
   else
-    echoerr "Did not find a solution file "
+    echoerr 'Did not find a solution file'
   endif
 endfunction
 
@@ -546,7 +546,7 @@ function! OmniSharp#AskStopServerIfRunning() abort
     call inputsave()
     let choice = input('Do you want to stop the OmniSharp server? (Y/n): ')
     call inputrestore()
-    if choice != "n"
+    if choice != 'n'
       call OmniSharp#StopServer(1)
     endif
   endif
@@ -585,10 +585,10 @@ endfunction
 
 function! OmniSharp#AppendCtrlPExtensions() abort
   " Don't override settings made elsewhere
-  if !exists("g:ctrlp_extensions")
+  if !exists('g:ctrlp_extensions')
     let g:ctrlp_extensions = []
   endif
-  if !exists("g:OmniSharp_ctrlp_extensions_added")
+  if !exists('g:OmniSharp_ctrlp_extensions_added')
     let g:OmniSharp_ctrlp_extensions_added = 1
     let g:ctrlp_extensions += ['findtype', 'findsymbols', 'findcodeactions']
   endif
