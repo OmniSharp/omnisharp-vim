@@ -70,37 +70,47 @@ function! OmniSharp#FindMembers() abort
 endfunction
 
 function! OmniSharp#NavigateUp() abort
-  let qf_taglist = pyeval('findMembers()')
-  let column = col('.')
-  let line = line('.')
-  let l = len(qf_taglist) - 1
+  if g:omnisharp_server_type == 'roslyn'
+    let qf_tag = pyeval("navigateUp()")
+    call cursor(qf_tag.Line, qf_tag.Column)
+  else
+    let qf_taglist = pyeval('findMembers()')
+    let column = col('.')
+    let line = line('.')
+    let l = len(qf_taglist) - 1
 
-  if l >= 0
-    while l >= 0
-      let qf_line = qf_taglist[l].lnum
-      let qf_col = qf_taglist[l].col
-      if qf_line < line || (qf_line == line && qf_col < column)
-        call cursor(qf_taglist[l].lnum, qf_taglist[l].col)
-        break
-      endif
-      let l -= 1
-    endwhile
+    if l >= 0
+      while l >= 0
+        let qf_line = qf_taglist[l].lnum
+        let qf_col = qf_taglist[l].col
+        if qf_line < line || (qf_line == line && qf_col < column)
+          call cursor(qf_taglist[l].lnum, qf_taglist[l].col)
+          break
+        endif
+        let l -= 1
+      endwhile
+    endif
   endif
 endfunction
 
 function! OmniSharp#NavigateDown() abort
-  let qf_taglist = pyeval('findMembers()')
-  let column = col('.')
-  let line = line('.')
-  for l in range(0, len(qf_taglist) - 1)
-    let qf_line = qf_taglist[l].lnum
-    let qf_col = qf_taglist[l].col
-    if qf_line > line || (qf_line == line && qf_col > column)
-      call cursor(qf_taglist[l].lnum, qf_taglist[l].col)
-      break
-    endif
-    let l += 1
-  endfor
+  if g:omnisharp_server_type == 'roslyn'
+    let qf_tag = pyeval("navigateDown()")
+    call cursor(qf_tag.Line, qf_tag.Column)
+  else
+    let qf_taglist = pyeval('findMembers()')
+    let column = col('.')
+    let line = line('.')
+    for l in range(0, len(qf_taglist) - 1)
+      let qf_line = qf_taglist[l].lnum
+      let qf_col = qf_taglist[l].col
+      if qf_line > line || (qf_line == line && qf_col > column)
+        call cursor(qf_taglist[l].lnum, qf_taglist[l].col)
+        break
+      endif
+      let l += 1
+    endfor
+  endif
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
