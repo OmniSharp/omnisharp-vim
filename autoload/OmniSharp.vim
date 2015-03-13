@@ -440,53 +440,56 @@ function! OmniSharp#StartServer() abort
     endif
   endwhile
 
-  if solutionfiles !=# ''
-    let array = split(solutionfiles, '\n')
-    if len(array) == 1
-      call OmniSharp#StartServerSolution(array[0])
-    elseif g:OmniSharp_sln_list_name !=# ''
-      echom 'Started with sln: ' . g:OmniSharp_sln_list_name
-      call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
-    elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
-      echom 'Started with sln: ' . array[g:OmniSharp_sln_list_index]
-      call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
-    else
-      echom 'sln: ' . g:OmniSharp_sln_list_name
-      let index = 1
-      if g:OmniSharp_autoselect_existing_sln
-        for solutionfile in array
-          if index( g:OmniSharp_running_slns, solutionfile ) >= 0
-            return
-          endif
-        endfor
-      endif
+  if solutionfiles ==# ''
+    if !g:OmniSharp_graceful_startfailure
+      echoerr 'Did not find a solution file'
+    endif
+    return
+  endif
 
+  let array = split(solutionfiles, '\n')
+  if len(array) == 1
+    call OmniSharp#StartServerSolution(array[0])
+  elseif g:OmniSharp_sln_list_name !=# ''
+    echom 'Started with sln: ' . g:OmniSharp_sln_list_name
+    call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
+  elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
+    echom 'Started with sln: ' . array[g:OmniSharp_sln_list_index]
+    call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
+  else
+    echom 'sln: ' . g:OmniSharp_sln_list_name
+    let index = 1
+    if g:OmniSharp_autoselect_existing_sln
       for solutionfile in array
-        echo index . ' - '. solutionfile
-        let index = index + 1
-      endfor
-
-      let option = 0
-      let optionstring = input('Choose a solution file and press enter ')
-      let len = strlen(optionstring) - 1
-      let i = 0
-      while i <= len
-        let c = strpart(optionstring, len-i, 1)
-        if c <# '0' && c ># '9'
+        if index( g:OmniSharp_running_slns, solutionfile ) >= 0
           return
         endif
-        let option += c * float2nr(pow(10, i))
-        let i += 1
-      endwhile
+      endfor
+    endif
 
-      if option == 0 || option > len(array)
+    for solutionfile in array
+      echo index . ' - '. solutionfile
+      let index = index + 1
+    endfor
+
+    let option = 0
+    let optionstring = input('Choose a solution file and press enter ')
+    let len = strlen(optionstring) - 1
+    let i = 0
+    while i <= len
+      let c = strpart(optionstring, len-i, 1)
+      if c <# '0' && c ># '9'
         return
       endif
+      let option += c * float2nr(pow(10, i))
+      let i += 1
+    endwhile
 
-      call OmniSharp#StartServerSolution(array[option - 1])
+    if option == 0 || option > len(array)
+      return
     endif
-  else
-    echoerr 'Did not find a solution file'
+
+    call OmniSharp#StartServerSolution(array[option - 1])
   endif
 endfunction
 
