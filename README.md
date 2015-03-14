@@ -2,14 +2,17 @@
 
 #OmniSharp
 
-OmniSharp is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provided below.
+OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provided below.
 
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
-OmniSharp is just a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, so it provides the same
-completions as MonoDevelop and SharpDevelop. The [server](https://github.com/nosami/OmniSharpServer) knows nothing about Vim, so could be plugged into most editors fairly easily.
+The plugin uses the [OmniSharp server](https://github.com/nosami/OmniSharpServer) which a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
+
+The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 [Emacs](https://github.com/sp3ctum/omnisharp-emacs),
 [Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) and [Sublime Text 3](https://github.com/moonrabbit/OmniSharpSublime) all have completion plugins utilising the OmniSharp server.
+
+Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.com/OmniSharp/omnisharp-roslyn) as an alternative to the Omnisharp Server.
 
 ##Features
 
@@ -178,6 +181,18 @@ YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux
 Simple syntax error highlighting is automatically performed when saving the current buffer or leaving insert mode.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
+
+### Using with omnisharp-roslyn
+
+OmniSharp-vim can now be run with [omnisharp-roslyn](https://github.com/OmniSharp/omnisharp-roslyn) instead of the OmniSharp server.
+To switch, edit the file autoload/OmniSharp.vim and change this line
+```
+let g:omnisharp_server_type = 'v1'
+```
+to
+```
+let g:omnisharp_server_type = 'roslyn' 
+```
 
 ### Other useful tools
 
