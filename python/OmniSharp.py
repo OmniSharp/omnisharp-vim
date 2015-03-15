@@ -259,4 +259,17 @@ def lookupAllUserTypes():
             vim.command("let s:allUserTypes = '%s'" % (response['Types']))
             vim.command("let s:allUserInterfaces = '%s'" % (response['Interfaces']))
 
+def navigateUp():
+    js = getResponse('/navigateup')
+    return get_navigate_response(js)
 
+def navigateDown():
+    js = getResponse('/navigatedown')
+    return get_navigate_response(js)
+
+def get_navigate_response(js):
+    if js != '':
+        response = json.loads(js)
+        return {'Line': response['Line'], 'Column': response['Column']}
+    else:
+        return {}
