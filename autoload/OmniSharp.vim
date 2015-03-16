@@ -18,7 +18,7 @@ function! OmniSharp#Complete(findstart, base) abort
     "locate the start of the word
     let line = getline('.')
     let start = col('.') - 1
-    let s:textBuffer = getline(1,'$')
+    let s:textBuffer = getline(1, '$')
     while start > 0 && line[start - 1] =~# '\v[a-zA-z0-9_]'
       let start -= 1
     endwhile
@@ -523,9 +523,9 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   endif
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
   if g:omnisharp_server_type ==# 'roslyn'
-    let command = shellescape(s:omnisharp_roslyn_server,1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
+    let command = shellescape(s:omnisharp_roslyn_server, 1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
   else
-    let command = shellescape(s:omnisharp_server,1)
+    let command = shellescape(s:omnisharp_server, 1)
     \ . ' -p ' . port
     \ . ' -s ' . shellescape(a:solutionPath, 1)
     \ . OmniSharp#ResolveLocalConfig(a:solutionPath)
