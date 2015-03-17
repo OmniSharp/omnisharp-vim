@@ -57,6 +57,9 @@ if !exists('g:Omnisharp_stop_server')
   let g:Omnisharp_stop_server = 2
 endif
 
+" Start server without solution file
+let g:Omnisharp_start_without_solution = get(g:, 'Omnisharp_start_without_solution', 0)
+
 " Provide custom server configuration file name
 let g:OmniSharp_server_config_name =
 \ get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
@@ -68,8 +71,6 @@ endif
 if !exists('g:Omnisharp_highlight_user_types')
   let g:Omnisharp_highlight_user_types = 0
 endif
-
-let g:OmniSharp_graceful_startfailure = get(g:, 'OmniSharp_graceful_startfailure', 0)
 
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(
