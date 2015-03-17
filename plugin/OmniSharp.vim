@@ -79,4 +79,4 @@ if !exists('g:OmniSharp_selector_ui')
 endif
 
 " Set g:OmniSharp_server_type to 'roslyn' or 'v1'
-let g:OmniSharp_server_type = 'v1'
+let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'v1')
