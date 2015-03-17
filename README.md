@@ -187,11 +187,11 @@ To use the other features, you'll want to create key bindings for them. See the 
 OmniSharp-vim can now be run with [omnisharp-roslyn](https://github.com/OmniSharp/omnisharp-roslyn) instead of the OmniSharp server.
 To switch, edit the file autoload/OmniSharp.vim and change this line
 ```
-let g:omnisharp_server_type = 'v1'
+let g:OmniSharp_server_type = 'v1'
 ```
 to
 ```
-let g:omnisharp_server_type = 'roslyn' 
+let g:OmniSharp_server_type = 'roslyn'
 ```
 
 ### Other useful tools

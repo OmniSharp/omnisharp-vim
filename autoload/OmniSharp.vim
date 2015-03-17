@@ -1,8 +1,8 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-"Set g:omnisharp_server_type to 'roslyn' or 'v1'
-let g:omnisharp_server_type = 'v1'
+"Set g:OmniSharp_server_type to 'roslyn' or 'v1'
+let g:OmniSharp_server_type = 'v1'
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 let s:omnisharp_roslyn_server = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
 let s:server_files = '*.sln'
@@ -70,7 +70,7 @@ function! OmniSharp#FindMembers() abort
 endfunction
 
 function! OmniSharp#NavigateUp() abort
-  if g:omnisharp_server_type == 'roslyn'
+  if g:OmniSharp_server_type == 'roslyn'
     let qf_tag = pyeval("navigateUp()")
     call cursor(qf_tag.Line, qf_tag.Column)
   else
@@ -94,7 +94,7 @@ function! OmniSharp#NavigateUp() abort
 endfunction
 
 function! OmniSharp#NavigateDown() abort
-  if g:omnisharp_server_type == 'roslyn'
+  if g:OmniSharp_server_type == 'roslyn'
     let qf_tag = pyeval("navigateDown()")
     call cursor(qf_tag.Line, qf_tag.Column)
   else
@@ -428,7 +428,7 @@ function! OmniSharp#StartServer() abort
   "get the path for the current buffer
   let folder = expand('%:p:h')
   let solutionfiles = globpath(folder, '*.sln', 1)
-  if g:omnisharp_server_type ==# 'roslyn'
+  if g:OmniSharp_server_type ==# 'roslyn'
     let solutionfiles = globpath(folder, 'project.json', 1)
   endif
 
@@ -441,7 +441,7 @@ function! OmniSharp#StartServer() abort
       break
     endif
     let solutionfiles = globpath(folder , '*.sln', 1)
-    if g:omnisharp_server_type ==# 'roslyn'
+    if g:OmniSharp_server_type ==# 'roslyn'
       let solutionfiles = globpath(folder, 'project.json', 1)
     endif
 
@@ -516,13 +516,13 @@ function! OmniSharp#ResolveLocalConfig(solutionPath) abort
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath) abort
-  if g:omnisharp_server_type ==# 'roslyn'
+  if g:OmniSharp_server_type ==# 'roslyn'
     let g:OmniSharp_running_slns += [fnamemodify(a:solutionPath, ':h')]
   else
     let g:OmniSharp_running_slns += [a:solutionPath]
   endif
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  if g:omnisharp_server_type ==# 'roslyn'
+  if g:OmniSharp_server_type ==# 'roslyn'
     let command = shellescape(s:omnisharp_roslyn_server, 1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
   else
     let command = shellescape(s:omnisharp_server, 1)
@@ -530,7 +530,7 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
     \ . ' -s ' . shellescape(a:solutionPath, 1)
     \ . OmniSharp#ResolveLocalConfig(a:solutionPath)
   endif
-  if !has('win32') && !has('win32unix') && g:omnisharp_server_type !=# 'roslyn'
+  if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
     let command = 'mono ' . command
   endif
   call OmniSharp#RunAsyncCommand(command)
@@ -573,7 +573,7 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    if g:omnisharp_server_type ==# 'roslyn'
+    if g:OmniSharp_server_type ==# 'roslyn'
       "Kill process - temporary hack till /stop is
       "implemented in the roslyn server
       if !has('win32') && !has('win32unix')
