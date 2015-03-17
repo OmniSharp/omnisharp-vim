@@ -58,7 +58,7 @@ if !exists('g:Omnisharp_stop_server')
 endif
 
 " Start server without solution file
-let g:Omnisharp_start_without_solution = get(g:, 'Omnisharp_start_without_solution', 0)
+let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
 
 " Provide custom server configuration file name
 let g:OmniSharp_server_config_name =

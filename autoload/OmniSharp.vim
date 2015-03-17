@@ -449,7 +449,7 @@ function! OmniSharp#StartServer() abort
   endwhile
 
   if solutionfiles ==# ''
-    if g:Omnisharp_start_without_solution
+    if g:OmniSharp_start_without_solution
       call OmniSharp#StartServerSolution('.')
     endif
     return
