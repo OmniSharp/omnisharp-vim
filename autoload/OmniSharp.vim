@@ -449,8 +449,8 @@ function! OmniSharp#StartServer() abort
   endwhile
 
   if solutionfiles ==# ''
-    if !g:OmniSharp_graceful_startfailure
-      echoerr 'Did not find a solution file'
+    if g:Omnisharp_start_without_solution
+      call OmniSharp#StartServerSolution('.')
     endif
     return
   endif
