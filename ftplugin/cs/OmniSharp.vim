@@ -13,6 +13,8 @@ augroup plugin-OmniSharp
 
 augroup END
 
+setlocal omnifunc=OmniSharp#Complete
+
 call OmniSharp#AppendCtrlPExtensions()
 
 if get(g:, 'Omnisharp_start_server', 0) == 1
