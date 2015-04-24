@@ -1,3 +1,8 @@
+if !has('python')
+  echoerr 'Error: OmniSharp requires Vim compiled with +python'
+  finish
+endif
+
 if exists('g:OmniSharp_loaded')
   finish
 endif
