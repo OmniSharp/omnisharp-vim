@@ -1,3 +1,7 @@
+if !has('python')
+  finish
+endif
+
 if exists("g:loaded_syntastic_cs_code_checker")
     finish
 endif

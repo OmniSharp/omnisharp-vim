@@ -1,3 +1,7 @@
+if !has('python')
+  finish
+endif
+
 let s:save_cpo = &cpo
 set cpo&vim
 

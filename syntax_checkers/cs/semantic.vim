@@ -1,6 +1,11 @@
+if !has('python')
+  finish
+endif
+
 if exists("g:loaded_syntastic_cs_semantic_checker")
     finish
 endif
+
 let g:loaded_syntastic_cs_semantic_checker = 1
 
 let s:save_cpo = &cpo
