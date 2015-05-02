@@ -618,8 +618,8 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
   endif
 
   if !exists("*UltiSnips#AddSnippetWithPriority")
-      echoerr "g:omnicomplete_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
-      return
+    echoerr "g:omnicomplete_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
+    return
   endif
  
   let line = strpart(getline('.'), 0, col('.')-1)
