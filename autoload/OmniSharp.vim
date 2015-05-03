@@ -625,7 +625,7 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
   let line = strpart(getline('.'), 0, col('.')-1)
   let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
  
-  let completion = matchstr(line, '.*\zs\s\W.\+(.\+)')
+  let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
   let completion = substitute(completion, remove_whitespace_regex, '\1', '')
  
   let should_expand_completion = len(completion) != 0
