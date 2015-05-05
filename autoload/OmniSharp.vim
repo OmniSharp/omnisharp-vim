@@ -613,12 +613,12 @@ function! OmniSharp#AppendCtrlPExtensions() abort
 endfunction
 
 function! OmniSharp#ExpandAutoCompleteSnippet()
-  if !g:omnicomplete_want_snippet
+  if !g:OmniSharp_want_snippet
     return
   endif
 
   if !exists("*UltiSnips#AddSnippetWithPriority")
-    echoerr "g:omnicomplete_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
+    echoerr "g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
     return
   endif
  

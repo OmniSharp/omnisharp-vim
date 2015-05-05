@@ -9,13 +9,13 @@ class Completion:
             bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
 
         want_snippet = \
-            bool(int(vim.eval('g:omnicomplete_want_snippet')))
+            bool(int(vim.eval('g:OmniSharp_want_snippet')))
 
         want_method_header = \
-            bool(int(vim.eval('g:omnicomplete_want_method_header')))
+            bool(int(vim.eval('g:OmniSharp_want_method_header')))
 
         want_return_type = \
-            bool(int(vim.eval('g:omnicomplete_want_return_type')))
+            bool(int(vim.eval('g:OmniSharp_want_return_type')))
 
         parameters['WantSnippet'] = want_snippet
         parameters['WantMethodHeader'] = want_method_header

@@ -86,3 +86,8 @@ endif
 
 " Set g:OmniSharp_server_type to 'roslyn' or 'v1'
 let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'v1')
+
+" Set default for snippet based completions
+let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
+let g:OmniSharp_want_method_header = get(g:, 'OmniSharp_want_method_header', 0)
+let g:OmniSharp_want_return_type = get(g:, 'OmniSharp_want_return_type', 0)
