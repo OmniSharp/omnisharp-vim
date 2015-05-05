@@ -11,8 +11,8 @@ let s:server_files = '*.sln'
 let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
+let s:generated_snippets = []
 let g:serverSeenRunning = 0
-let g:generated_snippets = []
 
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
@@ -28,9 +28,9 @@ function! OmniSharp#Complete(findstart, base) abort
 
     return start
   else
-    let g:omnisharp_last_completion_result =  pyeval('Completion().get_completions("s:column", "a:base")')
-    let g:omnisharp_last_completion_dictionary = pyeval('Completion().to_dictionary_keyed_by("word", "g:omnisharp_last_completion_result")')
-    return g:omnisharp_last_completion_result
+    let omnisharp_last_completion_result =  pyeval('Completion().get_completions("s:column", "a:base")')
+    let s:omnisharp_last_completion_dictionary = pyeval('Completion().to_dictionary_keyed_by("word", "omnisharp_last_completion_result")')
+    return omnisharp_last_completion_result
   endif
 endfunction
 
@@ -634,11 +634,11 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     let completion = split(completion, '\.')[-1]
     let completion = split(completion, 'new ')[-1]
 
-    if has_key(g:omnisharp_last_completion_dictionary, completion)
-      let snippet = get(get(g:omnisharp_last_completion_dictionary, completion, ''), 'snip','')
-      if index(g:generated_snippets, completion) == -1
+    if has_key(s:omnisharp_last_completion_dictionary, completion)
+      let snippet = get(get(s:omnisharp_last_completion_dictionary, completion, ''), 'snip','')
+      if index(s:generated_snippets, completion) == -1
         call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
-        call add(g:generated_snippets, completion)
+        call add(s:generated_snippets, completion)
       endif
       call UltiSnips#CursorMoved()
       call UltiSnips#ExpandSnippetOrJump()
