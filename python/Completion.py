@@ -24,10 +24,10 @@ class Completion:
         if response is not None:
             for completion in response:
                 complete = {
-                    'snip': completion['Snippet'] if completion['Snippet'] is not None else '',
-                    'word': completion['MethodHeader'] if completion['MethodHeader'] is not None else completion['CompletionText'],
-                    'menu': completion['ReturnType'] if completion['ReturnType'] is not None else completion['DisplayText'],
-                    'info': completion['Description'].replace('\r\n', '\n') if completion['Description'] is not None else '',
+                    'snip': completion['Snippet'] or '',
+                    'word': completion['MethodHeader'] or completion['CompletionText'],
+                    'menu': completion['ReturnType'] or completion['DisplayText'],
+                    'info': completion['Description'].replace('\r\n', '\n') or '',
                     'icase': 1,
                     'dup':1
                 }
