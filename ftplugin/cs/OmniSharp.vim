@@ -15,6 +15,8 @@ augroup plugin-OmniSharp
   \|    call OmniSharp#UpdateBuffer()
   \|  endif
 
+  autocmd CompleteDone <buffer> call OmniSharp#ExpandAutoCompleteSnippet()
+
 augroup END
 
 setlocal omnifunc=OmniSharp#Complete
