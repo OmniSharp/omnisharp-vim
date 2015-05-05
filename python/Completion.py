@@ -11,15 +11,9 @@ class Completion:
         want_snippet = \
             bool(int(vim.eval('g:OmniSharp_want_snippet')))
 
-        want_method_header = \
-            bool(int(vim.eval('g:OmniSharp_want_method_header')))
-
-        want_return_type = \
-            bool(int(vim.eval('g:OmniSharp_want_return_type')))
-
         parameters['WantSnippet'] = want_snippet
-        parameters['WantMethodHeader'] = want_method_header
-        parameters['WantReturnType'] = want_return_type
+        parameters['WantMethodHeader'] = want_snippet
+        parameters['WantReturnType'] = want_snippet
 
         parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
 
