@@ -29,7 +29,10 @@ function! OmniSharp#Complete(findstart, base) abort
     return start
   else
     let omnisharp_last_completion_result =  pyeval('Completion().get_completions("s:column", "a:base")')
-    let s:omnisharp_last_completion_dictionary = pyeval('Completion().to_dictionary_keyed_by("word", "omnisharp_last_completion_result")')
+    let s:omnisharp_last_completion_dictionary = {}
+    for completion in omnisharp_last_completion_result
+        let s:omnisharp_last_completion_dictionary[get(completion, 'word')] = completion
+    endfor
     return omnisharp_last_completion_result
   endif
 endfunction

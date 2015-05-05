@@ -34,10 +34,3 @@ class Completion:
                 vim_completions.append(complete)
 
         return vim_completions
-    def to_dictionary_keyed_by(self, key_by, completions):
-        completion_dictionary = {}
-        if completions is not None:
-            for completion in vim.eval(completions):
-                completion_dictionary[completion.get(key_by)] = completion
-
-        return completion_dictionary
