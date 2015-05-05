@@ -11,7 +11,7 @@ let s:server_files = '*.sln'
 let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
-let s:generated_snippets = []
+let s:generated_snippets = {}
 let g:serverSeenRunning = 0
 
 function! OmniSharp#Complete(findstart, base) abort
@@ -636,9 +636,9 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
 
     if has_key(s:omnisharp_last_completion_dictionary, completion)
       let snippet = get(get(s:omnisharp_last_completion_dictionary, completion, ''), 'snip','')
-      if index(s:generated_snippets, completion) == -1
+      if !has_key(s:generated_snippets, completion)
         call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
-        call add(s:generated_snippets, completion)
+        let s:generated_snippets[completion] = snippet
       endif
       call UltiSnips#CursorMoved()
       call UltiSnips#ExpandSnippetOrJump()
