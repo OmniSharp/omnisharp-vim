@@ -25,6 +25,10 @@ Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.c
     * Exact start match (case insensitive)
     * CamelCase completions
     * Subsequence match completions
+  * Completion snippets are supported. e.g. Console.WriteLine(TAB) (ENTER) will complete to Console.WriteLine(string value) and expand a dynamic snippet, this will place you in SELECT mode and the first method argument will be selected. 
+    * Requires [UltiSnips](https://github.com/SirVer/ultisnips) and supports standard C-x C-o completion, [Supertab](https://github.com/ervandew/supertab) and [Neocomplete](https://github.com/Shougo/neocomplete.vim).
+    * Requires `set completeopt-=preview` when using [Neocomplete](https://github.com/Shougo/neocomplete.vim) because of a compatibility issue with [UltiSnips](https://github.com/SirVer/ultisnips). 
+    * This functionality requires a recent version of Vim, you can check if your version is supported by running `:echo has("patch-7.3-598")`, it should output 1.
 
 * Jump to the definition of a type/variable/method
 * Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
@@ -317,6 +321,9 @@ nnoremap <leader>sp :OmniSharpStopServer<cr>
 nnoremap <leader>th :OmniSharpHighlightTypes<cr>
 "Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 set hidden
+
+" Enable snippet completion, requires completeopt-=preview
+let g:OmniSharp_want_snippet=1
 ```
 
 
