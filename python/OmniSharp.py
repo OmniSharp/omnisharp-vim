@@ -166,16 +166,16 @@ def setBuffer(buffer):
     lines = [line.encode('utf-8') for line in lines]
     vim.current.buffer[:] = lines
 
-def build(ret):
-    response = json.loads(getResponse('/build', {}, 60))
+def build():
+    js = json.loads(getResponse('/build', {}, 60))
 
-    success = response["Success"]
+    success = js["Success"]
     if success:
         print "Build succeeded"
     else:
         print "Build failed"
 
-    return get_quickfix_list(js, 'QuickFixes')
+    return quickfixes_from_js(js, 'QuickFixes')
 
 def buildcommand():
     vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
@@ -227,8 +227,12 @@ def findSymbols():
 def get_quickfix_list(js, key):
     if js != '':
         response = json.loads(js)
-        if response[key] is not None:
-            return quickfixes_from_response(response[key])
+        return quickfixes_from_js(response, key)
+    return [];
+
+def quickfixes_from_js(js, key):
+    if js[key] is not None:
+        return quickfixes_from_response(js[key])
     return [];
 
 def quickfixes_from_response(response):
