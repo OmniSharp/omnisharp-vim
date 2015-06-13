@@ -586,6 +586,7 @@ function! OmniSharp#StopServer(...) abort
     else
       python getResponse("/stopserver")
     endif
+    let g:OmniSharp_running_slns = []
   endif
 endfunction
 
