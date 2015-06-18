@@ -5,6 +5,7 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
+let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
 let s:omnisharp_roslyn_server = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
 let s:server_files = '*.sln'
@@ -508,7 +509,7 @@ endfunction
 function! OmniSharp#ResolveLocalConfig(solutionPath) abort
   let result = ''
   let configPath = fnamemodify(a:solutionPath, ':p:h')
-  \ . '\'
+  \ . s:dir_separator
   \ . g:OmniSharp_server_config_name
 
   if filereadable(configPath)
