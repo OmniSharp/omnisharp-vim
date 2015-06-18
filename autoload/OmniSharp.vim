@@ -541,7 +541,8 @@ endfunction
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
-  if exists(':Make')
+  " vim-dispatch is really halmful, anyone knows better way to detect vim-dispatch was installed?
+  if exists('g:dispatch_handlers')
     call dispatch#start(a:command, {'background': 1})
   else
     if is_vimproc
