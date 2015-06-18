@@ -541,7 +541,7 @@ endfunction
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
-  if exists(':Make')
+  if exists('g:loaded_dispatch')
     call dispatch#start(a:command, {'background': 1})
   else
     if is_vimproc
