@@ -513,7 +513,7 @@ function! OmniSharp#ResolveLocalConfig(solutionPath) abort
   \ . g:OmniSharp_server_config_name
 
   if filereadable(configPath)
-    let result = ' -config ' . configPath
+    let result = ' -config ' . shellescape(configPath, 1)
   endif
   return result
 endfunction
