@@ -6,8 +6,6 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:dir_separator = fnamemodify('.', ':p')[-1 :]
-let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
-let s:omnisharp_roslyn_server = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
 let s:server_files = '*.sln'
 let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
@@ -526,9 +524,9 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   endif
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
   if g:OmniSharp_server_type ==# 'roslyn'
-    let command = shellescape(s:omnisharp_roslyn_server, 1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
+    let command = shellescape(g:OmniSharp_server_path, 1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
   else
-    let command = shellescape(s:omnisharp_server, 1)
+    let command = shellescape(g:OmniSharp_server_path, 1)
     \ . ' -p ' . port
     \ . ' -s ' . shellescape(a:solutionPath, 1)
     \ . OmniSharp#ResolveLocalConfig(a:solutionPath)
