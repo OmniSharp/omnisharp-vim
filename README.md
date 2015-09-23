@@ -92,7 +92,7 @@ Note that if you have Mono installed outside of the ["standard" paths](https://g
 c:\
 cd c:\Users\username\vimfiles\bundle
 git clone https://github.com/OmniSharp/omnisharp-vim.git
-cd omnisharp-vim.git
+cd omnisharp-vim
 git submodule update --init --recursive
 cd server
 msbuild
