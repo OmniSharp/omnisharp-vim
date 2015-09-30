@@ -90,7 +90,7 @@ Note that if you have Mono installed outside of the ["standard" paths](https://g
 If you are planning to use OmniSharp-Roslyn, run the following commands:
 ```sh
 cd ~/.vim/bundle/omnisharp-vim/omnisharp-roslyn
-dnu restore
+./build.sh
 ```
 
 ####Windows
