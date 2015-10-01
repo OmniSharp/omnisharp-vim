@@ -6,7 +6,7 @@ OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#. A list o
 
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
-The plugin uses the [OmniSharp server](https://github.com/nosami/OmniSharpServer) which a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
+The plugin uses the [OmniSharp server](https://github.com/nosami/OmniSharpServer) which is a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
 
 The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 [Emacs](https://github.com/sp3ctum/omnisharp-emacs),
