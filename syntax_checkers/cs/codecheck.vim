@@ -2,7 +2,7 @@ if !has('python')
   finish
 endif
 
-if exists("g:loaded_syntastic_cs_code_checker")
+if exists('g:loaded_syntastic_cs_code_checker')
     finish
 endif
 let g:loaded_syntastic_cs_code_checker = 1

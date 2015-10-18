@@ -2,7 +2,7 @@ if !has('python')
   finish
 endif
 
-if exists("g:loaded_syntastic_cs_semantic_checker")
+if exists('g:loaded_syntastic_cs_semantic_checker')
     finish
 endif
 

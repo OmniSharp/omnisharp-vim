@@ -71,8 +71,8 @@ function! OmniSharp#FindMembers() abort
 endfunction
 
 function! OmniSharp#NavigateUp() abort
-  if g:OmniSharp_server_type == 'roslyn'
-    let qf_tag = pyeval("navigateUp()")
+  if g:OmniSharp_server_type ==# 'roslyn'
+    let qf_tag = pyeval('navigateUp()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
     let qf_taglist = pyeval('findMembers()')
@@ -95,8 +95,8 @@ function! OmniSharp#NavigateUp() abort
 endfunction
 
 function! OmniSharp#NavigateDown() abort
-  if g:OmniSharp_server_type == 'roslyn'
-    let qf_tag = pyeval("navigateDown()")
+  if g:OmniSharp_server_type ==# 'roslyn'
+    let qf_tag = pyeval('navigateDown()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
     let qf_taglist = pyeval('findMembers()')
