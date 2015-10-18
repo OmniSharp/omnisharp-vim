@@ -79,7 +79,9 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpBuild
 \|  delcommand OmniSharpBuildAsync
 \|  delcommand OmniSharpCodeFormat
+\|  delcommand OmniSharpDocumentation
 \|  delcommand OmniSharpFindImplementations
+\|  delcommand OmniSharpFindMembers
 \|  delcommand OmniSharpFindSymbol
 \|  delcommand OmniSharpFindSyntaxErrors
 \|  delcommand OmniSharpFindType
@@ -88,6 +90,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpFixUsings
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGotoDefinition
+\|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
 \|  delcommand OmniSharpReloadSolution
