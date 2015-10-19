@@ -426,39 +426,10 @@ function! OmniSharp#StartServer() abort
     return
   endif
 
-  "get the path for the current buffer
-  let folder = expand('%:p:h')
-  let solutionfiles = globpath(folder, '*.sln', 1)
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let solutionfiles = globpath(folder, 'project.json', 1)
-  endif
-
-  while solutionfiles ==# ''
-    let lastfolder = folder
-    "traverse up a level
-
-    let folder = fnamemodify(folder, ':p:h:h')
-    if folder == lastfolder
-      break
-    endif
-    let solutionfiles = globpath(folder , '*.sln', 1)
-    if g:OmniSharp_server_type ==# 'roslyn'
-      let solutionfiles = globpath(folder, 'project.json', 1)
-    endif
-
-    if isdirectory(solutionfiles)
-      let solutionfiles = ''
-    endif
-  endwhile
-
-  if solutionfiles ==# ''
-    if g:OmniSharp_start_without_solution
-      call OmniSharp#StartServerSolution('.')
-    endif
+  let array = s:find_solution_files()
+  if empty(array)
     return
   endif
-
-  let array = split(solutionfiles, '\n')
   if len(array) == 1
     call OmniSharp#StartServerSolution(array[0])
   elseif g:OmniSharp_sln_list_name !=# ''
@@ -607,6 +578,39 @@ function! OmniSharp#AppendCtrlPExtensions() abort
     let g:OmniSharp_ctrlp_extensions_added = 1
     let g:ctrlp_extensions += ['findtype', 'findsymbols', 'findcodeactions']
   endif
+endfunction
+
+function! s:find_solution_files() abort
+  "get the path for the current buffer
+  let folder = expand('%:p:h')
+  let solutionfiles = globpath(folder, '*.sln', 1)
+  if g:OmniSharp_server_type ==# 'roslyn'
+    let solutionfiles = globpath(folder, 'project.json', 1)
+  endif
+
+  while solutionfiles ==# ''
+    let lastfolder = folder
+    "traverse up a level
+
+    let folder = fnamemodify(folder, ':p:h:h')
+    if folder == lastfolder
+      break
+    endif
+    let solutionfiles = globpath(folder , '*.sln', 1)
+    if g:OmniSharp_server_type ==# 'roslyn'
+      let solutionfiles = globpath(folder, 'project.json', 1)
+    endif
+
+    if isdirectory(solutionfiles)
+      let solutionfiles = ''
+    endif
+  endwhile
+
+  if solutionfiles ==# '' && g:OmniSharp_start_without_solution
+    let solutionfiles = '.'
+  endif
+
+  return split(solutionfiles, '\n')
 endfunction
 
 let &cpo = s:save_cpo
