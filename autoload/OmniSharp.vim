@@ -587,9 +587,9 @@ function! s:find_solution_files() abort
   let solution_files = []
 
   while empty(solution_files)
-    let solution_files = globpath(dir , '*.sln', 1, 1)
+    let solution_files += globpath(dir , '*.sln', 1, 1)
     if g:OmniSharp_server_type ==# 'roslyn'
-      let solution_files = globpath(dir, 'project.json', 1, 1)
+      let solution_files += globpath(dir, 'project.json', 1, 1)
     endif
 
     call filter(solution_files, 'filereadable(v:val)')
