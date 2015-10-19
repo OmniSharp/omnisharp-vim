@@ -582,35 +582,30 @@ endfunction
 
 function! s:find_solution_files() abort
   "get the path for the current buffer
-  let folder = expand('%:p:h')
-  let solutionfiles = globpath(folder, '*.sln', 1)
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let solutionfiles = globpath(folder, 'project.json', 1)
-  endif
+  let dir = expand('%:p:h')
+  let solution_files = []
 
-  while solutionfiles ==# ''
-    let lastfolder = folder
-    "traverse up a level
+  while empty(solution_files)
+    let lastfolder = dir
 
-    let folder = fnamemodify(folder, ':p:h:h')
-    if folder == lastfolder
-      break
-    endif
-    let solutionfiles = globpath(folder , '*.sln', 1)
+    let solution_files = globpath(dir , '*.sln', 1, 1)
     if g:OmniSharp_server_type ==# 'roslyn'
-      let solutionfiles = globpath(folder, 'project.json', 1)
+      let solution_files = globpath(dir, 'project.json', 1, 1)
     endif
 
-    if isdirectory(solutionfiles)
-      let solutionfiles = ''
+    call filter(solution_files, 'filereadable(v:val)')
+
+    let dir = fnamemodify(dir, ':h')
+    if dir ==# lastfolder
+      break
     endif
   endwhile
 
-  if solutionfiles ==# '' && g:OmniSharp_start_without_solution
-    let solutionfiles = '.'
+  if empty(solution_files) && g:OmniSharp_start_without_solution
+    let solution_files = ['.']
   endif
 
-  return split(solutionfiles, '\n')
+  return solution_files
 endfunction
 
 let &cpo = s:save_cpo
