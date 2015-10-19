@@ -426,30 +426,31 @@ function! OmniSharp#StartServer() abort
     return
   endif
 
-  let array = s:find_solution_files()
-  if empty(array)
+  let solution_files = s:find_solution_files()
+  if empty(solution_files)
     return
   endif
-  if len(array) == 1
-    call OmniSharp#StartServerSolution(array[0])
+  if len(solution_files) == 1
+    call OmniSharp#StartServerSolution(solution_files[0])
   elseif g:OmniSharp_sln_list_name !=# ''
     echom 'Started with sln: ' . g:OmniSharp_sln_list_name
     call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
-  elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
-    echom 'Started with sln: ' . array[g:OmniSharp_sln_list_index]
-    call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
+  elseif g:OmniSharp_sln_list_index > -1 &&
+  \     g:OmniSharp_sln_list_index < len(solution_files)
+    echom 'Started with sln: ' . solution_files[g:OmniSharp_sln_list_index]
+    call OmniSharp#StartServerSolution( solution_files[g:OmniSharp_sln_list_index]  )
   else
     echom 'sln: ' . g:OmniSharp_sln_list_name
     let index = 1
     if g:OmniSharp_autoselect_existing_sln
-      for solutionfile in array
+      for solutionfile in solution_files
         if index( g:OmniSharp_running_slns, solutionfile ) >= 0
           return
         endif
       endfor
     endif
 
-    for solutionfile in array
+    for solutionfile in solution_files
       echo index . ' - '. solutionfile
       let index = index + 1
     endfor
@@ -467,11 +468,11 @@ function! OmniSharp#StartServer() abort
       let i += 1
     endwhile
 
-    if option == 0 || option > len(array)
+    if option == 0 || option > len(solution_files)
       return
     endif
 
-    call OmniSharp#StartServerSolution(array[option - 1])
+    call OmniSharp#StartServerSolution(solution_files[option - 1])
   endif
 endfunction
 
@@ -586,8 +587,6 @@ function! s:find_solution_files() abort
   let solution_files = []
 
   while empty(solution_files)
-    let lastfolder = dir
-
     let solution_files = globpath(dir , '*.sln', 1, 1)
     if g:OmniSharp_server_type ==# 'roslyn'
       let solution_files = globpath(dir, 'project.json', 1, 1)
@@ -595,6 +594,7 @@ function! s:find_solution_files() abort
 
     call filter(solution_files, 'filereadable(v:val)')
 
+    let lastfolder = dir
     let dir = fnamemodify(dir, ':h')
     if dir ==# lastfolder
       break
