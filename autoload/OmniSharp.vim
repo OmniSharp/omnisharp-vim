@@ -455,18 +455,7 @@ function! OmniSharp#StartServer() abort
       let index = index + 1
     endfor
 
-    let option = 0
-    let optionstring = input('Choose a solution file and press enter ')
-    let len = strlen(optionstring) - 1
-    let i = 0
-    while i <= len
-      let c = strpart(optionstring, len-i, 1)
-      if c <# '0' && c ># '9'
-        return
-      endif
-      let option += c * float2nr(pow(10, i))
-      let i += 1
-    endwhile
+    let option = input('Choose a solution file and press enter ') - 0
 
     if option == 0 || option > len(solution_files)
       return
