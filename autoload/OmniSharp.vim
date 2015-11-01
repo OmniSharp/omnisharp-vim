@@ -535,17 +535,7 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    if g:OmniSharp_server_type ==# 'roslyn'
-      "Kill process - temporary hack till /stop is
-      "implemented in the roslyn server
-      if !has('win32') && !has('win32unix')
-        call system('pkill -f omnisharp-roslyn')
-      else
-        call system('taskkill /IM /f Omnisharp')
-      endif
-    else
-      python getResponse("/stopserver")
-    endif
+    python getResponse("/stopserver")
     let g:OmniSharp_running_slns = []
   endif
 endfunction
