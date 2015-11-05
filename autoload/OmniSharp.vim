@@ -478,19 +478,17 @@ function! OmniSharp#ResolveLocalConfig(solutionPath) abort
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath) abort
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let g:OmniSharp_running_slns += [fnamemodify(a:solutionPath, ':h')]
-  else
-    let g:OmniSharp_running_slns += [a:solutionPath]
+  let solutionPath = a:solutionPath
+  if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
+    let solutionPath = fnamemodify(solutionPath, ':h')
   endif
+  let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let command = shellescape(g:OmniSharp_server_path, 1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
-  else
-    let command = shellescape(g:OmniSharp_server_path, 1)
-    \ . ' -p ' . port
-    \ . ' -s ' . shellescape(a:solutionPath, 1)
-    \ . OmniSharp#ResolveLocalConfig(a:solutionPath)
+  let command = shellescape(g:OmniSharp_server_path, 1)
+  \ . ' -p ' . port
+  \ . ' -s ' . shellescape(solutionPath, 1)
+  if g:OmniSharp_server_type !=# 'roslyn'
+    let command .= OmniSharp#ResolveLocalConfig(solutionPath)
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
     let command = 'mono ' . command
