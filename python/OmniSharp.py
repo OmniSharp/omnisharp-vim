@@ -41,7 +41,10 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     try:
         response = opener.open(req, json.dumps(parameters), timeout)
         vim.command("let g:serverSeenRunning = 1")
-        return response.read()
+        res = response.read()
+        if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
+            res = res[3:]
+        return res
     except Exception:
         vim.command("let g:serverSeenRunning = 0")
         return ''
