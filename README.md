@@ -9,8 +9,8 @@ OmniSharp works both on Windows and on Linux and OS X with Mono.
 The plugin uses the [OmniSharp server](https://github.com/nosami/OmniSharpServer) which is a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
 
 The server knows nothing about Vim, so could be plugged into most editors fairly easily.
-[Emacs](https://github.com/sp3ctum/omnisharp-emacs),
-[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) and [Sublime Text 3](https://github.com/moonrabbit/OmniSharpSublime) all have completion plugins utilising the OmniSharp server.
+[Emacs](https://github.com/OmniSharp/omnisharp-emacs),
+[Sublime Text 2](https://github.com/PaulCampbell/OmniSharpSublimePlugin) and [Sublime Text 3](https://github.com/OmniSharp/omnisharp-sublime) all have completion plugins utilising the OmniSharp server.
 
 Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.com/OmniSharp/omnisharp-roslyn) as an alternative to the Omnisharp Server.
 
@@ -27,10 +27,10 @@ Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.c
     * Subsequence match completions
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols interactively (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
+* Find types/symbols interactively (requires [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
 * Find implementations/derived types
 * Find usages
-* Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/kien/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
+* Contextual code actions (sort usings, use var....etc.) (requires [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) plugin or [unite.vim](https://github.com/Shougo/unite.vim) plugin)
   * Extract method
 * Find and fix code issues (unused usings, use base type where possible....etc.) (requires [Syntastic](https://github.com/scrooloose/syntastic) plugin)
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
