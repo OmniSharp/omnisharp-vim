@@ -1,6 +1,6 @@
 ![OmniSharp](logo.jpg)
 
-#OmniSharp
+# OmniSharp
 
 OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#. A list of currently implemented features is provided below.
 
@@ -14,7 +14,7 @@ The server knows nothing about Vim, so could be plugged into most editors fairly
 
 Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.com/OmniSharp/omnisharp-roslyn) as an alternative to the Omnisharp Server.
 
-##Features
+## Features
 
 * Contextual code completion
   * Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
@@ -45,37 +45,43 @@ Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.c
 * Code formatter
 * Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`)
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
+
 ```vim
 :OmniSharpAddToProject
 ```
+
 * Add reference. Supports project and file reference. GAC referencing todo.
+
 ```vim
 :OmniSharpAddReference path_to_reference
 ```
+
 * [Test runner](https://github.com/OmniSharp/omnisharp-vim/wiki/Test-Runner)
 
-##Screenshots
-####Auto Complete
+## Screenshots
+#### Auto Complete
 ![OmniSharp screenshot](https://f.cloud.github.com/assets/667194/514371/dc03e2bc-be56-11e2-9745-c3202335e5ab.png)
 
-####Find (and fix) Code Issues
+#### Find (and fix) Code Issues
 ![Code issues screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/codeissues.png)
 
-####Find Types / Symbols
+#### Find Types / Symbols
 ![Find Types screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindTypes.png)
 
-####Find Usages
+#### Find Usages
 ![Find Usages screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindUsages.png)
 
-####Code Actions
+#### Code Actions
 ![Code Actions screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/CodeActions.png)
 
-##Installation
+## Installation
 
 [pathogen.vim](https://github.com/tpope/vim-pathogen) is the recommended way to install OmniSharp.
 
-####OSX / Linux
+#### OSX / Linux
+
 Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
+
 ```sh
 cd ~/.vim/bundle
 git clone https://github.com/OmniSharp/omnisharp-vim.git
@@ -93,7 +99,8 @@ cd ~/.vim/bundle/omnisharp-vim/omnisharp-roslyn
 ./build.sh
 ```
 
-####Windows
+#### Windows
+
 ```dosbatch
 c:\
 cd c:\Users\username\vimfiles\bundle
@@ -104,7 +111,7 @@ cd server
 msbuild
 ```
 
-###Install Python
+### Install Python
 Install last version of 2.7 series ([Python 2.7.8] (http://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
@@ -114,15 +121,15 @@ Verify that Python is working inside Vim with
 :echo has('python')
 ```
 
-###(optional) Install vim-dispatch
-The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make Omnisharp start the server automatically and for running asynchronous builds.
+### (optional) Install vim-dispatch
+The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make OmniSharp start the server automatically and for running asynchronous builds.
 Use your favourite way to install it.
 
-###(optional) Install syntastic
+### (optional) Install syntastic
 The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
-###(optional) Install ctrlp.vim or unite.vim
+### (optional) Install ctrlp.vim or unite.vim
 [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim) is needed if you want to use the Code Actions, Find Type and Find Symbol features.
 If you have installed both, you can choose one by `g:OmniSharp_selector_ui` variable.
 
@@ -146,18 +153,22 @@ This behaviour can be disabled by setting `let g:Omnisharp_stop_server = 0` in y
 
 In addition you can tweak some OmniSharp server behaviour by changing the global configuration file placed:
 
-####OSX / Linux
+#### OSX / Linux
+
 ```sh
 ~/.vim/bundle/omnisharp-vim/server/config.json
 ```
-####Windows
+
+#### Windows
+
 ```dosbatch
 c:\Users\<username>\vimfiles\bundle\omnisharp-vim\server\config.json
 ```
+
 Or by providing a local version, that by default called `omnisharp.json` and placed in the same solution directory.
 If you want use another configuration file name, you should set `let g:Omnisharp_server_config_name = '<your file name>.json'` variable in the vimrc.
 
-Alternatively, you can start the Omnisharp server manually:
+Alternatively, you can start the OmniSharp server manually:
 
 ```
 [mono] OmniSharp.exe -p (portnumber) -s (path\to\sln)
@@ -208,7 +219,7 @@ let g:OmniSharp_server_type = 'roslyn'
 - [devtools-terminal](http://blog.dfilimonov.com/2013/09/12/devtools-terminal.html) Embed OmniSharp inside Chrome
 ![dev-tools screenshot](https://raw.githubusercontent.com/nosami/nosami.github.io/master/aspvnext.gif)
 
-##Configuration
+## Configuration
 
 ### Example vimrc
 
@@ -326,7 +337,7 @@ set hidden
 ```
 
 
-#####TODO
+##### TODO
 
 - Move type to own file
 
