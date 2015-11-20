@@ -144,25 +144,10 @@ def typeLookup(ret):
             vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
 def renameTo():
-    parameters = {} 
-    parameters['renameto'] = vim.eval("a:renameto") 
+    parameters = {}
+    parameters['renameto'] = vim.eval("a:renameto")
     js = getResponse('/rename', parameters)
-    response = json.loads(js)
-    changes = response['Changes']
-    currentBuffer = vim.current.buffer.name
-    cursor = vim.current.window.cursor
-    for change in changes:
-        lines = change['Buffer'].splitlines()
-        lines = [line.encode('utf-8') for line in lines]
-        filename = change['FileName']
-        vim.command(':argadd ' + filename)
-        buffer = filter(lambda b: b.name != None and b.name.upper() == filename.upper(), vim.buffers)[0]
-        vim.command(':b ' + filename)
-        buffer[:] = lines
-        vim.command(':undojoin')
-
-    vim.command(':b ' + currentBuffer)
-    vim.current.window.cursor = cursor
+    return js
 
 def setBuffer(buffer):
     lines = buffer.splitlines()

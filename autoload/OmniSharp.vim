@@ -291,8 +291,35 @@ function! OmniSharp#Rename() abort
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let qf_taglist = []
-  python renameTo()
+  let result = s:json_decode(pyeval('renameTo()'))
+
+  let save_lazyredraw = &lazyredraw
+  let save_eventignore = &eventignore
+  let buf = bufnr('%')
+  let curpos = getcurpos()
+  try
+    set lazyredraw eventignore=all
+    for change in result.Changes
+      execute 'silent hide edit' fnameescape(change.FileName)
+      let modified = &modified
+      let content = split(change.Buffer, '\r\?\n')
+      silent % delete _
+      silent 1put =content
+      silent 1 delete _
+      if !modified
+        silent update
+      endif
+    endfor
+  finally
+    if bufnr('%') != buf
+      execute buf 'buffer'
+    endif
+    call setpos('.', curpos)
+    silent update
+    let &eventignore = save_eventignore
+    silent edit  " reload to apply syntax
+    let &lazyredraw = save_lazyredraw
+  endtry
 endfunction
 
 function! OmniSharp#Build() abort
@@ -583,6 +610,11 @@ function! s:find_solution_files() abort
   endif
 
   return solution_files
+endfunction
+
+function! s:json_decode(json) abort
+  let [null, true, false] = [0, 1, 0]
+  sandbox return eval(a:json)
 endfunction
 
 if has('patch-7.4.279')
