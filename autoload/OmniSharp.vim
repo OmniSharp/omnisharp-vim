@@ -238,9 +238,7 @@ endfunction
 
 
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
-  if g:serverSeenRunning == 1
-    call OmniSharp#TypeLookup('False')
-  endif
+  call OmniSharp#TypeLookup('False')
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation() abort
