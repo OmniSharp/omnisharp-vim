@@ -36,7 +36,7 @@ function! OmniSharp#FindUsages() abort
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   else
     echo 'No usages found'
   endif
@@ -56,7 +56,7 @@ function! OmniSharp#FindImplementations() abort
 
   if len(qf_taglist) > 1
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   endif
 endfunction
 
@@ -66,7 +66,7 @@ function! OmniSharp#FindMembers() abort
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 1
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   endif
 endfunction
 
@@ -222,20 +222,18 @@ endfunction
 " This is useful to accumulate results from successive operations.
 " Global function that can be called from other scripts.
 function! s:GoScratch() abort
-  let done = 0
+  if bufwinnr('__OmniSharpScratch__') == -1
+    "botright new __OmniSharpScratch__
+    botright split __OmniSharpScratch__
+    setlocal buftype=nofile bufhidden=hide noswapfile nolist nobuflisted nospell
+  endif
   for i in range(1, winnr('$'))
     execute i . 'wincmd w'
-    if &buftype ==# 'nofile'
-      let done = 1
+    if &buftype ==# 'nofile' && bufname('%') ==# '__OmniSharpScratch__'
       break
     endif
   endfor
-  if !done
-    new
-    setlocal buftype=nofile bufhidden=hide noswapfile
-  endif
 endfunction
-
 
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
   call OmniSharp#TypeLookup('False')
@@ -250,13 +248,14 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
     python typeLookup("type")
+    let preWinNr = winnr()
     call s:GoScratch()
     python vim.current.window.height = 5
     set modifiable
     exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . s:documentation . '""".splitlines()'
     set nomodifiable
     "Return to original window
-    wincmd p
+    execute preWinNr . 'wincmd w'
   else
     let line = line('.')
     let found_line_in_loc_list = 0
@@ -326,7 +325,7 @@ function! OmniSharp#Build() abort
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   endif
 endfunction
 
@@ -416,7 +415,7 @@ function! OmniSharp#FixUsings() abort
 
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
-    copen
+    botright cwindow
   endif
 endfunction
 
