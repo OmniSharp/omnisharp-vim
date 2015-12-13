@@ -6,7 +6,7 @@ OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#. A list o
 
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
-The plugin uses the [OmniSharp server](https://github.com/nosami/OmniSharpServer) which is a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
+The plugin uses the [OmniSharp server](https://github.com/OmniSharp/omnisharp-server) which is a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
 
 The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 [Emacs](https://github.com/OmniSharp/omnisharp-emacs),
@@ -80,7 +80,7 @@ Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.c
 
 #### OSX / Linux
 
-Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/nosami/OmniSharpServer/wiki)
+Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/OmniSharp/omnisharp-server/wiki)
 
 ```sh
 cd ~/.vim/bundle
@@ -112,7 +112,7 @@ msbuild
 ```
 
 ### Install Python
-Install last version of 2.7 series ([Python 2.7.8] (http://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
+Install last version of 2.7 series ([Python 2.7.8] (https://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
 Verify that Python is working inside Vim with
@@ -187,7 +187,7 @@ If you prefer to get completions as you are typing, then you should take a look 
 or [NeoComplCache](https://github.com/Shougo/neocomplcache.vim).
 
 
-NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no longer maintained. NeoComplete is the successor to NeoComplCache. It is faster than NeoComplCache but requires Vim to be compiled with +lua. (Windows users can find [vim compiled with +lua](http://tuxproject.de/projects/vim/) and [Lua 5.2](http://sourceforge.net/projects/luabinaries/files/5.2.1/Executables/) - place lua52.dll in the same folder as gvim.exe) . OSX users can `brew install vim --HEAD --with-lua`
+NeoComplCache is the easiest to set up as it is pure vimscript. However, it's no longer maintained. NeoComplete is the successor to NeoComplCache. It is faster than NeoComplCache but requires Vim to be compiled with +lua. (Windows users can find [vim compiled with +lua](https://tuxproject.de/projects/vim/) and [Lua 5.2](http://sourceforge.net/projects/luabinaries/files/5.2.1/Executables/) - place lua52.dll in the same folder as gvim.exe) . OSX users can `brew install vim --HEAD --with-lua`
 
 YouCompleteMe is also fast, but is tricky to setup on Windows - trivial on linux or OSX.
 
