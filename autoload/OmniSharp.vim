@@ -251,8 +251,9 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
     let preWinNr = winnr()
     call s:GoScratch()
     python vim.current.window.height = 5
+    let doc = get(s:, 'documentation', '')
     set modifiable
-    exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . s:documentation . '""".splitlines()'
+    exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . doc . '""".splitlines()'
     set nomodifiable
     "Return to original window
     execute preWinNr . 'wincmd w'
