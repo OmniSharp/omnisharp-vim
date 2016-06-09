@@ -8,19 +8,26 @@ class Completion:
         parameters['WantDocumentationForEveryCompletionResult'] = \
             bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
 
+        want_snippet = \
+            bool(int(vim.eval('g:OmniSharp_want_snippet')))
+
+        parameters['WantSnippet'] = want_snippet
+        parameters['WantMethodHeader'] = want_snippet
+        parameters['WantReturnType'] = want_snippet
+
         parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
 
         response = syncrequest.get_response('/autocomplete', parameters)
-
 
         enc = vim.eval('&encoding')
         vim_completions = []
         if response is not None:
             for completion in response:
                 complete = {
-                    'word': completion['CompletionText'],
-                    'menu' : completion['DisplayText'] if completion['DisplayText'] is not None else '',
-                    'info': completion['Description'].replace('\r\n', '\n') if completion['Description'] is not None else '',
+                    'snip': completion['Snippet'] or '',
+                    'word': completion['MethodHeader'] or completion['CompletionText'],
+                    'menu': completion['ReturnType'] or completion['DisplayText'],
+                    'info': completion['Description'].replace('\r\n', '\n') or '',
                     'icase': 1,
                     'dup':1
                 }

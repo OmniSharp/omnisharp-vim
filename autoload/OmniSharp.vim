@@ -10,6 +10,7 @@ let s:server_files = '*.sln'
 let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
+let s:generated_snippets = {}
 let g:serverSeenRunning = 0
 
 function! OmniSharp#Complete(findstart, base) abort
@@ -26,7 +27,12 @@ function! OmniSharp#Complete(findstart, base) abort
 
     return start
   else
-    return pyeval('Completion().get_completions("s:column", "a:base")')
+    let omnisharp_last_completion_result =  pyeval('Completion().get_completions("s:column", "a:base")')
+    let s:omnisharp_last_completion_dictionary = {}
+    for completion in omnisharp_last_completion_result
+        let s:omnisharp_last_completion_dictionary[get(completion, 'word')] = completion
+    endfor
+    return omnisharp_last_completion_result
   endif
 endfunction
 
@@ -580,6 +586,40 @@ function! OmniSharp#AppendCtrlPExtensions() abort
   if !exists('g:OmniSharp_ctrlp_extensions_added')
     let g:OmniSharp_ctrlp_extensions_added = 1
     let g:ctrlp_extensions += ['findtype', 'findsymbols', 'findcodeactions']
+  endif
+endfunction
+
+function! OmniSharp#ExpandAutoCompleteSnippet()
+  if !g:OmniSharp_want_snippet
+    return
+  endif
+
+  if !exists("*UltiSnips#AddSnippetWithPriority")
+    echoerr "g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
+    return
+  endif
+ 
+  let line = strpart(getline('.'), 0, col('.')-1)
+  let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
+ 
+  let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
+  let completion = substitute(completion, remove_whitespace_regex, '\1', '')
+ 
+  let should_expand_completion = len(completion) != 0
+  
+  if should_expand_completion
+    let completion = split(completion, '\.')[-1]
+    let completion = split(completion, 'new ')[-1]
+
+    if has_key(s:omnisharp_last_completion_dictionary, completion)
+      let snippet = get(get(s:omnisharp_last_completion_dictionary, completion, ''), 'snip','')
+      if !has_key(s:generated_snippets, completion)
+        call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
+        let s:generated_snippets[completion] = snippet
+      endif
+      call UltiSnips#CursorMoved()
+      call UltiSnips#ExpandSnippetOrJump()
+    endif
   endif
 endfunction
 
