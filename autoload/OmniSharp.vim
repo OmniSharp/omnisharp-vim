@@ -5,8 +5,7 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:omnisharp_server = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
-let s:omnisharp_roslyn_server = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
+let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 let s:server_files = '*.sln'
 let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
@@ -43,7 +42,7 @@ function! OmniSharp#FindUsages() abort
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   else
     echo 'No usages found'
   endif
@@ -63,7 +62,7 @@ function! OmniSharp#FindImplementations() abort
 
   if len(qf_taglist) > 1
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   endif
 endfunction
 
@@ -73,13 +72,13 @@ function! OmniSharp#FindMembers() abort
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 1
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   endif
 endfunction
 
 function! OmniSharp#NavigateUp() abort
-  if g:OmniSharp_server_type == 'roslyn'
-    let qf_tag = pyeval("navigateUp()")
+  if g:OmniSharp_server_type ==# 'roslyn'
+    let qf_tag = pyeval('navigateUp()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
     let qf_taglist = pyeval('findMembers()')
@@ -102,8 +101,8 @@ function! OmniSharp#NavigateUp() abort
 endfunction
 
 function! OmniSharp#NavigateDown() abort
-  if g:OmniSharp_server_type == 'roslyn'
-    let qf_tag = pyeval("navigateDown()")
+  if g:OmniSharp_server_type ==# 'roslyn'
+    let qf_tag = pyeval('navigateDown()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
     let qf_taglist = pyeval('findMembers()')
@@ -229,25 +228,21 @@ endfunction
 " This is useful to accumulate results from successive operations.
 " Global function that can be called from other scripts.
 function! s:GoScratch() abort
-  let done = 0
+  if bufwinnr('__OmniSharpScratch__') == -1
+    "botright new __OmniSharpScratch__
+    botright split __OmniSharpScratch__
+    setlocal buftype=nofile bufhidden=hide noswapfile nolist nobuflisted nospell
+  endif
   for i in range(1, winnr('$'))
     execute i . 'wincmd w'
-    if &buftype ==# 'nofile'
-      let done = 1
+    if &buftype ==# 'nofile' && bufname('%') ==# '__OmniSharpScratch__'
       break
     endif
   endfor
-  if !done
-    new
-    setlocal buftype=nofile bufhidden=hide noswapfile
-  endif
 endfunction
 
-
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
-  if g:serverSeenRunning == 1
-    call OmniSharp#TypeLookup('False')
-  endif
+  call OmniSharp#TypeLookup('False')
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation() abort
@@ -259,13 +254,15 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
     python typeLookup("type")
+    let preWinNr = winnr()
     call s:GoScratch()
     python vim.current.window.height = 5
+    let doc = get(s:, 'documentation', '')
     set modifiable
-    exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . s:documentation . '""".splitlines()'
+    exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . doc . '""".splitlines()'
     set nomodifiable
     "Return to original window
-    wincmd p
+    execute preWinNr . 'wincmd w'
   else
     let line = line('.')
     let found_line_in_loc_list = 0
@@ -298,8 +295,35 @@ function! OmniSharp#Rename() abort
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let qf_taglist = []
-  python renameTo()
+  let result = s:json_decode(pyeval('renameTo()'))
+
+  let save_lazyredraw = &lazyredraw
+  let save_eventignore = &eventignore
+  let buf = bufnr('%')
+  let curpos = getcurpos()
+  try
+    set lazyredraw eventignore=all
+    for change in result.Changes
+      execute 'silent hide edit' fnameescape(change.FileName)
+      let modified = &modified
+      let content = split(change.Buffer, '\r\?\n')
+      silent % delete _
+      silent 1put =content
+      silent 1 delete _
+      if !modified
+        silent update
+      endif
+    endfor
+  finally
+    if bufnr('%') != buf
+      execute buf 'buffer'
+    endif
+    call setpos('.', curpos)
+    silent update
+    let &eventignore = save_eventignore
+    silent edit  " reload to apply syntax
+    let &lazyredraw = save_lazyredraw
+  endtry
 endfunction
 
 function! OmniSharp#Build() abort
@@ -308,7 +332,7 @@ function! OmniSharp#Build() abort
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
-    copen 4
+    botright cwindow 4
   endif
 endfunction
 
@@ -398,7 +422,7 @@ function! OmniSharp#FixUsings() abort
 
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
-    copen
+    botright cwindow
   endif
 endfunction
 
@@ -433,110 +457,69 @@ function! OmniSharp#StartServer() abort
     return
   endif
 
-  "get the path for the current buffer
-  let folder = expand('%:p:h')
-  let solutionfiles = globpath(folder, '*.sln', 1)
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let solutionfiles = globpath(folder, 'project.json', 1)
-  endif
-
-  while solutionfiles ==# ''
-    let lastfolder = folder
-    "traverse up a level
-
-    let folder = fnamemodify(folder, ':p:h:h')
-    if folder == lastfolder
-      break
-    endif
-    let solutionfiles = globpath(folder , '*.sln', 1)
-    if g:OmniSharp_server_type ==# 'roslyn'
-      let solutionfiles = globpath(folder, 'project.json', 1)
-    endif
-
-    if isdirectory(solutionfiles)
-      let solutionfiles = ''
-    endif
-  endwhile
-
-  if solutionfiles ==# ''
-    if g:OmniSharp_start_without_solution
-      call OmniSharp#StartServerSolution('.')
-    endif
+  let solution_files = s:find_solution_files()
+  if empty(solution_files)
     return
   endif
-
-  let array = split(solutionfiles, '\n')
-  if len(array) == 1
-    call OmniSharp#StartServerSolution(array[0])
+  if len(solution_files) == 1
+    call OmniSharp#StartServerSolution(solution_files[0])
   elseif g:OmniSharp_sln_list_name !=# ''
     echom 'Started with sln: ' . g:OmniSharp_sln_list_name
     call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
-  elseif g:OmniSharp_sln_list_index > -1 && g:OmniSharp_sln_list_index < len(array)
-    echom 'Started with sln: ' . array[g:OmniSharp_sln_list_index]
-    call OmniSharp#StartServerSolution( array[g:OmniSharp_sln_list_index]  )
+  elseif g:OmniSharp_sln_list_index > -1 &&
+  \     g:OmniSharp_sln_list_index < len(solution_files)
+    echom 'Started with sln: ' . solution_files[g:OmniSharp_sln_list_index]
+    call OmniSharp#StartServerSolution( solution_files[g:OmniSharp_sln_list_index]  )
   else
     echom 'sln: ' . g:OmniSharp_sln_list_name
     let index = 1
     if g:OmniSharp_autoselect_existing_sln
-      for solutionfile in array
+      for solutionfile in solution_files
         if index( g:OmniSharp_running_slns, solutionfile ) >= 0
           return
         endif
       endfor
     endif
 
-    for solutionfile in array
+    for solutionfile in solution_files
       echo index . ' - '. solutionfile
       let index = index + 1
     endfor
 
-    let option = 0
-    let optionstring = input('Choose a solution file and press enter ')
-    let len = strlen(optionstring) - 1
-    let i = 0
-    while i <= len
-      let c = strpart(optionstring, len-i, 1)
-      if c <# '0' && c ># '9'
-        return
-      endif
-      let option += c * float2nr(pow(10, i))
-      let i += 1
-    endwhile
+    let option = input('Choose a solution file and press enter ') - 0
 
-    if option == 0 || option > len(array)
+    if option == 0 || option > len(solution_files)
       return
     endif
 
-    call OmniSharp#StartServerSolution(array[option - 1])
+    call OmniSharp#StartServerSolution(solution_files[option - 1])
   endif
 endfunction
 
 function! OmniSharp#ResolveLocalConfig(solutionPath) abort
   let result = ''
   let configPath = fnamemodify(a:solutionPath, ':p:h')
-  \ . '\'
+  \ . s:dir_separator
   \ . g:OmniSharp_server_config_name
 
   if filereadable(configPath)
-    let result = ' -config ' . configPath
+    let result = ' -config ' . shellescape(configPath, 1)
   endif
   return result
 endfunction
 
 function! OmniSharp#StartServerSolution(solutionPath) abort
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let g:OmniSharp_running_slns += [fnamemodify(a:solutionPath, ':h')]
-  else
-    let g:OmniSharp_running_slns += [a:solutionPath]
+  let solutionPath = a:solutionPath
+  if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
+    let solutionPath = fnamemodify(solutionPath, ':h')
   endif
+  let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  if g:OmniSharp_server_type ==# 'roslyn'
-    let command = shellescape(s:omnisharp_roslyn_server, 1) . ' -p ' . port . ' -s ' . shellescape(fnamemodify(a:solutionPath, ':h'), 1)
-  else
-    let command = shellescape(s:omnisharp_server, 1)
-    \ . ' -p ' . port
-    \ . ' -s ' . shellescape(a:solutionPath, 1)
-    \ . OmniSharp#ResolveLocalConfig(a:solutionPath)
+  let command = shellescape(g:OmniSharp_server_path, 1)
+  \ . ' -p ' . port
+  \ . ' -s ' . shellescape(solutionPath, 1)
+  if g:OmniSharp_server_type !=# 'roslyn'
+    let command .= OmniSharp#ResolveLocalConfig(solutionPath)
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
     let command = 'mono ' . command
@@ -547,7 +530,7 @@ endfunction
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
-  if exists(':Make')
+  if exists(':Dispatch') == 2
     call dispatch#start(a:command, {'background': 1})
   else
     if is_vimproc
@@ -581,17 +564,8 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    if g:OmniSharp_server_type ==# 'roslyn'
-      "Kill process - temporary hack till /stop is
-      "implemented in the roslyn server
-      if !has('win32') && !has('win32unix')
-        call system('pkill -f omnisharp-roslyn')
-      else
-        call system('taskkill /IM /f Omnisharp')
-      endif
-    else
-      python getResponse("/stopserver")
-    endif
+    python getResponse("/stopserver")
+    let g:OmniSharp_running_slns = []
   endif
 endfunction
 
@@ -648,6 +622,48 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     endif
   endif
 endfunction
+
+function! s:find_solution_files() abort
+  "get the path for the current buffer
+  let dir = expand('%:p:h')
+  let solution_files = []
+
+  while empty(solution_files)
+    let solution_files += s:globpath(dir , '*.sln')
+    if g:OmniSharp_server_type ==# 'roslyn'
+      let solution_files += s:globpath(dir, 'project.json')
+    endif
+
+    call filter(solution_files, 'filereadable(v:val)')
+
+    let lastfolder = dir
+    let dir = fnamemodify(dir, ':h')
+    if dir ==# lastfolder
+      break
+    endif
+  endwhile
+
+  if empty(solution_files) && g:OmniSharp_start_without_solution
+    let solution_files = ['.']
+  endif
+
+  return solution_files
+endfunction
+
+function! s:json_decode(json) abort
+  let [null, true, false] = [0, 1, 0]
+  sandbox return eval(a:json)
+endfunction
+
+if has('patch-7.4.279')
+  function! s:globpath(path, file) abort
+    return globpath(a:path, a:file, 1, 1)
+  endfunction
+else
+  function! s:globpath(path, file) abort
+    return split(globpath(a:path, a:file, 1), "\n")
+  endfunction
+endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

@@ -2,6 +2,11 @@ if !has('python')
   finish
 endif
 
+if get(b:, 'OmniSharp_ftplugin_loaded', 0)
+  finish
+endif
+let b:OmniSharp_ftplugin_loaded = 1
+
 "Set a default value for the server address
 if !exists('g:omnicomplete_fetch_full_documentation')
     let g:omnicomplete_fetch_full_documentation = 0
@@ -76,12 +81,15 @@ endif
 let b:undo_ftplugin .= '
 \ execute "autocmd! plugin-OmniSharp * <buffer>"
 \
+\|  unlet b:OmniSharp_ftplugin_loaded
 \|  delcommand OmniSharpAddReference
 \|  delcommand OmniSharpAddToProject
 \|  delcommand OmniSharpBuild
 \|  delcommand OmniSharpBuildAsync
 \|  delcommand OmniSharpCodeFormat
+\|  delcommand OmniSharpDocumentation
 \|  delcommand OmniSharpFindImplementations
+\|  delcommand OmniSharpFindMembers
 \|  delcommand OmniSharpFindSymbol
 \|  delcommand OmniSharpFindSyntaxErrors
 \|  delcommand OmniSharpFindType
@@ -90,6 +98,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpFixUsings
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGotoDefinition
+\|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
 \|  delcommand OmniSharpReloadSolution

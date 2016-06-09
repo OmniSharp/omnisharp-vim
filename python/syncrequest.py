@@ -33,4 +33,6 @@ def get_response(endPoint, params=None, timeout=None):
         return None
 
     json_string = response.read()
+    if json_string.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
+        json_string = json_string[3:]
     return  json.loads(json_string)

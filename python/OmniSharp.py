@@ -41,7 +41,10 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     try:
         response = opener.open(req, json.dumps(parameters), timeout)
         vim.command("let g:serverSeenRunning = 1")
-        return response.read()
+        res = response.read()
+        if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
+            res = res[3:]
+        return res
     except Exception:
         vim.command("let g:serverSeenRunning = 0")
         return ''
@@ -141,41 +144,26 @@ def typeLookup(ret):
             vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
 def renameTo():
-    parameters = {} 
-    parameters['renameto'] = vim.eval("a:renameto") 
+    parameters = {}
+    parameters['renameto'] = vim.eval("a:renameto")
     js = getResponse('/rename', parameters)
-    response = json.loads(js)
-    changes = response['Changes']
-    currentBuffer = vim.current.buffer.name
-    cursor = vim.current.window.cursor
-    for change in changes:
-        lines = change['Buffer'].splitlines()
-        lines = [line.encode('utf-8') for line in lines]
-        filename = change['FileName']
-        vim.command(':argadd ' + filename)
-        buffer = filter(lambda b: b.name != None and b.name.upper() == filename.upper(), vim.buffers)[0]
-        vim.command(':b ' + filename)
-        buffer[:] = lines
-        vim.command(':undojoin')
-
-    vim.command(':b ' + currentBuffer)
-    vim.current.window.cursor = cursor
+    return js
 
 def setBuffer(buffer):
     lines = buffer.splitlines()
     lines = [line.encode('utf-8') for line in lines]
     vim.current.buffer[:] = lines
 
-def build(ret):
-    response = json.loads(getResponse('/build', {}, 60))
+def build():
+    js = json.loads(getResponse('/build', {}, 60))
 
-    success = response["Success"]
+    success = js["Success"]
     if success:
         print "Build succeeded"
     else:
         print "Build failed"
 
-    return get_quickfix_list(js, 'QuickFixes')
+    return quickfixes_from_js(js, 'QuickFixes')
 
 def buildcommand():
     vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
@@ -227,8 +215,12 @@ def findSymbols():
 def get_quickfix_list(js, key):
     if js != '':
         response = json.loads(js)
-        if response[key] is not None:
-            return quickfixes_from_response(response[key])
+        return quickfixes_from_js(response, key)
+    return [];
+
+def quickfixes_from_js(js, key):
+    if js[key] is not None:
+        return quickfixes_from_response(js[key])
     return [];
 
 def quickfixes_from_response(response):

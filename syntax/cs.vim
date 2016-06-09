@@ -53,10 +53,10 @@ syn keyword csModifier			abstract const extern internal override private protect
 " constant
 syn keyword csConstant			false null true
 " exception
-syn keyword csException			try catch finally throw
+syn keyword csException			try catch finally throw when
 
 " TODO:
-syn keyword csUnspecifiedStatement	as base checked event fixed get in is lock operator out params ref set sizeof stackalloc this typeof unchecked unsafe using
+syn keyword csUnspecifiedStatement	as base checked event fixed get in is lock nameof operator out params ref set sizeof stackalloc this typeof unchecked unsafe using
 
 syn keyword csLinqKeyword               ascending by descending equals from group in into join let on orderby select where
 " TODO:
