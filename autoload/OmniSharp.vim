@@ -610,6 +610,7 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
   if should_expand_completion
     let completion = split(completion, '\.')[-1]
     let completion = split(completion, 'new ')[-1]
+    let completion = split(completion, '= ')[-1]
 
     if has_key(s:omnisharp_last_completion_dictionary, completion)
       let snippet = get(get(s:omnisharp_last_completion_dictionary, completion, ''), 'snip','')
