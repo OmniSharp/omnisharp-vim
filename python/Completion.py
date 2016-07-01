@@ -27,7 +27,7 @@ class Completion:
                     'snip': completion['Snippet'] or '',
                     'word': completion['MethodHeader'] or completion['CompletionText'],
                     'menu': completion['ReturnType'] or completion['DisplayText'],
-                    'info': completion['Description'].replace('\r\n', '\n') or '',
+                    'info': (completion['Description'] or '').replace('\r\n', '\n'),
                     'icase': 1,
                     'dup':1
                 }
