@@ -300,7 +300,7 @@ function! OmniSharp#RenameTo(renameto) abort
   let save_lazyredraw = &lazyredraw
   let save_eventignore = &eventignore
   let buf = bufnr('%')
-  let curpos = getcurpos()
+  let curpos = getpos('.')
   try
     set lazyredraw eventignore=all
     for change in result.Changes
