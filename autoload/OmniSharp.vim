@@ -11,6 +11,7 @@ let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let s:generated_snippets = {}
+let s:omnisharp_last_completion_dictionary = {}
 let g:serverSeenRunning = 0
 
 function! OmniSharp#Complete(findstart, base) abort
