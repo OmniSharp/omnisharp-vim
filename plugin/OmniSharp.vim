@@ -94,6 +94,6 @@ if !exists('g:OmniSharp_server_path')
   if g:OmniSharp_server_type ==# 'v1'
     let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
   else
-    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'scripts', 'Omnisharp'], '/')
+    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'artifacts', 'scripts', 'Omnisharp'], '/')
   endif
 endif
