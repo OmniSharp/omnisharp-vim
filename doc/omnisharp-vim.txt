@@ -1,0 +1,255 @@
+*omnisharp-vim.txt* OmniSharp support for Vim
+*OmniSharp* *omnisharp* *omnisharp-vim*
+
+===============================================================================
+#                                                                             #
+#   ██████╗ ███╗   ███╗███╗   ██╗██╗███████╗██╗  ██╗ █████╗ ██████╗ ██████╗   #
+#  ██╔═══██╗████╗ ████║████╗  ██║██║██╔════╝██║  ██║██╔══██╗██╔══██╗██╔══██╗  #
+#  ██║   ██║██╔████╔██║██╔██╗ ██║██║███████╗███████║███████║██████╔╝██████╔╝  #
+#  ██║   ██║██║╚██╔╝██║██║╚██╗██║██║╚════██║██╔══██║██╔══██║██╔══██╗██╔═══╝   #
+#  ╚██████╔╝██║ ╚═╝ ██║██║ ╚████║██║███████║██║  ██║██║  ██║██║  ██║██║       #
+#   ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝       #
+#                                                                             #
+===============================================================================
+CONTENTS                                                   *omnisharp-contents*
+
+    1. Dependencies.................................|omnisharp-dependencies|
+    2. Usage........................................|omnisharp-usage|
+    3. Options......................................|omnisharp-options|
+    4. Commands.....................................|omnisharp-commands|
+    5. Mappings.....................................|omnisharp-mappings|
+    6. Credits......................................|omnisharp-credits|
+
+===============================================================================
+DEPENDENCIES                                           *omnisharp-dependencies*
+
+Required:~
+    - Vim 7.3 or higher with Python 2 support
+    - Mono OR .NET Framework
+
+Optional:~
+    - CtrlP or unite.vim (for fuzzy-search capabilities)
+    - Syntastic plugin (for syntax and type checking)
+    NOTE: Must be enabled (see |'g:syntastic_cs_checkers'|)
+
+===============================================================================
+USAGE                                                         *omnisharp-usage*
+
+Opening a `*.cs` file will automatically start an instance of omnisharp-server
+(if using vim-dispatch). Using omni completion will begin the fsautocomplete
+process.
+
+Suggestion: Install a completer such as NeoComplete or SuperTab
+
+===============================================================================
+OPTIONS                                                     *omnisharp-options*
+
+                                                    *'g:syntastic_cs_checkers'*
+Use this option to enable syntastic integration >
+    let g:syntastic_cs_checkers=['syntax', 'semantic', 'issues']
+<
+
+                                                    *'g:OmniSharp_selector_ui'*
+Description here >
+    let g:OmniSharp_selector_ui={something}
+<
+
+                                                   *'g:Omnisharp_start_server'*
+Description here >
+    let g:Omnisharp_start_server={something}
+<
+
+                                                    *'g:Omnisharp_stop_server'*
+Description here >
+    let g:Omnisharp_stop_server={something}
+<
+
+                                             *'g:Omnisharp_server_config_name'*
+Description here >
+    let g:Omnisharp_server_config_name={something}
+<
+
+                                                    *'g:OmniSharp_server_type'*
+Description here >
+    let g:OmniSharp_server_type={something}
+<
+
+                                                    *'g:OmniSharp_server_type'*
+Description here >
+    let g:OmniSharp_server_type={something}
+<
+
+                                                           *'g:OmniSharp_host'*
+Description here >
+    let g:OmniSharp_host={something}
+<
+
+                                            *'g:OmniSharp_typeLookupInPreview'*
+Description here >
+    let g:OmniSharp_typeLookupInPreview={something}
+<
+
+                                                        *'g:OmniSharp_timeout'*
+Description here >
+    let g:OmniSharp_timeout={something}
+<
+
+                                            *'g:SuperTabDefaultCompletionType'*
+Description here >
+    let g:SuperTabDefaultCompletionType={something}
+<
+
+                                      *'g:SuperTabContextDefaultCompletionType*
+Description here >
+    let g:SuperTabContextDefaultCompletionType={something}
+<
+
+                                     *'g:SuperTabDefaultCompletionTypeDiscover*
+Description here >
+    let g:SuperTabDefaultCompletionTypeDiscovery={something}
+<
+
+                                         *'g:SuperTabClosePreviewOnPopupClose'*
+Description here >
+    let g:SuperTabClosePreviewOnPopupClose={something}
+<
+
+                                         *'g:omnicomplete_fetch_documentation'*
+Description here >
+    let g:omnicomplete_fetch_documentation={something}
+<
+
+                                                   *'g:OmniSharp_want_snippet'*
+Description here >
+    let g:OmniSharp_want_snippet={something}
+<
+
+===============================================================================
+COMMANDS                                                   *omnisharp-commands*
+
+                                                              *:OmniSharpBuild*
+:OmniSharpBuild
+    Builds solution and puts errors/warnings in quickfix list
+
+                                                         *:OmniSharpBuildAsync*
+:OmniSharpBuildAsync
+    Builds solution asynchronously and puts errors/warnings in quickfix list
+    NOTE: Must have vim-dispatch installed
+
+                                                     *:OmniSharpGotoDefinition*
+:OmniSharpGotoDefinition
+    Navigates to the definition of the symbol under the cursor
+
+                                                *:OmniSharpFindImplementations*
+:OmniSharpFindImplementations
+    Fills quicklist with implementations of interface/class under the cursor
+    NOTE: Navigates to implementation if only one is found
+
+                                                           *:OmniSharpFindType*
+:OmniSharpFindType
+    Fuzzy-search through types
+    NOTE: Requires CtrlP or unite.vim
+
+                                                         *:OmniSharpFindSymbol*
+:OmniSharpFindSymbol
+    Fuzzy-search through symbols
+    NOTE: Requires CtrlP or unite.vim
+
+                                                         *:OmniSharpFindUsages*
+:OmniSharpFindUsages
+    Fills quicklist with usages of symbol under the cursor
+    NOTE: Navigates to usage if only one is found
+
+                                                        *:OmniSharpFindMembers*
+:OmniSharpFindMembers
+    Fills quicklist with members in current file
+
+                                                           *:OmniSharpFixIssue*
+:OmniSharpFixIssue
+    Fixes warning on current line
+
+                                                          *:OmniSharpFixUsings*
+:OmniSharpFixUsings
+    Removes unused using directives
+
+                                                         *:OmniSharpTypeLookup*
+:OmniSharpTypeLookup
+    Displays the type name or method signature of the symbol under the cursor
+
+                                                      *:OmniSharpDocumentation*
+:OmniSharpDocumentation
+    Opens the documentation for the symbol under the cursor
+    NOTE: Opens in an `__OmniSharpScratch__` buffer at the bottom of the screen
+
+                                                         *:OmniSharpNavigateUp*
+:OmniSharpNavigateUp
+    Navigates to previous method or class
+
+                                                       *:OmniSharpNavigateDown*
+:OmniSharpNavigateDown
+    Navigates to next method or class
+
+                                                     *:OmniSharpGetCodeActions*
+:OmniSharpGetCodeActions
+    Fuzzy-serach through available code actions
+    NOTE: Requries CtrlP or unite.vim
+
+                                                             *:OmniSharpRename*
+:OmniSharpRename
+    Renames symbol under cursor
+
+                                                     *:OmniSharpReloadSolution*
+:OmniSharpReloadSolution
+    Reloads solution in OmniSharp
+
+                                                         *:OmniSharpCodeFormat*
+:OmniSharpCodeFormat
+    Formats code
+
+                                                       *:OmniSharpAddToProject*
+:OmniSharpAddToProject
+    Adds current file to closest `*.csproj`
+
+                                                        *:OmniSharpStartServer*
+:OmniSharpStartServer
+    Starts the OmniSharp server
+    NOTE: Requires vim-dispatch
+
+                                                         *:OmniSharpStopServer*
+:OmniSharpStopServer
+    Stops the OmniSharp server
+    NOTE: Requires vim-dispatch
+
+                                                     *:OmniSharpHighlightTypes*
+:OmniSharpHighlightTypes
+    Enable advanced type highlighting for current file
+
+===============================================================================
+MAPPINGS                                                   *omnisharp-mappings*
+
+General:~
+
+    <leader>t
+        Echoes the type of the expression currently pointed to by the cursor
+    <leader>d
+        Go to declaration in current window
+    <leader>s
+        Takes you back from where go to declaration was triggered. Experimental
+
+FSharp Interactive:~
+    <A-CR>      OR
+    <leader>i
+        Send either the current selection or the current line to the fsharp
+        interactive and echoes the output the first line of the output. All
+        output will be written to the fsi-out buffer.
+
+===============================================================================
+CREDITS                                                     *omnisharp-credits*
+
+Syntax and indent files by kongo2002 <github.com/kongo2002>:
+ http://github.com/kongo2002/fsharp-vim
+
+Adapted from Tim Robinson <github.com/timrobinson>:
+ http://github.com/timrobinson/fsharp-vim
+>
+===============================================================================
