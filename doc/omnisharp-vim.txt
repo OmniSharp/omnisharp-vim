@@ -17,8 +17,6 @@ CONTENTS                                                   *omnisharp-contents*
     2. Usage........................................|omnisharp-usage|
     3. Options......................................|omnisharp-options|
     4. Commands.....................................|omnisharp-commands|
-    5. Mappings.....................................|omnisharp-mappings|
-    6. Credits......................................|omnisharp-credits|
 
 ===============================================================================
 DEPENDENCIES                                           *omnisharp-dependencies*
@@ -50,78 +48,69 @@ Use this option to enable syntastic integration >
 <
 
                                                     *'g:OmniSharp_selector_ui'*
-Description here >
-    let g:OmniSharp_selector_ui={something}
+Use this option to specify a selector UI if both CtrlP and unite.vim are
+installed. Default: Whichever is installed. >
+    let g:OmniSharp_selector_ui='unite'
+    OR
+    let g:OmniSharp_selector_ui='ctrlp'
 <
 
                                                    *'g:Omnisharp_start_server'*
-Description here >
-    let g:Omnisharp_start_server={something}
+Use this option to specify whether OmniSharp will start automatically upon
+opening a `*.cs` file. Default: 1 >
+    let g:Omnisharp_start_server=1
 <
 
                                                     *'g:Omnisharp_stop_server'*
-Description here >
-    let g:Omnisharp_stop_server={something}
+Use this option to specify whether OmniSharp will stop automatically upon
+closing Vim. Default: 1 >
+    let g:Omnisharp_stop_server=1
 <
 
                                              *'g:Omnisharp_server_config_name'*
-Description here >
-    let g:Omnisharp_server_config_name={something}
+Use this option to specify the OmniSharp server config filename.
+Default: 'omnisharp.json' >
+    let g:Omnisharp_server_config_name='omnisharp.json'
 <
 
                                                     *'g:OmniSharp_server_type'*
-Description here >
-    let g:OmniSharp_server_type={something}
-<
-
-                                                    *'g:OmniSharp_server_type'*
-Description here >
-    let g:OmniSharp_server_type={something}
+Use this option to specify which version of OmniSharp will be used.
+Default: 'v1' >
+    let g:OmniSharp_server_type='v1'
+    OR
+    let g:OmniSharp_server_type='roslyn'
 <
 
                                                            *'g:OmniSharp_host'*
-Description here >
-    let g:OmniSharp_host={something}
+Use this option to specify the host address of the OmniSharp server.
+Default: 'http://localhost:2000' >
+    let g:OmniSharp_host='http://localhost:2000'
 <
 
                                             *'g:OmniSharp_typeLookupInPreview'*
-Description here >
-    let g:OmniSharp_typeLookupInPreview={something}
+Use this option to specify whether type lookups display in Vim's Preview Window.
+Type lookups will display in the status line if this is `0`. Default: 0 >
+    let g:OmniSharp_typeLookupInPreview=0
 <
 
                                                         *'g:OmniSharp_timeout'*
-Description here >
-    let g:OmniSharp_timeout={something}
-<
-
-                                            *'g:SuperTabDefaultCompletionType'*
-Description here >
-    let g:SuperTabDefaultCompletionType={something}
-<
-
-                                      *'g:SuperTabContextDefaultCompletionType*
-Description here >
-    let g:SuperTabContextDefaultCompletionType={something}
-<
-
-                                     *'g:SuperTabDefaultCompletionTypeDiscover*
-Description here >
-    let g:SuperTabDefaultCompletionTypeDiscovery={something}
-<
-
-                                         *'g:SuperTabClosePreviewOnPopupClose'*
-Description here >
-    let g:SuperTabClosePreviewOnPopupClose={something}
+Use this option to specify the time (in seconds) to wait for a response from the
+server. Default: 1 >
+    let g:OmniSharp_timeout=1
 <
 
                                          *'g:omnicomplete_fetch_documentation'*
-Description here >
-    let g:omnicomplete_fetch_documentation={something}
+Use this option to specify whether OmniSharp will fetch full documentation on
+completion suggestions. By default, only type/method signatures are fetched for
+performance reasons. Full documentation can still be fetched when needed using
+the |:OmniSharpDocumentation| command. Default: 0 >
+    let g:omnicomplete_fetch_documentation=0
 <
 
                                                    *'g:OmniSharp_want_snippet'*
-Description here >
-    let g:OmniSharp_want_snippet={something}
+Use this option to enable snippet completion. Requires `completeopt-=preview`.
+Default: 0 >
+    let g:OmniSharp_want_snippet=0
 <
 
 ===============================================================================
@@ -224,32 +213,4 @@ COMMANDS                                                   *omnisharp-commands*
 :OmniSharpHighlightTypes
     Enable advanced type highlighting for current file
 
-===============================================================================
-MAPPINGS                                                   *omnisharp-mappings*
-
-General:~
-
-    <leader>t
-        Echoes the type of the expression currently pointed to by the cursor
-    <leader>d
-        Go to declaration in current window
-    <leader>s
-        Takes you back from where go to declaration was triggered. Experimental
-
-FSharp Interactive:~
-    <A-CR>      OR
-    <leader>i
-        Send either the current selection or the current line to the fsharp
-        interactive and echoes the output the first line of the output. All
-        output will be written to the fsi-out buffer.
-
-===============================================================================
-CREDITS                                                     *omnisharp-credits*
-
-Syntax and indent files by kongo2002 <github.com/kongo2002>:
- http://github.com/kongo2002/fsharp-vim
-
-Adapted from Tim Robinson <github.com/timrobinson>:
- http://github.com/timrobinson/fsharp-vim
->
 ===============================================================================
