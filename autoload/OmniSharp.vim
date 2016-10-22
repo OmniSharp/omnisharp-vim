@@ -135,13 +135,19 @@ function! OmniSharp#JumpToLocation(filename, line, column) abort
   endif
 endfunction
 
+function! OmniSharp#SelectorPluginError()
+  echoerr 'No selector plugin found.  Please install unite.vim, ctrlp.vim or fzf.vim'
+endfunction
+
 function! OmniSharp#FindSymbol() abort
   if g:OmniSharp_selector_ui ==? 'unite'
     call unite#start([['OmniSharp/findsymbols']])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
+  elseif g:OmniSharp_selector_ui ==? 'fzf'
+    call fzf#OmniSharp#findsymbols()
   else
-    echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
+    call OmniSharp#SelectorPluginError()
   endif
 endfunction
 
@@ -150,8 +156,10 @@ function! OmniSharp#FindType() abort
     call unite#start([['OmniSharp/findtype']])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     call ctrlp#init(ctrlp#OmniSharp#findtype#id())
+  elseif g:OmniSharp_selector_ui ==? 'fzf'
+    call fzf#OmniSharp#findtypes()
   else
-    echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
+    call OmniSharp#SelectorPluginError()
   endif
 endfunction
 
@@ -167,8 +175,10 @@ function! OmniSharp#GetCodeActions(mode) range abort
     endif
     call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
     call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
+  elseif g:OmniSharp_selector_ui ==? 'fzf'
+    call fzf#OmniSharp#getcodeactions(a:mode)
   else
-    echo 'No selector plugin found.  Please install unite.vim or ctrlp.vim'
+    call OmniSharp#SelectorPluginError()
   endif
 endfunction
 
