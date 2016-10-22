@@ -140,7 +140,7 @@ def typeLookup(ret):
         if(documentation == None):
             documentation = ''
         if(type != None):
-            vim.command("let %s = '%s'" % (ret, type)) 
+            vim.command("let %s = '%s'" % (ret, type))
             vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
 def renameTo():
@@ -166,7 +166,7 @@ def build():
     return quickfixes_from_js(js, 'QuickFixes')
 
 def buildcommand():
-    vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
+    vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand'))
 
 def getTestCommand():
     mode = vim.eval('a:mode')
@@ -175,7 +175,7 @@ def getTestCommand():
     response = json.loads(getResponse('/gettestcontext', parameters))
     testCommand = "let s:testcommand = '%(TestCommand)s'" % response
     vim.command(testCommand)
-		
+
 def codeFormat():
     parameters = {}
     parameters['ExpandTab'] = bool(int(vim.eval('&expandtab')))

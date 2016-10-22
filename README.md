@@ -1,4 +1,4 @@
-![OmniSharp](logo.jpg)
+![OmniSharp](logo.png)
 
 # OmniSharp
 
