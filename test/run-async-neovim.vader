@@ -1,0 +1,19 @@
+Given(cs):
+  using System;
+
+  namespace ConsoleApp
+  {
+    public class Program
+    {
+      public static void Main()
+      {
+        return 0;
+      }
+    }
+  }
+
+Execute (Set the var from the async command):
+  let command = ['bash', '-c', 'exit 133']
+  let job = OmniSharp#RunAsyncCommandJobstartNeovim(command)
+  Assert job > 0, "Could not launch the specified command"
+  AssertEqual 133, jobwait([job])[0]
