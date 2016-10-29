@@ -526,29 +526,33 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   endif
   let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = shellescape(g:OmniSharp_server_path, 1)
-  \ . ' -p ' . port
-  \ . ' -s ' . shellescape(solutionPath, 1)
+
+  let command = [shellescape(g:OmniSharp_server_path, 1),
+               \ '-p', port,
+               \ '-s', shellescape(solutionPath, 1)]
+
   if g:OmniSharp_server_type !=# 'roslyn'
-    let command .= OmniSharp#ResolveLocalConfig(solutionPath)
+    call add(command, OmniSharp#ResolveLocalConfig(solutionPath))
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    let command = 'mono ' . command
+    call insert(command, mono)
   endif
+
   call OmniSharp#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
-  if exists(':Dispatch') == 2
-    call dispatch#start(a:command, {'background': 1})
+  if has('nvim')
+    let command = extend(['sh', '-c'], a:command)
+    call jobstart(command)
+  elseif exists(':Dispatch') == 2
+    call dispatch#start(join(a:command, ' '), {'background': 1})
+  elseif is_vimproc
+    call vimproc#system_gui(substitute(join(a:command, ' '), '\\', '\/', 'g'))
   else
-    if is_vimproc
-      call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
-    else
-      echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
-    endif
+    echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
   endif
 endfunction
 
