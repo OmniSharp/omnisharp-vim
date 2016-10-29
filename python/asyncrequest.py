@@ -1,4 +1,24 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types, threading
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import vim
+import json
+import cgi
+import types
+import threading
+
+import urllib
+
+import sys
+if sys.version_info >= (3, 0):
+    from urllib.parse import urljoin
+    from urllib import request
+elif sys.version_info < (3, 0) and sys.version_info >= (2, 5):
+    import urllib2 as request
+    from urlparse import urljoin
+else:
+    raise ImportError("Unsupported python version: {}".format(sys.version_info))
+
 
 class ThreadUrl(threading.Thread):
 
@@ -11,8 +31,8 @@ class ThreadUrl(threading.Thread):
 
     def run(self):
         try:
-            proxy = urllib2.ProxyHandler({})
-            opener = urllib2.build_opener(proxy)
+            proxy = request.ProxyHandler({})
+            opener = request.build_opener(proxy)
             response = opener.open(self.url, self.data, self.timeout)
             self.callback(response.read())
         except:
@@ -40,7 +60,7 @@ def get_response_async(endPoint, callback, params=None, timeout=None):
     if vim.eval('exists("b:OmniSharp_host")') == '1':
         host = vim.eval('b:OmniSharp_host')
 
-    target = urlparse.urljoin(host, endPoint)
+    target = urljoin(host, endPoint)
     data = urllib.urlencode(parameters).encode('utf-8')
 
     def urlopen_callback(data):

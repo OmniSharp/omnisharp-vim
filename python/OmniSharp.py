@@ -1,5 +1,24 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types, threading
-import asyncrequest
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
+import logging
+import json
+import os
+import sys
+
+if sys.version_info >= (3, 0):
+    from urllib.parse import urljoin
+    from urllib import request
+elif sys.version_info < (3, 0) and sys.version_info >= (2, 5):
+    import urllib2 as request
+    from urlparse import urljoin
+else:
+    raise ImportError("Unsupported python version: {}".format(sys.version_info))
+
+import vim
+
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
@@ -31,21 +50,23 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     if vim.eval('exists("b:OmniSharp_host")') == '1':
         host = vim.eval('b:OmniSharp_host')
 
-    target = urlparse.urljoin(host, endPoint)
+    target = urljoin(host, endPoint)
 
-    proxy = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy)
-    req = urllib2.Request(target)
+    proxy = request.ProxyHandler({})
+    opener = request.build_opener(proxy)
+    req = request.Request(target)
     req.add_header('Content-Type', 'application/json')
 
     try:
-        response = opener.open(req, json.dumps(parameters), timeout)
+        response = opener.open(req, json.dumps(parameters).encode('utf-8'), timeout)
         vim.command("let g:serverSeenRunning = 1")
         res = response.read()
-        if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
+        if res.startswith(b"\xef\xbb\xbf"):  # Drop UTF-8 BOM
             res = res[3:]
-        return res
-    except Exception:
+
+        return res.decode('utf-8')
+    except Exception as e:
+        logger.exception("Failed to send data")
         vim.command("let g:serverSeenRunning = 0")
         return ''
 
@@ -59,7 +80,7 @@ def findMembers():
     parameters = {}
     parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     js = getResponse('/currentfilemembersasflat', parameters)
-    return quickfixes_from_response(json.loads(js));
+    return quickfixes_from_response(json.loads(js))
 
 def findImplementations():
     parameters = {}
@@ -68,13 +89,13 @@ def findImplementations():
     return get_quickfix_list(js, 'QuickFixes')
 
 def gotoDefinition():
-    js = getResponse('/gotodefinition');
+    js = getResponse('/gotodefinition')
     if(js != ''):
         definition = json.loads(js)
         if(definition['FileName'] != None):
             openFile(definition['FileName'].replace("'","''"), definition['Line'], definition['Column'])
         else:
-            print "Not found"
+            print("Not found")
 
 def openFile(filename, line, column):
     vim.command("call OmniSharp#JumpToLocation('%(filename)s', %(line)s, %(column)s)" % locals())
@@ -90,7 +111,7 @@ def getCodeActions(mode):
 def runCodeAction(mode, action):
     parameters = codeActionParameters(mode)
     parameters['codeaction'] = action
-    js = getResponse('/runcodeaction', parameters);
+    js = getResponse('/runcodeaction', parameters)
     text = json.loads(js)['Text']
     setBufferText(text)
     return True
@@ -117,7 +138,7 @@ def setBufferText(text):
     vim.current.window.cursor = cursor
 
 def fixCodeIssue():
-    js = getResponse('/fixcodeissue');
+    js = getResponse('/fixcodeissue')
     text = json.loads(js)['Text']
     setBufferText(text)
 
@@ -132,7 +153,7 @@ def codeCheck():
 def typeLookup(ret):
     parameters = {}
     parameters['includeDocumentation'] = vim.eval('a:includeDocumentation')
-    js = getResponse('/typelookup', parameters);
+    js = getResponse('/typelookup', parameters)
     if js != '':
         response = json.loads(js)
         type = response['Type']
@@ -159,9 +180,9 @@ def build():
 
     success = js["Success"]
     if success:
-        print "Build succeeded"
+        print("Build succeeded")
     else:
-        print "Build failed"
+        print("Build failed")
 
     return quickfixes_from_js(js, 'QuickFixes')
 
@@ -194,7 +215,7 @@ def addReference():
     js = getResponse("/addreference", parameters)
     if js != '':
         message = json.loads(js)['Message']
-        print message
+        print(message)
 
 def findSyntaxErrors():
     js = getResponse('/syntaxerrors')
@@ -216,12 +237,12 @@ def get_quickfix_list(js, key):
     if js != '':
         response = json.loads(js)
         return quickfixes_from_js(response, key)
-    return [];
+    return []
 
 def quickfixes_from_js(js, key):
     if js[key] is not None:
         return quickfixes_from_response(js[key])
-    return [];
+    return []
 
 def quickfixes_from_response(response):
     items = []

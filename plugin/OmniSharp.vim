@@ -1,7 +1,9 @@
-if !has('python')
-  echoerr 'Error: OmniSharp requires Vim compiled with +python'
+if !(has('python') || has('python3'))
+  echoerr 'Error: OmniSharp requires Vim compiled with +python or +python3'
   finish
 endif
+let s:pycmd = has('python3') ? 'python3' : 'python'
+let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
 
 if exists('g:OmniSharp_loaded')
   finish
@@ -9,12 +11,11 @@ endif
 
 let g:OmniSharp_loaded = 1
 
-"Load python/OmniSharp.py
+" Load python/OmniSharp.py
 let s:py_path = join([expand('<sfile>:p:h:h'), 'python'], '/')
-exec "python sys.path.append(r'" . s:py_path . "')"
-exec 'pyfile ' . fnameescape(s:py_path . '/Completion.py')
-exec 'pyfile ' . fnameescape(s:py_path . '/OmniSharp.py')
-
+exec s:pycmd "sys.path.append(r'" . s:py_path . "')"
+exec s:pyfile fnameescape(s:py_path . '/Completion.py')
+exec s:pyfile fnameescape(s:py_path . '/OmniSharp.py')
 
 let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
 

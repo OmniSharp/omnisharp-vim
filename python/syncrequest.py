@@ -1,4 +1,19 @@
-import vim, urllib2, urllib, urlparse, json
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import vim
+
+import sys
+if sys.version_info >= (3, 0):
+    from urllib.parse import urljoin
+    from urllib import request
+elif sys.version_info < (3, 0) and sys.version_info >= (2, 5):
+    import urllib2 as request
+    from urlparse import urljoin
+else:
+    raise ImportError("Unsupported python version: {}".format(sys.version_info))
+
+import json
 
 def get_response(endPoint, params=None, timeout=None):
     parameters = {}
@@ -18,11 +33,11 @@ def get_response(endPoint, params=None, timeout=None):
     if vim.eval('exists("b:OmniSharp_host")') == '1':
         host = vim.eval('b:OmniSharp_host')
 
-    target = urlparse.urljoin(host, endPoint)
+    target = urljoin(host, endPoint)
 
-    proxy = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy)
-    req = urllib2.Request(target)
+    proxy = request.ProxyHandler({})
+    opener = request.build_opener(proxy)
+    req = request.Request(target)
     req.add_header('Content-Type', 'application/json')
     
     try:

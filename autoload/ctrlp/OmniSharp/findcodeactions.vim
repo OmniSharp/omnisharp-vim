@@ -4,6 +4,29 @@
 " finish
 "endif
 "let g:loaded_ctrlp_findsymbols = 1
+if exists('*py3eval')
+  let s:pyeval = function('py3eval')
+elseif exists('*pyeval')
+  let s:pyeval = function('pyeval')
+else
+  exec s:pycmd ' import json, vim'
+  function! s:pyeval(e)
+    exec s:pycmd ' vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
+  endfunction
+endif
+
+let s:pycmd = has('python3') ? 'python3' : 'python'
+let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
+if exists('*py3eval')
+  let s:pyeval = function('py3eval')
+elseif exists('*pyeval')
+  let s:pyeval = function('pyeval')
+else
+  exec s:pycmd 'import json, vim'
+  function! s:pyeval(e)
+    exec s:pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
+  endfunction
+endif
 
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -72,7 +95,7 @@ endfunction
 function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
   call ctrlp#exit()
   let action = index(s:actions, a:str)
-  call pyeval(printf('runCodeAction(%s, %d)', string(s:mode), action))
+  call s:pyeval(printf('runCodeAction(%s, %d)', string(s:mode), action))
 endfunction
 
 " Give the extension an ID

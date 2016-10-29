@@ -118,14 +118,25 @@ msbuild
 ```
 
 ### Install Python
-Install last version of 2.7 series ([Python 2.7.8] (https://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
+
+Install last version of Python 3. Make sure that you pick correct version of Python to match the architecture of Vim.
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
+
+Whilst Python 2.7 series is supported ([Python 2.7.12] (https://www.python.org/download/releases/2.7.12/) at the time of this writing), it is highly advisable to use the latest Python version.
 
 Verify that Python is working inside Vim with
 
 ```vim
+:echo has('python3')
+```
+
+or
+
+```vim
 :echo has('python')
 ```
+
+if you cannot use Python 3 due to some reason.
 
 ### (optional) Install vim-dispatch
 The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make OmniSharp start the server automatically and for running asynchronous builds.
