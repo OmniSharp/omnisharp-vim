@@ -1,15 +1,5 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
-if exists('*py3eval')
-  let s:pyeval = function('py3eval')
-elseif exists('*pyeval')
-  let s:pyeval = function('pyeval')
-else
-  exec s:pycmd ' import json, vim'
-  function! s:pyeval(e)
-    exec s:pycmd ' vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
-  endfunction
-endif
 
 let s:pycmd = has('python3') ? 'python3' : 'python'
 let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
@@ -33,7 +23,7 @@ let s:findcodeactions = {
 
 function! s:findcodeactions.gather_candidates(args, context) abort
   let mode = get(a:args, 0, 'normal')
-  let actions = s:pyeval(printf('getCodeActions(%s)', string(mode)))
+  let actions = s:pyeval(printf('omnisharp.getCodeActions(%s)', string(mode)))
   if empty(actions)
     call unite#print_source_message('No code actions found', s:findcodeactions.name)
   endif
@@ -52,7 +42,7 @@ let s:findcodeactions_action_table = {
 function! s:findcodeactions_action_table.run.func(candidate) abort
   let mode = a:candidate.source__OmniSharp_mode
   let action = a:candidate.source__OmniSharp_action
-  call s:pyeval(printf('runCodeAction(%s, %d)', string(mode), action))
+  call s:pyeval(printf('omnisharp.runCodeAction(%s, %d)', string(mode), action))
 endfunction
 let s:findcodeactions.action_table = s:findcodeactions_action_table
 
@@ -66,7 +56,7 @@ function! s:findsymbols.gather_candidates(args, context) abort
   if !OmniSharp#ServerIsRunning()
     return []
   endif
-  let symbols = s:pyeval('findSymbols()')
+  let symbols = s:pyeval('omnisharp.findSymbols()')
   return map(symbols, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,
@@ -86,7 +76,7 @@ function! s:findtype.gather_candidates(args, context) abort
   if !OmniSharp#ServerIsRunning()
     return []
   endif
-  let symbols = s:pyeval('findTypes()')
+  let symbols = s:pyeval('omnisharp.findTypes()')
   return map(symbols, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,

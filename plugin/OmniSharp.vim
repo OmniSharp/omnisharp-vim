@@ -2,8 +2,19 @@ if !(has('python') || has('python3'))
   echoerr 'Error: OmniSharp requires Vim compiled with +python or +python3'
   finish
 endif
+
 let s:pycmd = has('python3') ? 'python3' : 'python'
 let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
+if exists('*py3eval')
+  let s:pyeval = function('py3eval')
+elseif exists('*pyeval')
+  let s:pyeval = function('pyeval')
+else
+  exec s:pycmd 'import json, vim'
+  function! s:pyeval(e)
+    exec s:pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
+  endfunction
+endif
 
 if exists('g:OmniSharp_loaded')
   finish

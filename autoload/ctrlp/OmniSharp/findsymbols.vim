@@ -5,16 +5,6 @@ if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_
   finish
 endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
-if exists('*py3eval')
-  let s:pyeval = function('py3eval')
-elseif exists('*pyeval')
-  let s:pyeval = function('pyeval')
-else
-  exec s:pycmd ' import json, vim'
-  function! s:pyeval(e)
-    exec s:pycmd ' vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
-  endfunction
-endif
 
 let s:pycmd = has('python3') ? 'python3' : 'python'
 let s:pyfile = has('python3') ? 'py3file' : 'pyfile'

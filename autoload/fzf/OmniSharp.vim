@@ -1,16 +1,6 @@
 if !(has('python') || has('python3'))
   finish
 endif
-if exists('*py3eval')
-  let s:pyeval = function('py3eval')
-elseif exists('*pyeval')
-  let s:pyeval = function('pyeval')
-else
-  exec s:pycmd ' import json, vim'
-  function! s:pyeval(e)
-    exec s:pycmd ' vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
-  endfunction
-endif
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
