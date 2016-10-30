@@ -10,7 +10,7 @@ except ImportError:
 
 import json
 
-import omnisharp_impl
+import implementation
 
 def mock_eval(expr):
     '''Mock vim.eval function.
@@ -41,18 +41,18 @@ def mock_vim():
 
     return vim
 
-@mock.patch('omnisharp_impl.OmniSharp._request')
+@mock.patch('implementation.OmniSharp._request')
 def test_check_alive(mock_request):
     '''Test that the response is correctly interpreted as byte-strings'''
     vim = mock_vim()
-    omnisharp = omnisharp_impl.OmniSharp(vim)
+    omnisharp = implementation.OmniSharp(vim)
 
     for expected_value in ['true', 'false']:
         mock_request.return_value = expected_value.encode('utf-8')
         response = omnisharp.getResponse('/checkalivestatus')
         assert response == expected_value
 
-@mock.patch('omnisharp_impl.OmniSharp._request')
+@mock.patch('implementation.OmniSharp._request')
 def test_find_symbols(mock_request):
     '''Test how quickfix list is parsed.'''
     example_response = {
@@ -70,7 +70,7 @@ def test_find_symbols(mock_request):
     }
 
     vim = mock_vim()
-    omnisharp = omnisharp_impl.OmniSharp(vim)
+    omnisharp = implementation.OmniSharp(vim)
 
     mock_request.return_value = json.dumps(example_response).encode('utf-8')
     symbols = omnisharp.findSymbols()

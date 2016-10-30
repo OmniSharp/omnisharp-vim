@@ -5,7 +5,7 @@
 
 import pytest
 
-import omnisharp_impl
+import implementation
 
 TESTDATA_NEGATIVE = [
     (None, None, []),
@@ -20,7 +20,7 @@ TESTDATA_NEGATIVE = [
 @pytest.mark.parametrize('response, key, expected', TESTDATA_NEGATIVE)
 def test_parse_quickfix_response_incorrect_response(response, key, expected):
     '''Negative testing of the parse_quickfix_response function.'''
-    assert omnisharp_impl.parse_quickfix_response(response, key) == expected, \
+    assert implementation.parse_quickfix_response(response, key) == expected, \
         "Failed to handle a None value"
 
 EXAMPLE_QUICKFIX_RESPONSE = {
@@ -54,12 +54,12 @@ TESTDATA_INCORRECT_KEY = [
 ]
 @pytest.mark.parametrize('response, key, expected', TESTDATA_INCORRECT_KEY)
 def test_parse_quickfix_response_incorrect_key(response, key, expected):
-    assert omnisharp_impl.parse_quickfix_response(response, None) == expected, \
+    assert implementation.parse_quickfix_response(response, None) == expected, \
         "Failed to handle a valid response and invalid key"
 
 def test_parse_quickfix_response():
     '''Test how quickfix list is parsed.'''
-    assert omnisharp_impl.parse_quickfix_response(EXAMPLE_QUICKFIX_RESPONSE, 'QuickFixes') == [
+    assert implementation.parse_quickfix_response(EXAMPLE_QUICKFIX_RESPONSE, 'QuickFixes') == [
         {
             'filename': EXAMPLE_QUICKFIX_RESPONSE['QuickFixes'][0]['FileName'],
             'text': EXAMPLE_QUICKFIX_RESPONSE['QuickFixes'][0]['Text'],
@@ -70,7 +70,7 @@ def test_parse_quickfix_response():
     ], \
         "Failed to handle a correct case"
 
-    assert omnisharp_impl.parse_quickfix_response(EXAMPLE_QUICKFIX_RESPONSE, 'Errors') == [
+    assert implementation.parse_quickfix_response(EXAMPLE_QUICKFIX_RESPONSE, 'Errors') == [
         {
             'filename': EXAMPLE_QUICKFIX_RESPONSE['Errors'][0]['FileName'],
             'text': EXAMPLE_QUICKFIX_RESPONSE['Errors'][0]['Message'],

@@ -78,7 +78,7 @@ class OmniSharp(object):
         parameters = {}
         parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
         js = self.get_json('/currentfilemembersasflat', parameters)
-        return parse_quickfix_response(js)
+        return parse_quickfixes(js)
 
     def findImplementations(self):
         parameters = {}
@@ -245,15 +245,10 @@ class OmniSharp(object):
         else:
             return {'Line': response['Line'], 'Column': response['Column']}
 
-def parse_quickfix_response(response, key=None):
-    '''Parse the quickfix response'''
-    if response is None:
-        return []
-
-    if key is not None and isinstance(response, dict):
-        return parse_quickfix_response(response.get(key))
-    elif key is not None or not isinstance(response, list):
-        return []
+def parse_quickfixes(response):
+    '''Parse the quickfix list.'''
+    if response is None or not isinstance(response, list):
+        response = []
 
     items = []
     for quickfix in response:
@@ -274,3 +269,10 @@ def parse_quickfix_response(response, key=None):
         items.append(item)
 
     return items
+
+def parse_quickfix_response(response, key):
+    '''Parse the quickfix response'''
+    if response is None or key is None or not isinstance(response, dict):
+        return []
+
+    return parse_quickfixes(response.get(key, []))

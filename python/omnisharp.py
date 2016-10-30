@@ -6,7 +6,9 @@ from __future__ import print_function
 import logging
 import os
 import vim
-import omnisharp_impl
+import implementation
+
+__all__ = ('omnisharp', 'logger')
 
 def _config_logging(logger_):
     '''An internal function used in order not to pollute the namespace.
@@ -27,7 +29,7 @@ def _config_logging(logger_):
     hdlr.setFormatter(formatter)
 
 # Singleton for use in the plugin
-omnisharp = omnisharp_impl.OmniSharp(vim)
+omnisharp = implementation.OmniSharp(vim)
 
 logger = logging.getLogger('omnisharp')
 _config_logging(logger)
