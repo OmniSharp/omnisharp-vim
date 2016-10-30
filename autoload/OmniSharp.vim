@@ -15,6 +15,10 @@ else
   endfunction
 endif
 
+function! s:pyevalFormat(tmp, ...)
+  s:pyeval(printf(tmp, a:000))
+endfunction
+
 let s:save_cpo = &cpo
 set cpo&vim
 
@@ -48,7 +52,7 @@ function! OmniSharp#Complete(findstart, base) abort
 
     return start
   else
-    let omnisharp_last_completion_result = s:pyeval('Completion().get_completions("s:column", "a:base")')
+    let omnisharp_last_completion_result = s:pyevalFormat('Completion().get_completions("%s", "%s")', s:column, a:base)
     let s:omnisharp_last_completion_dictionary = {}
     for completion in omnisharp_last_completion_result
         let s:omnisharp_last_completion_dictionary[get(completion, 'word')] = completion
@@ -188,7 +192,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
     let context = {'empty': 0, 'auto_resize': 1}
     call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    let actions = s:pyeval(printf('omnisharp.getCodeActions(%s)', string(a:mode)))
+    let actions = s:pyevalFormat('omnisharp.getCodeActions(%s)', string(a:mode))
     if empty(actions)
       echo 'No code actions found'
       return
@@ -368,7 +372,7 @@ function! OmniSharp#Build() abort
 endfunction
 
 function! OmniSharp#BuildAsync() abort
-  exec s:pycmd 'omnisharp.buildcommand()'
+  let b:buildcommand = s:pyeval('omnisharp.build_command')
   let &l:makeprg=b:buildcommand
   setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
   Make
@@ -376,10 +380,10 @@ endfunction
 
 function! OmniSharp#RunTests(mode) abort
   wall
-  exec s:pycmd 'omnisharp.buildcommand()'
+  let b:buildcommand = s:pyeval('omnisharp.build_command')
 
   if a:mode !=# 'last'
-    exec s:pycmd 'omnisharp.getTestCommand()'
+    let s:testcommand = s:pyevalFormat('omnisharp.get_test_command("%s")', a:mode)
   endif
 
   let s:cmdheight=&cmdheight

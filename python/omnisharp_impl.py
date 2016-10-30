@@ -176,16 +176,15 @@ class OmniSharp(object):
 
         return self.quickfixes_from_js(js, 'QuickFixes')
 
-    def buildcommand(self):
-        self.vim.command("let b:buildcommand = '%s'" % self.getResponse('/buildcommand'))
+    @property
+    def build_command(self):
+        '''Return the build command'''
+        return self.getResponse('/buildcommand')
 
-    def getTestCommand(self):
-        mode = self.vim.eval('a:mode')
+    def get_test_command(self, mode):
         parameters = {}
         parameters['Type'] = mode
-        response = json.loads(self.getResponse('/gettestcontext', parameters))
-        testCommand = "let s:testcommand = '%(TestCommand)s'" % response
-        self.vim.command(testCommand)
+        return json.loads(self.getResponse('/gettestcontext', parameters))['TestCommand']
 
     def codeFormat(self):
         parameters = {}
