@@ -4,6 +4,10 @@ pyvenv venv
 venv/bin/pip install --upgrade \
     pip \
     setuptools \
-    pytest \
-    pylint \
-    tox
+    .[test]
+
+# setup various python interpreters (this will take a long while the first time)
+for v in `cat .python-version`
+do
+    pyenv install $v
+done
