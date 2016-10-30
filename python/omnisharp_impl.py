@@ -22,6 +22,17 @@ class OmniSharp(object):
     def __init__(self, vim):
         self.vim = vim
 
+    def _request(self, target, payload, timeout):
+        proxy = request.ProxyHandler({})
+        opener = request.build_opener(proxy)
+        req = request.Request(target)
+        req.add_header('Content-Type', 'application/json')
+        response = opener.open(req, json.dumps(payload).encode('utf-8'), timeout)
+        res = response.read()
+        if res.startswith(b"\xef\xbb\xbf"):  # Drop UTF-8 BOM
+            res = res[3:]
+        return res
+
     def getResponse(self, endPoint, additional_parameters=None, timeout=None):
         parameters = {}
         parameters['line'] = self.vim.eval('line(".")')
@@ -41,18 +52,9 @@ class OmniSharp(object):
 
         target = urljoin(host, endPoint)
 
-        proxy = request.ProxyHandler({})
-        opener = request.build_opener(proxy)
-        req = request.Request(target)
-        req.add_header('Content-Type', 'application/json')
-
         try:
-            response = opener.open(req, json.dumps(parameters).encode('utf-8'), timeout)
+            res = self._request(target, parameters, timeout)
             self.vim.command("let g:serverSeenRunning = 1")
-            res = response.read()
-            if res.startswith(b"\xef\xbb\xbf"):  # Drop UTF-8 BOM
-                res = res[3:]
-
             return res.decode('utf-8')
         except Exception as e:
             self.vim.command("let g:serverSeenRunning = 0")
