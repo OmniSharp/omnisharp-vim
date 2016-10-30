@@ -252,10 +252,7 @@ def parse_quickfix_response(response, key=None):
 
     if key is not None and isinstance(response, dict):
         return parse_quickfix_response(response.get(key))
-    elif key is not None:
-        return []
-
-    if not isinstance(response, list):
+    elif key is not None or not isinstance(response, list):
         return []
 
     items = []
