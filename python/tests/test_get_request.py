@@ -54,6 +54,7 @@ def test_check_alive(mock_request):
 
 @mock.patch('omnisharp_impl.OmniSharp._request')
 def test_find_symbols(mock_request):
+    '''Test how quickfix list is parsed.'''
     example_response = {
         "QuickFixes": [
             {
