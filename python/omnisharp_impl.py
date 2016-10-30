@@ -58,31 +58,38 @@ class OmniSharp(object):
             return res.decode('utf-8')
         except Exception as e:
             self.vim.command("let g:serverSeenRunning = 0")
+            # FIXME: should return None to differentiate between response and
+            # no response
             return ''
+
+    def get_json(self, end_point, additional_parameters=None, timeout=None):
+        '''A wrapper to get json straight away'''
+        response = self.getResponse(end_point, additional_parameters, timeout=None)
+        if response is not None and response != '':
+            return json.loads(response)
 
     def findUsages(self):
         parameters = {}
         parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
-        js = self.getResponse('/findusages', parameters)
-        return self.get_quickfix_list(js, 'QuickFixes')
+        js = self.get_json('/findusages', parameters)
+        return parse_quickfix_response(js, 'QuickFixes')
 
     def findMembers(self):
         parameters = {}
         parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
-        js = self.getResponse('/currentfilemembersasflat', parameters)
-        return self.quickfixes_from_response(json.loads(js))
+        js = self.get_json('/currentfilemembersasflat', parameters)
+        return parse_quickfix_response(js)
 
     def findImplementations(self):
         parameters = {}
         parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
-        js = self.getResponse('/findimplementations', parameters)
-        return self.get_quickfix_list(js, 'QuickFixes')
+        js = self.get_json('/findimplementations', parameters)
+        return parse_quickfix_response(js, 'QuickFixes')
 
     def gotoDefinition(self):
-        js = self.getResponse('/gotodefinition')
-        if(js != ''):
-            definition = json.loads(js)
-            if(definition['FileName'] != None):
+        definition = self.get_json('/gotodefinition')
+        if definition is not None:
+            if definition['FileName'] is not None:
                 self.openFile(definition['FileName'].replace("'","''"), definition['Line'], definition['Column'])
             else:
                 print("Not found")
@@ -92,17 +99,13 @@ class OmniSharp(object):
 
     def getCodeActions(self, mode):
         parameters = self.codeActionParameters(mode)
-        js = self.getResponse('/getcodeactions', parameters)
-        if js != '':
-            actions = json.loads(js)['CodeActions']
-            return actions
-        return []
+        response = self.get_json('/getcodeactions', parameters)
+        return [] if response is None else response['CodeActions']
 
     def runCodeAction(self, mode, action):
         parameters = self.codeActionParameters(mode)
         parameters['codeaction'] = action
-        js = self.getResponse('/runcodeaction', parameters)
-        text = json.loads(js)['Text']
+        text = self.get_json('/runcodeaction', parameters)['Text']
         self.setBufferText(text)
         return True
 
@@ -128,37 +131,37 @@ class OmniSharp(object):
         self.vim.current.window.cursor = cursor
 
     def fixCodeIssue(self):
-        js = self.getResponse('/fixcodeissue')
-        text = json.loads(js)['Text']
+        text = self.get_json('/fixcodeissue')['Text']
         self.setBufferText(text)
 
     def getCodeIssues(self):
-        js = self.getResponse('/getcodeissues')
-        return self.get_quickfix_list(js, 'QuickFixes')
+        js = self.get_json('/getcodeissues')
+        return parse_quickfix_response(js, 'QuickFixes')
 
     def codeCheck(self):
-        js = self.getResponse('/codecheck')
-        return self.get_quickfix_list(js, 'QuickFixes')
+        js = self.get_json('/codecheck')
+        return parse_quickfix_response(js, 'QuickFixes')
 
     def typeLookup(self, ret):
         parameters = {}
         parameters['includeDocumentation'] = self.vim.eval('a:includeDocumentation')
-        js = self.getResponse('/typelookup', parameters)
-        if js != '':
-            response = json.loads(js)
-            type = response['Type']
-            documentation = response['Documentation']
-            if(documentation == None):
-                documentation = ''
-            if(type != None):
-                self.vim.command("let %s = '%s'" % (ret, type))
-                self.vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
+        response = self.get_json('/typelookup', parameters)
+
+        if response is None:
+            return
+
+        type = response['Type']
+        documentation = response['Documentation']
+        if(documentation == None):
+            documentation = ''
+        if(type != None):
+            self.vim.command("let %s = '%s'" % (ret, type))
+            self.vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
     def renameTo(self):
         parameters = {}
         parameters['renameto'] = self.vim.eval("a:renameto")
-        js = self.getResponse('/rename', parameters)
-        return js
+        return self.getResponse('/rename', parameters)
 
     def setBuffer(self, buffer):
         lines = buffer.splitlines()
@@ -166,15 +169,15 @@ class OmniSharp(object):
         self.vim.current.buffer[:] = lines
 
     def build(self):
-        js = json.loads(self.getResponse('/build', {}, 60))
+        response = self.get_json('/build', {}, 60)
 
-        success = js["Success"]
+        success = response["Success"]
         if success:
             print("Build succeeded")
         else:
             print("Build failed")
 
-        return self.quickfixes_from_js(js, 'QuickFixes')
+        return parse_quickfix_response(response, 'QuickFixes')
 
     @property
     def build_command(self):
@@ -182,96 +185,90 @@ class OmniSharp(object):
         return self.getResponse('/buildcommand')
 
     def get_test_command(self, mode):
+        '''Return the test command'''
         parameters = {}
         parameters['Type'] = mode
-        return json.loads(self.getResponse('/gettestcontext', parameters))['TestCommand']
+        response = self.get_json('/gettestcontext', parameters)
+        return response['TestCommand']
 
     def codeFormat(self):
         parameters = {}
         parameters['ExpandTab'] = bool(int(self.vim.eval('&expandtab')))
-        response = json.loads(self.getResponse('/codeformat', parameters))
+        response = self.get_json('/codeformat', parameters)
         self.setBuffer(response["Buffer"])
 
     def fix_usings(self):
-        response = self.getResponse('/fixusings')
-        js = json.loads(response)
+        js = self.get_json('/fixusings')
         self.setBuffer(js["Buffer"])
-        return self.get_quickfix_list(response, 'AmbiguousResults')
+        return parse_quickfix_response(js, 'AmbiguousResults')
 
     def addReference(self):
         parameters = {}
         parameters["reference"] = self.vim.eval("a:ref")
-        js = self.getResponse("/addreference", parameters)
-        if js != '':
-            message = json.loads(js)['Message']
-            print(message)
+        js = self.get_json("/addreference", parameters)
+        if js is not None:
+            print(js['Message'])
 
     def findSyntaxErrors(self):
-        js = self.getResponse('/syntaxerrors')
-        return self.get_quickfix_list(js, 'Errors')
+        js = self.get_json('/syntaxerrors')
+        return parse_quickfix_response(js, 'Errors')
 
     def findSemanticErrors(self):
-        js = self.getResponse('/semanticerrors')
-        return self.get_quickfix_list(js, 'Errors')
+        js = self.get_json('/semanticerrors')
+        return parse_quickfix_response(js, 'Errors')
 
     def findTypes(self):
-        js = self.getResponse('/findtypes')
-        return self.get_quickfix_list(js, 'QuickFixes')
+        js = self.get_json('/findtypes')
+        return parse_quickfix_response(js, 'QuickFixes')
 
     def findSymbols(self):
-        js = self.getResponse('/findsymbols')
-        return self.get_quickfix_list(js, 'QuickFixes')
-
-    def get_quickfix_list(self, js, key):
-        if js != '':
-            response = json.loads(js)
-            return self.quickfixes_from_js(response, key)
-        return []
-
-    def quickfixes_from_js(self, js, key):
-        if js[key] is not None:
-            return self.quickfixes_from_response(js[key])
-        return []
-
-    def quickfixes_from_response(self, response):
-        items = []
-        for quickfix in response:
-            if 'Text' in quickfix:
-                text = quickfix['Text']
-            #syntax errors returns 'Message' instead of 'Text'. I need to sort this out.
-            if 'Message' in quickfix:
-                text = quickfix['Message']
-
-            item = {
-                'filename': quickfix['FileName'],
-                'text': text,
-                'lnum': quickfix['Line'],
-                'col': quickfix['Column'],
-                'vcol': 0
-            }
-            items.append(item)
-
-        return items
+        js = self.get_json('/findsymbols')
+        return parse_quickfix_response(js, 'QuickFixes')
 
     def lookupAllUserTypes(self):
-        js = self.getResponse('/lookupalltypes')
-        if js != '':
-            response = json.loads(js)
-            if response != None:
-                self.vim.command("let s:allUserTypes = '%s'" % (response['Types']))
-                self.vim.command("let s:allUserInterfaces = '%s'" % (response['Interfaces']))
+        response = self.get_json('/lookupalltypes')
+        if response is not None:
+            self.vim.command("let s:allUserTypes = '%s'" % (response['Types']))
+            self.vim.command("let s:allUserInterfaces = '%s'" % (response['Interfaces']))
 
     def navigateUp(self):
-        js = self.getResponse('/navigateup')
+        js = self.get_json('/navigateup')
         return self.get_navigate_response(js)
 
     def navigateDown(self):
-        js = self.getResponse('/navigatedown')
+        js = self.get_json('/navigatedown')
         return self.get_navigate_response(js)
 
-    def get_navigate_response(self, js):
-        if js != '':
-            response = json.loads(js)
-            return {'Line': response['Line'], 'Column': response['Column']}
-        else:
+    def get_navigate_response(self, response):
+        if response is None:
             return {}
+        else:
+            return {'Line': response['Line'], 'Column': response['Column']}
+
+def parse_quickfix_response(response, key=None):
+    '''Parse the quickfix response'''
+    if response is None:
+        return []
+
+    if key is not None:
+        return parse_quickfix_response(response[key])
+
+    items = []
+    for quickfix in response:
+        if 'Text' in quickfix:
+            text = quickfix['Text']
+
+        # FIXME: syntax errors returns 'Message' instead of 'Text'. I need to sort this out.
+        if 'Message' in quickfix:
+            text = quickfix['Message']
+
+        item = {
+            'filename': quickfix['FileName'],
+            'text': text,
+            'lnum': quickfix['Line'],
+            'col': quickfix['Column'],
+            'vcol': 0
+        }
+        items.append(item)
+
+    return items
