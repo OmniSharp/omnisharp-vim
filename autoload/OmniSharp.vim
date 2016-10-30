@@ -541,12 +541,18 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   call OmniSharp#RunAsyncCommand(command)
 endfunction
 
+function! Receive(job_id, data, event)
+  echom printf('%s: %s',a:event,string(a:data))
+endfunction
+
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
   if has('nvim')
     let command = extend(['sh', '-c'], a:command)
-    call jobstart(command)
+    echom "DEBUG: Using Neovim jobstart to start the following command:"
+    echom join(command, ' ')
+    call jobstart(command, {'on_stdout': 'Receive'})
   elseif exists(':Dispatch') == 2
     call dispatch#start(join(a:command, ' '), {'background': 1})
   elseif is_vimproc
