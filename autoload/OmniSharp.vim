@@ -330,7 +330,7 @@ function! OmniSharp#Rename() abort
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let result = s:json_decode(s:pyeval('omnisharp.renameTo()'))
+  let result = s:pyevalFormat('omnisharp.rename_to(new_name="%s")', a:renameto)
 
   let save_lazyredraw = &lazyredraw
   let save_eventignore = &eventignore
@@ -338,7 +338,7 @@ function! OmniSharp#RenameTo(renameto) abort
   let curpos = getpos('.')
   try
     set lazyredraw eventignore=all
-    for change in result.Changes
+    for change in result
       execute 'silent hide edit' fnameescape(change.FileName)
       let modified = &modified
       let content = split(change.Buffer, '\r\?\n')
@@ -633,7 +633,7 @@ function! OmniSharp#AddReference(reference) abort
   else
     let a:ref = a:reference
   endif
-  exec s:pycmd 'omnisharp.addReference()'
+  s:pyevalFormat('omnisharp.add_reference(reference="%s")', a:ref)
 endfunction
 
 function! OmniSharp#AppendCtrlPExtensions() abort

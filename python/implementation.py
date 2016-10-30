@@ -16,46 +16,70 @@ else:
     raise ImportError("Unsupported python version: {}".format(sys.version_info))
 
 
+class OmniSharpOptions(object):
+    '''An object which is only used to get settings of the plugin or the
+    editor.'''
+    def __init__(self, vim):
+        self.vim = vim
+
+    @property
+    def host(self):
+        if self.vim.eval('exists("b:OmniSharp_host")') == '1':
+            return self.vim.eval('b:OmniSharp_host')
+
+        return self.vim.eval('g:OmniSharp_host')
+
+    @property
+    def timeout(self):
+        return int(self.vim.eval('g:OmniSharp_timeout'))
+
+    @property
+    def quickfixes_max(self):
+        return int(self.vim.eval('g:OmniSharp_quickFixLength'))
+
+    @property
+    def include_documentation(self):
+        return self.vim.eval('a:includeDocumentation')
+
+    @property
+    def expand_tab(self):
+        return bool(int(self.vim.eval('&expandtab')))
+
+    @property
+    def default_quickfix_parameters(self):
+        return {'MaxWidth': self._options.quickfixes_max}
+
 class OmniSharp(object):
     '''Main plugin object, which will be defined as a singleton.
     '''
     def __init__(self, vim):
         self.vim = vim
+        self._options = OmniSharpOptions(vim)
 
-    def _request(self, target, payload, timeout):
-        proxy = request.ProxyHandler({})
-        opener = request.build_opener(proxy)
-        req = request.Request(target)
-        req.add_header('Content-Type', 'application/json')
-        response = opener.open(req, json.dumps(payload).encode('utf-8'), timeout)
-        res = response.read()
-        if res.startswith(b"\xef\xbb\xbf"):  # Drop UTF-8 BOM
-            res = res[3:]
-        return res
-
-    def getResponse(self, endPoint, additional_parameters=None, timeout=None):
+    @property
+    def _default_parameters(self):
         parameters = {}
         parameters['line'] = self.vim.eval('line(".")')
         parameters['column'] = self.vim.eval('col(".")')
         parameters['buffer'] = '\r\n'.join(self.vim.eval("getline(1,'$')")[:])
         parameters['filename'] = self.vim.current.buffer.name
-        if additional_parameters != None:
+        return parameters
+
+    def getResponse(self, endPoint, additional_parameters=None, timeout=None):
+        parameters = self._default_parameters
+
+        if additional_parameters is not None:
             parameters.update(additional_parameters)
 
-        if timeout == None:
-            timeout = int(self.vim.eval('g:OmniSharp_timeout'))
+        if timeout is None:
+            timeout = self._options.timeout
 
-        host = self.vim.eval('g:OmniSharp_host')
-
-        if self.vim.eval('exists("b:OmniSharp_host")') == '1':
-            host = self.vim.eval('b:OmniSharp_host')
-
-        target = urljoin(host, endPoint)
+        target = urljoin(self._options.host, endPoint)
 
         try:
-            res = self._request(target, parameters, timeout)
+            res = make_request(target, parameters, timeout)
             self.vim.command("let g:serverSeenRunning = 1")
-            return res.decode('utf-8')
+            return res
         except Exception as e:
             self.vim.command("let g:serverSeenRunning = 0")
             # FIXME: should return None to differentiate between response and
@@ -69,56 +93,67 @@ class OmniSharp(object):
             return json.loads(response)
 
     def findUsages(self):
-        parameters = {}
-        parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
+        parameters = self._options.default_quickfix_parameters
         js = self.get_json('/findusages', parameters)
         return parse_quickfix_response(js, 'QuickFixes')
 
     def findMembers(self):
-        parameters = {}
-        parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
+        parameters = self._options.default_quickfix_parameters
         js = self.get_json('/currentfilemembersasflat', parameters)
         return parse_quickfixes(js)
 
     def findImplementations(self):
-        parameters = {}
-        parameters['MaxWidth'] = int(self.vim.eval('g:OmniSharp_quickFixLength'))
+        parameters = self._options.default_quickfix_parameters
         js = self.get_json('/findimplementations', parameters)
         return parse_quickfix_response(js, 'QuickFixes')
 
     def gotoDefinition(self):
         definition = self.get_json('/gotodefinition')
-        if definition is not None:
-            if definition['FileName'] is not None:
-                self.openFile(definition['FileName'].replace("'","''"), definition['Line'], definition['Column'])
-            else:
-                print("Not found")
+        if definition is None:
+            return
 
-    def openFile(self, filename, line, column):
-        self.vim.command("call OmniSharp#JumpToLocation('%(filename)s', %(line)s, %(column)s)" % locals())
+        if definition['FileName'] is not None:
+            self.open_file(
+                definition['FileName'].replace("'","''"),
+                definition['Line'],
+                definition['Column'])
+        else:
+            print("Not found")
+
+    def open_file(self, filename, line, column):
+        '''Open a file'''
+        self.vim.command(
+            "call OmniSharp#JumpToLocation('{filename}', {line}, {column})"
+            .format(
+                filename=filename,
+                line=line,
+                column=column))
 
     def getCodeActions(self, mode):
-        parameters = self.codeActionParameters(mode)
+        parameters = self._get_code_action_parameters(mode)
         response = self.get_json('/getcodeactions', parameters)
         return [] if response is None else response['CodeActions']
 
     def runCodeAction(self, mode, action):
-        parameters = self.codeActionParameters(mode)
+        parameters = self._get_code_action_parameters(mode)
         parameters['codeaction'] = action
         text = self.get_json('/runcodeaction', parameters)['Text']
         self.setBufferText(text)
         return True
 
-    def codeActionParameters(self, mode):
-        parameters = {}
-        if mode == 'visual':
-            start = self.vim.eval('getpos("\'<")')
-            end = self.vim.eval('getpos("\'>")')
-            parameters['SelectionStartLine'] = start[1]
-            parameters['SelectionStartColumn'] = start[2]
-            parameters['SelectionEndLine'] = end[1]
-            parameters['SelectionEndColumn'] = end[2]
-        return parameters
+    def _get_code_action_parameters(self, mode):
+        if mode != 'visual':
+            return {}
+
+        start = self.vim.eval('getpos("\'<")')
+        end = self.vim.eval('getpos("\'>")')
+
+        return {
+            'SelectionStartLine': start[1],
+            'SelectionStartColumn': start[2],
+            'SelectionEndLine': end[1],
+            'SelectionEndColumn': end[2]
+        }
 
     def setBufferText(self, text):
         if text == None:
@@ -143,8 +178,10 @@ class OmniSharp(object):
         return parse_quickfix_response(js, 'QuickFixes')
 
     def typeLookup(self, ret):
-        parameters = {}
-        parameters['includeDocumentation'] = self.vim.eval('a:includeDocumentation')
+        # FIXME: the logic could be simplified here as well
+        parameters = {
+            'includeDocumentation': self._options.include_documentation
+        }
         response = self.get_json('/typelookup', parameters)
 
         if response is None:
@@ -158,10 +195,8 @@ class OmniSharp(object):
             self.vim.command("let %s = '%s'" % (ret, type))
             self.vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
-    def renameTo(self):
-        parameters = {}
-        parameters['renameto'] = self.vim.eval("a:renameto")
-        return self.getResponse('/rename', parameters)
+    def rename_to(self, new_name):
+        return self.get_json('/rename', {'renameto': new_name})['Changes']
 
     def setBuffer(self, buffer):
         lines = buffer.splitlines()
@@ -169,7 +204,7 @@ class OmniSharp(object):
         self.vim.current.buffer[:] = lines
 
     def build(self):
-        response = self.get_json('/build', {}, 60)
+        response = self.get_json('/build', timeout=60)
 
         success = response["Success"]
         if success:
@@ -186,14 +221,12 @@ class OmniSharp(object):
 
     def get_test_command(self, mode):
         '''Return the test command'''
-        parameters = {}
-        parameters['Type'] = mode
+        parameters = {'Type': mode}
         response = self.get_json('/gettestcontext', parameters)
         return response['TestCommand']
 
     def codeFormat(self):
-        parameters = {}
-        parameters['ExpandTab'] = bool(int(self.vim.eval('&expandtab')))
+        parameters = {'ExpandTab': self._options.expand_tab}
         response = self.get_json('/codeformat', parameters)
         self.setBuffer(response["Buffer"])
 
@@ -202,9 +235,8 @@ class OmniSharp(object):
         self.setBuffer(js["Buffer"])
         return parse_quickfix_response(js, 'AmbiguousResults')
 
-    def addReference(self):
-        parameters = {}
-        parameters["reference"] = self.vim.eval("a:ref")
+    def add_reference(self, reference):
+        parameters = {"reference": reference}
         js = self.get_json("/addreference", parameters)
         if js is not None:
             print(js['Message'])
@@ -233,17 +265,28 @@ class OmniSharp(object):
 
     def navigateUp(self):
         js = self.get_json('/navigateup')
-        return self.get_navigate_response(js)
+        return parse_navigate_response(js)
 
     def navigateDown(self):
         js = self.get_json('/navigatedown')
-        return self.get_navigate_response(js)
+        return parse_navigate_response(js)
 
-    def get_navigate_response(self, response):
-        if response is None:
-            return {}
-        else:
-            return {'Line': response['Line'], 'Column': response['Column']}
+def make_request(target, payload, timeout):
+    proxy = request.ProxyHandler({})
+    opener = request.build_opener(proxy)
+    req = request.Request(target)
+    req.add_header('Content-Type', 'application/json')
+    response = opener.open(req, json.dumps(payload).encode('utf-8'), timeout)
+    res = response.read()
+    if res.startswith(b"\xef\xbb\xbf"):  # Drop UTF-8 BOM
+        res = res[3:]
+    return res.decode('utf-8')
+
+def parse_navigate_response(response):
+    if response is None:
+        return {}
+    else:
+        return {'Line': response['Line'], 'Column': response['Column']}
 
 def parse_quickfixes(response):
     '''Parse the quickfix list.'''
