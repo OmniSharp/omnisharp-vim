@@ -542,7 +542,7 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
     call add(command, OmniSharp#ResolveLocalConfig(solutionPath))
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    call insert(command, mono)
+    call insert(command, 'mono')
   endif
 
   call OmniSharp#RunAsyncCommand(command)
@@ -583,7 +583,7 @@ function! OmniSharp#RunAsyncCommand(command) abort
   elseif is_vimproc
     call vimproc#system_gui(substitute(join(command, ' '), '\\', '\/', 'g'))
   else
-    echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
+    echoerr 'Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc plugin to use this feature'
   endif
 endfunction
 
