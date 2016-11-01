@@ -272,14 +272,19 @@ class OmniSharp(object):
         return parse_navigate_response(js)
 
 def make_request(target, payload, timeout):
+    '''Make request to the OmniSharp server'''
     proxy = request.ProxyHandler({})
     opener = request.build_opener(proxy)
     req = request.Request(target)
     req.add_header('Content-Type', 'application/json')
-    response = opener.open(req, json.dumps(payload).encode('utf-8'), timeout)
+
+    json_ = json.dumps(payload).encode('utf-8')
+    response = opener.open(req, json_, timeout)
+
     res = response.read()
     if res.startswith(b"\xef\xbb\xbf"):  # Drop UTF-8 BOM
         res = res[3:]
+
     return res.decode('utf-8')
 
 def parse_navigate_response(response):
