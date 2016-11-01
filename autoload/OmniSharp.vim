@@ -13,6 +13,13 @@ let s:allUserInterfaces = ''
 let s:generated_snippets = {}
 let s:omnisharp_last_completion_dictionary = {}
 let g:serverSeenRunning = 0
+let g:omnisharp_debug = 0
+
+function! s:debug(message)
+  if g:omnisharp_debug == 1
+    echom "DEBUG: " . string(message)
+  endif
+endfunction
 
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
@@ -542,21 +549,39 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
 endfunction
 
 function! Receive(job_id, data, event)
-  echom printf('%s: %s',a:event,string(a:data))
+  if g:omnisharp_debug == 1
+    echom printf('%s: %s',a:event,string(a:data))
+  endif
+endfunction
+
+function! ReceiveVim(channel, message)
+  if g:omnisharp_debug == 1
+      echom printf('%s: %s', string(a:channel), string(a:message))
+  endif
 endfunction
 
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
-  if has('nvim')
-    let command = extend(['sh', '-c'], a:command)
-    echom "DEBUG: Using Neovim jobstart to start the following command:"
-    echom join(command, ' ')
+  let command = a:command
+  if exists('*jobstart')
+    if has('unix')
+      let command = extend(['sh', '-c'], command)
+    endif
+    call s:debug("Using Neovim jobstart to start the following command:")
+    call s:debug(command)
     call jobstart(command, {'on_stdout': 'Receive'})
+  elseif exists('*job_start')
+    if has('unix')
+      let command = extend(['sh', '-c'], command)
+    endif
+    call s:debug("Using vim job_start to start the following command:")
+    call s:debug(command)
+    let job = job_start(join(command, ' '), {'out_cb': 'ReceiveVim'})
   elseif exists(':Dispatch') == 2
-    call dispatch#start(join(a:command, ' '), {'background': 1})
+    call dispatch#start(join(command, ' '), {'background': 1})
   elseif is_vimproc
-    call vimproc#system_gui(substitute(join(a:command, ' '), '\\', '\/', 'g'))
+    call vimproc#system_gui(substitute(join(command, ' '), '\\', '\/', 'g'))
   else
     echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
   endif
@@ -619,15 +644,15 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     echoerr "g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
     return
   endif
- 
+
   let line = strpart(getline('.'), 0, col('.')-1)
   let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
- 
+
   let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
   let completion = substitute(completion, remove_whitespace_regex, '\1', '')
- 
+
   let should_expand_completion = len(completion) != 0
-  
+
   if should_expand_completion
     let completion = split(completion, '\.')[-1]
     let completion = split(completion, 'new ')[-1]
