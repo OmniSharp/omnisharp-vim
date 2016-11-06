@@ -79,7 +79,7 @@ endif
 
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(
-  \   ['unite', 'ctrlp'],
+  \   ['unite', 'ctrlp', 'fzf'],
   \   '!empty(globpath(&runtimepath, printf("autoload/%s.vim", v:val), 1))'
   \ ), 0, '')
 endif

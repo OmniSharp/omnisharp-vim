@@ -26,7 +26,7 @@ Required:~
     - Mono OR .NET Framework
 
 Optional:~
-    - CtrlP or unite.vim (for fuzzy-search capabilities)
+    - CtrlP, unite.vim or fzf.vim (for fuzzy-search capabilities)
     - Syntastic plugin (for syntax and type checking)
     NOTE: Must be enabled (see |'g:syntastic_cs_checkers'|)
 
@@ -48,11 +48,13 @@ Use this option to enable syntastic integration >
 <
 
                                                     *'g:OmniSharp_selector_ui'*
-Use this option to specify a selector UI if both CtrlP and unite.vim are
-installed. Default: Whichever is installed. >
+Use this option to specify a selector UI if more than one of CtrlP, unite.vim
+or fzf.vim are installed.  Default: Whichever is installed. >
     let g:OmniSharp_selector_ui='unite'
     OR
     let g:OmniSharp_selector_ui='ctrlp'
+    OR
+    let g:OmniSharp_selector_ui='fzf'
 <
 
                                                    *'g:Omnisharp_start_server'*
@@ -137,12 +139,12 @@ COMMANDS                                                   *omnisharp-commands*
                                                            *:OmniSharpFindType*
 :OmniSharpFindType
     Fuzzy-search through types
-    NOTE: Requires CtrlP or unite.vim
+    NOTE: Requires CtrlP, unite.vim or fzf.vim
 
                                                          *:OmniSharpFindSymbol*
 :OmniSharpFindSymbol
     Fuzzy-search through symbols
-    NOTE: Requires CtrlP or unite.vim
+    NOTE: Requires CtrlP, unite.vim or fzf.vim
 
                                                          *:OmniSharpFindUsages*
 :OmniSharpFindUsages
@@ -181,7 +183,7 @@ COMMANDS                                                   *omnisharp-commands*
                                                      *:OmniSharpGetCodeActions*
 :OmniSharpGetCodeActions
     Fuzzy-serach through available code actions
-    NOTE: Requries CtrlP or unite.vim
+    NOTE: Requires CtrlP, unite.vim or fzf.vim
 
                                                              *:OmniSharpRename*
 :OmniSharpRename

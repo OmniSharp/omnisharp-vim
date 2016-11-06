@@ -135,13 +135,20 @@ Use your favourite way to install it.
 The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
-### (optional) Install ctrlp.vim or unite.vim
-[CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim) is needed if you want to use the Code Actions, Find Type and Find Symbol features.
-If you have installed both, you can choose one by `g:OmniSharp_selector_ui` variable.
+### (optional) Install ctrlp.vim, unite.vim or fzf.vim
+
+If you want to use the Code Actions, Find Type and Find Symbol features, you will need to install one of the following plugins:
+
+- [CtrlP](https://github.com/ctrlpvim/ctrlp.vim)
+- [unite.vim](https://github.com/Shougo/unite.vim)
+- [fzf.vim](https://github.com/junegunn/fzf.vim)
+
+If you have installed more than one, you can choose one by `g:OmniSharp_selector_ui` variable.
 
 ```vim
 let g:OmniSharp_selector_ui = 'unite'  " Use unite.vim
 let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
+let g:OmniSharp_selector_ui = 'fzf'    " Use fzf.vim
 ```
 
 ## How to use
