@@ -638,11 +638,19 @@ endfunction
 function! s:find_solution_files() abort
   "get the path for the current buffer
   let dir = expand('%:p:h')
+  let lastfolder = ''
   let solution_files = []
 
-  while empty(solution_files)
-    let solution_files += s:globpath(dir , '*.sln')
+  while dir !=# lastfolder
+    let solution_files += s:globpath(dir, '*.sln')
     if g:OmniSharp_server_type ==# 'roslyn'
+      if g:OmniSharp_prefer_global_sln
+        let global_solution_files = s:globpath(dir, 'global.json')
+	if !empty(global_solution_files)
+          let solution_files = [dir]
+          break
+	endif
+      endif
       let solution_files += s:globpath(dir, 'project.json')
     endif
 
@@ -650,9 +658,6 @@ function! s:find_solution_files() abort
 
     let lastfolder = dir
     let dir = fnamemodify(dir, ':h')
-    if dir ==# lastfolder
-      break
-    endif
   endwhile
 
   if empty(solution_files) && g:OmniSharp_start_without_solution
