@@ -642,19 +642,23 @@ function! s:find_solution_files() abort
   let solution_files = []
 
   while dir !=# lastfolder
-    let solution_files += s:globpath(dir, '*.sln')
-    if g:OmniSharp_server_type ==# 'roslyn'
-      if g:OmniSharp_prefer_global_sln
-        let global_solution_files = s:globpath(dir, 'global.json')
-	if !empty(global_solution_files)
-          let solution_files = [dir]
-          break
-	endif
+    if empty(solution_files)
+      let solution_files += s:globpath(dir, '*.sln')
+      if g:OmniSharp_server_type ==# 'roslyn'
+        let solution_files += s:globpath(dir, 'project.json')
       endif
-      let solution_files += s:globpath(dir, 'project.json')
+
+      call filter(solution_files, 'filereadable(v:val)')
     endif
 
-    call filter(solution_files, 'filereadable(v:val)')
+    if g:OmniSharp_server_type ==# 'roslyn' && g:OmniSharp_prefer_global_sln
+      let global_solution_files = s:globpath(dir, 'global.json')
+      call filter(global_solution_files, 'filereadable(v:val)')
+      if !empty(global_solution_files)
+        let solution_files = [dir]
+        break
+      endif
+    endif
 
     let lastfolder = dir
     let dir = fnamemodify(dir, ':h')
