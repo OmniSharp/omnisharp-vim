@@ -97,3 +97,7 @@ if !exists('g:OmniSharp_server_path')
     let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'artifacts', 'scripts', 'Omnisharp'], '/')
   endif
 endif
+
+if !exists('g:OmniSharp_prefer_global_sln')
+  let g:OmniSharp_prefer_global_sln = 0
+endif
