@@ -13,7 +13,7 @@ let s:allUserInterfaces = ''
 let s:generated_snippets = {}
 let s:omnisharp_last_completion_dictionary = {}
 let g:serverSeenRunning = 0
-let g:omnisharp_debug = 0
+let g:omnisharp_debug = 1
 
 function! s:debug(message)
   if g:omnisharp_debug == 1
