@@ -17,7 +17,7 @@ let g:omnisharp_debug = 0
 
 function! s:debug(message)
   if g:omnisharp_debug == 1
-    echom "DEBUG: " . string(message)
+    echom "DEBUG: " . string(a:message)
   endif
 endfunction
 
