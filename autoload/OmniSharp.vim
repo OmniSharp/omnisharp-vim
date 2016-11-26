@@ -534,9 +534,9 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
 
-  let command = [shellescape(g:OmniSharp_server_path, 1),
+  let command = [g:OmniSharp_server_path,
                \ '-p', port,
-               \ '-s', shellescape(solutionPath, 1)]
+               \ '-s', solutionPath]
 
   if g:OmniSharp_server_type !=# 'roslyn'
     call add(command, OmniSharp#ResolveLocalConfig(solutionPath))
@@ -565,16 +565,10 @@ function! OmniSharp#RunAsyncCommand(command) abort
   silent! let is_vimproc = vimproc#version()
   let command = a:command
   if exists('*jobstart')
-    if has('unix')
-      let command = extend(['sh', '-c'], command)
-    endif
     call s:debug("Using Neovim jobstart to start the following command:")
     call s:debug(command)
     call jobstart(command, {'on_stdout': 'Receive'})
   elseif exists('*job_start')
-    if has('unix')
-      let command = extend(['sh', '-c'], command)
-    endif
     call s:debug("Using vim job_start to start the following command:")
     call s:debug(command)
     let job = job_start(join(command, ' '), {'out_cb': 'ReceiveVim'})
