@@ -47,7 +47,7 @@ class OmniSharpOptions(object):
 
     @property
     def default_quickfix_parameters(self):
-        return {'MaxWidth': self._options.quickfixes_max}
+        return {'MaxWidth': self.quickfixes_max}
 
 class OmniSharp(object):
     '''Main plugin object, which will be defined as a singleton.
