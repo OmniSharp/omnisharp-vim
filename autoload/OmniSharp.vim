@@ -672,8 +672,16 @@ function! s:find_solution_files() abort
 endfunction
 
 function! s:json_decode(json) abort
+  if !a:json
+    throw "Empty JSON response from server"
+  endif
+
   let [null, true, false] = [0, 1, 0]
-  sandbox return eval(a:json)
+  try
+    sandbox return eval(a:json)
+  catch
+    throw "Invalid JSON response from server: " . a:json
+  endtry
 endfunction
 
 if has('patch-7.4.279')
