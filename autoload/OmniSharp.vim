@@ -672,15 +672,15 @@ function! s:find_solution_files() abort
 endfunction
 
 function! s:json_decode(json) abort
-  if !a:json
-    throw "Empty JSON response from server"
+  if a:json == ''
+    throw 'Empty JSON response from server'
   endif
 
   let [null, true, false] = [0, 1, 0]
   try
     sandbox return eval(a:json)
   catch
-    throw "Invalid JSON response from server: " . a:json
+    throw 'Invalid JSON response from server: ' . a:json
   endtry
 endfunction
 
