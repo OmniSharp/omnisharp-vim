@@ -1,6 +1,23 @@
-if !has('python')
+if !(has('python') || has('python3'))
   finish
 endif
+
+let s:pycmd = has('python3') ? 'python3' : 'python'
+let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
+if exists('*py3eval')
+  let s:pyeval = function('py3eval')
+elseif exists('*pyeval')
+  let s:pyeval = function('pyeval')
+else
+  exec s:pycmd 'import json, vim'
+  function! s:pyeval(e)
+    exec s:pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
+  endfunction
+endif
+
+function! s:pyevalFormat(tmp, ...)
+  s:pyeval(printf(tmp, a:000))
+endfunction
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -13,6 +30,13 @@ let s:allUserInterfaces = ''
 let s:generated_snippets = {}
 let s:omnisharp_last_completion_dictionary = {}
 let g:serverSeenRunning = 0
+let g:omnisharp_debug = 1
+
+function! s:debug(message)
+  if g:omnisharp_debug == 1
+    echom "DEBUG: " . string(a:message)
+  endif
+endfunction
 
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
@@ -28,7 +52,7 @@ function! OmniSharp#Complete(findstart, base) abort
 
     return start
   else
-    let omnisharp_last_completion_result =  pyeval('Completion().get_completions("s:column", "a:base")')
+    let omnisharp_last_completion_result = s:pyevalFormat('Completion().get_completions("%s", "%s")', s:column, a:base)
     let s:omnisharp_last_completion_dictionary = {}
     for completion in omnisharp_last_completion_result
         let s:omnisharp_last_completion_dictionary[get(completion, 'word')] = completion
@@ -38,7 +62,7 @@ function! OmniSharp#Complete(findstart, base) abort
 endfunction
 
 function! OmniSharp#FindUsages() abort
-  let qf_taglist = pyeval('findUsages()')
+  let qf_taglist = s:pyeval('omnisharp.findUsages()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
@@ -50,7 +74,7 @@ function! OmniSharp#FindUsages() abort
 endfunction
 
 function! OmniSharp#FindImplementations() abort
-  let qf_taglist = pyeval('findImplementations()')
+  let qf_taglist = s:pyeval('omnisharp.findImplementations()')
 
   if len(qf_taglist) == 0
     echo 'No implementations found'
@@ -68,7 +92,7 @@ function! OmniSharp#FindImplementations() abort
 endfunction
 
 function! OmniSharp#FindMembers() abort
-  let qf_taglist = pyeval('findMembers()')
+  let qf_taglist = s:pyeval('omnisharp.findMembers()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 1
@@ -79,10 +103,10 @@ endfunction
 
 function! OmniSharp#NavigateUp() abort
   if g:OmniSharp_server_type ==# 'roslyn'
-    let qf_tag = pyeval('navigateUp()')
+    let qf_tag = s:pyeval('omnisharp.navigateUp()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
-    let qf_taglist = pyeval('findMembers()')
+    let qf_taglist = s:pyeval('omnisharp.findMembers()')
     let column = col('.')
     let line = line('.')
     let l = len(qf_taglist) - 1
@@ -103,10 +127,10 @@ endfunction
 
 function! OmniSharp#NavigateDown() abort
   if g:OmniSharp_server_type ==# 'roslyn'
-    let qf_tag = pyeval('navigateDown()')
+    let qf_tag = s:pyeval('omnisharp.navigateDown()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
-    let qf_taglist = pyeval('findMembers()')
+    let qf_taglist = s:pyeval('omnisharp.findMembers()')
     let column = col('.')
     let line = line('.')
     for l in range(0, len(qf_taglist) - 1)
@@ -122,7 +146,7 @@ function! OmniSharp#NavigateDown() abort
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
-  python gotoDefinition()
+  exec s:pycmd 'omnisharp.gotoDefinition()'
 endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column) abort
@@ -168,7 +192,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
     let context = {'empty': 0, 'auto_resize': 1}
     call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    let actions = pyeval(printf('getCodeActions(%s)', string(a:mode)))
+    let actions = s:pyevalFormat('omnisharp.getCodeActions(%s)', string(a:mode))
     if empty(actions)
       echo 'No code actions found'
       return
@@ -187,13 +211,13 @@ function! OmniSharp#GetIssues() abort
     return get(b:, 'issues', [])
   endif
   if g:serverSeenRunning == 1
-    let b:issues = pyeval('getCodeIssues()')
+    let b:issues = s:pyeval('omnisharp.getCodeIssues()')
   endif
   return get(b:, 'issues', [])
 endfunction
 
 function! OmniSharp#FixIssue() abort
-  python fixCodeIssue()
+  exec s:pycmd 'omnisharp.fixCodeIssue()'
 endfunction
 
 function! OmniSharp#FindSyntaxErrors() abort
@@ -204,7 +228,7 @@ function! OmniSharp#FindSyntaxErrors() abort
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:syntaxerrors = pyeval('findSyntaxErrors()')
+    let b:syntaxerrors = s:pyeval('omnisharp.findSyntaxErrors()')
   endif
   return get(b:, 'syntaxerrors', [])
 endfunction
@@ -217,7 +241,7 @@ function! OmniSharp#FindSemanticErrors() abort
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:semanticerrors = pyeval('findSemanticErrors()')
+    let b:semanticerrors = s:pyeval('omnisharp.findSemanticErrors()')
   endif
   return get(b:, 'semanticerrors', [])
 endfunction
@@ -230,7 +254,7 @@ function! OmniSharp#CodeCheck() abort
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:codecheck = pyeval('codeCheck()')
+    let b:codecheck = s:pyeval('omnisharp.codeCheck()')
   endif
   return get(b:, 'codecheck', [])
 endfunction
@@ -264,13 +288,13 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
   let type = ''
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
-    python typeLookup("type")
+    exec s:pycmd 'omnisharp.typeLookup("type")'
     let preWinNr = winnr()
     call s:GoScratch()
-    python vim.current.window.height = 5
+    exec s:pycmd 'vim.current.window.height = 5'
     let doc = get(s:, 'documentation', '')
     set modifiable
-    exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . doc . '""".splitlines()'
+    exec s:pycmd 'vim.current.buffer[:] = ["' . type . '"] + """' . doc . '""".splitlines()'
     set nomodifiable
     "Return to original window
     execute preWinNr . 'wincmd w'
@@ -288,7 +312,7 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
       endfor
     endif
     if found_line_in_loc_list == 0
-      python typeLookup("type")
+      exec s:pycmd 'omnisharp.typeLookup("type")'
       call OmniSharp#Echo(type)
     endif
   endif
@@ -306,7 +330,7 @@ function! OmniSharp#Rename() abort
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let result = s:json_decode(pyeval('renameTo()'))
+  let result = s:pyevalFormat('omnisharp.rename_to(new_name="%s")', a:renameto)
 
   let save_lazyredraw = &lazyredraw
   let save_eventignore = &eventignore
@@ -314,7 +338,7 @@ function! OmniSharp#RenameTo(renameto) abort
   let curpos = getpos('.')
   try
     set lazyredraw eventignore=all
-    for change in result.Changes
+    for change in result
       execute 'silent hide edit' fnameescape(change.FileName)
       let modified = &modified
       let content = split(change.Buffer, '\r\?\n')
@@ -338,7 +362,7 @@ function! OmniSharp#RenameTo(renameto) abort
 endfunction
 
 function! OmniSharp#Build() abort
-  let qf_taglist = pyeval('build()')
+  let qf_taglist = s:pyeval('omnisharp.build()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
@@ -348,7 +372,7 @@ function! OmniSharp#Build() abort
 endfunction
 
 function! OmniSharp#BuildAsync() abort
-  python buildcommand()
+  let b:buildcommand = s:pyeval('omnisharp.build_command')
   let &l:makeprg=b:buildcommand
   setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
   Make
@@ -356,10 +380,10 @@ endfunction
 
 function! OmniSharp#RunTests(mode) abort
   wall
-  python buildcommand()
+  let b:buildcommand = s:pyeval('omnisharp.build_command')
 
   if a:mode !=# 'last'
-    python getTestCommand()
+    let s:testcommand = s:pyevalFormat('omnisharp.get_test_command("%s")', a:mode)
   endif
 
   let s:cmdheight=&cmdheight
@@ -388,7 +412,7 @@ function! OmniSharp#EnableTypeHighlighting() abort
     return
   endif
 
-  python lookupAllUserTypes()
+  exec s:pycmd 'omnisharp.lookupAllUserTypes()'
 
   let startBuf = bufnr('%')
   " Perform highlighting for existing buffers
@@ -404,12 +428,12 @@ augroup END
 endfunction
 
 function! OmniSharp#ReloadSolution() abort
-  python getResponse("/reloadsolution")
+  exec s:pycmd 'omnisharp.getResponse("/reloadsolution")'
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
   if OmniSharp#BufferHasChanged() == 1
-    python getResponse("/updatebuffer")
+    exec s:pycmd 'omnisharp.getResponse("/updatebuffer")'
   endif
 endfunction
 
@@ -425,11 +449,11 @@ function! OmniSharp#BufferHasChanged() abort
 endfunction
 
 function! OmniSharp#CodeFormat() abort
-  python codeFormat()
+  exec s:pycmd 'omnisharp.codeFormat()'
 endfunction
 
 function! OmniSharp#FixUsings() abort
-  let qf_taglist = pyeval('fix_usings()')
+  let qf_taglist = s:pyeval('omnisharp.fix_usings()')
 
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
@@ -439,7 +463,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning() abort
   try
-    python vim.command("let s:alive = '" + getResponse("/checkalivestatus", None, 0.2) + "'");
+    let s:alive = s:pyeval('omnisharp.getResponse("/checkalivestatus", None, 0.2)')
     return s:alive ==# 'true'
   catch
     return 0
@@ -524,36 +548,59 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
     let solutionPath = fnamemodify(solutionPath, ':h')
   endif
+
   let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = shellescape(g:OmniSharp_server_path, 1)
-  \ . ' -p ' . port
-  \ . ' -s ' . shellescape(solutionPath, 1)
+
+  let command = [g:OmniSharp_server_path,
+               \ '-p', port,
+               \ '-s', solutionPath]
+
   if g:OmniSharp_server_type !=# 'roslyn'
-    let command .= OmniSharp#ResolveLocalConfig(solutionPath)
+    call add(command, OmniSharp#ResolveLocalConfig(solutionPath))
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    let command = 'mono ' . command
+    call insert(command, 'mono')
   endif
+
   call OmniSharp#RunAsyncCommand(command)
+endfunction
+
+function! Receive(job_id, data, event)
+  if g:omnisharp_debug == 1
+    echom printf('%s: %s',a:event,string(a:data))
+  endif
+endfunction
+
+function! ReceiveVim(channel, message)
+  if g:omnisharp_debug == 1
+      echom printf('%s: %s', string(a:channel), string(a:message))
+  endif
 endfunction
 
 function! OmniSharp#RunAsyncCommand(command) abort
   let is_vimproc = 0
   silent! let is_vimproc = vimproc#version()
-  if exists(':Dispatch') == 2
-    call dispatch#start(a:command, {'background': 1})
+  let command = a:command
+  if exists('*jobstart')
+    call s:debug("Using Neovim jobstart to start the following command:")
+    call s:debug(command)
+    call jobstart(command, {'on_stdout': 'Receive'})
+  elseif exists('*job_start')
+    call s:debug("Using vim job_start to start the following command:")
+    call s:debug(command)
+    let job = job_start(join(command, ' '), {'out_cb': 'ReceiveVim'})
+  elseif exists(':Dispatch') == 2
+    call dispatch#start(join(command, ' '), {'background': 1})
+  elseif is_vimproc
+    call vimproc#system_gui(substitute(join(command, ' '), '\\', '\/', 'g'))
   else
-    if is_vimproc
-      call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
-    else
-      echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
-    endif
+    echoerr 'Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc plugin to use this feature'
   endif
 endfunction
 
 function! OmniSharp#AddToProject() abort
-  python getResponse("/addtoproject")
+  exec s:pycmd 'omnisharp.getResponse("/addtoproject")'
 endfunction
 
 function! OmniSharp#AskStopServerIfRunning() abort
@@ -575,7 +622,7 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    python getResponse("/stopserver")
+    exec s:pycmd 'omnisharp.getResponse("/stopserver")'
     let g:OmniSharp_running_slns = []
   endif
 endfunction
@@ -586,7 +633,7 @@ function! OmniSharp#AddReference(reference) abort
   else
     let a:ref = a:reference
   endif
-  python addReference()
+  s:pyevalFormat('omnisharp.add_reference(reference="%s")', a:ref)
 endfunction
 
 function! OmniSharp#AppendCtrlPExtensions() abort
@@ -609,15 +656,15 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     echoerr "g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
     return
   endif
- 
+
   let line = strpart(getline('.'), 0, col('.')-1)
   let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
- 
+
   let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
   let completion = substitute(completion, remove_whitespace_regex, '\1', '')
- 
+
   let should_expand_completion = len(completion) != 0
-  
+
   if should_expand_completion
     let completion = split(completion, '\.')[-1]
     let completion = split(completion, 'new ')[-1]
@@ -696,3 +743,5 @@ endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" vim:nofen:fdl=0:ts=2:sw=2:sts=2

@@ -1,4 +1,10 @@
-import vim, syncrequest, types
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import vim
+import syncrequest
+import types
+
 class Completion:
     def get_completions(self, column, partialWord):
         parameters = {}
