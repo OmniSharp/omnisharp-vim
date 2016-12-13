@@ -1,13 +1,13 @@
-if !has('python')
-  echoerr 'Error: OmniSharp requires Vim compiled with +python'
-  finish
-endif
-
 if exists('g:OmniSharp_loaded')
   finish
 endif
 
 let g:OmniSharp_loaded = 1
+
+if !has('python')
+  echoerr 'Error: OmniSharp requires Vim compiled with +python'
+  finish
+endif
 
 "Load python/OmniSharp.py
 let s:py_path = join([expand('<sfile>:p:h:h'), 'python'], '/')
