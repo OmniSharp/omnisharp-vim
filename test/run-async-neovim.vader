@@ -17,3 +17,7 @@ Execute (Set the var from the async command):
   let job = OmniSharp#RunAsyncCommandJobstartNeovim(command)
   Assert job > 0, "Could not launch the specified command"
   AssertEqual 133, jobwait([job])[0]
+
+  let command = ['bash', '-c', 'echo This should be a fake error displayed in the window 1>&2']
+  let job = OmniSharp#RunAsyncCommandJobstartNeovim(command)
+  Assert job > 0, "Could not launch the specified command"

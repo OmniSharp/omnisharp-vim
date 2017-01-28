@@ -574,11 +574,15 @@ function! Receive(job_id, data, event)
   endif
 endfunction
 
+function! ReceiveError(job_id, data, event)
+  echoerr printf('%s: %s',a:event,string(a:data))
+endfunction
+
 function! OmniSharp#RunAsyncCommandJobstartNeovim(command) abort
   if SupportsRunAsyncUsingJobstartNeovim()
     call s:debug("Using Neovim jobstart to start the following command:")
     call s:debug(a:command)
-    return jobstart(a:command, {'on_stdout': 'Receive'})
+    return jobstart(a:command, {'on_stdout': 'Receive', 'on_stderr': 'ReceiveError'})
   else
     echoerr 'Not using neovim'
   endif
@@ -594,12 +598,16 @@ function! ReceiveVim(channel, message)
   endif
 endfunction
 
+function! ReceiveVimError(channel, message)
+  echoerr printf('%s: %s', string(a:channel), string(a:message))
+endfunction
+
 function! OmniSharp#RunAsyncCommandJobstartVim(command) abort
   let command = a:command
   if SupportsRunAsyncUsingJobstartVim()
     call s:debug("Using vim job_start to start the following command:")
     call s:debug(command)
-    let job = job_start(join(command, ' '), {'out_cb': 'ReceiveVim'})
+    return job_start(join(command, ' '), {'out_cb': 'ReceiveVim', 'err_cb': 'ReceiveVimError'})
   else
     echoerr 'Not using Vim 8.0+'
   endif
