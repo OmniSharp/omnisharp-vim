@@ -13,13 +13,6 @@ let s:allUserInterfaces = ''
 let s:generated_snippets = {}
 let s:omnisharp_last_completion_dictionary = {}
 let g:serverSeenRunning = 0
-let g:omnisharp_debug = 0
-
-function! s:debug(message)
-  if g:omnisharp_debug == 1
-    echom "DEBUG: " . string(a:message)
-  endif
-endfunction
 
 let s:is_vimproc = 0
 silent! let s:is_vimproc = vimproc#version()
@@ -561,98 +554,7 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
     call insert(command, 'mono')
   endif
 
-  call OmniSharp#RunAsyncCommand(command)
-endfunction
-
-function! SupportsRunAsyncUsingJobstartNeovim() abort
-  return exists('*jobstart')
-endfunction
-
-function! Receive(job_id, data, event)
-  if g:omnisharp_debug == 1
-    echom printf('%s: %s',a:event,string(a:data))
-  endif
-endfunction
-
-function! ReceiveError(job_id, data, event)
-  echoerr printf('%s: %s',a:event,string(a:data))
-endfunction
-
-function! OmniSharp#RunAsyncCommandJobstartNeovim(command) abort
-  if SupportsRunAsyncUsingJobstartNeovim()
-    call s:debug("Using Neovim jobstart to start the following command:")
-    call s:debug(a:command)
-    return jobstart(a:command, {'on_stdout': 'Receive', 'on_stderr': 'ReceiveError'})
-  else
-    echoerr 'Not using neovim'
-  endif
-endfunction
-
-function! SupportsRunAsyncUsingJobstartVim() abort
-  return exists('*job_start')
-endfunction
-
-function! ReceiveVim(channel, message)
-  if g:omnisharp_debug == 1
-      echom printf('%s: %s', string(a:channel), string(a:message))
-  endif
-endfunction
-
-function! ReceiveVimError(channel, message)
-  echoerr printf('%s: %s', string(a:channel), string(a:message))
-endfunction
-
-function! OmniSharp#RunAsyncCommandJobstartVim(command) abort
-  let command = a:command
-  if SupportsRunAsyncUsingJobstartVim()
-    call s:debug("Using vim job_start to start the following command:")
-    call s:debug(command)
-    return job_start(join(command, ' '), {'out_cb': 'ReceiveVim', 'err_cb': 'ReceiveVimError'})
-  else
-    echoerr 'Not using Vim 8.0+'
-  endif
-endfunction
-
-function! SupportsRunAsyncUsingDispatch() abort
-  return exists(':Dispatch') == 2
-endfunction
-
-function! OmniSharp#RunAsyncCommandDispatch(command) abort
-  let command = a:command
-  if SupportsRunAsyncUsingDispatch()
-    call dispatch#start(join(command, ' '), {'background': 1})
-  else
-    echoerr 'vim-dispatch not found'
-  endif
-endfunction
-
-function! SupportsRunAsyncUsingVimProc() abort
-  let is_vimproc = 0
-  silent! let is_vimproc = vimproc#version()
-  return is_vimproc
-endfunction
-
-function! OmniSharp#RunAsyncCommandVimProc(command) abort
-  if SupportsRunAsyncUsingVimProc()
-    call vimproc#system_gui(substitute(join(a:command, ' '), '\\', '\/', 'g'))
-  else
-    echoerr 'vimproc not found'
-  endif
-endfunction
-
-function! OmniSharp#RunAsyncCommand(command) abort
-  let command = a:command
-  if SupportsRunAsyncUsingJobstartNeovim()
-    call OmniSharp#RunAsyncCommandJobstartNeovim(a:command)
-  elseif SupportsRunAsyncUsingJobstartVim()
-    call OmniSharp#RunAsyncCommandJobstartVim(a:command)
-  elseif SupportsRunAsyncUsingDispatch()
-    call OmniSharp#RunAsyncCommandDispatch(a:command)
-  elseif SupportsRunAsyncUsingVimProc()
-    call OmniSharp#RunAsyncCommandVimProc(a:command)
-  else
-    echoerr 'Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc plugin to use this feature'
-  endif
+  call OmniSharp#lib#proc#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#AddToProject() abort
