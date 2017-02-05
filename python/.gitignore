@@ -1,0 +1,7 @@
+venv/
+*.egg-info/
+.cache/
+.tox/
+__cache__/
+
+*.pyc
