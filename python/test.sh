@@ -1,4 +1,6 @@
 #!/bin/bash
 
 . tox-env.sh
-venv/bin/tox
+
+pyenv activate ${OMNISHARP_VENV}
+tox

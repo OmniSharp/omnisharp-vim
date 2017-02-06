@@ -13,3 +13,6 @@ do
     pyenv install $v
 done
 
+pyenv virtualenv 3.5.3 ${OMNISHARP_VENV}
+pyenv activate ${OMNISHARP_VENV}
+pip install --upgrade setuptools pip tox
