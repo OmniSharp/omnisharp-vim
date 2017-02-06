@@ -1,5 +1,20 @@
-import json, logging, os.path, platform, re, urllib2, urlparse, vim, socket
-from contextlib import closing
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import logging
+import json
+import os
+import os.path
+import types
+
+try:
+    from urllib import parse as urlparse
+    from urllib import request
+except ImportError:
+    import urllib2 as request
+    import urlparse
+
+import vim  # pylint: disable=import-error
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
@@ -65,9 +80,9 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
 
     target = urlparse.urljoin(host, endPoint)
 
-    proxy = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy)
-    req = urllib2.Request(target)
+    proxy = request.ProxyHandler({})
+    opener = request.build_opener(proxy)
+    req = request.Request(target)
     req.add_header('Content-Type', 'application/json')
 
     try:
