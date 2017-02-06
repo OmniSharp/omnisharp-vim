@@ -5,6 +5,23 @@
 "endif
 "let g:loaded_ctrlp_findsymbols = 1
 
+if !(has('python') || has('python3'))
+  finish
+endif
+
+let s:pycmd = has('python3') ? 'python3' : 'python'
+let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
+if exists('*py3eval')
+  let s:pyeval = function('py3eval')
+elseif exists('*pyeval')
+  let s:pyeval = function('pyeval')
+else
+  exec s:pycmd 'import json, vim'
+  function! s:pyeval(e)
+    exec s:pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
+  endfunction
+endif
+
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -83,7 +100,7 @@ function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !pyeval(command)
+  if !s:pyeval(command)
     echo 'No action taken'
   endif
 endfunction
