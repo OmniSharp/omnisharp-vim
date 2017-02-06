@@ -6,6 +6,7 @@ import json
 import os
 import os.path
 import types
+import sys
 
 try:
     from urllib import parse as urlparse
@@ -89,6 +90,10 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
         response = opener.open(req, json.dumps(parameters), timeout)
         vim.command("let g:serverSeenRunning = 1")
         res = response.read()
+
+        if sys.version_info >= (3, 0):
+            res = res.decode('utf-8')
+
         if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
             res = res[3:]
         return res
