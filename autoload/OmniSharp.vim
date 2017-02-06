@@ -6,7 +6,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 "Load python/OmniSharp.py
-let s:py_path = OmniSharp#util#path_join('python')
+let s:py_path = OmniSharp#util#path_join(['python', 'omnisharp'])
 exec "python sys.path.append(r'" . s:py_path . "')"
 exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'OmniSharp.py']))
 
