@@ -20,7 +20,11 @@ import vim  # pylint: disable=import-error
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
 
-log_dir = os.path.join(vim.eval('expand("<sfile>:p:h")'), '..', 'log')
+log_dir = os.path.join(
+    vim.eval('g:omnisharp_python_path'),
+    '..',
+    '..',
+    'log')
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 hdlr = logging.FileHandler(os.path.join(log_dir, 'python.log'))

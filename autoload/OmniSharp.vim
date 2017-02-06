@@ -1,32 +1,12 @@
-if !(has('python') || has('python3'))
+if !OmniSharp#lib#py#exists()
   finish
 endif
 
-let s:pycmd = has('python3') ? 'python3' : 'python'
-let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
-if exists('*py3eval')
-  let s:pyeval = function('py3eval')
-elseif exists('*pyeval')
-  let s:pyeval = function('pyeval')
-else
-  exec s:pycmd 'import json, vim'
-  function! s:pyeval(e)
-    exec s:pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
-  endfunction
-endif
-
-function! s:pyevalFormat(tmp, ...)
-  s:pyeval(printf(tmp, a:000))
-endfunction
-
 let s:save_cpo = &cpo
 set cpo&vim
-"
-"Load python/omnisharp/OmniSharp.py
-"Load python/omnisharp/OmniSharp.py
-let s:py_path = OmniSharp#util#path_join(['python', 'omnisharp'])
-exec s:pycmd "sys.path.append(r'" . s:py_path . "')"
-exec s:pyfile fnameescape(s:py_path . '/OmniSharp.py')
+
+" Load python/omnisharp/OmniSharp.py
+call OmniSharp#lib#py#load('/OmniSharp.py')
 
 let s:server_files = '*.sln'
 let s:allUserTypes = ''
@@ -39,7 +19,7 @@ let s:is_vimproc = 0
 silent! let s:is_vimproc = vimproc#version()
 
 function! OmniSharp#GetCompletions(partial, ...) abort
-  let completions = s:pyeval(printf('getCompletions(%s)', string(a:partial)))
+  let completions = OmniSharp#lib#py#eval(printf('getCompletions(%s)', string(a:partial)))
   let s:last_completion_dictionary = {}
   for completion in completions
     let s:last_completion_dictionary[get(completion, 'word')] = completion
@@ -69,7 +49,7 @@ function! OmniSharp#Complete(findstart, base) abort
 endfunction
 
 function! OmniSharp#FindUsages() abort
-  let qf_taglist = s:pyeval('findUsages()')
+  let qf_taglist = OmniSharp#lib#py#eval('findUsages()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
@@ -81,7 +61,7 @@ function! OmniSharp#FindUsages() abort
 endfunction
 
 function! OmniSharp#FindImplementations() abort
-  let qf_taglist = s:pyeval('findImplementations()')
+  let qf_taglist = OmniSharp#lib#py#eval('findImplementations()')
 
   if len(qf_taglist) == 0
     echo 'No implementations found'
@@ -99,7 +79,7 @@ function! OmniSharp#FindImplementations() abort
 endfunction
 
 function! OmniSharp#FindMembers() abort
-  let qf_taglist = s:pyeval('findMembers()')
+  let qf_taglist = OmniSharp#lib#py#eval('findMembers()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 1
@@ -110,10 +90,10 @@ endfunction
 
 function! OmniSharp#NavigateUp() abort
   if g:OmniSharp_server_type ==# 'roslyn'
-    let qf_tag = s:pyeval('navigateUp()')
+    let qf_tag = OmniSharp#lib#py#eval('navigateUp()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
-    let qf_taglist = s:pyeval('findMembers()')
+    let qf_taglist = OmniSharp#lib#py#eval('findMembers()')
     let column = col('.')
     let line = line('.')
     let l = len(qf_taglist) - 1
@@ -134,10 +114,10 @@ endfunction
 
 function! OmniSharp#NavigateDown() abort
   if g:OmniSharp_server_type ==# 'roslyn'
-    let qf_tag = s:pyeval('navigateDown()')
+    let qf_tag = OmniSharp#lib#py#eval('navigateDown()')
     call cursor(qf_tag.Line, qf_tag.Column)
   else
-    let qf_taglist = s:pyeval('findMembers()')
+    let qf_taglist = OmniSharp#lib#py#eval('findMembers()')
     let column = col('.')
     let line = line('.')
     for l in range(0, len(qf_taglist) - 1)
@@ -153,7 +133,7 @@ function! OmniSharp#NavigateDown() abort
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
-  s:pyeval('gotoDefinition()')
+  OmniSharp#lib#py#eval('gotoDefinition()')
 endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column) abort
@@ -176,7 +156,7 @@ function! OmniSharp#FindSymbol(...) abort
   if !OmniSharp#ServerIsRunning()
     return
   endif
-  let quickfixes = s:pyeval(printf('findSymbols(%s)', string(filter)))
+  let quickfixes = OmniSharp#lib#py#eval(printf('findSymbols(%s)', string(filter)))
   if empty(quickfixes)
     echo 'No symbols found'
     return
@@ -217,7 +197,7 @@ endfunction
 " callback function can be used to clear the flag.
 function! OmniSharp#CountCodeActions(...) abort
   let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
-  let s:actions = s:pyeval(printf('getCodeActions("normal", %s)', string(v)))
+  let s:actions = OmniSharp#lib#py#eval(printf('getCodeActions("normal", %s)', string(v)))
 
   " v:t_func was added in vim8 - this form is backwards-compatible
   if a:0 && type(a:1) == type(function("tr"))
@@ -248,7 +228,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
   if exists('s:actions')
     let actions = s:actions
   else
-    let actions = s:pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
+    let actions = OmniSharp#lib#py#eval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
   endif
   if empty(actions)
     echo 'No code actions found'
@@ -279,7 +259,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
         let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
         let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', a:mode, command)
       endif
-      if !pyeval(command)
+      if !OmniSharp#lib#py#eval(command)
         echo 'No action taken'
       endif
     endif
@@ -291,13 +271,13 @@ function! OmniSharp#GetIssues() abort
     return get(b:, 'issues', [])
   endif
   if g:serverSeenRunning == 1
-    let b:issues = s:pyeval('getCodeIssues()')
+    let b:issues = OmniSharp#lib#py#eval('getCodeIssues()')
   endif
   return get(b:, 'issues', [])
 endfunction
 
 function! OmniSharp#FixIssue() abort
-  s:pyeval('fixCodeIssue()')
+  OmniSharp#lib#py#eval('fixCodeIssue()')
 endfunction
 
 function! OmniSharp#FindSyntaxErrors() abort
@@ -308,7 +288,7 @@ function! OmniSharp#FindSyntaxErrors() abort
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:syntaxerrors = s:pyeval('findSyntaxErrors()')
+    let b:syntaxerrors = OmniSharp#lib#py#eval('findSyntaxErrors()')
   endif
   return get(b:, 'syntaxerrors', [])
 endfunction
@@ -321,7 +301,7 @@ function! OmniSharp#FindSemanticErrors() abort
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:semanticerrors = s:pyeval('findSemanticErrors()')
+    let b:semanticerrors = OmniSharp#lib#py#eval('findSemanticErrors()')
   endif
   return get(b:, 'semanticerrors', [])
 endfunction
@@ -334,7 +314,7 @@ function! OmniSharp#CodeCheck() abort
     return []
   endif
   if g:serverSeenRunning == 1
-    let b:codecheck = s:pyeval('codeCheck()')
+    let b:codecheck = OmniSharp#lib#py#eval('codeCheck()')
   endif
   return get(b:, 'codecheck', [])
 endfunction
@@ -352,7 +332,7 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
     let s:documentation = ''
-    s:pyeval('typeLookup("type")')
+    OmniSharp#lib#py#eval('typeLookup("type")')
     let doc = get(s:, 'documentation', '')
     if len(doc) > 0
       let doc = "\n\n" . doc
@@ -372,7 +352,7 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
       endfor
     endif
     if found_line_in_loc_list == 0
-      s:pyeval('typeLookup("type")')
+      OmniSharp#lib#py#eval('typeLookup("type")')
       call OmniSharp#Echo(type)
     endif
   endif
@@ -390,7 +370,7 @@ function! OmniSharp#Rename() abort
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let result = s:json_decode(s:pyeval('renameTo()'))
+  let result = s:json_decode(OmniSharp#lib#py#eval('renameTo()'))
 
   let save_lazyredraw = &lazyredraw
   let save_eventignore = &eventignore
@@ -422,7 +402,7 @@ function! OmniSharp#RenameTo(renameto) abort
 endfunction
 
 function! OmniSharp#Build() abort
-  let qf_taglist = s:pyeval('build()')
+  let qf_taglist = OmniSharp#lib#py#eval('build()')
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
@@ -432,7 +412,7 @@ function! OmniSharp#Build() abort
 endfunction
 
 function! OmniSharp#BuildAsync() abort
-  s:pyeval('buildcommand()')
+  OmniSharp#lib#py#eval('buildcommand()')
   let &l:makeprg=b:buildcommand
   setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
   Make
@@ -440,10 +420,10 @@ endfunction
 
 function! OmniSharp#RunTests(mode) abort
   wall
-  s:pyeval('buildcommand()')
+  OmniSharp#lib#py#eval('buildcommand()')
 
   if a:mode !=# 'last'
-    s:pyeval('getTestCommand()')
+    OmniSharp#lib#py#eval('getTestCommand()')
   endif
 
   let s:cmdheight=&cmdheight
@@ -481,9 +461,9 @@ function! OmniSharp#EnableTypeHighlighting() abort
   endif
 
   if g:OmniSharp_server_type ==# 'roslyn'
-    s:pyeval('lookupAllUserTypes()')
+    OmniSharp#lib#py#eval('lookupAllUserTypes()')
   else
-    s:pyeval('lookupAllUserTypesLegacy()')
+    OmniSharp#lib#py#eval('lookupAllUserTypesLegacy()')
   endif
 
   let startBuf = bufnr('%')
@@ -500,12 +480,12 @@ function! OmniSharp#EnableTypeHighlighting() abort
 endfunction
 
 function! OmniSharp#ReloadSolution() abort
-  s:pyeval('getResponse("/reloadsolution")')
+  OmniSharp#lib#py#eval('getResponse("/reloadsolution")')
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
   if OmniSharp#BufferHasChanged() == 1
-    s:pyeval('getResponse("/updatebuffer")')
+    OmniSharp#lib#py#eval('getResponse("/updatebuffer")')
   endif
 endfunction
 
@@ -521,11 +501,11 @@ function! OmniSharp#BufferHasChanged() abort
 endfunction
 
 function! OmniSharp#CodeFormat() abort
-  s:pyeval('codeFormat()')
+  OmniSharp#lib#py#eval('codeFormat()')
 endfunction
 
 function! OmniSharp#FixUsings() abort
-  let qf_taglist = s:pyeval('fix_usings()')
+  let qf_taglist = OmniSharp#lib#py#eval('fix_usings()')
 
   if len(qf_taglist) > 0
     call setqflist(qf_taglist)
@@ -535,7 +515,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning() abort
   try
-    s:pyeval('vim.command("let s:alive = \"%s\"" % getResponse("/checkalivestatus", None, 0.2))')
+    OmniSharp#lib#py#eval('vim.command("let s:alive = \"%s\"" % getResponse("/checkalivestatus", None, 0.2))')
     return s:alive ==# 'true'
   catch
     return 0
@@ -614,7 +594,7 @@ function! OmniSharp#StartServer() abort
 endfunction
 
 function! OmniSharp#AddToProject() abort
-  s:pyeval('getResponse("/addtoproject")')
+  OmniSharp#lib#py#eval('getResponse("/addtoproject")')
 endfunction
 
 function! OmniSharp#AskStopServerIfRunning() abort
@@ -636,7 +616,7 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    s:pyeval('getResponse("/stopserver")')
+    OmniSharp#lib#py#eval('getResponse("/stopserver")')
     call OmniSharp#proc#StopJob()
     let g:OmniSharp_running_slns = []
   endif
@@ -648,7 +628,7 @@ function! OmniSharp#AddReference(reference) abort
   else
     let a:ref = a:reference
   endif
-  s:pyeval('addReference()')
+  OmniSharp#lib#py#eval('addReference()')
 endfunction
 
 function! OmniSharp#AppendCtrlPExtensions() abort

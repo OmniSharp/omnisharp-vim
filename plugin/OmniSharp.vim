@@ -4,7 +4,7 @@ endif
 
 let g:OmniSharp_loaded = 1
 
-if !(has('python') || has('python3'))
+if !OmniSharp#lib#py#exists()
   echoerr 'Error: OmniSharp requires Vim compiled with +python or +python3'
   finish
 endif

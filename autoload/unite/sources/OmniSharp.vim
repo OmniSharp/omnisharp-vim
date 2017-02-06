@@ -1,18 +1,5 @@
-if !(has('python') || has('python3'))
+if !OmniSharp#lib#py#exists()
   finish
-endif
-
-let s:pycmd = has('python3') ? 'python3' : 'python'
-let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
-if exists('*py3eval')
-  let s:pyeval = function('py3eval')
-elseif exists('*pyeval')
-  let s:pyeval = function('pyeval')
-else
-  exec s:pycmd 'import json, vim'
-  function! s:pyeval(e)
-    exec s:pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
-  endfunction
 endif
 
 let s:save_cpo = &cpoptions
@@ -60,7 +47,7 @@ function! s:findcodeactions_action_table.run.func(candidate) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !s:pyeval(command)
+  if !OmniSharp#lib#py#eval(command)
     echo 'No action taken'
   endif
 endfunction
@@ -93,7 +80,7 @@ function! s:findtype.gather_candidates(args, context) abort
   if !OmniSharp#ServerIsRunning()
     return []
   endif
-  let symbols = s:pyeval('findTypes()')
+  let symbols = OmniSharp#lib#py#eval('findTypes()')
   return map(symbols, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,
