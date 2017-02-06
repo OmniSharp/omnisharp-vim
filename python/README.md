@@ -1,20 +1,24 @@
-# Python module for the plugin
+# Python module for the plug-in
 
 The tests should be kept in the `tests` folder.
 
-## Setup instructions for UNIX
+## Setup
 
-The script `tox-bootstrap.sh` can be used for setting up a testing environment
-on Linux and Mac machines.
+Install `tox` system wide and just run the `tox` command from the command line.
+It should succeed if you have the following:
 
-The `tox` tool, when run, creates virtual environments under `.tox/` folder and
-their names correspond the names in the `tox.ini` configuration file.  For
-example, for activating a Python 2.7.x environment one would simply do:
+- any version of the Python 2.7 interpreter
+
+Using the python then should be as simple as:
 
 ```bash
-source .tox/py27/bin/activate
+source .tox/${PYTHON_VERSION_LABEL}/bin/activate
 ```
 
-## Setup instructions for Windows
+## Setup instructions for pyenv for UNIX
 
-TODO
+The script `pyenv-bootstrap.sh` can be used for setting up different versions
+of the interpreters on Linux and Mac machines.
+
+Unfortunately `pyenv` is not supported on Windows, so you will need to install
+the interpreters manually.
