@@ -59,7 +59,20 @@ endfunction
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findsymbols#init() abort
+<<<<<<< HEAD
   return s:symbols
+=======
+  if !OmniSharp#ServerIsRunning()
+    return
+  endif
+
+  let s:quickfixes = OmniSharp#py#eval('findSymbols()')
+  let symbols = []
+  for quickfix in s:quickfixes
+    call add(symbols, quickfix.text)
+  endfor
+  return symbols
+>>>>>>> 1eb03cb... Remove #py#exists and fixup the new util function
 endfunction
 
 

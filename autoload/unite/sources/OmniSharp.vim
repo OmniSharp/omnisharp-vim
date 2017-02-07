@@ -1,4 +1,4 @@
-if !OmniSharp#lib#py#exists()
+if !(has('python') || has('python3'))
   finish
 endif
 
@@ -47,7 +47,7 @@ function! s:findcodeactions_action_table.run.func(candidate) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !OmniSharp#lib#py#eval(command)
+  if !OmniSharp#py#eval(command)
     echo 'No action taken'
   endif
 endfunction
@@ -80,7 +80,7 @@ function! s:findtype.gather_candidates(args, context) abort
   if !OmniSharp#ServerIsRunning()
     return []
   endif
-  let symbols = OmniSharp#lib#py#eval('findTypes()')
+  let symbols = OmniSharp#py#eval('findTypes()')
   return map(symbols, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,

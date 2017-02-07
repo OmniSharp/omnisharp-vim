@@ -5,9 +5,10 @@
 "endif
 "let g:loaded_ctrlp_findsymbols = 1
 
-if !OmniSharp#lib#py#exists()
+if !(has('python') || has('python3'))
   finish
 endif
+
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -86,7 +87,7 @@ function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !OmniSharp#lib#py#eval(command)
+  if !OmniSharp#py#eval(command)
     echo 'No action taken'
   endif
 endfunction
