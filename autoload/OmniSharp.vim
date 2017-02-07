@@ -554,7 +554,7 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
     call insert(command, 'mono')
   endif
 
-  call OmniSharp#lib#proc#RunAsyncCommand(command)
+  call OmniSharp#proc#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#AddToProject() abort
