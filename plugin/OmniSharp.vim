@@ -9,11 +9,13 @@ if !has('python')
   finish
 endif
 
+let s:dir_sep = has('win32') ? '\' : '/'
+
 "Load python/OmniSharp.py
-let s:py_path = join([expand('<sfile>:p:h:h'), 'python'], '/')
+let s:py_path = join([expand('<sfile>:p:h:h'), 'python'], s:dir_sep)
 exec "python sys.path.append(r'" . s:py_path . "')"
-exec 'pyfile ' . fnameescape(s:py_path . '/Completion.py')
-exec 'pyfile ' . fnameescape(s:py_path . '/OmniSharp.py')
+exec 'pyfile ' . fnameescape(s:py_path . s:dir_sep . 'Completion.py')
+exec 'pyfile ' . fnameescape(s:py_path . s:dir_sep . 'OmniSharp.py')
 
 
 let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
@@ -91,7 +93,6 @@ let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'v1')
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
 if !exists('g:OmniSharp_server_path')
-  let s:dir_sep = has('win32') ? '\\' : '/'
   if g:OmniSharp_server_type ==# 'v1'
     let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], s:dir_sep)
   else

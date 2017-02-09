@@ -85,6 +85,7 @@ function! OmniSharp#proc#vimprocStart(command) abort
   if OmniSharp#proc#supportsVimProc()
     " FIXME: consider using vimproc#popen3 as it gives control over the
     " process and we can get the stdout/stderr separately
+    " FIXME: Should we be still replacing the path separator?
     call vimproc#system_bg(substitute(join(a:command, ' '), '\\', '\/', 'g'))
   else
     echoerr 'vimproc not found'
