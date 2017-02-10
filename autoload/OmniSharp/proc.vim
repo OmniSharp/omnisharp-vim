@@ -69,7 +69,7 @@ endfunction
 
 function! OmniSharp#proc#dispatch(command) abort
   if OmniSharp#proc#supportsVimDispatch()
-    call dispatch#start(join(a:command, ' '), {'background': 1})
+    call dispatch#start(a:command, {'background': 1})
   else
     echoerr 'vim-dispatch not found'
   endif
@@ -86,7 +86,7 @@ function! OmniSharp#proc#vimprocStart(command) abort
     " FIXME: consider using vimproc#popen3 as it gives control over the
     " process and we can get the stdout/stderr separately
     " FIXME: Should we be still replacing the path separator?
-    call vimproc#system_bg(substitute(join(a:command, ' '), '\\', '\/', 'g'))
+    call vimproc#system_bg(substitute(a:command, '\\', '\/', 'g'))
   else
     echoerr 'vimproc not found'
   endif

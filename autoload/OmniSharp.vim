@@ -542,16 +542,15 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
 
   let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = [
+  let command = join([
       \ shellescape(cmd, 1),
       \ '-p', port,
-      \ '-s', shellescape(solutionPath, 1)]
-
+      \ '-s', shellescape(solutionPath, 1)], ' ')
   if g:OmniSharp_server_type !=# 'roslyn'
-    call add(command, OmniSharp#ResolveLocalConfig(solutionPath))
+    command = command . " " . OmniSharp#ResolveLocalConfig(solutionPath)
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    call insert(command, 'mono')
+    command = "mono " . command
   endif
 
   call OmniSharp#proc#RunAsyncCommand(command)
