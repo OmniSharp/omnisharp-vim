@@ -479,15 +479,18 @@ function! OmniSharp#StartServer() abort
   if empty(solution_files)
     return
   endif
+
+  let l:command = 'unknown'
+
   if len(solution_files) == 1
-    call OmniSharp#StartServerSolution(solution_files[0])
+    let l:command = OmniSharp#GetStartServerCommand(solution_files[0])
   elseif g:OmniSharp_sln_list_name !=# ''
     echom 'Started with sln: ' . g:OmniSharp_sln_list_name
-    call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
+    let l:command = OmniSharp#GetStartServerCommand(g:OmniSharp_sln_list_name)
   elseif g:OmniSharp_sln_list_index > -1 &&
   \     g:OmniSharp_sln_list_index < len(solution_files)
     echom 'Started with sln: ' . solution_files[g:OmniSharp_sln_list_index]
-    call OmniSharp#StartServerSolution( solution_files[g:OmniSharp_sln_list_index]  )
+    let l:command = OmniSharp#GetStartServerCommand(solution_files[g:OmniSharp_sln_list_index])
   else
     echom 'sln: ' . g:OmniSharp_sln_list_name
     let index = 1
@@ -510,8 +513,15 @@ function! OmniSharp#StartServer() abort
       return
     endif
 
-    call OmniSharp#StartServerSolution(solution_files[option - 1])
+    let l:command = OmniSharp#GetStartServerCommand(solution_files[option - 1])
   endif
+
+  if l:command ==# 'unknown'
+    echoerr 'Could not determinet the command to start the OmniSharp server!'
+    return
+  endif
+
+  call OmniSharp#proc#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#ResolveLocalConfig(solutionPath) abort
@@ -526,7 +536,7 @@ function! OmniSharp#ResolveLocalConfig(solutionPath) abort
   return result
 endfunction
 
-function! OmniSharp#StartServerSolution(solutionPath) abort
+function! OmniSharp#GetStartServerCommand(solutionPath) abort
   let solutionPath = a:solutionPath
   if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
     let solutionPath = fnamemodify(solutionPath, ':h')
@@ -547,13 +557,13 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
       \ '-p', port,
       \ '-s', shellescape(solutionPath, 1)], ' ')
   if g:OmniSharp_server_type !=# 'roslyn'
-    command = command . " " . OmniSharp#ResolveLocalConfig(solutionPath)
+    let command = command . " " . OmniSharp#ResolveLocalConfig(solutionPath)
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    command = "mono " . command
+    let command = "mono " . command
   endif
 
-  call OmniSharp#proc#RunAsyncCommand(command)
+  return command
 endfunction
 
 function! OmniSharp#AddToProject() abort
