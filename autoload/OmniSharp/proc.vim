@@ -1,7 +1,7 @@
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
-let g:omnisharp_proc_debug = 0
+let g:omnisharp_proc_debug = get(g:, 'omnisharp_proc_debug', 0)
 
 function! s:debug(message)
   if g:omnisharp_proc_debug == 1
@@ -76,9 +76,9 @@ function! OmniSharp#proc#dispatch(command) abort
 endfunction
 
 function! OmniSharp#proc#supportsVimProc() abort
-  let is_vimproc = 0
-  silent! let is_vimproc = vimproc#version()
-  return is_vimproc
+  let l:is_vimproc = 0
+  silent! let l:is_vimproc = vimproc#version()
+  return l:is_vimproc
 endfunction
 
 function! OmniSharp#proc#vimprocStart(command) abort
@@ -106,5 +106,5 @@ function! OmniSharp#proc#RunAsyncCommand(command) abort
   endif
 endfunction
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
