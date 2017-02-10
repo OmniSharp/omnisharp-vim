@@ -9,13 +9,25 @@ if !has('python')
   finish
 endif
 
+let s:plugin_root_dir = expand('<sfile>:p:h:h')
 let s:dir_sep = has('win32') ? '\' : '/'
+function! s:path_join(parts) abort
+  let parts = a:parts
+  if type(parts) == type("")
+    let parts = [parts]
+  elseif type(parts) != type([])
+    throw "Unsupported type for joining paths"
+  endif
+
+  return join([s:plugin_root_dir] + parts, s:dir_sep)
+endfunction
+
 
 "Load python/OmniSharp.py
-let s:py_path = join([expand('<sfile>:p:h:h'), 'python'], s:dir_sep)
+let s:py_path = s:path_join('python')
 exec "python sys.path.append(r'" . s:py_path . "')"
-exec 'pyfile ' . fnameescape(s:py_path . s:dir_sep . 'Completion.py')
-exec 'pyfile ' . fnameescape(s:py_path . s:dir_sep . 'OmniSharp.py')
+exec 'pyfile ' . fnameescape(s:path_join(['python', 'Completion.py']))
+exec 'pyfile ' . fnameescape(s:path_join(['python', 'OmniSharp.py']))
 
 
 let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
@@ -94,10 +106,10 @@ let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
 if !exists('g:OmniSharp_server_path')
   if g:OmniSharp_server_type ==# 'v1'
-    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], s:dir_sep)
+    let g:OmniSharp_server_path = s:path_join(['server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'])
   else
     let s:server_extension = has('win32') || has('win32unix') ? '.cmd' : ''
-    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'artifacts', 'scripts', 'OmniSharp' . s:server_extension], s:dir_sep)
+    let g:OmniSharp_server_path = s:path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'Omnisharp' . s:server_extension])
   endif
 endif
 
