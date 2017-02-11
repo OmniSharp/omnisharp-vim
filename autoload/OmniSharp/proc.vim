@@ -15,12 +15,14 @@ endfunction
 
 function! OmniSharp#proc#neovimOutHandler(job_id, data, event)
   if g:omnisharp_proc_debug == 1
-    echom printf('%s: %s',a:event,string(a:data))
+    let l:message = printf('%s: %s',a:event,string(a:data))
+    echom l:message
   endif
 endfunction
 
 function! OmniSharp#proc#neovimErrHandler(job_id, data, event)
-  echoerr printf('%s: %s',a:event,string(a:data))
+  let l:message = printf('%s: %s',a:event,string(a:data))
+  echoerr l:message
 endfunction
 
 function! OmniSharp#proc#neovimJobstart(command) abort
@@ -69,7 +71,7 @@ endfunction
 
 function! OmniSharp#proc#dispatch(command) abort
   if OmniSharp#proc#supportsVimDispatch()
-    call dispatch#start(a:command, {'background': 1})
+    call dispatch#start(join(a:command, ' '), {'background': 1})
   else
     echoerr 'vim-dispatch not found'
   endif
@@ -86,7 +88,7 @@ function! OmniSharp#proc#vimprocStart(command) abort
     " FIXME: consider using vimproc#popen3 as it gives control over the
     " process and we can get the stdout/stderr separately
     " FIXME: Should we be still replacing the path separator?
-    call vimproc#system_bg(substitute(a:command, '\\', '\/', 'g'))
+    call vimproc#system_bg(substitute(join(a:command, ' '), '\\', '\/', 'g'))
   else
     echoerr 'vimproc not found'
   endif
@@ -108,3 +110,5 @@ endfunction
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
+
+" vim: shiftwidth=2

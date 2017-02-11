@@ -480,7 +480,7 @@ function! OmniSharp#StartServer() abort
     return
   endif
 
-  let l:command = 'unknown'
+  let l:command = []
 
   if len(solution_files) == 1
     let l:command = OmniSharp#GetStartServerCommand(solution_files[0])
@@ -516,7 +516,7 @@ function! OmniSharp#StartServer() abort
     let l:command = OmniSharp#GetStartServerCommand(solution_files[option - 1])
   endif
 
-  if l:command ==# 'unknown'
+  if l:command ==# []
     echoerr 'Could not determinet the command to start the OmniSharp server!'
     return
   endif
@@ -525,15 +525,14 @@ function! OmniSharp#StartServer() abort
 endfunction
 
 function! OmniSharp#ResolveLocalConfig(solutionPath) abort
-  let result = ''
   let configPath = fnamemodify(a:solutionPath, ':p:h')
   \ . s:dir_separator
   \ . g:OmniSharp_server_config_name
 
   if filereadable(configPath)
-    let result = ' -config ' . shellescape(configPath, 1)
+    return configPath
   endif
-  return result
+  return ''
 endfunction
 
 function! OmniSharp#GetStartServerCommand(solutionPath) abort
@@ -552,15 +551,19 @@ function! OmniSharp#GetStartServerCommand(solutionPath) abort
 
   let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = join([
-      \ shellescape(cmd, 1),
-      \ '-p', port,
-      \ '-s', shellescape(solutionPath, 1)], ' ')
+  let command = [
+              \ cmd,
+              \ '-p', port,
+              \ '-s', solutionPath]
+
   if g:OmniSharp_server_type !=# 'roslyn'
-    let command = command . " " . OmniSharp#ResolveLocalConfig(solutionPath)
+    let l:config_file = OmniSharp#ResolveLocalConfig(solutionPath)
+    if l:config_file !=# ''
+      let command = command + ['-config', l:config_file]
+    endif
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    let command = "mono " . command
+    let command = insert(command, "mono")
   endif
 
   return command
