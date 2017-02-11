@@ -5,9 +5,7 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 let s:server_files = '*.sln'
-let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let s:generated_snippets = {}
@@ -483,14 +481,14 @@ function! OmniSharp#StartServer() abort
   let l:command = []
 
   if len(solution_files) == 1
-    let l:command = OmniSharp#GetStartServerCommand(solution_files[0])
+    let l:command = OmniSharp#util#get_start_cmd(solution_files[0])
   elseif g:OmniSharp_sln_list_name !=# ''
     echom 'Started with sln: ' . g:OmniSharp_sln_list_name
-    let l:command = OmniSharp#GetStartServerCommand(g:OmniSharp_sln_list_name)
+    let l:command = OmniSharp#util#get_start_cmd(g:OmniSharp_sln_list_name)
   elseif g:OmniSharp_sln_list_index > -1 &&
   \     g:OmniSharp_sln_list_index < len(solution_files)
     echom 'Started with sln: ' . solution_files[g:OmniSharp_sln_list_index]
-    let l:command = OmniSharp#GetStartServerCommand(solution_files[g:OmniSharp_sln_list_index])
+    let l:command = OmniSharp#util#get_start_cmd(solution_files[g:OmniSharp_sln_list_index])
   else
     echom 'sln: ' . g:OmniSharp_sln_list_name
     let index = 1
@@ -513,7 +511,7 @@ function! OmniSharp#StartServer() abort
       return
     endif
 
-    let l:command = OmniSharp#GetStartServerCommand(solution_files[option - 1])
+    let l:command = OmniSharp#util#get_start_cmd(solution_files[option - 1])
   endif
 
   if l:command ==# []
@@ -522,51 +520,6 @@ function! OmniSharp#StartServer() abort
   endif
 
   call OmniSharp#proc#RunAsyncCommand(command)
-endfunction
-
-function! OmniSharp#ResolveLocalConfig(solutionPath) abort
-  let configPath = fnamemodify(a:solutionPath, ':p:h')
-  \ . s:dir_separator
-  \ . g:OmniSharp_server_config_name
-
-  if filereadable(configPath)
-    return configPath
-  endif
-  return ''
-endfunction
-
-function! OmniSharp#GetStartServerCommand(solutionPath) abort
-  let solutionPath = a:solutionPath
-  if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
-    let solutionPath = fnamemodify(solutionPath, ':h')
-  endif
-
-  let cmd = g:OmniSharp_server_path
-  if s:is_vimproc
-    let cmd = substitute(cmd, '\\', '/', 'g')
-    let solutionPath = substitute(solutionPath, '\\', '/', 'g')
-  elseif has('win32') && &shell =~ 'cmd'
-    let cmd = substitute(cmd, '/', '\\', 'g')
-  endif
-
-  let g:OmniSharp_running_slns += [solutionPath]
-  let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = [
-              \ cmd,
-              \ '-p', port,
-              \ '-s', solutionPath]
-
-  if g:OmniSharp_server_type !=# 'roslyn'
-    let l:config_file = OmniSharp#ResolveLocalConfig(solutionPath)
-    if l:config_file !=# ''
-      let command = command + ['-config', l:config_file]
-    endif
-  endif
-  if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    let command = insert(command, "mono")
-  endif
-
-  return command
 endfunction
 
 function! OmniSharp#AddToProject() abort
