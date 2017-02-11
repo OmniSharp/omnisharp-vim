@@ -30,28 +30,33 @@ function! OmniSharp#util#path_join(parts) abort
 endfunction
 
 function! OmniSharp#util#get_start_cmd(solution_path) abort
-  let solutionPath = a:solution_path
-  if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
-    let solutionPath = fnamemodify(solutionPath, ':h')
+  let solution_path = a:solution_path
+  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
+    let solution_path = fnamemodify(solution_path, ':h')
+  endif
+  let g:OmniSharp_running_slns += [solution_path]
+  let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
+
+  let s:server_path = ''
+  if !exists('g:OmniSharp_server_path')
+    if g:OmniSharp_server_type ==# 'v1'
+      let s:server_path = OmniSharp#util#path_join(['server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'])
+    else
+      let s:server_extension = has('win32') || has('win32unix') ? '.cmd' : ''
+      let s:server_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'Omnisharp' . s:server_extension])
+    endif
+  else
+    let s:server_path = g:OmniSharp_server_path
   endif
 
-  let cmd = g:OmniSharp_server_path
-  if s:is_vimproc
-    let cmd = substitute(cmd, '\\', '/', 'g')
-    let solutionPath = substitute(solutionPath, '\\', '/', 'g')
-  elseif has('win32') && &shell =~ 'cmd'
-    let cmd = substitute(cmd, '/', '\\', 'g')
-  endif
-
-  let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
   let command = [
-              \ cmd,
+              \ s:server_path,
               \ '-p', port,
-              \ '-s', solutionPath]
+              \ '-s', solution_path]
 
   if g:OmniSharp_server_type !=# 'roslyn'
-    let l:config_file = OmniSharp#ResolveLocalConfig(solutionPath)
+    let l:config_file = s:resolve_local_config(solution_path)
     if l:config_file !=# ''
       let command = command + ['-config', l:config_file]
     endif
