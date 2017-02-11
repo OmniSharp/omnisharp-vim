@@ -23,14 +23,6 @@ Execute (Test vim jobs):
     AssertEqual 133, jobstatus
   endif
 
-Execute (Test start command construction):
-  let s:sep = has('win32') ? '\' : '/'
-  let command = OmniSharp#GetStartServerCommand(join(['..', 'omnisharp-roslyn', 'src', 'OmniSharp', 'project.json'], s:sep))
-  let m = matchstr(command, '.*omnisharp-roslyn' . s:sep . 'artifacts')
-  Assert !empty(m), 'The command does not seem to be referring to the correct server'
-
-" No way to test the below with changing the code significantly
-"
 Execute (Test vim-dispatch jobs):
   let command = ['bash', '-c', 'exit 133']
   if OmniSharp#proc#supportsVimDispatch()
