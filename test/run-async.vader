@@ -31,8 +31,18 @@ Execute (Test start command construction):
 
 " No way to test the below with changing the code significantly
 "
-" Execute (Test vimproc jobs):
-"   Assert 0
-"
-" Execute (Test vim-dispatch jobs):
-"   Assert 0
+Execute (Test vim-dispatch jobs):
+  let command = ['bash', '-c', 'exit 133']
+  if OmniSharp#proc#supportsVimDispatch()
+    let request = OmniSharp#proc#dispatch(command)
+    call dispatch#complete(request)
+    AssertNotEqual 0, request.pid
+  endif
+
+Execute (Test vimproc jobs):
+  let command = ['bash', '-c', 'exit 133']
+  if OmniSharp#proc#supportsVimProc()
+    let proc = OmniSharp#proc#vimprocStart(command)
+    call proc.waitpid()
+    AssertEqual 133, result.status
+  endif

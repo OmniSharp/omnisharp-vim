@@ -71,7 +71,10 @@ endfunction
 
 function! OmniSharp#proc#dispatch(command) abort
   if OmniSharp#proc#supportsVimDispatch()
-    call dispatch#start(join(a:command, ' '), {'background': 1})
+    exe 'let c = dispatch#shellescape("' . join(a:command, '", "') . '")'
+    return dispatch#spawn(
+          \ c,
+          \ {'background': 1})
   else
     echoerr 'vim-dispatch not found'
   endif
@@ -85,10 +88,7 @@ endfunction
 
 function! OmniSharp#proc#vimprocStart(command) abort
   if OmniSharp#proc#supportsVimProc()
-    " FIXME: consider using vimproc#popen3 as it gives control over the
-    " process and we can get the stdout/stderr separately
-    " FIXME: Should we be still replacing the path separator?
-    call vimproc#system_bg(substitute(join(a:command, ' '), '\\', '\/', 'g'))
+    return vimproc#popen3(a:command)
   else
     echoerr 'vimproc not found'
   endif
@@ -104,7 +104,7 @@ function! OmniSharp#proc#RunAsyncCommand(command) abort
   elseif OmniSharp#proc#supportsVimProc()
     call OmniSharp#proc#vimprocStart(a:command)
   else
-    echoerr 'Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc plugin to use this feature'
+    echoerr 'Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc.vim plugin to use this feature'
   endif
 endfunction
 
