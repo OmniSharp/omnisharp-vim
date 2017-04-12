@@ -378,8 +378,12 @@ endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer() abort
   hi link CSharpUserType Type
-  exec 'syn keyword CSharpUserType ' . s:allUserTypes
-  exec 'syn keyword csInterfaceDeclaration ' . s:allUserInterfaces
+  if !empty(s:allUserTypes)
+    exec 'syn keyword CSharpUserType ' . s:allUserTypes
+  endif
+  if !empty(s:allUserInterfaces)
+    exec 'syn keyword csInterfaceDeclaration ' . s:allUserInterfaces
+  endif
 endfunction
 
 function! OmniSharp#EnableTypeHighlighting() abort
