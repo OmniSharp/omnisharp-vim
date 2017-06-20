@@ -6,7 +6,7 @@ OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#. A list o
 
 OmniSharp works both on Windows and on Linux and OS X with Mono.
 
-The plugin uses the [OmniSharp server](https://github.com/OmniSharp/omnisharp-server) which is a thin wrapper around the awesome [NRefactory] (https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
+The plugin uses the [OmniSharp server](https://github.com/OmniSharp/omnisharp-server) which is a thin wrapper around the awesome [NRefactory](https://github.com/icsharpcode/NRefactory) library, and it provides the same completions as MonoDevelop and SharpDevelop. 
 
 The server knows nothing about Vim, so could be plugged into most editors fairly easily.
 [Emacs](https://github.com/OmniSharp/omnisharp-emacs),
@@ -82,6 +82,14 @@ Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.c
 
 [pathogen.vim](https://github.com/tpope/vim-pathogen) is the recommended way to install OmniSharp.
 
+For [Vundle](https://github.com/VundleVim/Vundle.vim):
+
+```vim
+Plugin 'OmniSharp/omnisharp-vim'
+```
+
+You'll still need to build the server using `xbuild` or `msbuild` as below.
+
 #### OSX / Linux
 
 Requires a minimum of Mono 3.0.12 - If you absolutely must use mono 2.10 then checkout the mono-2.10.8 tag. [Updating mono on ubuntu](https://github.com/OmniSharp/omnisharp-server/wiki)
@@ -95,8 +103,6 @@ cd server
 xbuild
 ```
 
-If you installed the package with Vundle, you still need to build the server as above.
-
 Note that if you have Mono installed outside of the ["standard" paths](https://github.com/OmniSharp/omnisharp-server/blob/master/OmniSharp/Solution/AssemblySearch.cs#L35-L52) (for example, if it is installed via Boxen where your homebrew root is not `/usr/local/`, you'll need to either add the path to the `AssemblySearch.cs` before building, or symlink your installation to one of the standard paths.
 
 If you are planning to use OmniSharp-Roslyn, run the following commands:
@@ -109,12 +115,18 @@ cd ~/.vim/bundle/omnisharp-vim/omnisharp-roslyn
 
 ```dosbatch
 c:\
-cd c:\Users\username\vimfiles\bundle
+cd c:\Users\<username>\vimfiles\bundle
 git clone https://github.com/OmniSharp/omnisharp-vim.git
 cd omnisharp-vim
 git submodule update --init --recursive
 cd server
 msbuild
+```
+
+If you are planning to use OmniSharp-Roslyn, run the following commands in `PowerShell`:
+```sh
+cd c:\Users\<username>\vimfiles\bundle\omnisharp-vim\omnisharp-roslyn
+./build.ps1
 ```
 
 ### Install Python
