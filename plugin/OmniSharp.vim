@@ -92,7 +92,7 @@ let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
 if !exists('g:OmniSharp_server_path')
   if g:OmniSharp_server_type ==# 'v1'
-    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
+    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharpServer', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
   else
     let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'artifacts', 'scripts', 'Omnisharp'], '/')
   endif
