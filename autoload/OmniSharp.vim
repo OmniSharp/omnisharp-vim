@@ -454,7 +454,9 @@ function! OmniSharp#ServerIsRunning() abort
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning() abort
-  if !OmniSharp#ServerIsRunning()
+  if OmniSharp#ServerIsRunning()
+    echohl ErrorMsg | echom 'A server is already running on host ' . g:OmniSharp_host | echohl NONE
+  else
     call OmniSharp#StartServer()
     if g:Omnisharp_stop_server==2
       au VimLeavePre * call OmniSharp#StopServer()
