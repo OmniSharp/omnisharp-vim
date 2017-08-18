@@ -14,6 +14,9 @@ let s:generated_snippets = {}
 let s:omnisharp_last_completion_dictionary = {}
 let g:serverSeenRunning = 0
 
+let s:is_vimproc = 0
+silent! let s:is_vimproc = vimproc#version()
+
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
     "store the current cursor position
@@ -528,9 +531,18 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
   if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
     let solutionPath = fnamemodify(solutionPath, ':h')
   endif
+
+  let cmd = g:OmniSharp_server_path
+  if s:is_vimproc
+    let cmd = substitute(cmd, '\\', '/', 'g')
+    let solutionPath = substitute(solutionPath, '\\', '/', 'g')
+  elseif has('win32') && &shell =~ 'cmd'
+    let cmd = substitute(cmd, '/', '\\', 'g')
+  endif
+
   let g:OmniSharp_running_slns += [solutionPath]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = shellescape(g:OmniSharp_server_path, 1)
+  let command = shellescape(cmd, 1)
   \ . ' -p ' . port
   \ . ' -s ' . shellescape(solutionPath, 1)
   if g:OmniSharp_server_type !=# 'roslyn'
@@ -543,16 +555,12 @@ function! OmniSharp#StartServerSolution(solutionPath) abort
 endfunction
 
 function! OmniSharp#RunAsyncCommand(command) abort
-  let is_vimproc = 0
-  silent! let is_vimproc = vimproc#version()
   if exists(':Dispatch') == 2
     call dispatch#start(a:command, {'background': 1})
+  elseif s:is_vimproc
+    call vimproc#system_gui(a:command)
   else
-    if is_vimproc
-      call vimproc#system_gui(substitute(a:command, '\\', '\/', 'g'))
-    else
-      echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
-    endif
+    echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
   endif
 endfunction
 
