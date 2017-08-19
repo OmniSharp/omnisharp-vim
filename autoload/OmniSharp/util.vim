@@ -20,10 +20,10 @@ endfunction
 
 function! OmniSharp#util#path_join(parts) abort
   let parts = a:parts
-  if type(parts) == type("")
+  if type(parts) == type('')
     let parts = [parts]
   elseif type(parts) != type([])
-    throw "Unsupported type for joining paths"
+    throw 'Unsupported type for joining paths'
   endif
 
   return join([s:plugin_root_dir] + parts, s:dir_separator)
@@ -62,7 +62,7 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
     endif
   endif
   if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    let command = insert(command, "mono")
+    let command = insert(command, 'mono')
   endif
 
   return command
