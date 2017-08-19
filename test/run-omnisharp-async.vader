@@ -46,7 +46,7 @@ Execute (Test start command construction):
 "
 "   let v1_command = GetClassicCmd()
 "   if OmniSharp#proc#supportsNeovimJobs()
-"     let r = OmniSharp#proc#neovimJobstart(v1_command)
+"     let r = OmniSharp#proc#neovimJobStart(v1_command)
 "     call StartWait()
 "     Assert OmniSharp#ServerIsRunning(), "Should be running, but is not"
 "     call OmniSharp#StopServer(1)
@@ -55,21 +55,21 @@ Execute (Test start command construction):
 "     // FIXME: Currently this fails, which should be fixed?
 "     // AssertEqual 0, jobwait([r], 6000)[0]
 "
-"     "let r = OmniSharp#proc#neovimJobstart(roslyn_command)
+"     "let r = OmniSharp#proc#neovimJobStart(roslyn_command)
 "   endif
 "   "if OmniSharp#proc#supportsVimJobs()
-"   "  let r = OmniSharp#proc#vimJobstart(v1_command)
-"   "  let r = OmniSharp#proc#vimJobstart(roslyn_command)
+"   "  let r = OmniSharp#proc#vimJobStart(v1_command)
+"   "  let r = OmniSharp#proc#vimJobStart(roslyn_command)
 "   "endif
 "   if OmniSharp#proc#supportsVimDispatch()
-"     let r = OmniSharp#proc#dispatch(v1_command)
+"     let r = OmniSharp#proc#dispatchStart(v1_command)
 "     call StartWait()
 "     Assert OmniSharp#ServerIsRunning(), "Should be running, but is not"
 "     call OmniSharp#StopServer(1)
 "     call StopWait()
 "     Assert !OmniSharp#ServerIsRunning(), "Should not be running, but is"
 "
-"   "  let r = OmniSharp#proc#dispatch(roslyn_command)
+"   "  let r = OmniSharp#proc#dispatchStart(roslyn_command)
 "   endif
 "   if OmniSharp#proc#supportsVimProc()
 "     let r = OmniSharp#proc#vimprocStart(v1_command)

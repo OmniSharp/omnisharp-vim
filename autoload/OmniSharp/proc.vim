@@ -25,7 +25,7 @@ function! OmniSharp#proc#neovimErrHandler(job_id, data, event)
   echoerr l:message
 endfunction
 
-function! OmniSharp#proc#neovimJobstart(command) abort
+function! OmniSharp#proc#neovimJobStart(command) abort
   if OmniSharp#proc#supportsNeovimJobs()
     call s:debug("Using Neovim jobstart to start the following command:")
     call s:debug(a:command)
@@ -52,7 +52,7 @@ function! OmniSharp#proc#vimErrHandler(channel, message)
   echoerr printf('%s: %s', string(a:channel), string(a:message))
 endfunction
 
-function! OmniSharp#proc#vimJobstart(command) abort
+function! OmniSharp#proc#vimJobStart(command) abort
   if OmniSharp#proc#supportsVimJobs()
     call s:debug("Using vim job_start to start the following command:")
     call s:debug(a:command)
@@ -69,7 +69,7 @@ function! OmniSharp#proc#supportsVimDispatch() abort
   return exists(':Dispatch') == 2
 endfunction
 
-function! OmniSharp#proc#dispatch(command) abort
+function! OmniSharp#proc#dispatchStart(command) abort
   if OmniSharp#proc#supportsVimDispatch()
     exe 'let c = dispatch#shellescape("' . join(a:command, '", "') . '")'
     return dispatch#spawn(
@@ -96,11 +96,11 @@ endfunction
 
 function! OmniSharp#proc#RunAsyncCommand(command) abort
   if OmniSharp#proc#supportsNeovimJobs()
-    call OmniSharp#proc#neovimJobstart(a:command)
+    call OmniSharp#proc#neovimJobStart(a:command)
   elseif OmniSharp#proc#supportsVimJobs()
-    call OmniSharp#proc#vimJobstart(a:command)
+    call OmniSharp#proc#vimJobStart(a:command)
   elseif OmniSharp#proc#supportsVimDispatch()
-    call OmniSharp#proc#dispatch(a:command)
+    call OmniSharp#proc#dispatchStart(a:command)
   elseif OmniSharp#proc#supportsVimProc()
     call OmniSharp#proc#vimprocStart(a:command)
   else
