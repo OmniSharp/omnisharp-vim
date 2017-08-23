@@ -599,6 +599,19 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
 endfunction
 
 function! s:find_solution_files() abort
+  if g:OmniSharp_sln_finder != ''
+    let found = call(g:OmniSharp_sln_finder, [expand('%:p')])
+    if type(found) == type([])
+      return found
+    elseif type(found) == type('')
+      if found == ''
+        return []
+      else
+        return [found]
+      endif
+    endif
+  endif
+
   "get the path for the current buffer
   let dir = expand('%:p:h')
   let lastfolder = ''

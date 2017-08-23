@@ -92,3 +92,5 @@ let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 if !exists('g:OmniSharp_prefer_global_sln')
   let g:OmniSharp_prefer_global_sln = 0
 endif
+
+let g:OmniSharp_sln_finder = get(g:, 'OmniSharp_sln_finder', '')
