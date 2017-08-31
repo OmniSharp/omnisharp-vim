@@ -238,21 +238,17 @@ function! OmniSharp#CodeCheck() abort
   return get(b:, 'codecheck', [])
 endfunction
 
-" Jump to first scratch window visible in current tab, or create it.
-" This is useful to accumulate results from successive operations.
-" Global function that can be called from other scripts.
-function! s:GoScratch() abort
-  if bufwinnr('__OmniSharpScratch__') == -1
-    "botright new __OmniSharpScratch__
-    botright split __OmniSharpScratch__
-    setlocal buftype=nofile bufhidden=hide noswapfile nolist nobuflisted nospell
-  endif
-  for i in range(1, winnr('$'))
-    execute i . 'wincmd w'
-    if &buftype ==# 'nofile' && bufname('%') ==# '__OmniSharpScratch__'
-      break
-    endif
-  endfor
+" Manually write content to the preview window.
+" Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
+function! s:writeToPreview(content)
+  silent pedit __OmniSharpScratch__
+  silent wincmd P
+  setlocal modifiable noreadonly
+  setlocal nobuflisted buftype=nofile bufhidden=wipe
+  silent put =a:content
+  0d_
+  setlocal nomodifiable readonly
+  silent wincmd p
 endfunction
 
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
@@ -267,16 +263,13 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
   let type = ''
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
+    let s:documentation = ''
     python typeLookup("type")
-    let preWinNr = winnr()
-    call s:GoScratch()
-    python vim.current.window.height = 5
     let doc = get(s:, 'documentation', '')
-    set modifiable
-    exec 'python vim.current.buffer[:] = ["' . type . '"] + """' . doc . '""".splitlines()'
-    set nomodifiable
-    "Return to original window
-    execute preWinNr . 'wincmd w'
+    if len(doc) > 0
+      let doc = "\n\n" . doc
+    endif
+    call s:writeToPreview(type . doc)
   else
     let line = line('.')
     let found_line_in_loc_list = 0
