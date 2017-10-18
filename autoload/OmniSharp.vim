@@ -5,9 +5,7 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 let s:server_files = '*.sln'
-let s:roslyn_server_files = 'project.json'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let s:generated_snippets = {}
@@ -472,15 +470,18 @@ function! OmniSharp#StartServer() abort
   if empty(solution_files)
     return
   endif
+
+  let l:command = []
+
   if len(solution_files) == 1
-    call OmniSharp#StartServerSolution(solution_files[0])
+    let l:command = OmniSharp#util#get_start_cmd(solution_files[0])
   elseif g:OmniSharp_sln_list_name !=# ''
     echom 'Started with sln: ' . g:OmniSharp_sln_list_name
-    call OmniSharp#StartServerSolution( g:OmniSharp_sln_list_name )
+    let l:command = OmniSharp#util#get_start_cmd(g:OmniSharp_sln_list_name)
   elseif g:OmniSharp_sln_list_index > -1 &&
   \     g:OmniSharp_sln_list_index < len(solution_files)
     echom 'Started with sln: ' . solution_files[g:OmniSharp_sln_list_index]
-    call OmniSharp#StartServerSolution( solution_files[g:OmniSharp_sln_list_index]  )
+    let l:command = OmniSharp#util#get_start_cmd(solution_files[g:OmniSharp_sln_list_index])
   else
     echom 'sln: ' . g:OmniSharp_sln_list_name
     let index = 1
@@ -503,58 +504,15 @@ function! OmniSharp#StartServer() abort
       return
     endif
 
-    call OmniSharp#StartServerSolution(solution_files[option - 1])
-  endif
-endfunction
-
-function! OmniSharp#ResolveLocalConfig(solutionPath) abort
-  let result = ''
-  let configPath = fnamemodify(a:solutionPath, ':p:h')
-  \ . s:dir_separator
-  \ . g:OmniSharp_server_config_name
-
-  if filereadable(configPath)
-    let result = ' -config ' . shellescape(configPath, 1)
-  endif
-  return result
-endfunction
-
-function! OmniSharp#StartServerSolution(solutionPath) abort
-  let solutionPath = a:solutionPath
-  if fnamemodify(solutionPath, ':t') ==? s:roslyn_server_files
-    let solutionPath = fnamemodify(solutionPath, ':h')
+    let l:command = OmniSharp#util#get_start_cmd(solution_files[option - 1])
   endif
 
-  let cmd = g:OmniSharp_server_path
-  if s:is_vimproc
-    let cmd = substitute(cmd, '\\', '/', 'g')
-    let solutionPath = substitute(solutionPath, '\\', '/', 'g')
-  elseif has('win32') && &shell =~ 'cmd'
-    let cmd = substitute(cmd, '/', '\\', 'g')
+  if l:command ==# []
+    echoerr 'Could not determinet the command to start the OmniSharp server!'
+    return
   endif
 
-  let g:OmniSharp_running_slns += [solutionPath]
-  let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
-  let command = shellescape(cmd, 1)
-  \ . ' -p ' . port
-  \ . ' -s ' . shellescape(solutionPath, 1)
-  if g:OmniSharp_server_type !=# 'roslyn'
-    let command .= OmniSharp#ResolveLocalConfig(solutionPath)
-  endif
-  if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
-    let command = 'mono ' . command
-  endif
-  call OmniSharp#RunAsyncCommand(command)
-endfunction
-
-function! OmniSharp#RunAsyncCommand(command) abort
-  if exists(':Dispatch') == 2
-    call dispatch#start(a:command, {'background': 1})
-  elseif s:is_vimproc
-    call vimproc#system_gui(a:command)
-  else
-    echoerr 'Please install either vim-dispatch or vimproc plugin to use this feature'
-  endif
+  call OmniSharp#proc#RunAsyncCommand(command)
 endfunction
 
 function! OmniSharp#AddToProject() abort
@@ -614,15 +572,15 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     echoerr "g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
     return
   endif
- 
+
   let line = strpart(getline('.'), 0, col('.')-1)
   let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
- 
+
   let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
   let completion = substitute(completion, remove_whitespace_regex, '\1', '')
- 
+
   let should_expand_completion = len(completion) != 0
-  
+
   if should_expand_completion
     let completion = split(completion, '\.')[-1]
     let completion = split(completion, 'new ')[-1]
@@ -701,3 +659,5 @@ endif
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" vim: shiftwidth=2

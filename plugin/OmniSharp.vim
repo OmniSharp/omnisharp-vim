@@ -10,11 +10,10 @@ if !has('python')
 endif
 
 "Load python/OmniSharp.py
-let s:py_path = join([expand('<sfile>:p:h:h'), 'python'], '/')
+let s:py_path = OmniSharp#util#path_join('python')
 exec "python sys.path.append(r'" . s:py_path . "')"
-exec 'pyfile ' . fnameescape(s:py_path . '/Completion.py')
-exec 'pyfile ' . fnameescape(s:py_path . '/OmniSharp.py')
-
+exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'Completion.py']))
+exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'OmniSharp.py']))
 
 let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
 
@@ -89,14 +88,6 @@ let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'v1')
 
 " Set default for snippet based completions
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
-
-if !exists('g:OmniSharp_server_path')
-  if g:OmniSharp_server_type ==# 'v1'
-    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'], '/')
-  else
-    let g:OmniSharp_server_path = join([expand('<sfile>:p:h:h'), 'omnisharp-roslyn', 'artifacts', 'scripts', 'OmniSharp' . (has('win32') || has('win32unix') ? '.cmd' : '')], '/')
-  endif
-endif
 
 if !exists('g:OmniSharp_prefer_global_sln')
   let g:OmniSharp_prefer_global_sln = 0

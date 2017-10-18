@@ -1,0 +1,83 @@
+Execute (Test start command construction):
+  let project_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json'])
+  let g:OmniSharp_server_type = 'roslyn'
+  let command = OmniSharp#util#get_start_cmd(project_path)
+  Assert command[0] =~ "artifacts.scripts.OmniSharp"
+
+  let g:OmniSharp_server_type = 'v1'
+  let command = OmniSharp#util#get_start_cmd(project_path)
+  if !has('win32')
+    AssertEqual 'mono', command[0]
+  endif
+
+" Execute (Test start omnisharp-v1 server):
+"   function! GetClassicCmd()
+"     let g:OmniSharp_server_type = 'v1'
+"     return OmniSharp#util#get_start_cmd(OmniSharp#util#path_join(['server', 'OmniSharp.sln']))
+"   endfunction
+"
+"   function! GetRoslynCmd()
+"     let g:OmniSharp_server_type = 'roslyn'
+"     return OmniSharp#util#get_start_cmd(OmniSharp#util#path_join(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json']))
+"   endfunction
+"
+"   let g:omnisharp_proc_debug = 0
+"   let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
+"
+"   function! StartWait()
+"     Log "Waiting for server to be started"
+"     for i in range(0, 50, 1)
+"       sleep 100 m
+"       if OmniSharp#ServerIsRunning()
+"         break
+"       endif
+"     endfor
+"   endfunction
+"
+"   function! StopWait()
+"     Log "Waiting for server to be stopped"
+"     for i in range(0, 50, 1)
+"       sleep 100 m
+"       if !OmniSharp#ServerIsRunning()
+"         break
+"       endif
+"     endfor
+"   endfunction
+"
+"   let v1_command = GetClassicCmd()
+"   if OmniSharp#proc#supportsNeovimJobs()
+"     let r = OmniSharp#proc#neovimJobStart(v1_command)
+"     call StartWait()
+"     Assert OmniSharp#ServerIsRunning(), "Should be running, but is not"
+"     call OmniSharp#StopServer(1)
+"     call StopWait()
+"     Assert !OmniSharp#ServerIsRunning(), "Should not be running, but is"
+"     // FIXME: Currently this fails, which should be fixed?
+"     // AssertEqual 0, jobwait([r], 6000)[0]
+"
+"     "let r = OmniSharp#proc#neovimJobStart(roslyn_command)
+"   endif
+"   "if OmniSharp#proc#supportsVimJobs()
+"   "  let r = OmniSharp#proc#vimJobStart(v1_command)
+"   "  let r = OmniSharp#proc#vimJobStart(roslyn_command)
+"   "endif
+"   if OmniSharp#proc#supportsVimDispatch()
+"     let r = OmniSharp#proc#dispatchStart(v1_command)
+"     call StartWait()
+"     Assert OmniSharp#ServerIsRunning(), "Should be running, but is not"
+"     call OmniSharp#StopServer(1)
+"     call StopWait()
+"     Assert !OmniSharp#ServerIsRunning(), "Should not be running, but is"
+"
+"   "  let r = OmniSharp#proc#dispatchStart(roslyn_command)
+"   endif
+"   if OmniSharp#proc#supportsVimProc()
+"     let r = OmniSharp#proc#vimprocStart(v1_command)
+"     call StartWait()
+"     Assert OmniSharp#ServerIsRunning(), "Should be running, but is not"
+"     call OmniSharp#StopServer(1)
+"     call StopWait()
+"     Assert !OmniSharp#ServerIsRunning(), "Should not be running, but is"
+"
+"     " let r = OmniSharp#proc#vimprocStart(roslyn_command)
+"   endif

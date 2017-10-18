@@ -45,7 +45,7 @@ Omnisharp-vim can now be run with the [omnisharp-roslyn server](https://github.c
   * Displays documentation for an entity when using preview window
 * Syntax error highlighting
 * On the fly semantic error highlighting (nearly as good as a full compilation!)
-* Integrated xbuild/msbuild (can run asynchronously if vim dispatch is installed)
+* Integrated xbuild/msbuild (can run asynchronously if supported)
 * Code formatter
 * Automatic folding of `# region` and `<summary></summary>` (make sure to have `set foldmethod=syntax`)
 * Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
@@ -139,8 +139,17 @@ Verify that Python is working inside Vim with
 :echo has('python')
 ```
 
-### (optional) Install vim-dispatch
-The vim plugin [vim-dispatch] (https://github.com/tpope/vim-dispatch) is needed to make OmniSharp start the server automatically and for running asynchronous builds.
+### Asynchronous command execution
+
+Omnisharp-vim plugin can start the server and run asynchronous builds only if any of the following criteria is met:
+
+* Vim with job control API is used (8.0+)
+* [neovim](https://neovim.io) with job control API is used
+* [vim-dispatch](https://github.com/tpope/vim-dispatch) is installed
+* [vimproc.vim](https://github.com/Shougo/vimproc.vim) is installed
+
+#### (optional) Install vim-dispatch
+The vim plugin [vim-dispatch] () is needed to make OmniSharp start the server automatically and for running asynchronous builds.
 Use your favourite way to install it.
 
 ### (optional) Install syntastic
@@ -351,7 +360,7 @@ nnoremap <leader>cf :OmniSharpCodeFormat<cr>
 " Load the current .cs file to the nearest project
 nnoremap <leader>tp :OmniSharpAddToProject<cr>
 
-" (Experimental - uses vim-dispatch or vimproc plugin) - Start the omnisharp server for the current solution
+" Start the omnisharp server for the current solution
 nnoremap <leader>ss :OmniSharpStartServer<cr>
 nnoremap <leader>sp :OmniSharpStopServer<cr>
 

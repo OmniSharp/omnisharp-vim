@@ -34,8 +34,8 @@ Optional:~
 USAGE                                                         *omnisharp-usage*
 
 Opening a `*.cs` file will automatically start an instance of omnisharp-server
-(if using vim-dispatch). Using omni completion will begin the fsautocomplete
-process.
+(if using vim 8.0+, neovim or vim-dispatch). Using omni completion will begin
+the fsautocomplete process.
 
 Suggestion: Install a completer such as NeoComplete or SuperTab
 
@@ -125,7 +125,7 @@ COMMANDS                                                   *omnisharp-commands*
                                                          *:OmniSharpBuildAsync*
 :OmniSharpBuildAsync
     Builds solution asynchronously and puts errors/warnings in quickfix list
-    NOTE: Must have vim-dispatch installed
+    NOTE: Must have vim 8.0+, neovim or vim-dispatch installed
 
                                                      *:OmniSharpGotoDefinition*
 :OmniSharpGotoDefinition
@@ -204,12 +204,12 @@ COMMANDS                                                   *omnisharp-commands*
                                                         *:OmniSharpStartServer*
 :OmniSharpStartServer
     Starts the OmniSharp server
-    NOTE: Requires vim-dispatch
+    NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                          *:OmniSharpStopServer*
 :OmniSharpStopServer
     Stops the OmniSharp server
-    NOTE: Requires vim-dispatch
+    NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                      *:OmniSharpHighlightTypes*
 :OmniSharpHighlightTypes

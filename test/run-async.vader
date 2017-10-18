@@ -1,0 +1,40 @@
+Execute (Test neovim jobs):
+  let command = ['bash', '-c', 'exit 133']
+  let jobstatus = 0
+  if OmniSharp#proc#supportsNeovimJobs()
+    let job = OmniSharp#proc#neovimJobStart(command)
+    Assert job > 0, "Could not launch the specified command"
+    let jobstatus = jobwait([job])[0]
+    AssertEqual 133, jobstatus
+  endif
+
+Execute (Test vim jobs):
+  let command = ['bash', '-c', 'exit 133']
+  let jobstatus = 0
+  if OmniSharp#proc#supportsVimJobs()
+    let job = OmniSharp#proc#vimJobStart(command)
+    while job_info(job).status != 'dead'
+      sleep 10 m
+      echom "Sleeping"
+    endwhile
+    echom "Not Sleeping"
+    sleep 10 m
+    let jobstatus = job_info(job).exitval
+    AssertEqual 133, jobstatus
+  endif
+
+Execute (Test vim-dispatch jobs):
+  let command = ['bash', '-c', 'exit 133']
+  if OmniSharp#proc#supportsVimDispatch()
+    let request = OmniSharp#proc#dispatchStart(command)
+    call dispatch#complete(request)
+    AssertNotEqual 0, request.pid
+  endif
+
+Execute (Test vimproc jobs):
+  let command = ['bash', '-c', 'exit 133']
+  if OmniSharp#proc#supportsVimProc()
+    let proc = OmniSharp#proc#vimprocStart(command)
+    call proc.waitpid()
+    AssertEqual 133, result.status
+  endif
