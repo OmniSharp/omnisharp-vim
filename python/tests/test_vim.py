@@ -3,7 +3,7 @@
 
 import mock
 import tests.mock_vim as vim
-import OmniSharp
+from omnisharp import OmniSharp
 
 def test_get_response_no_server():
     response = OmniSharp.getResponse("my_endpoint")

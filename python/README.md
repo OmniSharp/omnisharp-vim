@@ -4,12 +4,18 @@ The tests should be kept in the `tests` folder.
 
 ## Setup
 
-Install `tox` system wide and just run the `tox` command from the command line.
-It should succeed if you have the following:
+Pip should is bundled with recent releases of Python (`2.7.9+` and `3.4`) [[StackOverflow](https://stackoverflow.com/a/12476379)], hence the easiest way to set `tox` up is via `pip` unless a system package manager is your preferred choice.
+Instructions:
 
-- any version of the Python 2.7 interpreter
+- Install the latest Python `2.7.x` release from [python.org](https://www.python.org/downloads/).
+- Install `tox`:
+    - Via `pip` from command prompt or terminal application:
+    ```
+    $ pip install tox
+    ```
+    - Via your own package manager.
 
-Using the python then should be as simple as:
+From UNIX, you can activate the specific python environment by running:
 
 ```bash
 source .tox/${PYTHON_VERSION_LABEL}/bin/activate
