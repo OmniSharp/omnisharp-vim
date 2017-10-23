@@ -3,4 +3,4 @@ language: python
 python:
   - "2.7"
 install: pip install tox-travis
-script: tox
+script: cd ${TRAVIS_BUILD_DIR}/python; tox
