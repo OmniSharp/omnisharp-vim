@@ -15,7 +15,9 @@ Instructions:
     ```
     - Via your own package manager.
 
-From UNIX, you can activate the specific python environment by running:
+## Activating the tox virtual environments
+
+In order to activate a specific python environment configured with `tox` execute the following:
 
 ```bash
 source .tox/${PYTHON_VERSION_LABEL}/bin/activate
