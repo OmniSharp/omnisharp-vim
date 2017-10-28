@@ -130,7 +130,7 @@ cd c:\Users\<username>\vimfiles\bundle\omnisharp-vim\omnisharp-roslyn
 ```
 
 ### Install Python
-Install last version of 2.7 series ([Python 2.7.8] (https://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
+Install last version of 2.7 series ([Python 2.7.8](https://www.python.org/download/releases/2.7.8/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
 For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
 
 Verify that Python is working inside Vim with
@@ -149,11 +149,11 @@ Omnisharp-vim plugin can start the server and run asynchronous builds only if an
 * [vimproc.vim](https://github.com/Shougo/vimproc.vim) is installed
 
 #### (optional) Install vim-dispatch
-The vim plugin [vim-dispatch] () is needed to make OmniSharp start the server automatically and for running asynchronous builds.
+The vim plugin [vim-dispatch](https://github.com/tpope/vim-dispatch) is needed to make OmniSharp start the server automatically and for running asynchronous builds.
 Use your favourite way to install it.
 
 ### (optional) Install syntastic
-The vim plugin [syntastic] (https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
+The vim plugin [syntastic](https://github.com/scrooloose/syntastic) is needed for displaying code issues and syntax errors.
 Use your favourite way to install it.
 
 ### (optional) Install ctrlp.vim, unite.vim or fzf.vim
@@ -214,7 +214,7 @@ Add `-v Verbose` to get extra information from the server.
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
 
 To get completions, open one of the C# files from the solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode
-(or just TAB if you have [SuperTab] (https://github.com/ervandew/supertab) installed).
+(or just TAB if you have [SuperTab](https://github.com/ervandew/supertab) installed).
 Repeat to cycle through completions, or use the cursor keys (eugh!)
 
 If you prefer to get completions as you are typing, then you should take a look at [NeoComplete](https://github.com/Shougo/neocomplete.vim), [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
