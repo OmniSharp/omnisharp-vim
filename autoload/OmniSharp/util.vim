@@ -19,13 +19,13 @@ function! s:resolve_local_config(solution_path) abort
 endfunction
 
 function! OmniSharp#util#path_join(parts) abort
-  let parts = a:parts
-  if type(parts) == type('')
-    let parts = [parts]
-  elseif type(parts) != type([])
+  if type(a:parts) == type('')
+    let parts = [a:parts]
+  elseif type(a:parts) == type([])
+    let parts = a:parts
+  else
     throw 'Unsupported type for joining paths'
   endif
-
   return join([s:plugin_root_dir] + parts, s:dir_separator)
 endfunction
 
