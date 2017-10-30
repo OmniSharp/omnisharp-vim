@@ -43,7 +43,7 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
       let s:server_path = OmniSharp#util#path_join(['server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'])
     else
       let s:server_extension = has('win32') || has('win32unix') ? '.cmd' : ''
-      let s:server_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'Omnisharp' . s:server_extension])
+      let s:server_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'OmniSharp' . s:server_extension])
     endif
   else
     let s:server_path = g:OmniSharp_server_path
