@@ -232,8 +232,12 @@ def quickfixes_from_response(response):
         if 'Message' in quickfix:
             text = quickfix['Message']
 
+        filename = quickfix['FileName']
+        if filename == None:
+            filename = vim.current.buffer.name
+
         item = {
-            'filename': quickfix['FileName'],
+            'filename': filename,
             'text': text,
             'lnum': quickfix['Line'],
             'col': quickfix['Column'],
