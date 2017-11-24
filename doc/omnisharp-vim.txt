@@ -101,12 +101,12 @@ server. Default: 1 >
     let g:OmniSharp_timeout=1
 <
 
-                                         *'g:omnicomplete_fetch_documentation'*
+                                         *'g:omnicomplete_fetch_full_documentation'*
 Use this option to specify whether OmniSharp will fetch full documentation on
 completion suggestions. By default, only type/method signatures are fetched for
 performance reasons. Full documentation can still be fetched when needed using
 the |:OmniSharpDocumentation| command. Default: 0 >
-    let g:omnicomplete_fetch_documentation=0
+    let g:omnicomplete_fetch_full_documentation=0
 <
 
                                                    *'g:OmniSharp_want_snippet'*

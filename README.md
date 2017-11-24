@@ -287,7 +287,7 @@ set completeopt=longest,menuone,preview
 " There is a performance penalty with this (especially on Mono)
 " By default, only Type/Method signatures are fetched. Full documentation can still be fetched when
 " you need it with the :OmniSharpDocumentation command.
-" let g:omnicomplete_fetch_documentation=1
+" let g:omnicomplete_fetch_full_documentation=1
 
 "Move the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
 "You might also want to look at the echodoc plugin
