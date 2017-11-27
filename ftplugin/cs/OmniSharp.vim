@@ -7,7 +7,6 @@ if get(b:, 'OmniSharp_ftplugin_loaded', 0)
 endif
 let b:OmniSharp_ftplugin_loaded = 1
 
-"Set a default value for the server address
 if !exists('g:omnicomplete_fetch_full_documentation')
     let g:omnicomplete_fetch_full_documentation = 0
 endif
