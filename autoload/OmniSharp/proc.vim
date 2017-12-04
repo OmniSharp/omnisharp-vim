@@ -52,13 +52,11 @@ function! OmniSharp#proc#vimErrHandler(channel, message) abort
   echoerr printf('%s: %s', string(a:channel), string(a:message))
 endfunction
 
-let s:job = v:null
-
 function! OmniSharp#proc#vimJobStart(command) abort
   if OmniSharp#proc#supportsVimJobs()
     call s:debug('Using vim job_start to start the following command:')
     call s:debug(a:command)
-    if type(s:job) !=# v:t_job || job_status(s:job) ==# 'dead'
+    if !exists('s:job') || job_status(s:job) ==# 'dead'
       let s:job = job_start(
                   \ a:command,
                   \ {'out_cb': 'OmniSharp#proc#vimOutHandler',
