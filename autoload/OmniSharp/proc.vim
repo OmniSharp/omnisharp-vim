@@ -56,10 +56,14 @@ function! OmniSharp#proc#vimJobStart(command) abort
   if OmniSharp#proc#supportsVimJobs()
     call s:debug('Using vim job_start to start the following command:')
     call s:debug(a:command)
-    return job_start(
-                \ a:command,
-                \ {'out_cb': 'OmniSharp#proc#vimOutHandler',
-                \  'err_cb': 'OmniSharp#proc#vimErrHandler'})
+    if !exists('s:job') || job_status(s:job) ==# 'dead'
+      let s:job = job_start(
+                  \ a:command,
+                  \ {'out_cb': 'OmniSharp#proc#vimOutHandler',
+                  \  'err_cb': 'OmniSharp#proc#vimErrHandler'})
+    else
+      call s:debug('Skip to start server since job still exists')
+    endif
   else
     echoerr 'Not using Vim 8.0+'
   endif
