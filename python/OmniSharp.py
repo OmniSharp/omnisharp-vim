@@ -13,6 +13,8 @@ logger.addHandler(hdlr)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
+def isRoslynServer():
+    return vim.eval('g:OmniSharp_server_type') == 'roslyn'
 
 def getResponse(endPoint, additional_parameters=None, timeout=None):
     parameters = {}
@@ -122,7 +124,11 @@ def fixCodeIssue():
     setBufferText(text)
 
 def getCodeIssues():
-    js = getResponse('/getcodeissues')
+    js = None
+    if isRoslynServer():
+        js = getResponse('/codecheck')
+    else:
+        js = getResponse('/getcodeissues')
     return get_quickfix_list(js, 'QuickFixes')
 
 def codeCheck():
