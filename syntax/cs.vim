@@ -16,22 +16,22 @@ endif
 let s:cs_cpo_save = &cpo
 set cpo&vim
 
-" Fold Message Function
-func! SummaryFolds()
-    let firstLine = getline(v:foldstart)
-    if firstLine =~ "<summary>"
-        let line = getline(v:foldstart + 1)
-        let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
-        return "+--" . " Summary: " . sub
-    elseif firstLine =~ "# region"
-        let sub = substitute(firstLine, '\s*\# region ', '', 'g')
-        return "+-- Region: " . sub
-    else
-        return "+-- " . firstLine
-    endif
-endfunc
+if g:OmniSharp_set_foldtext
+    " Fold Message Function
+    func! SummaryFolds()
+        let firstLine = getline(v:foldstart)
+        if firstLine =~ "<summary>"
+            let line = getline(v:foldstart + 1)
+            let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
+            return "+--" . " Summary: " . sub
+        elseif firstLine =~ "# region"
+            let sub = substitute(firstLine, '\s*\# region ', '', 'g')
+            return "+-- Region: " . sub
+        else
+            return "+-- " . firstLine
+        endif
+    endfunc
 
-if g:OmniSharp_override_folds
     augroup cs_folds
         autocmd!
         autocmd BufEnter *.cs setlocal foldtext=SummaryFolds()

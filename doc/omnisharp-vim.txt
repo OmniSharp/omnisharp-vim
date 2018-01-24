@@ -115,10 +115,10 @@ Default: 0 >
     let g:OmniSharp_want_snippet=0
 <
 
-                                                 *'g:OmniSharp_override_folds'*
+                                                   *'g:OmniSharp_set_foldtext'*
 Use a custom 'foldtext' for closed folds.
 Default: 1 >
-    let g:OmniSharp_override_folds=1
+    let g:OmniSharp_set_foldtext=1
 <
 
 ===============================================================================
