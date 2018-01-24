@@ -20,14 +20,14 @@ set cpo&vim
 func! SummaryFolds()
     let firstLine = getline(v:foldstart)
     if firstLine =~ "<summary>"
-	let line = getline(v:foldstart + 1)
-	let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
-	return "+--" . " Summary: " . sub
+        let line = getline(v:foldstart + 1)
+        let sub = substitute(line, '\s*\/\/\/ ', '', 'g')
+        return "+--" . " Summary: " . sub
     elseif firstLine =~ "# region"
-	let sub = substitute(firstLine, '\s*\# region ', '', 'g')
-	return "+-- Region: " . sub
+        let sub = substitute(firstLine, '\s*\# region ', '', 'g')
+        return "+-- Region: " . sub
     else
-	return "+-- " . firstLine
+        return "+-- " . firstLine
     endif
 endfunc
 
