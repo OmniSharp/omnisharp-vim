@@ -31,10 +31,12 @@ func! SummaryFolds()
     endif
 endfunc
 
-augroup cs_folds
-    autocmd!
-    autocmd BufEnter *.cs setlocal foldtext=SummaryFolds()
-augroup END
+if g:OmniSharp_override_folds
+    augroup cs_folds
+        autocmd!
+        autocmd BufEnter *.cs setlocal foldtext=SummaryFolds()
+    augroup END
+endif
 
 " type
 syn keyword csType			bool byte char decimal double float int long object sbyte short string T uint ulong ushort var void dynamic
