@@ -30,6 +30,9 @@ let g:OmniSharp_quickFixLength = get(g:, 'OmniSharp_quickFixLength', 60)
 "Don't use the preview window by default
 let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0)
 
+"Set 'foldtext' to a custom OmniSharp fold string
+let g:OmniSharp_set_foldtext = get(g:, 'OmniSharp_set_foldtext', 1)
+
 " Auto syntax-check options.
 " Default:
 " g:OmniSharp_BufWritePreSyntaxCheck = 1
