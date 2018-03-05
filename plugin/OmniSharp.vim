@@ -21,7 +21,6 @@ else
 endif
 
 
-
 "Load python/OmniSharp.py
 let s:py_path = OmniSharp#util#path_join('python')
 exec "python sys.path.append(r'" . s:py_path . "')"
