@@ -5,7 +5,7 @@ endif
 let g:OmniSharp_loaded = 1
 
 if has('python3')
-      let s:py_path = OmniSharp#util#path_join('python')
+      let s:py_path = OmniSharp#util#path_join('python3')
       exec "python sys.path.append(r'" . s:py_path . "')"
       exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python3', 'Completion.py']))
       exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python3', 'OmniSharp.py']))
