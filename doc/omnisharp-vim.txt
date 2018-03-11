@@ -115,6 +115,15 @@ Default: 0 >
     let g:OmniSharp_want_snippet=0
 <
 
+                                           *'g:OmniSharp_translate_cygwin_wsl'*
+Use this option when vim is running in a Cygwin or Windows Subsystem for Linux
+environment on Windows, but the omnisharp server is a Windows binary. When set
+to 1, omnisharp-vim will translate the cygwin/WSL unix paths into Windows paths
+and back.
+Default: 0 >
+    let g:OmniSharp_translate_cygwin_wsl=1
+<
+
 ===============================================================================
 COMMANDS                                                   *omnisharp-commands*
 

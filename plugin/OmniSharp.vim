@@ -9,6 +9,9 @@ if !has('python')
   finish
 endif
 
+" Set default for translating cygwin/WSL unix paths to Windows paths
+let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', 0)
+
 "Load python/OmniSharp.py
 let s:py_path = OmniSharp#util#path_join('python')
 exec "python sys.path.append(r'" . s:py_path . "')"

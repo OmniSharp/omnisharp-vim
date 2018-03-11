@@ -43,7 +43,7 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
     let solution_path = fnamemodify(solution_path, ':h')
   endif
 
-  if s:is_cygwin() || s:is_wsl()
+  if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_cygwin() || s:is_wsl())
     " Future releases of WSL will have a wslpath tool, similar to cygpath - when
     " this becomes standard then this block can be replaced with a call to
     " wslpath/cygpath

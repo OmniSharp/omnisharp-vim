@@ -12,6 +12,7 @@ logger.addHandler(hdlr)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
+translate_unix_win = bool(int(vim.eval('g:OmniSharp_translate_cygwin_wsl')))
 is_cygwin = 'cygwin' in platform.system().lower()
 is_wsl = 'linux' in platform.system().lower() and 'microsoft' in platform.release().lower()
 
@@ -21,17 +22,17 @@ is_wsl = 'linux' in platform.system().lower() and 'microsoft' in platform.releas
 # translated from e.g. "C:\path\to\file" to "/mnt/c/path/to/file", and
 # filenames sent TO OmniSharp must be translated in the other direction.
 def formatPathForServer(filepath):
-    if not (is_cygwin or is_wsl):
-        return filepath
-    pattern = r'^/cygdrive/([a-zA-Z])/' if is_cygwin else r'^/mnt/([a-zA-Z])/'
-    return re.sub(pattern, r'\1:\\', filepath).replace('/', '\\')
+    if translate_unix_win and (is_cygwin or is_wsl):
+        pattern = r'^/cygdrive/([a-zA-Z])/' if is_cygwin else r'^/mnt/([a-zA-Z])/'
+        return re.sub(pattern, r'\1:\\', filepath).replace('/', '\\')
+    return filepath
 def formatPathForClient(filepath):
-    if not (is_cygwin or is_wsl):
-        return filepath
-    def path_replace(matchobj):
-        prefix = '/cygdrive/{0}/' if is_cygwin else '/mnt/{0}/'
-        return prefix.format(matchobj.group(1).lower())
-    return re.sub(r'^([a-zA-Z]):\\', path_replace, filepath).replace('\\', '/')
+    if translate_unix_win and (is_cygwin or is_wsl):
+        def path_replace(matchobj):
+            prefix = '/cygdrive/{0}/' if is_cygwin else '/mnt/{0}/'
+            return prefix.format(matchobj.group(1).lower())
+        return re.sub(r'^([a-zA-Z]):\\', path_replace, filepath).replace('\\', '/')
+    return filepath
 
 def getResponse(endPoint, additional_parameters=None, timeout=None):
     parameters = {}
