@@ -12,7 +12,6 @@ endif
 "Load python/OmniSharp.py
 let s:py_path = OmniSharp#util#path_join('python')
 exec "python sys.path.append(r'" . s:py_path . "')"
-exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'Completion.py']))
 exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'OmniSharp.py']))
 
 let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)

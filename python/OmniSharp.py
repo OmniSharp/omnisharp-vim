@@ -1,5 +1,4 @@
-import vim, urllib2, urllib, urlparse, logging, json, os, os.path, cgi, types, threading
-import asyncrequest
+import json, logging, os.path, platform, re, urllib2, urlparse, vim
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
@@ -13,13 +12,33 @@ logger.addHandler(hdlr)
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 
+is_cygwin = 'cygwin' in platform.system().lower()
+is_wsl = 'linux' in platform.system().lower() and 'microsoft' in platform.release().lower()
+
+# When working in Windows Subsystem for Linux (WSL) or Cygwin, vim uses
+# unix-style paths but OmniSharp (with a Windows binary) uses Windows
+# paths. This means that filenames returned FROM OmniSharp must be
+# translated from e.g. "C:\path\to\file" to "/mnt/c/path/to/file", and
+# filenames sent TO OmniSharp must be translated in the other direction.
+def formatPathForServer(filepath):
+    if not (is_cygwin or is_wsl):
+        return filepath
+    pattern = r'^/cygdrive/([a-zA-Z])/' if is_cygwin else r'^/mnt/([a-zA-Z])/'
+    return re.sub(pattern, r'\1:\\', filepath).replace('/', '\\')
+def formatPathForClient(filepath):
+    if not (is_cygwin or is_wsl):
+        return filepath
+    def path_replace(matchobj):
+        prefix = '/cygdrive/{0}/' if is_cygwin else '/mnt/{0}/'
+        return prefix.format(matchobj.group(1).lower())
+    return re.sub(r'^([a-zA-Z]):\\', path_replace, filepath).replace('\\', '/')
 
 def getResponse(endPoint, additional_parameters=None, timeout=None):
     parameters = {}
     parameters['line'] = vim.eval('line(".")')
     parameters['column'] = vim.eval('col(".")')
     parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
-    parameters['filename'] = vim.current.buffer.name
+    parameters['filename'] = formatPathForServer(vim.current.buffer.name)
     if additional_parameters != None:
         parameters.update(additional_parameters)
 
@@ -67,14 +86,47 @@ def findImplementations():
     js = getResponse('/findimplementations', parameters)
     return get_quickfix_list(js, 'QuickFixes')
 
+def getCompletions(column, partialWord):
+    parameters = {}
+    parameters['column'] = vim.eval(column)
+    parameters['wordToComplete'] = vim.eval(partialWord)
+
+    parameters['WantDocumentationForEveryCompletionResult'] = \
+        bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
+
+    want_snippet = \
+        bool(int(vim.eval('g:OmniSharp_want_snippet')))
+
+    parameters['WantSnippet'] = want_snippet
+    parameters['WantMethodHeader'] = want_snippet
+    parameters['WantReturnType'] = want_snippet
+
+    parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
+
+    response = json.loads(getResponse('/autocomplete', parameters))
+
+    vim_completions = []
+    if response != None:
+        for completion in response:
+            vim_completions.append({
+                'snip': completion['Snippet'] or '',
+                'word': completion['MethodHeader'] or completion['CompletionText'],
+                'menu': completion['ReturnType'] or completion['DisplayText'],
+                'info': (completion['Description'] or '').replace('\r\n', '\n'),
+                'icase': 1,
+                'dup': 1
+            })
+    return vim_completions
+
 def gotoDefinition():
     js = getResponse('/gotodefinition');
-    if(js != ''):
+    if js != '':
         definition = json.loads(js)
         if(definition['FileName'] != None):
-            openFile(definition['FileName'].replace("'","''"), definition['Line'], definition['Column'])
+            filename = formatPathForClient(definition['FileName'].replace("'","''"))
+            openFile(filename, definition['Line'], definition['Column'])
         else:
-            print "Not found"
+            print("Not found")
 
 def openFile(filename, line, column):
     vim.command("call OmniSharp#JumpToLocation('%(filename)s', %(line)s, %(column)s)" % locals())
@@ -159,9 +211,9 @@ def build():
 
     success = js["Success"]
     if success:
-        print "Build succeeded"
+        print("Build succeeded")
     else:
-        print "Build failed"
+        print("Build failed")
 
     return quickfixes_from_js(js, 'QuickFixes')
 
@@ -194,7 +246,7 @@ def addReference():
     js = getResponse("/addreference", parameters)
     if js != '':
         message = json.loads(js)['Message']
-        print message
+        print(message)
 
 def findSyntaxErrors():
     js = getResponse('/syntaxerrors')
@@ -235,6 +287,8 @@ def quickfixes_from_response(response):
         filename = quickfix['FileName']
         if filename == None:
             filename = vim.current.buffer.name
+        else:
+            filename = formatPathForClient(filename)
 
         item = {
             'filename': filename,
