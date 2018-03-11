@@ -44,7 +44,9 @@ OPTIONS                                                     *omnisharp-options*
 
                                                     *'g:syntastic_cs_checkers'*
 Use this option to enable syntastic integration >
-    let g:syntastic_cs_checkers=['syntax', 'semantic', 'issues']
+    let g:syntastic_cs_checkers=['syntax', 'semantic', 'issues'] " v1 server
+    OR
+    let g:syntastic_cs_checkers=['code_checker']                 " roslyn
 <
 
                                                     *'g:OmniSharp_selector_ui'*
@@ -83,6 +85,12 @@ Default: 'v1' >
     let g:OmniSharp_server_type='roslyn'
 <
 
+                                                    *'g:OmniSharp_server_path'*
+Use this option to give the full path to the roslyn or v1 omnisharp server
+executable. >
+    let g:OmniSharp_server_path='/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
+<
+
                                                            *'g:OmniSharp_host'*
 Use this option to specify the host address of the OmniSharp server.
 Default: 'http://localhost:2000' >
@@ -101,7 +109,7 @@ server. Default: 1 >
     let g:OmniSharp_timeout=1
 <
 
-                                         *'g:omnicomplete_fetch_full_documentation'*
+                                    *'g:omnicomplete_fetch_full_documentation'*
 Use this option to specify whether OmniSharp will fetch full documentation on
 completion suggestions. By default, only type/method signatures are fetched for
 performance reasons. Full documentation can still be fetched when needed using
