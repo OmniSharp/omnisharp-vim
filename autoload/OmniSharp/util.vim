@@ -18,6 +18,14 @@ function! s:resolve_local_config(solution_path) abort
   return ''
 endfunction
 
+function! s:is_cygwin() abort
+  return has('win32unix')
+endfunction
+
+function! s:is_wsl() abort
+  return strlen(system('grep Microsoft /proc/version')) > 0
+endfunction
+
 function! OmniSharp#util#path_join(parts) abort
   if type(a:parts) == type('')
     let parts = [a:parts]
@@ -34,6 +42,16 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
   if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
     let solution_path = fnamemodify(solution_path, ':h')
   endif
+
+  if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_cygwin() || s:is_wsl())
+    " Future releases of WSL will have a wslpath tool, similar to cygpath - when
+    " this becomes standard then this block can be replaced with a call to
+    " wslpath/cygpath
+    let prefix = s:is_cygwin() ? '^/cygdrive/' : '^/mnt/'
+    let solution_path = substitute(solution_path, prefix.'\([a-zA-Z]\)/', '\u\1:\\', '')
+    let solution_path = substitute(solution_path, '/', '\\', 'g')
+  endif
+
   let g:OmniSharp_running_slns += [solution_path]
   let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
 
