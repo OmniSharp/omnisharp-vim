@@ -298,6 +298,9 @@ def quickfixes_from_response(response):
             'col': quickfix['Column'],
             'vcol': 0
         }
+        if 'LogLevel' in quickfix:
+            item['type'] = 'E' if quickfix['LogLevel'] == 'Error' else 'W'
+
         items.append(item)
 
     return items
