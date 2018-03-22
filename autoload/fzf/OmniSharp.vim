@@ -59,7 +59,7 @@ function! s:action_sink(str) abort
   endif
 endfunction
 
-function! fzf#OmniSharp#getcodeactions(mode) abort
+function! fzf#OmniSharp#getcodeactions(mode, actions) abort
   " When using the roslyn server, use /v2/codeactions
   let s:version = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
   let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(s:version)))
@@ -68,11 +68,10 @@ function! fzf#OmniSharp#getcodeactions(mode) abort
     echo 'No code actions found'
     return
   endif
-  " rosyln endpoint /v2/getcodeactions returns dicts, not strings
-  if type(s:actions[0]) == v:t_dict
-    let acts = map(copy(s:actions), {i,v -> get(v, 'Name')})
-  else
+  if s:version ==# 'v1'
     let acts = s:actions
+  else
+    let acts = map(copy(s:actions), {i,v -> get(v, 'Name')})
   endif
 
   call fzf#run({
