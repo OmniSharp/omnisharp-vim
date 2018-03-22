@@ -261,8 +261,10 @@ def findTypes():
     js = getResponse('/findtypes')
     return get_quickfix_list(js, 'QuickFixes')
 
-def findSymbols():
-    js = getResponse('/findsymbols')
+def findSymbols(filter=''):
+    parameters = {}
+    parameters["filter"] = filter
+    js = getResponse('/findsymbols', parameters)
     return get_quickfix_list(js, 'QuickFixes')
 
 def get_quickfix_list(js, key):

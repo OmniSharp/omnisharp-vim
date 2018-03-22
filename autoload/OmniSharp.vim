@@ -140,13 +140,18 @@ function! OmniSharp#SelectorPluginError()
   echoerr 'No selector plugin found.  Please install unite.vim, ctrlp.vim or fzf.vim'
 endfunction
 
-function! OmniSharp#FindSymbol() abort
+function! OmniSharp#FindSymbol(...) abort
+  if a:0 > 0
+    let filter = a:1
+  else
+    let filter = ''
+  endif
   if g:OmniSharp_selector_ui ==? 'unite'
     call unite#start([['OmniSharp/findsymbols']])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#findsymbols()
+    call fzf#OmniSharp#findsymbols(filter)
   else
     call OmniSharp#SelectorPluginError()
   endif
