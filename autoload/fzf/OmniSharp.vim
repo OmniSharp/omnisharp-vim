@@ -39,6 +39,10 @@ function! fzf#OmniSharp#findsymbols(filter) abort
   for quickfix in s:quickfixes
     call add(symbols, quickfix.text)
   endfor
+  if empty(symbols)
+    echo 'No symbols found'
+    return
+  endif
   call fzf#run({
   \ 'source': symbols,
   \ 'down': '40%',

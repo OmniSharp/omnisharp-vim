@@ -149,7 +149,9 @@ function! OmniSharp#FindSymbol(...) abort
   if g:OmniSharp_selector_ui ==? 'unite'
     call unite#start([['OmniSharp/findsymbols']])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
+    if ctrlp#OmniSharp#findsymbols#findsymbols(filter)
+      call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
+    endif
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findsymbols(filter)
   else
