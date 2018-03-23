@@ -82,15 +82,6 @@ Install the vim plugin using your preferred plugin manager:
 | [NeoBundle](https://github.com/Shougo/neobundle.vim) | `NeoBundle 'OmniSharp/omnisharp-vim'`                                                |
 | [Pathogen](https://github.com/tpope/vim-pathogen)    | `git clone git://github.com/OmniSharp/omnisharp-vim.git ~/.vim/bundle/omnisharp-vim` |
 
-#### Configuration
-The following must be added to your vimrc:
-
-```vim
-let g:OmniSharp_server_type = 'roslyn'
-```
-
-See `:help OmniSharp` and the example vimrc below for more configuration options.
-
 ### Server
 OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. Download the latest release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the http variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz`.
 
@@ -209,7 +200,7 @@ let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
 " OmniSharp won't work without this setting
 filetype plugin on
 
-" Choose the OmniSharp-Roslyn server
+" Choose the OmniSharp-Roslyn server - this is the default
 let g:OmniSharp_server_type = 'roslyn'
 
 " Set the path to the roslyn server
