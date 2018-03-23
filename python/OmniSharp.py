@@ -298,6 +298,11 @@ def quickfixes_from_response(response):
             'col': quickfix['Column'],
             'vcol': 0
         }
+        if 'LogLevel' in quickfix:
+            item['type'] = 'E' if quickfix['LogLevel'] == 'Error' else 'W'
+            if quickfix['LogLevel'] == 'Hidden':
+                item['subtype'] = 'Style'
+
         items.append(item)
 
     return items
