@@ -79,10 +79,10 @@ Default: 'omnisharp.json' >
 
                                                     *'g:OmniSharp_server_type'*
 Use this option to specify which version of OmniSharp will be used.
-Default: 'v1' >
-    let g:OmniSharp_server_type='v1'
-    OR
+Default: 'roslyn' >
     let g:OmniSharp_server_type='roslyn'
+    OR
+    let g:OmniSharp_server_type='v1'
 <
 
                                                     *'g:OmniSharp_server_path'*
