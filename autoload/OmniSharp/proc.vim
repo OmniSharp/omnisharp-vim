@@ -30,7 +30,7 @@ function! OmniSharp#proc#neovimJobStart(command) abort
     call s:debug('Using Neovim jobstart to start the following command:')
     call s:debug(a:command)
     return jobstart(
-                \ a:command,
+                \ join(a:command, ' '),
                 \ {'on_stdout': 'OmniSharp#proc#neovimOutHandler',
                 \  'on_stderr': 'OmniSharp#proc#neovimErrHandler'})
   else
