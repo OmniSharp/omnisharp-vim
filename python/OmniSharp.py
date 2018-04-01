@@ -308,6 +308,25 @@ def quickfixes_from_response(response):
     return items
 
 def lookupAllUserTypes():
+    js = getResponse('/findsymbols', {'filter': ''})
+    if js != '':
+        response = json.loads(js)
+        if response != None and response['QuickFixes'] != None:
+            slnTypes = []
+            slnInterfaces = []
+            slnAttributes = []
+            for symbol in response['QuickFixes']:
+                if symbol['Kind'] == 'Class':
+                    slnTypes.append(symbol['Text'])
+                    if symbol['Text'].endswith('Attribute'):
+                        slnAttributes.append(symbol['Text'][:-9])
+                elif symbol['Kind'] == 'Interface':
+                    slnInterfaces.append(symbol['Text'])
+            vim.command("let s:allUserTypes = '%s'" % ' '.join(slnTypes))
+            vim.command("let s:allUserInterfaces = '%s'" % ' '.join(slnInterfaces))
+            vim.command("let s:allUserAttributes = '%s'" % ' '.join(slnAttributes))
+
+def lookupAllUserTypesLegacy():
     js = getResponse('/lookupalltypes')
     if js != '':
         response = json.loads(js)
