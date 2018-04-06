@@ -67,7 +67,7 @@ opening a `*.cs` file. Default: 1 >
 
                                                     *'g:Omnisharp_stop_server'*
 Use this option to specify whether OmniSharp will stop automatically upon
-closing Vim. Default: 1 >
+closing Vim. Default: 2 >
     let g:Omnisharp_stop_server=1
 <
 

@@ -171,16 +171,59 @@ function! OmniSharp#FindType() abort
   endif
 endfunction
 
+function! s:CleanupCodeActions() abort
+  unlet s:actions
+  if exists('s:cb')
+    call s:cb()
+    unlet s:cb
+  endif
+  autocmd! OmniSharp#CountCodeActions
+endfunction
+
+" This function returns a count of the currently available code actions. It also
+" uses the code actions to pre-populate the code actions for
+" OmniSharp#GetCodeActions, and clears them on CursorMoved.
+"
+" If a callback function is passed in, the callback will also be called on
+" CursorMoved, allowing this function to be used to set up a temporary "Code
+" actions available" flag, e.g. in the statusline or signs column, and the
+" callback function can be used to clear the flag.
+function! OmniSharp#CountCodeActions(...) abort
+  let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
+  let s:actions = pyeval(printf('getCodeActions("normal", %s)', string(v)))
+
+  " v:t_func was added in vim8 - this form is backwards-compatible
+  if a:0 && type(a:1) == type(function("tr"))
+    let s:cb = a:1
+  endif
+
+  augroup OmniSharp#CountCodeActions
+    autocmd!
+    autocmd CursorMoved <buffer> call s:CleanupCodeActions()
+    autocmd CursorMovedI <buffer> call s:CleanupCodeActions()
+    autocmd BufLeave <buffer> call s:CleanupCodeActions()
+  augroup END
+
+  return len(s:actions)
+endfunction
+
 function! OmniSharp#GetCodeActions(mode) range abort
+  if !exists('s:actions')
+    let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
+    let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
+  endif
+  if empty(s:actions)
+    echo 'No code actions found'
+    return
+  endif
   if g:OmniSharp_selector_ui ==? 'unite'
     let context = {'empty': 0, 'auto_resize': 1}
     call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    if ctrlp#OmniSharp#findcodeactions#setactions(a:mode)
-      call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
-    endif
+    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, s:actions)
+    call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#getcodeactions(a:mode)
+    call fzf#OmniSharp#getcodeactions(a:mode, s:actions)
   else
     call OmniSharp#SelectorPluginError()
   endif
