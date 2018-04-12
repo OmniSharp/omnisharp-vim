@@ -169,13 +169,9 @@ function! OmniSharp#GetCodeActions(mode) range abort
     let context = {'empty': 0, 'auto_resize': 1}
     call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    let actions = pyeval(printf('getCodeActions(%s)', string(a:mode)))
-    if empty(actions)
-      echo 'No code actions found'
-      return
+    if ctrlp#OmniSharp#findcodeactions#setactions(a:mode)
+      call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
     endif
-    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
-    call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#getcodeactions(a:mode)
   else

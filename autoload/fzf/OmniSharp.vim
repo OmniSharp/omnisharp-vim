@@ -46,19 +46,36 @@ function! fzf#OmniSharp#findsymbols() abort
 endfunction
 
 function! s:action_sink(str) abort
-  let action = index(s:actions, a:str)
-  call pyeval(printf('runCodeAction(%s, %d)', string(s:mode), action))
+  if s:version ==# 'v1'
+    let action = index(s:actions, a:str)
+    let command = printf('runCodeAction(%s, %d)', string(s:mode), action)
+  else
+    let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# a:str})[0]
+    let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+    let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
+  endif
+  if !pyeval(command)
+    echo 'No action taken'
+  endif
 endfunction
 
 function! fzf#OmniSharp#getcodeactions(mode) abort
-  let s:actions = pyeval(printf('getCodeActions(%s)', string(a:mode)))
+  " When using the roslyn server, use /v2/codeactions
+  let s:version = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
+  let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(s:version)))
   let s:mode = a:mode
   if empty(s:actions)
     echo 'No code actions found'
     return
   endif
+  if s:version ==# 'v1'
+    let acts = s:actions
+  else
+    let acts = map(copy(s:actions), {i,v -> get(v, 'Name')})
+  endif
+
   call fzf#run({
-  \ 'source': s:actions,
+  \ 'source': acts,
   \ 'down': '10%',
   \ 'sink': function('s:action_sink')})
 endfunction

@@ -132,31 +132,53 @@ def gotoDefinition():
 def openFile(filename, line, column):
     vim.command("call OmniSharp#JumpToLocation('%(filename)s', %(line)s, %(column)s)" % locals())
 
-def getCodeActions(mode):
-    parameters = codeActionParameters(mode)
-    js = getResponse('/getcodeactions', parameters)
+def getCodeActions(mode, version='v1'):
+    parameters = codeActionParameters(mode, version)
+    if version == 'v1':
+        endpoint = '/getcodeactions'
+    elif version == 'v2':
+        endpoint = '/v2/getcodeactions'
+    js = getResponse(endpoint, parameters)
     if js != '':
         actions = json.loads(js)['CodeActions']
         return actions
     return []
 
-def runCodeAction(mode, action):
-    parameters = codeActionParameters(mode)
-    parameters['codeaction'] = action
-    js = getResponse('/runcodeaction', parameters);
-    text = json.loads(js)['Text']
-    setBufferText(text)
-    return True
+def runCodeAction(mode, action, version='v1'):
+    parameters = codeActionParameters(mode, version)
+    if version == 'v1':
+        parameters['codeaction'] = action
+        res = getResponse('/runcodeaction', parameters)
+        js = json.loads(res)
+        if 'Text' in js:
+            setBufferText(js['Text'])
+            return True
+    elif version == 'v2':
+        parameters['identifier'] = action
+        res = getResponse('/v2/runcodeaction', parameters)
+        js = json.loads(res)
+        if 'Changes' in js:
+            for c in js['Changes']:
+                if 'ModificationType' in c and c['ModificationType'] == 0 and 'Buffer' in c:
+                    setBufferText(c['Buffer'])
+                    return True
+    return False
 
-def codeActionParameters(mode):
+def codeActionParameters(mode, version='v1'):
     parameters = {}
     if mode == 'visual':
         start = vim.eval('getpos("\'<")')
         end = vim.eval('getpos("\'>")')
-        parameters['SelectionStartLine'] = start[1]
-        parameters['SelectionStartColumn'] = start[2]
-        parameters['SelectionEndLine'] = end[1]
-        parameters['SelectionEndColumn'] = end[2]
+        if version == 'v1':
+            parameters['SelectionStartLine'] = start[1]
+            parameters['SelectionStartColumn'] = start[2]
+            parameters['SelectionEndLine'] = end[1]
+            parameters['SelectionEndColumn'] = end[2]
+        elif version == 'v2':
+            parameters['Selection'] = {
+                'Start': { 'Line': start[1], 'Column': start[2] },
+                'End': { 'Line': end[1], 'Column': end[2] }
+            }
     return parameters
 
 def setBufferText(text):
