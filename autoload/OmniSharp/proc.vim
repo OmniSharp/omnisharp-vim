@@ -62,10 +62,18 @@ function! OmniSharp#proc#vimJobStart(command) abort
                   \ {'out_cb': 'OmniSharp#proc#vimOutHandler',
                   \  'err_cb': 'OmniSharp#proc#vimErrHandler'})
     else
-      call s:debug('Skip to start server since job still exists')
+      echom 'OmniSharp server not started - job still exists'
     endif
   else
     echoerr 'Not using Vim 8.0+'
+  endif
+endfunction
+
+function! OmniSharp#proc#vimJobStop() abort
+  if OmniSharp#proc#supportsVimJobs()
+    if exists('s:job')
+      call job_stop(s:job)
+    endif
   endif
 endfunction
 
@@ -108,6 +116,12 @@ function! OmniSharp#proc#RunAsyncCommand(command) abort
     call OmniSharp#proc#vimprocStart(a:command)
   else
     echoerr 'Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc.vim plugin to use this feature'
+  endif
+endfunction
+
+function! OmniSharp#proc#StopJob() abort
+  if OmniSharp#proc#supportsVimJobs()
+    call OmniSharp#proc#vimJobStop()
   endif
 endfunction
 

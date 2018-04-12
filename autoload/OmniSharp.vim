@@ -550,6 +550,7 @@ function! OmniSharp#StopServer(...) abort
 
   if force || OmniSharp#ServerIsRunning()
     python getResponse("/stopserver")
+    call OmniSharp#proc#StopJob()
     let g:OmniSharp_running_slns = []
   endif
 endfunction
