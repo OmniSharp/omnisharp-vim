@@ -374,34 +374,42 @@ function! OmniSharp#RunTests(mode) abort
 endfunction
 
 function! OmniSharp#EnableTypeHighlightingForBuffer() abort
-  hi link CSharpUserType Type
+  highlight default link csUserType Type
   if !empty(s:allUserTypes)
-    exec 'syn keyword CSharpUserType ' . s:allUserTypes
+    exec 'syn keyword csUserType ' . s:allUserTypes
   endif
+  highlight default link csUserInterface Include
   if !empty(s:allUserInterfaces)
-    exec 'syn keyword csInterfaceDeclaration ' . s:allUserInterfaces
+    exec 'syn keyword csUserInterface ' . s:allUserInterfaces
+  endif
+  highlight default link csUserAttribute Include
+  if !empty(s:allUserAttributes)
+    exec 'syn keyword csUserAttribute ' . s:allUserAttributes
   endif
 endfunction
 
 function! OmniSharp#EnableTypeHighlighting() abort
-
-  if !OmniSharp#ServerIsRunning() || !empty(s:allUserTypes)
+  if !OmniSharp#ServerIsRunning()
     return
   endif
 
-  python lookupAllUserTypes()
+  if g:OmniSharp_server_type ==# 'roslyn'
+    python lookupAllUserTypes()
+  else
+    python lookupAllUserTypesLegacy()
+  endif
 
   let startBuf = bufnr('%')
   " Perform highlighting for existing buffers
   bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
-exec 'b '. startBuf
+  exec 'b '. startBuf
 
-call OmniSharp#EnableTypeHighlightingForBuffer()
+  call OmniSharp#EnableTypeHighlightingForBuffer()
 
-augroup _omnisharp
-  au!
-  autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
-augroup END
+  augroup _omnisharp
+    au!
+    autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
+  augroup END
 endfunction
 
 function! OmniSharp#ReloadSolution() abort
