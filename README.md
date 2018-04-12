@@ -103,7 +103,11 @@ let g:OmniSharp_translate_cygwin_wsl = 1
 ```
 
 ### Mono
-OmniSharp-Roslyn requires Mono on Linux and OSX, see [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
+OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) usually come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
+
+```vim
+    let g:OmniSharp_server_use_mono = 1
+```
 
 ### Install Python
 Install last version of 2.7 series ([Python 2.7.14](https://www.python.org/downloads/release/python-2714/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.

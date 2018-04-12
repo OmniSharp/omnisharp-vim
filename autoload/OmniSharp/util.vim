@@ -73,13 +73,13 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
               \ '-p', port,
               \ '-s', solution_path]
 
-  if g:OmniSharp_server_type !=# 'roslyn'
+  if g:OmniSharp_server_type ==# 'v1'
     let l:config_file = s:resolve_local_config(solution_path)
     if l:config_file !=# ''
       let command = command + ['-config', l:config_file]
     endif
   endif
-  if !has('win32') && !has('win32unix') && g:OmniSharp_server_type !=# 'roslyn'
+  if !has('win32') && !has('win32unix') && (g:OmniSharp_server_use_mono || g:OmniSharp_server_type ==# 'v1')
     let command = insert(command, 'mono')
   endif
 

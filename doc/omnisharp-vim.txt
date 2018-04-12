@@ -91,6 +91,14 @@ executable. >
     let g:OmniSharp_server_path='/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
 
+                                                *'g:OmniSharp_server_use_mono'*
+The roslyn server must be run with mono on Linux and OSX. The roslyn server
+binaries usually come with an embedded mono, but this can be overridden to use
+the installed mono with this option. Note that mono must be in the $PATH.
+Default: 0 >
+    let g:OmniSharp_server_use_mono=1
+<
+
                                                            *'g:OmniSharp_host'*
 Use this option to specify the host address of the OmniSharp server.
 Default: 'http://localhost:2000' >
