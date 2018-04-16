@@ -208,8 +208,8 @@ function! OmniSharp#CountCodeActions(...) abort
 endfunction
 
 function! OmniSharp#GetCodeActions(mode) range abort
+  let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
   if !exists('s:actions')
-    let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
     let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
   endif
   if empty(s:actions)
@@ -218,7 +218,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
   endif
   if g:OmniSharp_selector_ui ==? 'unite'
     let context = {'empty': 0, 'auto_resize': 1}
-    call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
+    call unite#start([['OmniSharp/findcodeactions', a:mode, s:actions, v]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
     call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, s:actions)
     call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
