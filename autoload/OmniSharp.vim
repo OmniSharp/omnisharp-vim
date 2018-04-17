@@ -136,10 +136,6 @@ function! OmniSharp#JumpToLocation(filename, line, column) abort
   endif
 endfunction
 
-function! OmniSharp#SelectorPluginError()
-  echoerr 'No selector plugin found.  Please install unite.vim, ctrlp.vim or fzf.vim'
-endfunction
-
 function! OmniSharp#FindSymbol(...) abort
   let filter = a:0 > 0 ? a:1 : ''
   if !OmniSharp#ServerIsRunning()
@@ -176,15 +172,6 @@ function! OmniSharp#FindType() abort
   endif
 endfunction
 
-function! s:CleanupCodeActions() abort
-  unlet s:actions
-  if exists('s:cb')
-    call s:cb()
-    unlet s:cb
-  endif
-  autocmd! OmniSharp#CountCodeActions
-endfunction
-
 " This function returns a count of the currently available code actions. It also
 " uses the code actions to pre-populate the code actions for
 " OmniSharp#GetCodeActions, and clears them on CursorMoved.
@@ -201,6 +188,15 @@ function! OmniSharp#CountCodeActions(...) abort
   if a:0 && type(a:1) == type(function("tr"))
     let s:cb = a:1
   endif
+
+  function! s:CleanupCodeActions() abort
+    unlet s:actions
+    if exists('s:cb')
+      call s:cb()
+      unlet s:cb
+    endif
+    autocmd! OmniSharp#CountCodeActions
+  endfunction
 
   augroup OmniSharp#CountCodeActions
     autocmd!
@@ -230,7 +226,26 @@ function! OmniSharp#GetCodeActions(mode) range abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#getcodeactions(a:mode, s:actions)
   else
-    call OmniSharp#SelectorPluginError()
+    let message = []
+    let i = 0
+    for action in s:actions
+      let i += 1
+      call add(message, printf('%d. %s', i, v ==# 'v1' ? action : action.Name))
+    endfor
+    call add(message, 'Enter an action number, or just hit Enter to cancel: ')
+    let selection = str2nr(input(join(message, "\n")))
+    if type(selection) == type(0) && selection > 0 && selection <= i
+      if v ==# 'v1'
+        let command = printf('runCodeAction(%s, %d)', string(a:mode), selection - 1)
+      else
+        let action = s:actions[selection - 1]
+        let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+        let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', a:mode, command)
+      endif
+      if !pyeval(command)
+        echo 'No action taken'
+      endif
+    endif
   endif
 endfunction
 
@@ -285,19 +300,6 @@ function! OmniSharp#CodeCheck() abort
     let b:codecheck = pyeval('codeCheck()')
   endif
   return get(b:, 'codecheck', [])
-endfunction
-
-" Manually write content to the preview window.
-" Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
-function! s:writeToPreview(content)
-  silent pedit __OmniSharpScratch__
-  silent wincmd P
-  setlocal modifiable noreadonly
-  setlocal nobuflisted buftype=nofile bufhidden=wipe
-  silent put =a:content
-  0d_
-  setlocal nomodifiable readonly
-  silent wincmd p
 endfunction
 
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
@@ -705,6 +707,19 @@ function! s:json_decode(json) abort
   catch
     throw 'Invalid JSON response from server: ' . a:json
   endtry
+endfunction
+
+" Manually write content to the preview window.
+" Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
+function! s:writeToPreview(content)
+  silent pedit __OmniSharpScratch__
+  silent wincmd P
+  setlocal modifiable noreadonly
+  setlocal nobuflisted buftype=nofile bufhidden=wipe
+  silent put =a:content
+  0d_
+  setlocal nomodifiable readonly
+  silent wincmd p
 endfunction
 
 if has('patch-7.4.279')

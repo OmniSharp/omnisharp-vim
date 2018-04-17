@@ -131,18 +131,19 @@ OmniSharp-vim can start the server and run asynchronous builds only if any of th
 The vim plugin [syntastic](https://github.com/vim-syntastic/syntastic) is needed for displaying code issues and syntax errors.
 
 ### (optional) Install ctrlp.vim, unite.vim or fzf.vim
-If you want to use the Code Actions, Find Type and Find Symbol features, you will need to install one of the following plugins:
+If one of these plugins is detected, it will be used as the selector for Code Actions and Find Symbols features:
 
 - [fzf.vim](https://github.com/junegunn/fzf.vim)
 - [CtrlP](https://github.com/ctrlpvim/ctrlp.vim)
 - [unite.vim](https://github.com/Shougo/unite.vim)
 
-If you have installed more than one, you can choose one by `g:OmniSharp_selector_ui` variable.
+If you have installed more than one, or you prefer to use native vim functionality (command line, quickfix window etc.) rather than a selector plugin, you can choose an option with the `g:OmniSharp_selector_ui` variable.
 
 ```vim
 let g:OmniSharp_selector_ui = 'unite'  " Use unite.vim
 let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
 let g:OmniSharp_selector_ui = 'fzf'    " Use fzf.vim
+let g:OmniSharp_selector_ui = ''       " Use vim - command line, quickfix etc.
 ```
 
 ## How to use
