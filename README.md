@@ -94,8 +94,6 @@ let g:OmniSharp_server_path = 'C:\OmniSharp\omnisharp.http-win-x64\OmniSharp.exe
 let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 ```
 
-You'll also need to make sure that you have `libuv` installed (e.g.: `brew install libuv`).
-
 #### Cygwin and WSL
 Windows users who wish to use OmniSharp-vim in a Cygwin or Windows Subsystem for Linux terminal vim, download the *Windows* OmniSharp-Rosyn release. Configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
 
@@ -104,12 +102,14 @@ let g:OmniSharp_server_path = '/mnt/c/OmniSharp/omnisharp.http-win-x64/OmniSharp
 let g:OmniSharp_translate_cygwin_wsl = 1
 ```
 
-### Mono
+#### Linux and Mac
 OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) usually come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
 
 ```vim
     let g:OmniSharp_server_use_mono = 1
 ```
+
+OmniSharp-Roslyn also requires [libuv](http://libuv.org/). This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv` on debian/Ubuntu, `pacman -S libuv` on arch linux etc.
 
 ### Install Python
 Install last version of 2.7 series ([Python 2.7.14](https://www.python.org/downloads/release/python-2714/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
