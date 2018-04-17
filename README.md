@@ -94,6 +94,8 @@ let g:OmniSharp_server_path = 'C:\OmniSharp\omnisharp.http-win-x64\OmniSharp.exe
 let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 ```
 
+You'll also need to make sure that you have `libuv` installed (e.g.: `brew install libuv`).
+
 #### Cygwin and WSL
 Windows users who wish to use OmniSharp-vim in a Cygwin or Windows Subsystem for Linux terminal vim, download the *Windows* OmniSharp-Rosyn release. Configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
 
