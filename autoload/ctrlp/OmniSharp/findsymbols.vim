@@ -47,20 +47,12 @@ call add(g:ctrlp_ext_vars, {
 \ })
 
 
-function! ctrlp#OmniSharp#findsymbols#findsymbols(filter) abort
-  if !OmniSharp#ServerIsRunning()
-    return 0
-  endif
-  let s:quickfixes = pyeval(printf('findSymbols(%s)', string(a:filter)))
+function! ctrlp#OmniSharp#findsymbols#setsymbols(quickfixes) abort
+  let s:quickfixes = a:quickfixes
   let s:symbols = []
   for quickfix in s:quickfixes
     call add(s:symbols, quickfix.text)
   endfor
-  if empty(s:symbols)
-    echo 'No symbols found'
-    return 0
-  endif
-  return 1
 endfunction
 
 " Provide a list of strings to search in

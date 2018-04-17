@@ -141,21 +141,25 @@ function! OmniSharp#SelectorPluginError()
 endfunction
 
 function! OmniSharp#FindSymbol(...) abort
-  if a:0 > 0
-    let filter = a:1
-  else
-    let filter = ''
+  let filter = a:0 > 0 ? a:1 : ''
+  if !OmniSharp#ServerIsRunning()
+    return
+  endif
+  let quickfixes = pyeval(printf('findSymbols(%s)', string(filter)))
+  if empty(quickfixes)
+    echo 'No symbols found'
+    return
   endif
   if g:OmniSharp_selector_ui ==? 'unite'
-    call unite#start([['OmniSharp/findsymbols']])
+    call unite#start([['OmniSharp/findsymbols', quickfixes]])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    if ctrlp#OmniSharp#findsymbols#findsymbols(filter)
-      call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
-    endif
+    call ctrlp#OmniSharp#findsymbols#setsymbols(quickfixes)
+    call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#findsymbols(filter)
+    call fzf#OmniSharp#findsymbols(quickfixes)
   else
-    call OmniSharp#SelectorPluginError()
+    call setqflist(quickfixes)
+    botright cwindow 4
   endif
 endfunction
 
@@ -167,7 +171,8 @@ function! OmniSharp#FindType() abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findtypes()
   else
-    call OmniSharp#SelectorPluginError()
+    call setqflist(quickfixes)
+    botright cwindow 4
   endif
 endfunction
 

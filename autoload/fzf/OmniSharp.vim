@@ -30,19 +30,12 @@ function! fzf#OmniSharp#findtypes() abort
   \ 'sink': function('s:location_sink')})
 endfunction
 
-function! fzf#OmniSharp#findsymbols(filter) abort
-  if !OmniSharp#ServerIsRunning()
-    return
-  endif
-  let s:quickfixes = pyeval(printf('findSymbols(%s)', string(a:filter)))
+function! fzf#OmniSharp#findsymbols(quickfixes) abort
+  let s:quickfixes = a:quickfixes
   let symbols = []
   for quickfix in s:quickfixes
     call add(symbols, quickfix.text)
   endfor
-  if empty(symbols)
-    echo 'No symbols found'
-    return
-  endif
   call fzf#run({
   \ 'source': symbols,
   \ 'down': '40%',

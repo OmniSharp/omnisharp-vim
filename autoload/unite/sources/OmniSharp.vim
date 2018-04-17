@@ -56,11 +56,8 @@ let s:findsymbols = {
 \   'default_kind': 'jump_list',
 \ }
 function! s:findsymbols.gather_candidates(args, context) abort
-  if !OmniSharp#ServerIsRunning()
-    return []
-  endif
-  let symbols = pyeval('findSymbols()')
-  return map(symbols, '{
+  let quickfixes = get(a:args, 0, [])
+  return map(quickfixes, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,
   \   "action__path": v:val.filename,
