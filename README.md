@@ -25,12 +25,11 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
     * This functionality requires a recent version of Vim, you can check if your version is supported by running `:echo has("patch-7.3-598")`, it should output 1.
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols interactively (requires plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
+* Find symbols interactively (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
 * Find implementations/derived types
 * Find usages
-* Contextual code actions (sort usings, use var....etc.) (requires plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
-  * Extract method
-* Find and fix code issues (unused usings, use base type where possible....etc.) (requires plugin: [Syntastic](https://github.com/vim-syntastic/syntastic))
+* Contextual code actions (unused usings, use var....etc.) (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
+* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
 * Semantic type highlighting
@@ -274,7 +273,7 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <buffer> <C-j> :OmniSharpNavigateDown<CR>
 augroup END
 
-" Contextual code actions (requires fzf, CtrlP or unite.vim)
+" Contextual code actions (uses fzf, CtrlP or unite.vim when available)
 nnoremap <Leader><Space> :OmniSharpGetCodeActions<CR>
 " Run code actions with text selected in visual mode to extract method
 xnoremap <Leader><Space> :call OmniSharp#GetCodeActions('visual')<CR>
@@ -299,7 +298,7 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 nnoremap <Leader>th :OmniSharpHighlightTypes<CR>
 
 " Enable snippet completion, requires completeopt-=preview
-let g:OmniSharp_want_snippet=1
+" let g:OmniSharp_want_snippet=1
 ```
 
 Pull requests welcome!
