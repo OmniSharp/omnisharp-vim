@@ -50,13 +50,19 @@ Use this option to enable syntastic integration >
 <
 
                                                     *'g:OmniSharp_selector_ui'*
-Use this option to specify a selector UI if more than one of CtrlP, unite.vim
-or fzf.vim are installed.  Default: Whichever is installed. >
+Use this option to specify a selector UI for choosing code actions and
+navigating to symbols. When no selector UI plugin is detected, or
+g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
+window will be used instead.
+Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
+none are. >
     let g:OmniSharp_selector_ui='unite'
     OR
     let g:OmniSharp_selector_ui='ctrlp'
     OR
     let g:OmniSharp_selector_ui='fzf'
+    OR
+    let g:OmniSharp_selector_ui=''
 <
 
                                                    *'g:Omnisharp_start_server'*
@@ -67,7 +73,7 @@ opening a `*.cs` file. Default: 1 >
 
                                                     *'g:Omnisharp_stop_server'*
 Use this option to specify whether OmniSharp will stop automatically upon
-closing Vim. Default: 1 >
+closing Vim. Default: 2 >
     let g:Omnisharp_stop_server=1
 <
 

@@ -46,16 +46,11 @@ call add(g:ctrlp_ext_vars, {
 \ })
 
 
-function! ctrlp#OmniSharp#findcodeactions#setactions(mode) abort
+function! ctrlp#OmniSharp#findcodeactions#setactions(mode, actions) abort
   " When using the roslyn server, use /v2/codeactions
   let s:version = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
-  let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(s:version)))
+  let s:actions = a:actions
   let s:mode = a:mode
-  if empty(s:actions)
-    echo 'No code actions found'
-    return 0
-  endif
-  return 1
 endfunction
 
 " Provide a list of strings to search in

@@ -136,26 +136,26 @@ function! OmniSharp#JumpToLocation(filename, line, column) abort
   endif
 endfunction
 
-function! OmniSharp#SelectorPluginError()
-  echoerr 'No selector plugin found.  Please install unite.vim, ctrlp.vim or fzf.vim'
-endfunction
-
 function! OmniSharp#FindSymbol(...) abort
-  if a:0 > 0
-    let filter = a:1
-  else
-    let filter = ''
+  let filter = a:0 > 0 ? a:1 : ''
+  if !OmniSharp#ServerIsRunning()
+    return
+  endif
+  let quickfixes = pyeval(printf('findSymbols(%s)', string(filter)))
+  if empty(quickfixes)
+    echo 'No symbols found'
+    return
   endif
   if g:OmniSharp_selector_ui ==? 'unite'
-    call unite#start([['OmniSharp/findsymbols']])
+    call unite#start([['OmniSharp/findsymbols', quickfixes]])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    if ctrlp#OmniSharp#findsymbols#findsymbols(filter)
-      call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
-    endif
+    call ctrlp#OmniSharp#findsymbols#setsymbols(quickfixes)
+    call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#findsymbols(filter)
+    call fzf#OmniSharp#findsymbols(quickfixes)
   else
-    call OmniSharp#SelectorPluginError()
+    call setqflist(quickfixes)
+    botright cwindow 4
   endif
 endfunction
 
@@ -167,22 +167,85 @@ function! OmniSharp#FindType() abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findtypes()
   else
-    call OmniSharp#SelectorPluginError()
+    call setqflist(quickfixes)
+    botright cwindow 4
   endif
 endfunction
 
+" This function returns a count of the currently available code actions. It also
+" uses the code actions to pre-populate the code actions for
+" OmniSharp#GetCodeActions, and clears them on CursorMoved.
+"
+" If a callback function is passed in, the callback will also be called on
+" CursorMoved, allowing this function to be used to set up a temporary "Code
+" actions available" flag, e.g. in the statusline or signs column, and the
+" callback function can be used to clear the flag.
+function! OmniSharp#CountCodeActions(...) abort
+  let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
+  let s:actions = pyeval(printf('getCodeActions("normal", %s)', string(v)))
+
+  " v:t_func was added in vim8 - this form is backwards-compatible
+  if a:0 && type(a:1) == type(function("tr"))
+    let s:cb = a:1
+  endif
+
+  function! s:CleanupCodeActions() abort
+    unlet s:actions
+    if exists('s:cb')
+      call s:cb()
+      unlet s:cb
+    endif
+    autocmd! OmniSharp#CountCodeActions
+  endfunction
+
+  augroup OmniSharp#CountCodeActions
+    autocmd!
+    autocmd CursorMoved <buffer> call s:CleanupCodeActions()
+    autocmd CursorMovedI <buffer> call s:CleanupCodeActions()
+    autocmd BufLeave <buffer> call s:CleanupCodeActions()
+  augroup END
+
+  return len(s:actions)
+endfunction
+
 function! OmniSharp#GetCodeActions(mode) range abort
+  let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
+  if !exists('s:actions')
+    let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
+  endif
+  if empty(s:actions)
+    echo 'No code actions found'
+    return
+  endif
   if g:OmniSharp_selector_ui ==? 'unite'
     let context = {'empty': 0, 'auto_resize': 1}
-    call unite#start([['OmniSharp/findcodeactions', a:mode]], context)
+    call unite#start([['OmniSharp/findcodeactions', a:mode, s:actions, v]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    if ctrlp#OmniSharp#findcodeactions#setactions(a:mode)
-      call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
-    endif
+    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, s:actions)
+    call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#getcodeactions(a:mode)
+    call fzf#OmniSharp#getcodeactions(a:mode, s:actions)
   else
-    call OmniSharp#SelectorPluginError()
+    let message = []
+    let i = 0
+    for action in s:actions
+      let i += 1
+      call add(message, printf('%d. %s', i, v ==# 'v1' ? action : action.Name))
+    endfor
+    call add(message, 'Enter an action number, or just hit Enter to cancel: ')
+    let selection = str2nr(input(join(message, "\n")))
+    if type(selection) == type(0) && selection > 0 && selection <= i
+      if v ==# 'v1'
+        let command = printf('runCodeAction(%s, %d)', string(a:mode), selection - 1)
+      else
+        let action = s:actions[selection - 1]
+        let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+        let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', a:mode, command)
+      endif
+      if !pyeval(command)
+        echo 'No action taken'
+      endif
+    endif
   endif
 endfunction
 
@@ -237,19 +300,6 @@ function! OmniSharp#CodeCheck() abort
     let b:codecheck = pyeval('codeCheck()')
   endif
   return get(b:, 'codecheck', [])
-endfunction
-
-" Manually write content to the preview window.
-" Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
-function! s:writeToPreview(content)
-  silent pedit __OmniSharpScratch__
-  silent wincmd P
-  setlocal modifiable noreadonly
-  setlocal nobuflisted buftype=nofile bufhidden=wipe
-  silent put =a:content
-  0d_
-  setlocal nomodifiable readonly
-  silent wincmd p
 endfunction
 
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
@@ -657,6 +707,19 @@ function! s:json_decode(json) abort
   catch
     throw 'Invalid JSON response from server: ' . a:json
   endtry
+endfunction
+
+" Manually write content to the preview window.
+" Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
+function! s:writeToPreview(content)
+  silent pedit __OmniSharpScratch__
+  silent wincmd P
+  setlocal modifiable noreadonly
+  setlocal nobuflisted buftype=nofile bufhidden=wipe
+  silent put =a:content
+  0d_
+  setlocal nomodifiable readonly
+  silent wincmd p
 endfunction
 
 if has('patch-7.4.279')

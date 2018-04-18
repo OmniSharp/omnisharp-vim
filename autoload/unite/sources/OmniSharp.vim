@@ -9,16 +9,22 @@ let s:findcodeactions = {
 \ }
 
 function! s:findcodeactions.gather_candidates(args, context) abort
-  let mode = get(a:args, 0, 'normal')
-  let actions = pyeval(printf('getCodeActions(%s)', string(mode)))
-  if empty(actions)
-    call unite#print_source_message('No code actions found', s:findcodeactions.name)
+  let s:mode = get(a:args, 0, 'normal')
+  let s:actions = get(a:args, 1, [])
+  let s:version = get(a:args, 2, 'roslyn')
+
+  if s:version ==# 'v1'
+    return map(s:actions, '{
+    \   "word": v:val,
+    \   "source__OmniSharp_action": v:key,
+    \ }')
+  else
+    let actions = map(copy(s:actions), {i,v -> get(v, 'Name')})
+    return map(actions, '{
+    \   "word": v:val,
+    \   "source__OmniSharp_action": v:val,
+    \ }')
   endif
-  return map(actions, '{
-  \   "word": v:val,
-  \   "source__OmniSharp_mode": mode,
-  \   "source__OmniSharp_action": v:key,
-  \ }')
 endfunction
 
 let s:findcodeactions_action_table = {
@@ -27,9 +33,19 @@ let s:findcodeactions_action_table = {
 \   }
 \ }
 function! s:findcodeactions_action_table.run.func(candidate) abort
-  let mode = a:candidate.source__OmniSharp_mode
-  let action = a:candidate.source__OmniSharp_action
-  call pyeval(printf('runCodeAction(%s, %d)', string(mode), action))
+  let str = a:candidate.source__OmniSharp_action
+
+  if s:version ==# 'v1'
+    let action = index(s:actions, str)
+    let command = printf('runCodeAction(%s, %d)', string(s:mode), action)
+  else
+    let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# str})[0]
+    let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+    let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
+  endif
+  if !pyeval(command)
+    echo 'No action taken'
+  endif
 endfunction
 let s:findcodeactions.action_table = s:findcodeactions_action_table
 
@@ -40,11 +56,8 @@ let s:findsymbols = {
 \   'default_kind': 'jump_list',
 \ }
 function! s:findsymbols.gather_candidates(args, context) abort
-  if !OmniSharp#ServerIsRunning()
-    return []
-  endif
-  let symbols = pyeval('findSymbols()')
-  return map(symbols, '{
+  let quickfixes = get(a:args, 0, [])
+  return map(quickfixes, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,
   \   "action__path": v:val.filename,

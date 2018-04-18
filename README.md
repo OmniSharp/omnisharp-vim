@@ -25,12 +25,11 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
     * This functionality requires a recent version of Vim, you can check if your version is supported by running `:echo has("patch-7.3-598")`, it should output 1.
 
 * Jump to the definition of a type/variable/method
-* Find types/symbols interactively (requires plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
+* Find symbols interactively (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
 * Find implementations/derived types
 * Find usages
-* Contextual code actions (sort usings, use var....etc.) (requires plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
-  * Extract method
-* Find and fix code issues (unused usings, use base type where possible....etc.) (requires plugin: [Syntastic](https://github.com/vim-syntastic/syntastic))
+* Contextual code actions (unused usings, use var....etc.) (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
+* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
 * Semantic type highlighting
@@ -70,6 +69,9 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 
 #### Code Actions
 ![Code Actions screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/CodeActions.png)
+
+#### Code Actions Available (see [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Code-Actions-Available-flag) for details)
+![Code Actions Available](https://user-images.githubusercontent.com/5274565/38906320-1aa2d7c0-430a-11e8-9ee3-40790b7e600e.png)
 
 ## Installation
 ### Plugin
@@ -133,18 +135,19 @@ OmniSharp-vim can start the server and run asynchronous builds only if any of th
 The vim plugin [syntastic](https://github.com/vim-syntastic/syntastic) is needed for displaying code issues and syntax errors.
 
 ### (optional) Install ctrlp.vim, unite.vim or fzf.vim
-If you want to use the Code Actions, Find Type and Find Symbol features, you will need to install one of the following plugins:
+If one of these plugins is detected, it will be used as the selector for Code Actions and Find Symbols features:
 
 - [fzf.vim](https://github.com/junegunn/fzf.vim)
 - [CtrlP](https://github.com/ctrlpvim/ctrlp.vim)
 - [unite.vim](https://github.com/Shougo/unite.vim)
 
-If you have installed more than one, you can choose one by `g:OmniSharp_selector_ui` variable.
+If you have installed more than one, or you prefer to use native vim functionality (command line, quickfix window etc.) rather than a selector plugin, you can choose an option with the `g:OmniSharp_selector_ui` variable.
 
 ```vim
 let g:OmniSharp_selector_ui = 'unite'  " Use unite.vim
 let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
 let g:OmniSharp_selector_ui = 'fzf'    " Use fzf.vim
+let g:OmniSharp_selector_ui = ''       " Use vim - command line, quickfix etc.
 ```
 
 ## How to use
@@ -176,6 +179,8 @@ OmniSharp listens to requests from Vim on port 2000 by default, so make sure tha
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use an autocompletion plugin.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
+
+See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom configuration examples.
 
 ### Using with the legacy server
 
@@ -275,7 +280,7 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <buffer> <C-j> :OmniSharpNavigateDown<CR>
 augroup END
 
-" Contextual code actions (requires fzf, CtrlP or unite.vim)
+" Contextual code actions (uses fzf, CtrlP or unite.vim when available)
 nnoremap <Leader><Space> :OmniSharpGetCodeActions<CR>
 " Run code actions with text selected in visual mode to extract method
 xnoremap <Leader><Space> :call OmniSharp#GetCodeActions('visual')<CR>
@@ -300,7 +305,7 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 nnoremap <Leader>th :OmniSharpHighlightTypes<CR>
 
 " Enable snippet completion, requires completeopt-=preview
-let g:OmniSharp_want_snippet=1
+" let g:OmniSharp_want_snippet=1
 ```
 
 Pull requests welcome!
