@@ -70,6 +70,9 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 #### Code Actions
 ![Code Actions screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/CodeActions.png)
 
+#### Code Actions Available (see [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Code-Actions-Available-flag) for details)
+![Code Actions Available](https://user-images.githubusercontent.com/5274565/38906320-1aa2d7c0-430a-11e8-9ee3-40790b7e600e.png)
+
 ## Installation
 ### Plugin
 Install the vim plugin using your preferred plugin manager:
@@ -174,6 +177,8 @@ OmniSharp listens to requests from Vim on port 2000 by default, so make sure tha
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use an autocompletion plugin.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
+
+See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom configuration examples.
 
 ### Using with the legacy server
 
