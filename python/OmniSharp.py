@@ -146,6 +146,21 @@ def getCodeActions(mode, version='v1'):
     return []
 
 def runCodeAction(mode, action, version='v1'):
+    def __applyChange(changeDefinition):
+        filename = formatPathForClient(changeDefinition['FileName'])
+        openFile(filename, 1, 1)
+        if __isBufferChange(changeDefinition):
+            setBufferText(changeDefinition['Buffer'])
+        elif __isNewFile(changeDefinition):
+            for change in changeDefinition['Changes']:
+                setBufferText(change['NewText'])
+
+    def __isBufferChange(changeDefinition):
+        return 'Buffer' in changeDefinition and changeDefinition['Buffer'] != None
+
+    def __isNewFile(changeDefinition):
+        return 'Changes' in changeDefinition and changeDefinition['Changes'] != None
+
     parameters = codeActionParameters(mode, version)
     if version == 'v1':
         parameters['codeaction'] = action
@@ -163,21 +178,6 @@ def runCodeAction(mode, action, version='v1'):
                 __applyChange(changeDefinition)
             return True
     return False
-
-def __applyChange(changeDefinition):
-    filename = formatPathForClient(changeDefinition['FileName'])
-    openFile(filename, 1, 1)
-    if __isBufferChange(changeDefinition):
-        setBufferText(changeDefinition['Buffer'])
-    elif __isNewFile(changeDefinition):
-        for change in changeDefinition['Changes']:
-            setBufferText(change['NewText'])
-
-def __isBufferChange(changeDefinition):
-    return 'Buffer' in changeDefinition and changeDefinition['Buffer'] != None
-
-def __isNewFile(changeDefinition):
-    return 'Changes' in changeDefinition and changeDefinition['Changes'] != None
 
 def codeActionParameters(mode, version='v1'):
     parameters = {}
