@@ -174,7 +174,7 @@ let g:Omnisharp_stop_server = 1  " Ask whether to stop the server
 let g:Omnisharp_stop_server = 2  " Automatically stop the server
 ```
 
-OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port.
+OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port. This behavior can be changed by setting `let g:OmniSharp_use_random_port = 1` in your vimrc. When set, the OmniSharp server will run on a random port instead of using the default port.
 
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use an autocompletion plugin.
 
