@@ -159,11 +159,25 @@ def runCodeAction(mode, action, version='v1'):
         res = getResponse('/v2/runcodeaction', parameters)
         js = json.loads(res)
         if 'Changes' in js:
-            for c in js['Changes']:
-                if 'ModificationType' in c and c['ModificationType'] == 0 and 'Buffer' in c:
-                    setBufferText(c['Buffer'])
-                    return True
+            for changeDefinition in js['Changes']:
+                __applyChange(changeDefinition)
+            return True
     return False
+
+def __applyChange(changeDefinition):
+    if __isBufferChange(changeDefinition):
+        setBufferText(changeDefinition['Buffer'])
+    elif __isNewFile(changeDefinition):
+        for change in changeDefinition['Changes']:
+            filename = formatPathForClient(changeDefinition['FileName'])
+            openFile(filename, change['StartLine'], change['StartColumn'])
+            setBufferText(change['NewText'])
+
+def __isBufferChange(changeDefinition):
+    return 'Buffer' in changeDefinition and changeDefinition['Buffer'] != None
+
+def __isNewFile(changeDefinition):
+    return 'Changes' in changeDefinition and changeDefinition['Changes'] != None
 
 def codeActionParameters(mode, version='v1'):
     parameters = {}
