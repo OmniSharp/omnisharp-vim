@@ -165,12 +165,12 @@ def runCodeAction(mode, action, version='v1'):
     return False
 
 def __applyChange(changeDefinition):
+    filename = formatPathForClient(changeDefinition['FileName'])
+    openFile(filename, 1, 1)
     if __isBufferChange(changeDefinition):
         setBufferText(changeDefinition['Buffer'])
     elif __isNewFile(changeDefinition):
         for change in changeDefinition['Changes']:
-            filename = formatPathForClient(changeDefinition['FileName'])
-            openFile(filename, change['StartLine'], change['StartColumn'])
             setBufferText(change['NewText'])
 
 def __isBufferChange(changeDefinition):
