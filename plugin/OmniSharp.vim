@@ -17,7 +17,9 @@ let s:py_path = OmniSharp#util#path_join('python')
 exec "python sys.path.append(r'" . s:py_path . "')"
 exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'OmniSharp.py']))
 
-let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
+let g:OmniSharp_use_random_port = get(g:, 'OmniSharp_use_random_port', 0)
+let s:OmniSharp_default_port = g:OmniSharp_use_random_port ? pyeval('find_free_port()') : 2000
+let g:OmniSharp_port = get(g:, 'OmniSharp_port', s:OmniSharp_default_port)
 
 "Setup variable defaults
 "Default value for the server address

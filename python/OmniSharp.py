@@ -1,4 +1,5 @@
-import json, logging, os.path, platform, re, urllib2, urlparse, vim
+import json, logging, os.path, platform, re, urllib2, urlparse, vim, socket
+from contextlib import closing
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
@@ -372,3 +373,8 @@ def get_navigate_response(js):
         return {'Line': response['Line'], 'Column': response['Column']}
     else:
         return {}
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(('', 0))
+        return s.getsockname()[1]
