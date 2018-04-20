@@ -146,6 +146,12 @@ Default: 0 >
     let g:OmniSharp_translate_cygwin_wsl=1
 <
 
+                                                *'g:OmniSharp_use_random_port'*
+Use this option to default to a random port when no port is selected.
+Default: 0 >
+    let g:OmniSharp_use_random_port=0
+<
+
 ===============================================================================
 COMMANDS                                                   *omnisharp-commands*
 

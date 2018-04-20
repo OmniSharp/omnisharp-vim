@@ -210,9 +210,7 @@ endfunction
 
 function! OmniSharp#GetCodeActions(mode) range abort
   let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
-  if !exists('s:actions')
-    let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
-  endif
+  let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
   if empty(s:actions)
     echo 'No code actions found'
     return
