@@ -174,8 +174,10 @@ def runCodeAction(mode, action, version='v1'):
         res = getResponse('/v2/runcodeaction', parameters)
         js = json.loads(res)
         if 'Changes' in js:
+            vim.command("let cursor_position = getcurpos()")
             for changeDefinition in js['Changes']:
                 __applyChange(changeDefinition)
+            vim.command("call setpos('.', cursor_position)")
             return True
     return False
 
