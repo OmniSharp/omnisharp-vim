@@ -210,23 +210,27 @@ endfunction
 
 function! OmniSharp#GetCodeActions(mode) range abort
   let v = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
-  let s:actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
-  if empty(s:actions)
+  if exists('s:actions')
+    let actions = s:actions
+  else
+    let actions = pyeval(printf('getCodeActions(%s, %s)', string(a:mode), string(v)))
+  endif
+  if empty(actions)
     echo 'No code actions found'
     return
   endif
   if g:OmniSharp_selector_ui ==? 'unite'
     let context = {'empty': 0, 'auto_resize': 1}
-    call unite#start([['OmniSharp/findcodeactions', a:mode, s:actions, v]], context)
+    call unite#start([['OmniSharp/findcodeactions', a:mode, actions, v]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, s:actions)
+    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
     call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#getcodeactions(a:mode, s:actions)
+    call fzf#OmniSharp#getcodeactions(a:mode, actions)
   else
     let message = []
     let i = 0
-    for action in s:actions
+    for action in actions
       let i += 1
       call add(message, printf('%d. %s', i, v ==# 'v1' ? action : action.Name))
     endfor
@@ -236,7 +240,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
       if v ==# 'v1'
         let command = printf('runCodeAction(%s, %d)', string(a:mode), selection - 1)
       else
-        let action = s:actions[selection - 1]
+        let action = actions[selection - 1]
         let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
         let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', a:mode, command)
       endif
