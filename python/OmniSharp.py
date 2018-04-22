@@ -146,6 +146,21 @@ def getCodeActions(mode, version='v1'):
     return []
 
 def runCodeAction(mode, action, version='v1'):
+    def __applyChange(changeDefinition):
+        filename = formatPathForClient(changeDefinition['FileName'])
+        openFile(filename, 1, 1)
+        if __isBufferChange(changeDefinition):
+            setBufferText(changeDefinition['Buffer'])
+        elif __isNewFile(changeDefinition):
+            for change in changeDefinition['Changes']:
+                setBufferText(change['NewText'])
+
+    def __isBufferChange(changeDefinition):
+        return 'Buffer' in changeDefinition and changeDefinition['Buffer'] != None
+
+    def __isNewFile(changeDefinition):
+        return 'Changes' in changeDefinition and changeDefinition['Changes'] != None
+
     parameters = codeActionParameters(mode, version)
     if version == 'v1':
         parameters['codeaction'] = action
@@ -159,10 +174,11 @@ def runCodeAction(mode, action, version='v1'):
         res = getResponse('/v2/runcodeaction', parameters)
         js = json.loads(res)
         if 'Changes' in js:
-            for c in js['Changes']:
-                if 'ModificationType' in c and c['ModificationType'] == 0 and 'Buffer' in c:
-                    setBufferText(c['Buffer'])
-                    return True
+            vim.command("let cursor_position = getcurpos()")
+            for changeDefinition in js['Changes']:
+                __applyChange(changeDefinition)
+            vim.command("call setpos('.', cursor_position)")
+            return True
     return False
 
 def codeActionParameters(mode, version='v1'):
