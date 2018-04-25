@@ -9,7 +9,7 @@ let s:server_files = '*.sln'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
 let s:generated_snippets = {}
-let s:omnisharp_last_completion_dictionary = {}
+let s:last_completion_dictionary = {}
 let g:serverSeenRunning = 0
 
 let s:is_vimproc = 0
@@ -17,22 +17,19 @@ silent! let s:is_vimproc = vimproc#version()
 
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
-    "store the current cursor position
-    let s:column = col('.')
     "locate the start of the word
     let line = getline('.')
     let start = col('.') - 1
-    let s:textBuffer = getline(1, '$')
     while start > 0 && line[start - 1] =~# '\v[a-zA-z0-9_]'
       let start -= 1
     endwhile
 
     return start
   else
-    let omnisharp_last_completion_result =  pyeval('getCompletions("s:column", "a:base")')
-    let s:omnisharp_last_completion_dictionary = {}
+    let omnisharp_last_completion_result =  pyeval(printf('getCompletions(%s)', string(a:base)))
+    let s:last_completion_dictionary = {}
     for completion in omnisharp_last_completion_result
-        let s:omnisharp_last_completion_dictionary[get(completion, 'word')] = completion
+        let s:last_completion_dictionary[get(completion, 'word')] = completion
     endfor
     return omnisharp_last_completion_result
   endif
@@ -650,8 +647,8 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     let completion = split(completion, 'new ')[-1]
     let completion = split(completion, '= ')[-1]
 
-    if has_key(s:omnisharp_last_completion_dictionary, completion)
-      let snippet = get(get(s:omnisharp_last_completion_dictionary, completion, ''), 'snip','')
+    if has_key(s:last_completion_dictionary, completion)
+      let snippet = get(get(s:last_completion_dictionary, completion, ''), 'snip','')
       if !has_key(s:generated_snippets, completion)
         call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
         let s:generated_snippets[completion] = snippet

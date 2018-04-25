@@ -88,10 +88,11 @@ def findImplementations():
     js = getResponse('/findimplementations', parameters)
     return get_quickfix_list(js, 'QuickFixes')
 
-def getCompletions(column, partialWord):
+def getCompletions(partialWord):
     parameters = {}
-    parameters['column'] = vim.eval(column)
-    parameters['wordToComplete'] = vim.eval(partialWord)
+    parameters['column'] = vim.eval('col(".")')
+    parameters['buffer'] = '\r\n'.join(vim.eval("getline(1,'$')")[:])
+    parameters['wordToComplete'] = partialWord
 
     parameters['WantDocumentationForEveryCompletionResult'] = \
         bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
@@ -102,8 +103,6 @@ def getCompletions(column, partialWord):
     parameters['WantSnippet'] = want_snippet
     parameters['WantMethodHeader'] = want_snippet
     parameters['WantReturnType'] = want_snippet
-
-    parameters['buffer'] = '\r\n'.join(vim.eval('s:textBuffer')[:])
 
     response = json.loads(getResponse('/autocomplete', parameters))
 

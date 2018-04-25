@@ -72,8 +72,8 @@ let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_soluti
 let g:OmniSharp_server_config_name =
 \ get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
 
-if g:Omnisharp_stop_server==1
-  au VimLeavePre * call OmniSharp#AskStopServerIfRunning()
+if g:Omnisharp_stop_server == 1
+  autocmd VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
 if !exists('g:Omnisharp_highlight_user_types')
