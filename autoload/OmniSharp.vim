@@ -15,6 +15,21 @@ let g:serverSeenRunning = 0
 let s:is_vimproc = 0
 silent! let s:is_vimproc = vimproc#version()
 
+function! OmniSharp#GetCompletions(partial, ...) abort
+  let completions = pyeval(printf('getCompletions(%s)', string(a:partial)))
+  let s:last_completion_dictionary = {}
+  for completion in completions
+    let s:last_completion_dictionary[get(completion, 'word')] = completion
+  endfor
+  if a:0 > 0
+    " If a callback has been passed in, then use it
+    call a:1(completions)
+  else
+    " Otherwise just return the results
+    return completions
+  endif
+endfunction
+
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
     "locate the start of the word
@@ -26,12 +41,7 @@ function! OmniSharp#Complete(findstart, base) abort
 
     return start
   else
-    let omnisharp_last_completion_result =  pyeval(printf('getCompletions(%s)', string(a:base)))
-    let s:last_completion_dictionary = {}
-    for completion in omnisharp_last_completion_result
-        let s:last_completion_dictionary[get(completion, 'word')] = completion
-    endfor
-    return omnisharp_last_completion_result
+    return OmniSharp#GetCompletions(a:base)
   endif
 endfunction
 
