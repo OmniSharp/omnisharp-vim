@@ -76,6 +76,13 @@ if g:Omnisharp_stop_server == 1
   autocmd VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
+" Initialize OmniSharp as an asyncomplete source
+autocmd User asyncomplete_setup call asyncomplete#register_source({
+\   'name': 'OmniSharp',
+\   'whitelist': ['cs'],
+\   'completor': function('asyncomplete#sources#OmniSharp#completor')
+\ })
+
 if !exists('g:Omnisharp_highlight_user_types')
   let g:Omnisharp_highlight_user_types = 0
 endif
