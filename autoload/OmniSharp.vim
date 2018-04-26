@@ -5,6 +5,11 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
+"Load python/OmniSharp.py
+let s:py_path = OmniSharp#util#path_join('python')
+exec "python sys.path.append(r'" . s:py_path . "')"
+exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'OmniSharp.py']))
+
 let s:server_files = '*.sln'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
