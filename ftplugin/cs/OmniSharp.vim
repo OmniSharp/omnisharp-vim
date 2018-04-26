@@ -8,7 +8,7 @@ endif
 let b:OmniSharp_ftplugin_loaded = 1
 
 if !exists('g:omnicomplete_fetch_full_documentation')
-    let g:omnicomplete_fetch_full_documentation = 0
+  let g:omnicomplete_fetch_full_documentation = 0
 endif
 
 augroup plugin-OmniSharp
@@ -20,7 +20,6 @@ augroup plugin-OmniSharp
   \|  endif
 
   autocmd CompleteDone <buffer> call OmniSharp#ExpandAutoCompleteSnippet()
-
 augroup END
 
 setlocal omnifunc=OmniSharp#Complete

@@ -466,7 +466,7 @@ function! OmniSharp#EnableTypeHighlighting() abort
   call OmniSharp#EnableTypeHighlightingForBuffer()
 
   augroup _omnisharp
-    au!
+    autocmd!
     autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
   augroup END
 endfunction

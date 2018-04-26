@@ -83,10 +83,6 @@ autocmd User asyncomplete_setup call asyncomplete#register_source({
 \   'completor': function('asyncomplete#sources#OmniSharp#completor')
 \ })
 
-if !exists('g:Omnisharp_highlight_user_types')
-  let g:Omnisharp_highlight_user_types = 0
-endif
-
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(
   \   ['unite', 'ctrlp', 'fzf'],

@@ -20,9 +20,8 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
     * CamelCase completions
     * Subsequence match completions
   * Completion snippets are supported. e.g. Console.WriteLine(TAB) (ENTER) will complete to Console.WriteLine(string value) and expand a dynamic snippet, this will place you in SELECT mode and the first method argument will be selected. 
-    * Requires [UltiSnips](https://github.com/SirVer/ultisnips) and supports standard C-x C-o completion, [Supertab](https://github.com/ervandew/supertab) and [Neocomplete](https://github.com/Shougo/neocomplete.vim).
+    * Requires [UltiSnips](https://github.com/SirVer/ultisnips) and supports standard C-x C-o completion as well as completion/autocompletion plugins such as [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim), [Supertab](https://github.com/ervandew/supertab), [Neocomplete](https://github.com/Shougo/neocomplete.vim) etc.
     * Requires `set completeopt-=preview` when using [Neocomplete](https://github.com/Shougo/neocomplete.vim) because of a compatibility issue with [UltiSnips](https://github.com/SirVer/ultisnips). 
-    * This functionality requires a recent version of Vim, you can check if your version is supported by running `:echo has("patch-7.3-598")`, it should output 1.
 
 * Jump to the definition of a type/variable/method
 * Find symbols interactively (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
@@ -46,7 +45,7 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 :OmniSharpAddToProject
 ```
 
-* Add reference. Supports project and file reference. GAC referencing todo.
+* Add reference. Supports project and file reference.
 
 ```vim
 :OmniSharpAddReference path_to_reference
@@ -114,8 +113,8 @@ OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](ht
 OmniSharp-Roslyn also requires [libuv](http://libuv.org/). This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv` on debian/Ubuntu, `pacman -S libuv` on arch linux etc.
 
 ### Install Python
-Install last version of 2.7 series ([Python 2.7.14](https://www.python.org/downloads/release/python-2714/) at the time of this writing). Make sure that you pick correct version of Python to match the architecture of Vim.
-For example, if you installed Vim using the default Windows installer, you will need to install the x86 (32 bit!) version of Python.
+Install latest version of 2.7 series ([Python 2.7.14](https://www.python.org/downloads/release/python-2714/) at the time of this writing).
+Make sure that you pick correct version of Python to match your vim's architecture (32-bit python for 32-bit vim, 64-bit python for 64-bit vim).
 
 Verify that Python is working inside Vim with
 
@@ -133,6 +132,11 @@ OmniSharp-vim can start the server and run asynchronous builds only if any of th
 
 ### (optional) Install syntastic
 The vim plugin [syntastic](https://github.com/vim-syntastic/syntastic) is needed for displaying code issues and syntax errors.
+Configure it to work with OmniSharp with the following line in your vimrc.
+
+```vim
+let g:syntastic_cs_checkers = ['code_checker']
+```
 
 ### (optional) Install ctrlp.vim, unite.vim or fzf.vim
 If one of these plugins is detected, it will be used as the selector for Code Actions and Find Symbols features:
@@ -151,10 +155,11 @@ let g:OmniSharp_selector_ui = ''       " Use vim - command line, quickfix etc.
 ```
 
 ## How to use
-By default, the server is started automatically if you have vim-dispatch installed when you open a .cs file.
-It tries to detect your solution file (.sln) and starts the OmniSharp server passing the path to the solution file.
+By default, the server is started automatically when you open a .cs file.
+It tries to detect your solution file (.sln) and starts the OmniSharp-roslyn server, passing the path to the solution file.
 
-If you are using tmux, the server will start in a new tmux session. In iterm2, a new tab is opened. Windows starts the server with a minimised cmd shell. For any other configuration, the server will start invisibly in the background.
+In vim8 and neovim, the server is started invisibly by a vim job.
+In older versions of vim, the server will be started in different ways depending on whether you are using vim-dispatch in tmux, or are using vim-proc, gvim or running vim in a terminal.
 
 This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in your vimrc. You can then start the server manually from within vim with `:OmniSharpStartServer`. Alternatively, the server can be manually started from outside vim:
 
@@ -165,7 +170,7 @@ This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in 
 Add `-v Verbose` to get extra information from the server.
 
 
-When vim is closed and the OmniSharp server is running, vim will ask you if you want to stop the OmniSharp server.
+When vim is closed and the OmniSharp server is running, vim will stop the server automatically.
 This behaviour can be altered with the `g:Omnisharp_stop_server` variable in your vimrc:
 
 ```vim
@@ -176,7 +181,7 @@ let g:Omnisharp_stop_server = 2  " Automatically stop the server
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port. This behavior can be changed by setting `let g:OmniSharp_use_random_port = 1` in your vimrc. When set, the OmniSharp server will run on a random port instead of using the default port.
 
-To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use an autocompletion plugin.
+To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use a completion or autocompletion plugin.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
 
@@ -193,16 +198,6 @@ let g:OmniSharp_server_type = 'v1'
 let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
 ```
 
-### Other useful tools
-
-- [grunt-init-csharpsolution](https://github.com/nosami/grunt-init-csharpsolution) Useful for quickly creating a C# solution with a couple of projects. Easily adaptable.
-![screenshot](https://raw.githubusercontent.com/nosami/nosami.github.io/master/grunt-init-csharpsolution.gif)
-- [WarmUp](https://github.com/chucknorris/warmup/issues) Same as above, but it didn't work for me on OSX when I tried.
-- [OpenIDE](https://github.com/continuoustests/OpenIDE) Lots of uses. I use it for creating new project files and generating classes with the namespace and class pre-populated. It's very extensible.
-- [OrangeT/vim-csharp](https://github.com/OrangeT/vim-csharp) Advanced syntax highlighting including razor support. Contains snippets for Razor, Xunit and Moq.
-- [devtools-terminal](http://blog.dfilimonov.com/2013/09/12/devtools-terminal.html) Embed OmniSharp inside Chrome
-![dev-tools screenshot](https://raw.githubusercontent.com/nosami/nosami.github.io/master/aspvnext.gif)
-
 ## Configuration
 
 ### Example vimrc
@@ -211,14 +206,8 @@ let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
 " OmniSharp won't work without this setting
 filetype plugin on
 
-" Choose the OmniSharp-Roslyn server - this is the default
-let g:OmniSharp_server_type = 'roslyn'
-
 " Set the path to the roslyn server
 let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
-
-" This is the default value, setting it isn't actually necessary
-let g:OmniSharp_host = "http://localhost:2000"
 
 " Set the type lookup function to use the preview window instead of echoing it
 "let g:OmniSharp_typeLookupInPreview = 1
@@ -230,6 +219,7 @@ let g:OmniSharp_timeout = 1
 " one (so the preview documentation is accessible). Remove 'preview' if you
 " don't want to see any documentation whatsoever.
 set completeopt=longest,menuone,preview
+
 " Fetch full documentation during omnicomplete requests.
 " There is a performance penalty with this (especially on Mono).
 " By default, only Type/Method signatures are fetched. Full documentation can
@@ -262,7 +252,6 @@ augroup omnisharp_commands
     " The following commands are contextual, based on the cursor position.
     autocmd FileType cs nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>fi :OmniSharpFindImplementations<CR>
-    autocmd FileType cs nnoremap <buffer> <Leader>ft :OmniSharpFindType<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>fs :OmniSharpFindSymbol<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>fu :OmniSharpFindUsages<CR>
 
@@ -304,7 +293,7 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 " Add syntax highlighting for types and interfaces
 nnoremap <Leader>th :OmniSharpHighlightTypes<CR>
 
-" Enable snippet completion, requires completeopt-=preview
+" Enable snippet completion
 " let g:OmniSharp_want_snippet=1
 ```
 
