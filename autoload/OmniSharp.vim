@@ -140,11 +140,16 @@ endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column) abort
   if a:filename !=# ''
-    if a:filename !=# bufname('%')
-      exec 'e! ' . fnameescape(a:filename)
+    if fnamemodify(a:filename, ':p') !=# expand('%:p')
+      try
+        execute 'edit ' . fnameescape(a:filename)
+      catch /^Vim(edit):E37/
+        echohl ErrorMsg | echomsg 'No write since last change' | echohl None
+        return 0
+      endtry
     endif
-    "row is 1 based, column is 0 based
     call cursor(a:line, a:column)
+    return 1
   endif
 endfunction
 
@@ -244,7 +249,7 @@ function! OmniSharp#GetCodeActions(mode) range abort
     let i = 0
     for action in actions
       let i += 1
-      call add(message, printf('%d. %s', i, v ==# 'v1' ? action : action.Name))
+      call add(message, printf(' %2d. %s', i, v ==# 'v1' ? action : action.Name))
     endfor
     call add(message, 'Enter an action number, or just hit Enter to cancel: ')
     let selection = str2nr(input(join(message, "\n")))
