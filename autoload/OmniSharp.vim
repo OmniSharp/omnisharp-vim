@@ -709,7 +709,7 @@ function! s:find_solution_files() abort
   endwhile
 
   if empty(solution_files) && g:OmniSharp_start_without_solution
-    let solution_files = ['.']
+    let solution_files = [getcwd()]
   endif
 
   return solution_files
