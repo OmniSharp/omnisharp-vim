@@ -649,8 +649,8 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
     return
   endif
 
-  if !exists("*UltiSnips#AddSnippetWithPriority")
-    echoerr "g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed."
+  if empty(globpath(&runtimepath, 'plugin/UltiSnips.vim'))
+    echoerr 'g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed.'
     return
   endif
 
