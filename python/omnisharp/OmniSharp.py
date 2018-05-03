@@ -265,6 +265,9 @@ def codeCheck():
     js = getResponse('/codecheck')
     return get_quickfix_list(js, 'QuickFixes')
 
+def signatureHelp():
+    return getResponse('/signatureHelp');
+
 def typeLookup(ret):
     parameters = {}
     parameters['includeDocumentation'] = vim.eval('a:includeDocumentation')

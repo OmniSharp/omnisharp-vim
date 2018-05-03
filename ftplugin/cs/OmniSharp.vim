@@ -55,6 +55,7 @@ command! -buffer -bar OmniSharpRunAllTests         call OmniSharp#RunTests('all'
 command! -buffer -bar OmniSharpRunLastTests        call OmniSharp#RunTests('last')
 command! -buffer -bar OmniSharpRunTestFixture      call OmniSharp#RunTests('fixture')
 command! -buffer -bar OmniSharpRunTests            call OmniSharp#RunTests('single')
+command! -buffer -bar OmniSharpSignatureHelp       call OmniSharp#SignatureHelp()
 command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
 command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookupWithoutDocumentation()
