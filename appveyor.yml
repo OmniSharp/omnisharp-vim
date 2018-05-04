@@ -1,0 +1,7 @@
+install:
+  - echo Installed Pythons
+  - dir c:\Python*
+  - C:\Python36\python -m pip install tox
+build: false  # Not a C# project, build stuff at the test step instead.
+test_script:
+  - C:\Python36\python -m tox -c python/tox.ini
