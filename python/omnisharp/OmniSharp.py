@@ -7,6 +7,7 @@ import os
 import os.path
 import types
 import sys
+import platform
 
 try:
     from urllib import parse as urlparse
