@@ -3,5 +3,6 @@ venv/
 .cache/
 .tox/
 __cache__/
+.pytest_cache/
 
 *.pyc

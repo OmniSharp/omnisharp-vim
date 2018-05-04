@@ -22,6 +22,8 @@ def mock_eval(expr):
         return ["mybufferdata"]
     elif expr.startswith('g:OmniSharp_timeout'):
         return 123
+    elif expr.startswith('g:OmniSharp_translate_cygwin_wsl'):
+        return 0
     elif expr.startswith('g:OmniSharp'):
         return "some_global_setting"
     elif expr == 'expand("<sfile>:p:h")':
