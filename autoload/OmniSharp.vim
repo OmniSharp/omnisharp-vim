@@ -133,7 +133,7 @@ function! OmniSharp#NavigateDown() abort
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
-  OmniSharp#py#eval('gotoDefinition()')
+  call OmniSharp#py#eval('gotoDefinition()')
 endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column) abort
@@ -277,7 +277,7 @@ function! OmniSharp#GetIssues() abort
 endfunction
 
 function! OmniSharp#FixIssue() abort
-  OmniSharp#py#eval('fixCodeIssue()')
+  call OmniSharp#py#eval('fixCodeIssue()')
 endfunction
 
 function! OmniSharp#FindSyntaxErrors() abort
@@ -332,7 +332,7 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
 
   if g:OmniSharp_typeLookupInPreview || a:includeDocumentation ==# 'True'
     let s:documentation = ''
-    OmniSharp#py#eval('typeLookup("type")')
+    call OmniSharp#py#eval('typeLookup("type")')
     let doc = get(s:, 'documentation', '')
     if len(doc) > 0
       let doc = "\n\n" . doc
@@ -352,7 +352,7 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
       endfor
     endif
     if found_line_in_loc_list == 0
-      OmniSharp#py#eval('typeLookup("type")')
+      call OmniSharp#py#eval('typeLookup("type")')
       call OmniSharp#Echo(type)
     endif
   endif
@@ -412,7 +412,7 @@ function! OmniSharp#Build() abort
 endfunction
 
 function! OmniSharp#BuildAsync() abort
-  OmniSharp#py#eval('buildcommand()')
+  call OmniSharp#py#eval('buildcommand()')
   let &l:makeprg=b:buildcommand
   setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
   Make
@@ -420,10 +420,10 @@ endfunction
 
 function! OmniSharp#RunTests(mode) abort
   wall
-  OmniSharp#py#eval('buildcommand()')
+  call OmniSharp#py#eval('buildcommand()')
 
   if a:mode !=# 'last'
-    OmniSharp#py#eval('getTestCommand()')
+    call OmniSharp#py#eval('getTestCommand()')
   endif
 
   let s:cmdheight=&cmdheight
@@ -461,9 +461,9 @@ function! OmniSharp#EnableTypeHighlighting() abort
   endif
 
   if g:OmniSharp_server_type ==# 'roslyn'
-    OmniSharp#py#eval('lookupAllUserTypes()')
+    call OmniSharp#py#eval('lookupAllUserTypes()')
   else
-    OmniSharp#py#eval('lookupAllUserTypesLegacy()')
+    call OmniSharp#py#eval('lookupAllUserTypesLegacy()')
   endif
 
   let startBuf = bufnr('%')
@@ -480,12 +480,12 @@ function! OmniSharp#EnableTypeHighlighting() abort
 endfunction
 
 function! OmniSharp#ReloadSolution() abort
-  OmniSharp#py#eval('getResponse("/reloadsolution")')
+  call OmniSharp#py#eval('getResponse("/reloadsolution")')
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
   if OmniSharp#BufferHasChanged() == 1
-    OmniSharp#py#eval('getResponse("/updatebuffer")')
+    call OmniSharp#py#eval('getResponse("/updatebuffer")')
   endif
 endfunction
 
@@ -501,7 +501,7 @@ function! OmniSharp#BufferHasChanged() abort
 endfunction
 
 function! OmniSharp#CodeFormat() abort
-  OmniSharp#py#eval('codeFormat()')
+  call OmniSharp#py#eval('codeFormat()')
 endfunction
 
 function! OmniSharp#FixUsings() abort
@@ -515,7 +515,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning() abort
   try
-    OmniSharp#py#eval('vim.command("let s:alive = \"%s\"" % getResponse("/checkalivestatus", None, 0.2))')
+    call OmniSharp#py#eval('vim.command("let s:alive = \"%s\"" % getResponse("/checkalivestatus", None, 0.2))')
     return s:alive ==# 'true'
   catch
     return 0
@@ -594,7 +594,7 @@ function! OmniSharp#StartServer() abort
 endfunction
 
 function! OmniSharp#AddToProject() abort
-  OmniSharp#py#eval('getResponse("/addtoproject")')
+  call OmniSharp#py#eval('getResponse("/addtoproject")')
 endfunction
 
 function! OmniSharp#AskStopServerIfRunning() abort
@@ -616,7 +616,7 @@ function! OmniSharp#StopServer(...) abort
   endif
 
   if force || OmniSharp#ServerIsRunning()
-    OmniSharp#py#eval('getResponse("/stopserver")')
+    call OmniSharp#py#eval('getResponse("/stopserver")')
     call OmniSharp#proc#StopJob()
     let g:OmniSharp_running_slns = []
   endif
@@ -628,7 +628,7 @@ function! OmniSharp#AddReference(reference) abort
   else
     let a:ref = a:reference
   endif
-  OmniSharp#py#eval('addReference()')
+  call OmniSharp#py#eval('addReference()')
 endfunction
 
 function! OmniSharp#AppendCtrlPExtensions() abort
