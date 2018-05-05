@@ -429,6 +429,7 @@ def get_navigate_response(js):
         return {}
 
 def find_free_port():
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    with closing(s):
         s.bind(('', 0))
         return s.getsockname()[1]
