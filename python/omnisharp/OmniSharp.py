@@ -8,6 +8,9 @@ import os.path
 import types
 import sys
 import platform
+import re
+import socket
+from contextlib import closing
 
 try:
     from urllib import parse as urlparse
