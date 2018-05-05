@@ -29,8 +29,8 @@ function! OmniSharp#py#load(filename)
   exec s:pyfile fnameescape(g:omnisharp_python_path . a:filename)
 endfunction
 
-function! OmniSharp#py#eval(tmp, ...)
-  return s:pyeval(printf(tmp, a:000))
+function! OmniSharp#py#eval(cmd)
+  return s:pyeval(a:cmd)
 endfunction
 
 let &cpo = s:save_cpo
