@@ -61,8 +61,7 @@ function! OmniSharp#FindUsages() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist)
   else
     echo 'No usages found'
   endif
@@ -81,8 +80,7 @@ function! OmniSharp#FindImplementations() abort
   endif
 
   if len(qf_taglist) > 1
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist)
   endif
 endfunction
 
@@ -91,8 +89,7 @@ function! OmniSharp#FindMembers() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 1
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist)
   endif
 endfunction
 
@@ -177,8 +174,7 @@ function! OmniSharp#FindSymbol(...) abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findsymbols(quickfixes)
   else
-    call setqflist(quickfixes)
-    botright cwindow 4
+    call s:set_quickfix(quickfixes)
   endif
 endfunction
 
@@ -190,8 +186,7 @@ function! OmniSharp#FindType() abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findtypes()
   else
-    call setqflist(quickfixes)
-    botright cwindow 4
+    call s:set_quickfix(quickfixes)
   endif
 endfunction
 
@@ -414,8 +409,7 @@ function! OmniSharp#Build() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist)
   endif
 endfunction
 
@@ -516,8 +510,7 @@ function! OmniSharp#FixUsings() abort
   let qf_taglist = g:OmniSharp#py#eval('fix_usings()')
 
   if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    botright cwindow
+    call s:set_quickfix(qf_taglist)
   endif
 endfunction
 
@@ -732,6 +725,13 @@ function! s:json_decode(json) abort
   catch
     throw 'Invalid JSON response from server: ' . a:json
   endtry
+endfunction
+
+function! s:set_quickfix(list)
+  call setqflist(a:list)
+  if g:OmniSharp_open_quickfix
+    botright cwindow 4
+  endif
 endfunction
 
 " Manually write content to the preview window.
