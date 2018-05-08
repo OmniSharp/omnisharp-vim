@@ -10,6 +10,11 @@ let s:py_path = OmniSharp#util#path_join(['python', 'omnisharp'])
 exec "python sys.path.append(r'" . s:py_path . "')"
 exec 'pyfile ' . fnameescape(OmniSharp#util#path_join(['python', 'omnisharp', 'OmniSharp.py']))
 
+let g:OmniSharp_use_random_port = get(g:, 'OmniSharp_use_random_port', 0)
+let s:OmniSharp_default_port = g:OmniSharp_use_random_port ? pyeval('find_free_port()') : 2000
+let g:OmniSharp_port = get(g:, 'OmniSharp_port', s:OmniSharp_default_port)
+let g:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:' . g:OmniSharp_port)
+
 let s:server_files = '*.sln'
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
