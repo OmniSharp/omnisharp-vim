@@ -12,14 +12,6 @@ endif
 " Set default for translating cygwin/WSL unix paths to Windows paths
 let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', 0)
 
-let g:OmniSharp_use_random_port = get(g:, 'OmniSharp_use_random_port', 0)
-let s:OmniSharp_default_port = g:OmniSharp_use_random_port ? pyeval('find_free_port()') : 2000
-let g:OmniSharp_port = get(g:, 'OmniSharp_port', s:OmniSharp_default_port)
-
-"Setup variable defaults
-"Default value for the server address
-let g:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:' . g:OmniSharp_port)
-
 "Default value for the timeout value
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
 

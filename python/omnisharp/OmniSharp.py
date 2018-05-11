@@ -95,7 +95,13 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     req.add_header('Content-Type', 'application/json')
 
     try:
-        response = opener.open(req, json.dumps(parameters), timeout)
+
+        body = json.dumps(parameters)
+
+        if sys.version_info >= (3, 0):
+            body = body.encode('utf-8')
+
+        response = opener.open(req, body, timeout)
         vim.command("let g:serverSeenRunning = 1")
         res = response.read()
 
