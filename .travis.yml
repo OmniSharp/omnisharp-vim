@@ -2,5 +2,7 @@ sudo: false
 language: python
 python:
   - "2.7"
+  - "3.5"
+  - "3.6"
 install: pip install tox-travis
 script: cd ${TRAVIS_BUILD_DIR}/python; tox
