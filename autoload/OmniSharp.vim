@@ -515,7 +515,7 @@ endfunction
 
 function! OmniSharp#ServerIsRunning() abort
   try
-    call OmniSharp#py#eval('vim.command("let s:alive = \"%s\"" % getResponse("/checkalivestatus", None, 0.2))')
+    let s:alive = OmniSharp#py#eval('\"%s\"" % getResponse("/checkalivestatus", None, 0.2)')
     return s:alive ==# 'true'
   catch
     return 0
