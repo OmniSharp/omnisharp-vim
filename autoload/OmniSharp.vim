@@ -61,7 +61,7 @@ function! OmniSharp#FindUsages() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
-    call s:set_quickfix(qf_taglist)
+    call s:set_quickfix(qf_taglist, 'Usages: '.expand('<cword>'))
   else
     echo 'No usages found'
   endif
@@ -80,7 +80,7 @@ function! OmniSharp#FindImplementations() abort
   endif
 
   if len(qf_taglist) > 1
-    call s:set_quickfix(qf_taglist)
+    call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
   endif
 endfunction
 
@@ -88,8 +88,10 @@ function! OmniSharp#FindMembers() abort
   let qf_taglist = g:OmniSharp#py#eval('findMembers()')
 
   " Place the tags in the quickfix window, if possible
+  " TODO: Should this use the location window instead, since it is
+  " buffer-specific?
   if len(qf_taglist) > 1
-    call s:set_quickfix(qf_taglist)
+    call s:set_quickfix(qf_taglist, 'Members')
   endif
 endfunction
 
@@ -157,7 +159,7 @@ function! OmniSharp#JumpToLocation(filename, line, column) abort
 endfunction
 
 function! OmniSharp#FindSymbol(...) abort
-  let filter = a:0 > 0 ? a:1 : ''
+  let filter = a:0 ? a:1 : ''
   if !OmniSharp#ServerIsRunning()
     return
   endif
@@ -174,7 +176,8 @@ function! OmniSharp#FindSymbol(...) abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findsymbols(quickfixes)
   else
-    call s:set_quickfix(quickfixes)
+    let title = 'Symbols'.(len(filter) ? ': '.filter : '')
+    call s:set_quickfix(quickfixes, title)
   endif
 endfunction
 
@@ -186,7 +189,7 @@ function! OmniSharp#FindType() abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findtypes()
   else
-    call s:set_quickfix(quickfixes)
+    call s:set_quickfix(quickfixes, 'Types')
   endif
 endfunction
 
@@ -409,7 +412,7 @@ function! OmniSharp#Build() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
-    call s:set_quickfix(qf_taglist)
+    call s:set_quickfix(qf_taglist, 'Build')
   endif
 endfunction
 
@@ -510,7 +513,7 @@ function! OmniSharp#FixUsings() abort
   let qf_taglist = g:OmniSharp#py#eval('fix_usings()')
 
   if len(qf_taglist) > 0
-    call s:set_quickfix(qf_taglist)
+    call s:set_quickfix(qf_taglist, 'Usings')
   endif
 endfunction
 
@@ -727,8 +730,8 @@ function! s:json_decode(json) abort
   endtry
 endfunction
 
-function! s:set_quickfix(list)
-  call setqflist(a:list)
+function! s:set_quickfix(list, title)
+  call setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title})
   if g:OmniSharp_open_quickfix
     botright cwindow 4
   endif
