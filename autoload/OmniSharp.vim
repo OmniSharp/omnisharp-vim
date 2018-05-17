@@ -360,6 +360,8 @@ function! OmniSharp#SignatureHelp() abort
   let result = s:json_decode(g:OmniSharp#py#eval('signatureHelp()'))
   if type(result) != type({})
     echo 'No signature help found'
+    " Clear existing preview content
+    let output = ''
   else
     if result.ActiveSignature == -1
       " No signature matches - display all options
@@ -373,8 +375,8 @@ function! OmniSharp#SignatureHelp() abort
         let output = join([parameter.Label, parameter.Documentation], "\n")
       endif
     endif
-    call s:writeToPreview(output)
   endif
+  call s:writeToPreview(output)
 endfunction
 
 function! OmniSharp#Echo(message) abort
