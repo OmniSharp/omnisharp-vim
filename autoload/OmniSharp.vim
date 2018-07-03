@@ -82,6 +82,8 @@ function! OmniSharp#FindImplementations() abort
   if len(qf_taglist) > 1
     call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
   endif
+
+  return len(qf_taglist)
 endfunction
 
 function! OmniSharp#FindMembers() abort
