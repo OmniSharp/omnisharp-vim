@@ -5,7 +5,7 @@ import logging
 
 import vim  # pylint: disable=import-error
 
-from .util import BaseCtx
+from .util import VimUtilCtx
 from .util import find_free_port as util_find_free_port
 from .util import (formatPathForClient, formatPathForServer, getResponse,
                    quickfixes_from_response)
@@ -14,43 +14,7 @@ from .vimcmd import vimcmd
 logger = logging.getLogger('omnisharp')
 
 
-class VimUtilCtx(BaseCtx):
-    """ Implementation of a UtilCtx that gets data from vim API """
-
-    @property
-    def buffer_name(self):
-        return vim.current.buffer.name
-
-    @property
-    def translate_cygwin_wsl(self):
-        return bool(int(vim.eval('g:OmniSharp_translate_cygwin_wsl'))),
-
-    @property
-    def cwd(self):
-        return vim.eval('getcwd()')
-
-    @property
-    def timeout(self):
-        return int(vim.eval('g:OmniSharp_timeout'))
-
-    @property
-    def host(self):
-        return vim.eval('OmniSharp#GetHost()')
-
-    @property
-    def line(self):
-        return vim.current.window.cursor[0]
-
-    @property
-    def column(self):
-        return vim.current.window.cursor[1] + 1
-
-    @property
-    def buffer(self):
-        return '\r\n'.join(vim.eval("getline(1,'$')")[:])
-
-
-ctx = VimUtilCtx()
+ctx = VimUtilCtx(vim)
 
 
 def openFile(filename, line=0, column=0, noautocmd=0):

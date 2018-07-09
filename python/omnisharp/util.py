@@ -75,6 +75,45 @@ class UtilCtx(BaseCtx):
         self.buffer = buffer
 
 
+class VimUtilCtx(BaseCtx):
+    """ Implementation of a UtilCtx that gets data from vim API """
+    def __init__(self, vim):
+        super(VimUtilCtx, self).__init__()
+        self._vim = vim
+
+    @property
+    def buffer_name(self):
+        return self._vim.current.buffer.name
+
+    @property
+    def translate_cygwin_wsl(self):
+        return bool(int(self._vim.eval('g:OmniSharp_translate_cygwin_wsl')))
+
+    @property
+    def cwd(self):
+        return self._vim.eval('getcwd()')
+
+    @property
+    def timeout(self):
+        return int(self._vim.eval('g:OmniSharp_timeout'))
+
+    @property
+    def host(self):
+        return self._vim.eval('OmniSharp#GetHost()')
+
+    @property
+    def line(self):
+        return self._vim.current.window.cursor[0]
+
+    @property
+    def column(self):
+        return self._vim.current.window.cursor[1] + 1
+
+    @property
+    def buffer(self):
+        return '\r\n'.join(self._vim.eval("getline(1,'$')")[:])
+
+
 def quickfixes_from_response(ctx, response):
     items = []
     for quickfix in response:
