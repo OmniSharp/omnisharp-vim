@@ -21,7 +21,7 @@ Execute (Test start command construction):
 "     return OmniSharp#util#get_start_cmd(OmniSharp#util#path_join(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json']))
 "   endfunction
 "
-"   let g:omnisharp_proc_debug = 0
+"   let g:OmniSharp_proc_debug = 0
 "   let g:OmniSharp_port = get(g:, 'OmniSharp_port', 2000)
 "
 "   function! StartWait()

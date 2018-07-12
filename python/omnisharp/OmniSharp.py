@@ -25,7 +25,7 @@ logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
 
 log_dir = os.path.join(
-    vim.eval('g:omnisharp_python_path'),
+    vim.eval('g:OmniSharp_python_path'),
     '..',
     '..',
     'log')

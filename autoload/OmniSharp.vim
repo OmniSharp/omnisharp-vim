@@ -533,7 +533,7 @@ endfunction
 function! OmniSharp#StartServerIfNotRunning() abort
   if !OmniSharp#ServerIsRunning()
     call OmniSharp#StartServer()
-    if g:Omnisharp_stop_server==2
+    if g:OmniSharp_stop_server == 2
       au VimLeavePre * call OmniSharp#StopServer()
     endif
   endif

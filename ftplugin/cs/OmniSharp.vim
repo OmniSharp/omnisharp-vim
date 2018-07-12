@@ -26,7 +26,7 @@ setlocal omnifunc=OmniSharp#Complete
 
 call OmniSharp#AppendCtrlPExtensions()
 
-if get(g:, 'Omnisharp_start_server', 0) == 1
+if get(g:, 'OmniSharp_start_server', 0) == 1
   call OmniSharp#StartServerIfNotRunning()
 endif
 

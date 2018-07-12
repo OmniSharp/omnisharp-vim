@@ -65,22 +65,22 @@ none are. >
     let g:OmniSharp_selector_ui=''
 <
 
-                                                   *'g:Omnisharp_start_server'*
+                                                   *'g:OmniSharp_start_server'*
 Use this option to specify whether OmniSharp will start automatically upon
 opening a `*.cs` file. Default: 1 >
-    let g:Omnisharp_start_server=1
+    let g:OmniSharp_start_server=1
 <
 
-                                                    *'g:Omnisharp_stop_server'*
+                                                    *'g:OmniSharp_stop_server'*
 Use this option to specify whether OmniSharp will stop automatically upon
 closing Vim. Default: 2 >
-    let g:Omnisharp_stop_server=1
+    let g:OmniSharp_stop_server=1
 <
 
-                                             *'g:Omnisharp_server_config_name'*
+                                             *'g:OmniSharp_server_config_name'*
 Use this option to specify the OmniSharp server config filename.
 Default: 'omnisharp.json' >
-    let g:Omnisharp_server_config_name='omnisharp.json'
+    let g:OmniSharp_server_config_name='omnisharp.json'
 <
 
                                                     *'g:OmniSharp_server_type'*

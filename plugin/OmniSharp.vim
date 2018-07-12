@@ -28,38 +28,30 @@ let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0
 let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, 'OmniSharp_BufWritePreSyntaxCheck', 1)
 let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, 'OmniSharp_CursorHoldSyntaxCheck', 0)
 
-let g:OmniSharp_sln_list_index =
-\ get( g:, 'OmniSharp_sln_list_index', -1 )
+let g:OmniSharp_sln_list_index = get(g:, 'OmniSharp_sln_list_index', -1)
 
-let g:OmniSharp_sln_list_name =
-\ get( g:, 'OmniSharp_sln_list_name', '' )
+let g:OmniSharp_sln_list_name = get(g:, 'OmniSharp_sln_list_name', '')
 
-let g:OmniSharp_autoselect_existing_sln =
-\ get( g:, 'OmniSharp_autoselect_existing_sln', 1 )
+let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing_sln', 1)
 
 let g:OmniSharp_running_slns = []
 
 " Automatically start server
-if !exists('g:Omnisharp_start_server')
-  let g:Omnisharp_start_server = 1
-endif
+let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
 
 " Automatically stop server
-" g:Omnisharp_stop_server == 0  :: never stop server
-" g:Omnisharp_stop_server == 1  :: always ask
-" g:Omnisharp_stop_server == 2  :: stop if this vim started
-if !exists('g:Omnisharp_stop_server')
-  let g:Omnisharp_stop_server = 2
-endif
+" g:OmniSharp_stop_server == 0  :: never stop server
+" g:OmniSharp_stop_server == 1  :: always ask
+" g:OmniSharp_stop_server == 2  :: stop if this vim started
+let g:OmniSharp_stop_server = get(g:, 'OmniSharp_stop_server', get(g:, 'Omnisharp_stop_server', 2))
 
 " Start server without solution file
 let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
 
 " Provide custom server configuration file name
-let g:OmniSharp_server_config_name =
-\ get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
+let g:OmniSharp_server_config_name = get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
 
-if g:Omnisharp_stop_server == 1
+if g:OmniSharp_stop_server == 1
   autocmd VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
 
@@ -86,6 +78,6 @@ let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 " Set default for snippet based completions
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
-if !exists('g:OmniSharp_prefer_global_sln')
-  let g:OmniSharp_prefer_global_sln = 0
-endif
+let g:OmniSharp_prefer_global_sln = get(g:, 'OmniSharp_prefer_global_sln', 0)
+
+let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
