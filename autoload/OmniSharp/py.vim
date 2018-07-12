@@ -26,12 +26,10 @@ function! OmniSharp#py#load(filename)
     exec s:pycmd "sys.path.append(r'" . g:omnisharp_python_path . "')"
     let s:module_path_added = 1
   endif
-  exec s:pyfile fnameescape(g:omnisharp_python_path . a:filename)
+  exec s:pyfile fnameescape(OmniSharp#util#path_join(['python', 'omnisharp', a:filename]))
 endfunction
 
-function! OmniSharp#py#eval(cmd)
-  return s:pyeval(a:cmd)
-endfunction
+let g:OmniSharp#py#eval = s:pyeval
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

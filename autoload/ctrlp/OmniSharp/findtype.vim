@@ -58,7 +58,7 @@ function! ctrlp#OmniSharp#findtype#init() abort
     return
   endif
 
-  let s:quickfixes = OmniSharp#py#eval('findTypes()')
+  let s:quickfixes = g:OmniSharp#py#eval('findTypes()')
   let types = []
   for quickfix in s:quickfixes
     call add(types, quickfix.text)
