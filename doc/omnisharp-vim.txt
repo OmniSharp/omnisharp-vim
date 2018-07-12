@@ -42,11 +42,98 @@ Suggestion: Install a completer such as NeoComplete or SuperTab
 ===============================================================================
 OPTIONS                                                     *omnisharp-options*
 
+                                                   *'g:OmniSharp_start_server'*
+Use this option to specify whether OmniSharp will start automatically upon
+opening a `*.cs` file. Default: 1 >
+    let g:OmniSharp_start_server = 1
+<
+
+                                                    *'g:OmniSharp_stop_server'*
+Use this option to specify whether OmniSharp will stop automatically upon
+closing Vim. Default: 2 >
+    let g:OmniSharp_stop_server = 1
+<
+
+                                             *'g:OmniSharp_server_config_name'*
+Use this option to specify the OmniSharp server config filename.
+Default: 'omnisharp.json' >
+    let g:OmniSharp_server_config_name = 'omnisharp.json'
+<
+
+                                                    *'g:OmniSharp_server_type'*
+Use this option to specify which version of OmniSharp will be used.
+Default: 'roslyn' >
+    let g:OmniSharp_server_type = 'roslyn'
+    OR
+    let g:OmniSharp_server_type = 'v1'
+<
+
+                                                    *'g:OmniSharp_server_path'*
+Use this option to give the full path to the roslyn or v1 omnisharp server
+executable. >
+    let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
+<
+
+                                                *'g:OmniSharp_server_use_mono'*
+The roslyn server must be run with mono on Linux and OSX. The roslyn server
+binaries usually come with an embedded mono, but this can be overridden to use
+the installed mono with this option. Note that mono must be in the $PATH.
+Default: 0 >
+    let g:OmniSharp_server_use_mono = 1
+<
+
+                                                           *'g:OmniSharp_host'*
+Use this option to specify the host address of the OmniSharp server.
+Default: 'http://localhost:2000' >
+    let g:OmniSharp_host = 'http://localhost:2000'
+<
+
+                                                *'g:OmniSharp_use_random_port'*
+Use this option to default to a random port when no port is selected.
+Default: 0 >
+    let g:OmniSharp_use_random_port = 0
+<
+
+                                                        *'g:OmniSharp_timeout'*
+Use this option to specify the time (in seconds) to wait for a response from the
+server. Default: 1 >
+    let g:OmniSharp_timeout = 1
+<
+
+                                           *'g:OmniSharp_translate_cygwin_wsl'*
+Use this option when vim is running in a Cygwin or Windows Subsystem for Linux
+environment on Windows, but the omnisharp server is a Windows binary. When set
+to 1, omnisharp-vim will translate the cygwin/WSL unix paths into Windows paths
+and back.
+Default: 0 >
+    let g:OmniSharp_translate_cygwin_wsl = 1
+<
+
+                                            *'g:OmniSharp_typeLookupInPreview'*
+Use this option to specify whether type lookups display in Vim's Preview Window.
+Type lookups will display in the status line if this is `0`. Default: 0 >
+    let g:OmniSharp_typeLookupInPreview = 0
+<
+
+                                                   *'g:OmniSharp_want_snippet'*
+Use this option to enable snippet completion. Requires `completeopt-=preview`.
+Default: 0 >
+    let g:OmniSharp_want_snippet = 0
+<
+
+                                    *'g:omnicomplete_fetch_full_documentation'*
+Use this option to specify whether OmniSharp will fetch full documentation on
+completion suggestions. By default, only type/method signatures are fetched for
+performance reasons. Full documentation can still be fetched when needed using
+the |:OmniSharpDocumentation| command. Default: 0 >
+    let g:omnicomplete_fetch_full_documentation = 0
+<
+
                                                     *'g:syntastic_cs_checkers'*
 Use this option to enable syntastic integration >
-    let g:syntastic_cs_checkers=['syntax', 'semantic', 'issues'] " v1 server
+    let g:syntastic_cs_checkers = ['code_checker']                 " roslyn
     OR
-    let g:syntastic_cs_checkers=['code_checker']                 " roslyn
+    let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues'] " v1 server
 <
 
                                                     *'g:OmniSharp_selector_ui'*
@@ -56,100 +143,13 @@ g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
 window will be used instead.
 Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
 none are. >
-    let g:OmniSharp_selector_ui='unite'
+    let g:OmniSharp_selector_ui = 'unite'
     OR
-    let g:OmniSharp_selector_ui='ctrlp'
+    let g:OmniSharp_selector_ui = 'ctrlp'
     OR
-    let g:OmniSharp_selector_ui='fzf'
+    let g:OmniSharp_selector_ui = 'fzf'
     OR
-    let g:OmniSharp_selector_ui=''
-<
-
-                                                   *'g:OmniSharp_start_server'*
-Use this option to specify whether OmniSharp will start automatically upon
-opening a `*.cs` file. Default: 1 >
-    let g:OmniSharp_start_server=1
-<
-
-                                                    *'g:OmniSharp_stop_server'*
-Use this option to specify whether OmniSharp will stop automatically upon
-closing Vim. Default: 2 >
-    let g:OmniSharp_stop_server=1
-<
-
-                                             *'g:OmniSharp_server_config_name'*
-Use this option to specify the OmniSharp server config filename.
-Default: 'omnisharp.json' >
-    let g:OmniSharp_server_config_name='omnisharp.json'
-<
-
-                                                    *'g:OmniSharp_server_type'*
-Use this option to specify which version of OmniSharp will be used.
-Default: 'roslyn' >
-    let g:OmniSharp_server_type='roslyn'
-    OR
-    let g:OmniSharp_server_type='v1'
-<
-
-                                                    *'g:OmniSharp_server_path'*
-Use this option to give the full path to the roslyn or v1 omnisharp server
-executable. >
-    let g:OmniSharp_server_path='/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
-<
-
-                                                *'g:OmniSharp_server_use_mono'*
-The roslyn server must be run with mono on Linux and OSX. The roslyn server
-binaries usually come with an embedded mono, but this can be overridden to use
-the installed mono with this option. Note that mono must be in the $PATH.
-Default: 0 >
-    let g:OmniSharp_server_use_mono=1
-<
-
-                                                           *'g:OmniSharp_host'*
-Use this option to specify the host address of the OmniSharp server.
-Default: 'http://localhost:2000' >
-    let g:OmniSharp_host='http://localhost:2000'
-<
-
-                                            *'g:OmniSharp_typeLookupInPreview'*
-Use this option to specify whether type lookups display in Vim's Preview Window.
-Type lookups will display in the status line if this is `0`. Default: 0 >
-    let g:OmniSharp_typeLookupInPreview=0
-<
-
-                                                        *'g:OmniSharp_timeout'*
-Use this option to specify the time (in seconds) to wait for a response from the
-server. Default: 1 >
-    let g:OmniSharp_timeout=1
-<
-
-                                    *'g:omnicomplete_fetch_full_documentation'*
-Use this option to specify whether OmniSharp will fetch full documentation on
-completion suggestions. By default, only type/method signatures are fetched for
-performance reasons. Full documentation can still be fetched when needed using
-the |:OmniSharpDocumentation| command. Default: 0 >
-    let g:omnicomplete_fetch_full_documentation=0
-<
-
-                                                   *'g:OmniSharp_want_snippet'*
-Use this option to enable snippet completion. Requires `completeopt-=preview`.
-Default: 0 >
-    let g:OmniSharp_want_snippet=0
-<
-
-                                           *'g:OmniSharp_translate_cygwin_wsl'*
-Use this option when vim is running in a Cygwin or Windows Subsystem for Linux
-environment on Windows, but the omnisharp server is a Windows binary. When set
-to 1, omnisharp-vim will translate the cygwin/WSL unix paths into Windows paths
-and back.
-Default: 0 >
-    let g:OmniSharp_translate_cygwin_wsl=1
-<
-
-                                                *'g:OmniSharp_use_random_port'*
-Use this option to default to a random port when no port is selected.
-Default: 0 >
-    let g:OmniSharp_use_random_port=0
+    let g:OmniSharp_selector_ui = ''
 <
 
 ===============================================================================
