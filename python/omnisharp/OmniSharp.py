@@ -1,10 +1,34 @@
-import json, logging, os.path, platform, re, urllib2, urlparse, vim, socket
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import logging
+import json
+import os
+import os.path
+import types
+import sys
+import platform
+import re
+import socket
 from contextlib import closing
+
+try:
+    from urllib import parse as urlparse
+    from urllib import request
+except ImportError:
+    import urllib2 as request
+    import urlparse
+
+import vim  # pylint: disable=import-error
 
 logger = logging.getLogger('omnisharp')
 logger.setLevel(logging.WARNING)
 
-log_dir = os.path.join(vim.eval('expand("<sfile>:p:h")'), '..', 'log')
+log_dir = os.path.join(
+    vim.eval('g:omnisharp_python_path'),
+    '..',
+    '..',
+    'log')
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 hdlr = logging.FileHandler(os.path.join(log_dir, 'python.log'))
@@ -65,15 +89,25 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
 
     target = urlparse.urljoin(host, endPoint)
 
-    proxy = urllib2.ProxyHandler({})
-    opener = urllib2.build_opener(proxy)
-    req = urllib2.Request(target)
+    proxy = request.ProxyHandler({})
+    opener = request.build_opener(proxy)
+    req = request.Request(target)
     req.add_header('Content-Type', 'application/json')
 
     try:
-        response = opener.open(req, json.dumps(parameters), timeout)
+
+        body = json.dumps(parameters)
+
+        if sys.version_info >= (3, 0):
+            body = body.encode('utf-8')
+
+        response = opener.open(req, body, timeout)
         vim.command("let g:serverSeenRunning = 1")
         res = response.read()
+
+        if sys.version_info >= (3, 0):
+            res = res.decode('utf-8')
+
         if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
             res = res[3:]
         return res
@@ -401,6 +435,7 @@ def get_navigate_response(js):
         return {}
 
 def find_free_port():
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    with closing(s):
         s.bind(('', 0))
         return s.getsockname()[1]

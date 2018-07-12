@@ -22,7 +22,7 @@ CONTENTS                                                   *omnisharp-contents*
 DEPENDENCIES                                           *omnisharp-dependencies*
 
 Required:~
-    - Vim 7.3 or higher with Python 2 support
+    - Vim 7.4 or higher with Python 2 or Python 3 support
     - Mono OR .NET Framework
 
 Optional:~

@@ -1,4 +1,4 @@
-if !has('python')
+if !(has('python') || has('python3'))
   finish
 endif
 
@@ -19,7 +19,7 @@ function! fzf#OmniSharp#findtypes() abort
   if !OmniSharp#ServerIsRunning()
     return
   endif
-  let s:quickfixes = pyeval('findTypes()')
+  let s:quickfixes = g:OmniSharp#py#eval('findTypes()')
   let types = []
   for quickfix in s:quickfixes
     call add(types, quickfix.text)
@@ -51,7 +51,7 @@ function! s:action_sink(str) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !pyeval(command)
+  if !g:OmniSharp#py#eval(command)
     echo 'No action taken'
   endif
 endfunction

@@ -5,6 +5,9 @@ if ( exists('g:loaded_ctrlp_OmniSharp_findtype') && g:loaded_ctrlp_OmniSharp_fin
 endif
 let g:loaded_ctrlp_OmniSharp_findtype = 1
 
+if !(has('python') || has('python3'))
+  finish
+endif
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -55,7 +58,7 @@ function! ctrlp#OmniSharp#findtype#init() abort
     return
   endif
 
-  let s:quickfixes = pyeval('findTypes()')
+  let s:quickfixes = g:OmniSharp#py#eval('findTypes()')
   let types = []
   for quickfix in s:quickfixes
     call add(types, quickfix.text)

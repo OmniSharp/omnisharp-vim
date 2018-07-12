@@ -6,7 +6,6 @@ if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_
 endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
 
-
 " Add this extension's settings to g:ctrlp_ext_vars
 "
 " Required:

@@ -26,6 +26,8 @@ def mock_eval(expr):
         return 0
     elif expr.startswith('g:OmniSharp'):
         return "some_global_setting"
+    elif expr.startswith('g:omnisharp_python_path'):
+        return "."
     elif expr == 'expand("<sfile>:p:h")':
         return os.path.dirname(__file__)
 
