@@ -391,15 +391,17 @@ function! OmniSharp#Rename() abort
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let result = s:json_decode(g:OmniSharp#py#eval('renameTo()'))
+  let command = printf('renameTo(%s)', string(a:renameto))
+  let changes = g:OmniSharp#py#eval(command)
 
   let save_lazyredraw = &lazyredraw
   let save_eventignore = &eventignore
   let buf = bufnr('%')
   let curpos = getpos('.')
+  let view = winsaveview()
   try
     set lazyredraw eventignore=all
-    for change in result.Changes
+    for change in changes
       execute 'silent hide edit' fnameescape(change.FileName)
       let modified = &modified
       let content = split(change.Buffer, '\r\?\n')
@@ -412,9 +414,10 @@ function! OmniSharp#RenameTo(renameto) abort
     endfor
   finally
     if bufnr('%') != buf
-      execute buf 'buffer'
+      exec 'buffer ' . buf
     endif
     call setpos('.', curpos)
+    call winrestview(view)
     silent update
     let &eventignore = save_eventignore
     silent edit  " reload to apply syntax

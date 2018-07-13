@@ -282,11 +282,15 @@ def typeLookup(ret):
             vim.command("let %s = '%s'" % (ret, type))
             vim.command("let s:documentation = '%s'" % documentation.replace("'", "''"))
 
-def renameTo():
-    parameters = {}
-    parameters['renameto'] = vim.eval("a:renameto")
-    js = getResponse('/rename', parameters)
-    return js
+def renameTo(name):
+    parameters = {
+        'renameto': name,
+    }
+    js = json.loads(getResponse('/rename', parameters))
+    changes = js['Changes']
+    for change in changes:
+        change['FileName'] = formatPathForClient(change['FileName'])
+    return changes
 
 def setBuffer(buffer):
     lines = buffer.splitlines()
