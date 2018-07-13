@@ -68,6 +68,10 @@ def formatPathForClient(filepath):
                 prefix = '/mnt/{0}/'
             return prefix.format(matchobj.group(1).lower())
         return re.sub(r'^([a-zA-Z]):\\', path_replace, filepath).replace('\\', '/')
+    # Shorten path names by checking if we can make them relative
+    cwd = vim.eval('getcwd()')
+    if os.path.commonprefix([cwd, filepath]) == cwd:
+        filepath = os.path.relpath(filepath, cwd)
     return filepath
 
 def getResponse(endPoint, additional_parameters=None, timeout=None):
