@@ -217,6 +217,11 @@ COMMANDS                                                   *omnisharp-commands*
     Opens the documentation for the symbol under the cursor
     NOTE: Opens in an `__OmniSharpScratch__` buffer at the bottom of the screen
 
+                                                      *:OmniSharpSignatureHelp*
+:OmniSharpSignatureHelp
+    Opens the documentation for the method argument under the cursor
+    NOTE: Opens in an `__OmniSharpScratch__` buffer at the bottom of the screen
+
                                                          *:OmniSharpNavigateUp*
 :OmniSharpNavigateUp
     Navigates to previous method or class
