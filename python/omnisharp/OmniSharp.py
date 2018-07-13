@@ -22,7 +22,8 @@ except ImportError:
 import vim  # pylint: disable=import-error
 
 logger = logging.getLogger('omnisharp')
-logger.setLevel(logging.WARNING)
+level = vim.eval('g:OmniSharp_loglevel').upper()
+logger.setLevel(getattr(logging, level))
 
 log_dir = os.path.join(
     vim.eval('g:OmniSharp_python_path'),
@@ -31,11 +32,15 @@ log_dir = os.path.join(
     'log')
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
-hdlr = logging.FileHandler(os.path.join(log_dir, 'python.log'))
+log_file = os.path.join(log_dir, 'python.log')
+hdlr = logging.FileHandler(log_file)
 logger.addHandler(hdlr)
 
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
+
+def getLogFile():
+    return log_file
 
 translate_unix_win = bool(int(vim.eval('g:OmniSharp_translate_cygwin_wsl')))
 is_msys = 'msys_nt' in platform.system().lower()
@@ -94,26 +99,34 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     req = request.Request(target)
     req.add_header('Content-Type', 'application/json')
 
+    body = json.dumps(parameters)
+
+    if sys.version_info >= (3, 0):
+        body = body.encode('utf-8')
+
+    logger.info("Request: %s", target)
+    logger.debug(body)
+
     try:
-
-        body = json.dumps(parameters)
-
-        if sys.version_info >= (3, 0):
-            body = body.encode('utf-8')
-
         response = opener.open(req, body, timeout)
         vim.command("let g:serverSeenRunning = 1")
         res = response.read()
 
-        if sys.version_info >= (3, 0):
-            res = res.decode('utf-8')
-
-        if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
-            res = res[3:]
-        return res
     except Exception:
         vim.command("let g:serverSeenRunning = 0")
+        logger.exception("Could not connect to OmniSharp server: " + target)
         return ''
+
+    if sys.version_info >= (3, 0):
+        res = res.decode('utf-8')
+
+    if res.startswith("\xef\xbb\xbf"):  # Drop UTF-8 BOM
+        res = res[3:]
+
+    logger.info("Received Response: %s", target)
+    logger.debug(res)
+
+    return res
 
 def findUsages():
     parameters = {}

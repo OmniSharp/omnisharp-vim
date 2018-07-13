@@ -49,6 +49,7 @@ command! -buffer -bar OmniSharpGotoDefinition      call OmniSharp#GotoDefinition
 command! -buffer -bar OmniSharpHighlightTypes      call OmniSharp#EnableTypeHighlighting()
 command! -buffer -bar OmniSharpNavigateUp          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown        call OmniSharp#NavigateDown()
+command! -buffer -bar OmniSharpOpenPythonLog       call OmniSharp#OpenPythonLog()
 command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRunAllTests         call OmniSharp#RunTests('all')
@@ -100,6 +101,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
+\|  delcommand OmniSharpOpenPythonLog
 \|  delcommand OmniSharpReloadSolution
 \|  delcommand OmniSharpRename
 \|  delcommand OmniSharpRenameTo

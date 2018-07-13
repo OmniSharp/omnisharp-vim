@@ -24,6 +24,8 @@ def mock_eval(expr):
         return 123
     elif expr.startswith('g:OmniSharp_translate_cygwin_wsl'):
         return 0
+    elif expr.startswith('g:OmniSharp_loglevel'):
+        return "warning"
     elif expr.startswith('g:OmniSharp'):
         return "some_global_setting"
     elif expr.startswith('g:OmniSharp_python_path'):

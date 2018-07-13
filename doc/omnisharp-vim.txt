@@ -94,6 +94,13 @@ Default: 0 >
     let g:OmniSharp_use_random_port = 0
 <
 
+                                                       *'g:OmniSharp_loglevel'*
+Sets the log level for the python code. Possible values are debug, 'info',
+'warning', 'error', and 'critical'.
+Default: warning >
+    let g:OmniSharp_loglevel = warning
+<
+
                                                   *'g:OmniSharp_open_quickfix'*
 By default, OmniSharp-vim opens the quickfix window when it is populated, e.g.
 after find usages, implementations etc. Set this variable to 0 to prevent the
@@ -229,6 +236,10 @@ COMMANDS                                                   *omnisharp-commands*
                                                        *:OmniSharpNavigateDown*
 :OmniSharpNavigateDown
     Navigates to next method or class
+
+                                                      *:OmniSharpOpenPythonLog*
+:OmniSharpOpenPythonLog
+    Open the python log file
 
                                                      *:OmniSharpGetCodeActions*
 :OmniSharpGetCodeActions
