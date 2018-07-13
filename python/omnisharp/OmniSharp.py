@@ -158,7 +158,7 @@ def getCompletions(partialWord):
                 'snip': completion['Snippet'] or '',
                 'word': completion['MethodHeader'] or completion['CompletionText'],
                 'menu': completion['ReturnType'] or completion['DisplayText'],
-                'info': (completion['Description'] or '').replace('\r\n', '\n'),
+                'info': (completion['Description'] or ' ').replace('\r\n', '\n'),
                 'icase': 1,
                 'dup': 1
             })
@@ -264,6 +264,9 @@ def getCodeIssues():
 def codeCheck():
     js = getResponse('/codecheck')
     return get_quickfix_list(js, 'QuickFixes')
+
+def signatureHelp():
+    return getResponse('/signatureHelp');
 
 def typeLookup(ret):
     parameters = {}

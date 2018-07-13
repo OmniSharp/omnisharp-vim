@@ -351,23 +351,32 @@ function! OmniSharp#TypeLookup(includeDocumentation) abort
     endif
     call s:writeToPreview(type . doc)
   else
-    let line = line('.')
-    let found_line_in_loc_list = 0
-    "don't display type lookup if we have a syntastic error
-    if exists(':SyntasticCheck')
-      SyntasticSetLoclist
-      for issue in getloclist(0)
-        if issue['lnum'] == line
-          let found_line_in_loc_list = 1
-          break
-        endif
-      endfor
-    endif
-    if found_line_in_loc_list == 0
-      call g:OmniSharp#py#eval('typeLookup("type")')
-      call OmniSharp#Echo(type)
+    call g:OmniSharp#py#eval('typeLookup("type")')
+    call OmniSharp#Echo(type)
+  endif
+endfunction
+
+function! OmniSharp#SignatureHelp() abort
+  let result = s:json_decode(g:OmniSharp#py#eval('signatureHelp()'))
+  if type(result) != type({})
+    echo 'No signature help found'
+    " Clear existing preview content
+    let output = ''
+  else
+    if result.ActiveSignature == -1
+      " No signature matches - display all options
+      let output = join(map(result.Signatures, 'v:val.Label'), "\n")
+    else
+      let signature = result.Signatures[result.ActiveSignature]
+      if len(signature.Parameters) == 0
+        let output = signature.Label
+      else
+        let parameter = signature.Parameters[result.ActiveParameter]
+        let output = join([parameter.Label, parameter.Documentation], "\n")
+      endif
     endif
   endif
+  call s:writeToPreview(output)
 endfunction
 
 function! OmniSharp#Echo(message) abort
@@ -596,7 +605,7 @@ function! OmniSharp#StartServer() abort
   endif
 
   if l:command ==# []
-    echoerr 'Could not determinet the command to start the OmniSharp server!'
+    echoerr 'Could not determine the command to start the OmniSharp server!'
     return
   endif
 
@@ -750,6 +759,7 @@ function! s:writeToPreview(content)
   silent wincmd P
   setlocal modifiable noreadonly
   setlocal nobuflisted buftype=nofile bufhidden=wipe
+  0,$d
   silent put =a:content
   0d_
   setlocal nomodifiable readonly
