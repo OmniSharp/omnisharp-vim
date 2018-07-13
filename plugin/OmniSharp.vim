@@ -53,6 +53,9 @@ endif
 " Provide custom server configuration file name
 let g:OmniSharp_server_config_name = get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
 
+" Default value for python log level
+let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', 'warning')
+
 " Initialize OmniSharp as an asyncomplete source
 autocmd User asyncomplete_setup call asyncomplete#register_source({
 \   'name': 'OmniSharp',

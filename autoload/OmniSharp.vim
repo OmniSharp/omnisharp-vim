@@ -699,6 +699,11 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
   endif
 endfunction
 
+function! OmniSharp#OpenPythonLog() abort
+  let logfile = g:OmniSharp#py#eval('getLogFile()')
+  exec "edit " . logfile
+endfunction
+
 function! s:find_solution_files() abort
   "get the path for the current buffer
   let dir = expand('%:p:h')
