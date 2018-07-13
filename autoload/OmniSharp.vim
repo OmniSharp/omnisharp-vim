@@ -65,8 +65,7 @@ function! OmniSharp#FindUsages() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist, 'Usages: '.expand('<cword>'))
   else
     echo 'No usages found'
   endif
@@ -85,18 +84,20 @@ function! OmniSharp#FindImplementations() abort
   endif
 
   if len(qf_taglist) > 1
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
   endif
+
+  return len(qf_taglist)
 endfunction
 
 function! OmniSharp#FindMembers() abort
   let qf_taglist = g:OmniSharp#py#eval('findMembers()')
 
   " Place the tags in the quickfix window, if possible
+  " TODO: Should this use the location window instead, since it is
+  " buffer-specific?
   if len(qf_taglist) > 1
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist, 'Members')
   endif
 endfunction
 
@@ -164,7 +165,7 @@ function! OmniSharp#JumpToLocation(filename, line, column) abort
 endfunction
 
 function! OmniSharp#FindSymbol(...) abort
-  let filter = a:0 > 0 ? a:1 : ''
+  let filter = a:0 ? a:1 : ''
   if !OmniSharp#ServerIsRunning()
     return
   endif
@@ -181,8 +182,8 @@ function! OmniSharp#FindSymbol(...) abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findsymbols(quickfixes)
   else
-    call setqflist(quickfixes)
-    botright cwindow 4
+    let title = 'Symbols'.(len(filter) ? ': '.filter : '')
+    call s:set_quickfix(quickfixes, title)
   endif
 endfunction
 
@@ -194,8 +195,7 @@ function! OmniSharp#FindType() abort
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#findtypes()
   else
-    call setqflist(quickfixes)
-    botright cwindow 4
+    call s:set_quickfix(quickfixes, 'Types')
   endif
 endfunction
 
@@ -418,8 +418,7 @@ function! OmniSharp#Build() abort
 
   " Place the tags in the quickfix window, if possible
   if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    botright cwindow 4
+    call s:set_quickfix(qf_taglist, 'Build')
   endif
 endfunction
 
@@ -520,8 +519,7 @@ function! OmniSharp#FixUsings() abort
   let qf_taglist = g:OmniSharp#py#eval('fix_usings()')
 
   if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    botright cwindow
+    call s:set_quickfix(qf_taglist, 'Usings')
   endif
 endfunction
 
@@ -537,7 +535,7 @@ endfunction
 function! OmniSharp#StartServerIfNotRunning() abort
   if !OmniSharp#ServerIsRunning()
     call OmniSharp#StartServer()
-    if g:Omnisharp_stop_server==2
+    if g:OmniSharp_stop_server == 2
       au VimLeavePre * call OmniSharp#StopServer()
     endif
   endif
@@ -736,6 +734,13 @@ function! s:json_decode(json) abort
   catch
     throw 'Invalid JSON response from server: ' . a:json
   endtry
+endfunction
+
+function! s:set_quickfix(list, title)
+  call setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title})
+  if g:OmniSharp_open_quickfix
+    botright cwindow 4
+  endif
 endfunction
 
 " Manually write content to the preview window.

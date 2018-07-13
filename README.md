@@ -161,7 +161,7 @@ It tries to detect your solution file (.sln) and starts the OmniSharp-roslyn ser
 In vim8 and neovim, the server is started invisibly by a vim job.
 In older versions of vim, the server will be started in different ways depending on whether you are using vim-dispatch in tmux, or are using vim-proc, gvim or running vim in a terminal.
 
-This behaviour can be disabled by setting `let g:Omnisharp_start_server = 0` in your vimrc. You can then start the server manually from within vim with `:OmniSharpStartServer`. Alternatively, the server can be manually started from outside vim:
+This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in your vimrc. You can then start the server manually from within vim with `:OmniSharpStartServer`. Alternatively, the server can be manually started from outside vim:
 
 ```sh
 [mono] OmniSharp.exe -p (portnumber) -s (path/to/sln)
@@ -171,12 +171,12 @@ Add `-v Verbose` to get extra information from the server.
 
 
 When vim is closed and the OmniSharp server is running, vim will stop the server automatically.
-This behaviour can be altered with the `g:Omnisharp_stop_server` variable in your vimrc:
+This behaviour can be altered with the `g:OmniSharp_stop_server` variable in your vimrc:
 
 ```vim
-let g:Omnisharp_stop_server = 0  " Do not stop the server on exit
-let g:Omnisharp_stop_server = 1  " Ask whether to stop the server
-let g:Omnisharp_stop_server = 2  " Automatically stop the server
+let g:OmniSharp_stop_server = 0  " Do not stop the server on exit
+let g:OmniSharp_stop_server = 1  " Ask whether to stop the server
+let g:OmniSharp_stop_server = 2  " Automatically stop the server
 ```
 
 OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port. This behavior can be changed by setting `let g:OmniSharp_use_random_port = 1` in your vimrc. When set, the OmniSharp server will run on a random port instead of using the default port.

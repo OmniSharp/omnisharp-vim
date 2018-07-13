@@ -1,10 +1,8 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let g:omnisharp_proc_debug = get(g:, 'omnisharp_proc_debug', 0)
-
 function! s:debug(message) abort
-  if g:omnisharp_proc_debug == 1
+  if g:OmniSharp_proc_debug == 1
     echom 'DEBUG: ' . string(a:message)
   endif
 endfunction
@@ -14,7 +12,7 @@ function! OmniSharp#proc#supportsNeovimJobs() abort
 endfunction
 
 function! OmniSharp#proc#neovimOutHandler(job_id, data, event) abort
-  if g:omnisharp_proc_debug == 1
+  if g:OmniSharp_proc_debug == 1
     let l:message = printf('%s: %s',a:event,string(a:data))
     echom l:message
   endif
@@ -43,8 +41,8 @@ function! OmniSharp#proc#supportsVimJobs() abort
 endfunction
 
 function! OmniSharp#proc#vimOutHandler(channel, message) abort
-  if g:omnisharp_proc_debug == 1
-      echom printf('%s: %s', string(a:channel), string(a:message))
+  if g:OmniSharp_proc_debug == 1
+    echom printf('%s: %s', string(a:channel), string(a:message))
   endif
 endfunction
 

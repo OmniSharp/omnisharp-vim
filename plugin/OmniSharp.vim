@@ -9,59 +9,49 @@ if !(has('python') || has('python3'))
   finish
 endif
 
-" Set default for translating cygwin/WSL unix paths to Windows paths
-let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', 0)
+" Select a server: one of 'roslyn' or 'v1'
+let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'roslyn')
 
-"Default value for the timeout value
-let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
+" Use mono to start the roslyn server on *nix
+let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 
-"Default value for the timeout value
+let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
+
 let g:OmniSharp_quickFixLength = get(g:, 'OmniSharp_quickFixLength', 60)
 
-"Don't use the preview window by default
+let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
+
+let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', 0)
+
 let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0)
 
-" Auto syntax-check options.
-" Default:
-" g:OmniSharp_BufWritePreSyntaxCheck = 1
-" g:OmniSharp_CursorHoldSyntaxCheck  = 0
 let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, 'OmniSharp_BufWritePreSyntaxCheck', 1)
 let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, 'OmniSharp_CursorHoldSyntaxCheck', 0)
 
-let g:OmniSharp_sln_list_index =
-\ get( g:, 'OmniSharp_sln_list_index', -1 )
+let g:OmniSharp_sln_list_index = get(g:, 'OmniSharp_sln_list_index', -1)
+let g:OmniSharp_sln_list_name = get(g:, 'OmniSharp_sln_list_name', '')
 
-let g:OmniSharp_sln_list_name =
-\ get( g:, 'OmniSharp_sln_list_name', '' )
-
-let g:OmniSharp_autoselect_existing_sln =
-\ get( g:, 'OmniSharp_autoselect_existing_sln', 1 )
+let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing_sln', 1)
+let g:OmniSharp_prefer_global_sln = get(g:, 'OmniSharp_prefer_global_sln', 0)
+let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
 
 let g:OmniSharp_running_slns = []
 
 " Automatically start server
-if !exists('g:Omnisharp_start_server')
-  let g:Omnisharp_start_server = 1
-endif
+let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
 
 " Automatically stop server
-" g:Omnisharp_stop_server == 0  :: never stop server
-" g:Omnisharp_stop_server == 1  :: always ask
-" g:Omnisharp_stop_server == 2  :: stop if this vim started
-if !exists('g:Omnisharp_stop_server')
-  let g:Omnisharp_stop_server = 2
-endif
+" g:OmniSharp_stop_server == 0  :: never stop server
+" g:OmniSharp_stop_server == 1  :: always ask
+" g:OmniSharp_stop_server == 2  :: stop if this vim started
+let g:OmniSharp_stop_server = get(g:, 'OmniSharp_stop_server', get(g:, 'Omnisharp_stop_server', 2))
 
-" Start server without solution file
-let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
-
-" Provide custom server configuration file name
-let g:OmniSharp_server_config_name =
-\ get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
-
-if g:Omnisharp_stop_server == 1
+if g:OmniSharp_stop_server == 1
   autocmd VimLeavePre * call OmniSharp#AskStopServerIfRunning()
 endif
+
+" Provide custom server configuration file name
+let g:OmniSharp_server_config_name = get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
 
 " Initialize OmniSharp as an asyncomplete source
 autocmd User asyncomplete_setup call asyncomplete#register_source({
@@ -77,15 +67,7 @@ if !exists('g:OmniSharp_selector_ui')
   \ ), 0, '')
 endif
 
-" Set g:OmniSharp_server_type to 'roslyn' or 'v1'
-let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'roslyn')
-
-" Use mono to start the roslyn server on *nix
-let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
-
-" Set default for snippet based completions
+" Set to 1 when ultisnips is installed
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
-if !exists('g:OmniSharp_prefer_global_sln')
-  let g:OmniSharp_prefer_global_sln = 0
-endif
+let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
