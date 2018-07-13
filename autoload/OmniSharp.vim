@@ -27,7 +27,11 @@ let s:is_vimproc = 0
 silent! let s:is_vimproc = vimproc#version()
 
 function! OmniSharp#GetCompletions(partial, ...) abort
-  let completions = g:OmniSharp#py#eval(printf('getCompletions(%s)', string(a:partial)))
+  if !OmniSharp#ServerIsRunning()
+    let completions = []
+  else
+    let completions = g:OmniSharp#py#eval(printf('getCompletions(%s)', string(a:partial)))
+  endif
   let s:last_completion_dictionary = {}
   for completion in completions
     let s:last_completion_dictionary[get(completion, 'word')] = completion
