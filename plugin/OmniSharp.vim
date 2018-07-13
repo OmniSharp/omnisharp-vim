@@ -35,26 +35,17 @@ let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing
 let g:OmniSharp_prefer_global_sln = get(g:, 'OmniSharp_prefer_global_sln', 0)
 let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
 
-let g:OmniSharp_running_slns = []
-
 " Automatically start server
 let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
-
-" Automatically stop server
-" g:OmniSharp_stop_server == 0  :: never stop server
-" g:OmniSharp_stop_server == 1  :: always ask
-" g:OmniSharp_stop_server == 2  :: stop if this vim started
-let g:OmniSharp_stop_server = get(g:, 'OmniSharp_stop_server', get(g:, 'Omnisharp_stop_server', 2))
-
-if g:OmniSharp_stop_server == 1
-  autocmd VimLeavePre * call OmniSharp#AskStopServerIfRunning()
-endif
 
 " Provide custom server configuration file name
 let g:OmniSharp_server_config_name = get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
 
 " Default value for python log level
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', 'warning')
+
+" Default map of solution file to port
+let g:OmniSharp_sln_ports = get(g:, 'OmniSharp_sln_ports', {})
 
 " Initialize OmniSharp as an asyncomplete source
 autocmd User asyncomplete_setup call asyncomplete#register_source({

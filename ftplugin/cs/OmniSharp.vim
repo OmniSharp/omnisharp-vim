@@ -52,12 +52,15 @@ command! -buffer -bar OmniSharpNavigateDown        call OmniSharp#NavigateDown()
 command! -buffer -bar OmniSharpOpenPythonLog       call OmniSharp#OpenPythonLog()
 command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
+command! -buffer -bar OmniSharpRestartAllServers   call OmniSharp#RestartAllServers()
+command! -buffer -bar OmniSharpRestartServer       call OmniSharp#RestartServer()
 command! -buffer -bar OmniSharpRunAllTests         call OmniSharp#RunTests('all')
 command! -buffer -bar OmniSharpRunLastTests        call OmniSharp#RunTests('last')
 command! -buffer -bar OmniSharpRunTestFixture      call OmniSharp#RunTests('fixture')
 command! -buffer -bar OmniSharpRunTests            call OmniSharp#RunTests('single')
 command! -buffer -bar OmniSharpSignatureHelp       call OmniSharp#SignatureHelp()
 command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
+command! -buffer -bar OmniSharpStopAllServers      call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookupWithoutDocumentation()
 
@@ -105,8 +108,11 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpReloadSolution
 \|  delcommand OmniSharpRename
 \|  delcommand OmniSharpRenameTo
+\|  delcommand OmniSharpRestartAllServers
+\|  delcommand OmniSharpRestartServer
 \|  delcommand OmniSharpStartServer
 \|  delcommand OmniSharpStartServerSolution
+\|  delcommand OmniSharpStopAllServers
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup
 \|  delcommand OmniSharpRunAllTests
