@@ -12,13 +12,6 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 
 * Contextual code completion
   * Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
-  * CamelCase completions are supported, e.g Console.WL(TAB) will complete to Console.WriteLine
-  * "Subsequence" completions are also supported. e.g. Console.Wline would also complete to Console.WriteLine
-  * Completions are ranked in the following order
-    * Exact start match (case sensitive)
-    * Exact start match (case insensitive)
-    * CamelCase completions
-    * Subsequence match completions
   * Completion snippets are supported. e.g. Console.WriteLine(TAB) (ENTER) will complete to Console.WriteLine(string value) and expand a dynamic snippet, this will place you in SELECT mode and the first method argument will be selected. 
     * Requires [UltiSnips](https://github.com/SirVer/ultisnips) and supports standard C-x C-o completion as well as completion/autocompletion plugins such as [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim), [Supertab](https://github.com/ervandew/supertab), [Neocomplete](https://github.com/Shougo/neocomplete.vim) etc.
     * Requires `set completeopt-=preview` when using [Neocomplete](https://github.com/Shougo/neocomplete.vim) because of a compatibility issue with [UltiSnips](https://github.com/SirVer/ultisnips). 
@@ -39,18 +32,6 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 * On the fly semantic error highlighting (nearly as good as a full compilation!)
 * Integrated xbuild/msbuild (can run asynchronously if supported)
 * Code formatter
-* Add currently edited file to the nearest project (currently will only add .cs files to a .csproj file)
-
-```vim
-:OmniSharpAddToProject
-```
-
-* Add reference. Supports project and file reference.
-
-```vim
-:OmniSharpAddReference path_to_reference
-```
-
 * [Test runner](https://github.com/OmniSharp/omnisharp-vim/wiki/Test-Runner)
 
 ## Screenshots
@@ -84,7 +65,10 @@ Install the vim plugin using your preferred plugin manager:
 | [Pathogen](https://github.com/tpope/vim-pathogen)    | `git clone git://github.com/OmniSharp/omnisharp-vim.git ~/.vim/bundle/omnisharp-vim` |
 
 ### Server
-OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. Download the latest release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the http variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz`.
+OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. Download the latest **HTTP** release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the **HTTP** variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz`.
+
+##### Important! Download the HTTP release!
+_Please pay attention to the previous paragraph, and download the HTTP OmniSharp-Roslyn release (it has "http" in the download filename"). The non-HTTP version uses stdio instead of HTTP and OmniSharp-vim cannot communicate with it. This trips a lot of people up, hence the added emphases!_
 
 Extract the binaries and configure your vimrc with the path to the `OmniSharp.exe` file, e.g.:
 
@@ -110,16 +94,17 @@ OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](ht
     let g:OmniSharp_server_use_mono = 1
 ```
 
-OmniSharp-Roslyn also requires [libuv](http://libuv.org/). This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv` on debian/Ubuntu, `pacman -S libuv` on arch linux etc.
+##### libuv
+OmniSharp-Roslyn also requires [libuv](http://libuv.org/) on Linux and Mac. This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv` on debian/Ubuntu, `pacman -S libuv` on arch linux etc.
 
 ### Install Python
-Install latest version of 2.7 series ([Python 2.7.14](https://www.python.org/downloads/release/python-2714/) at the time of this writing).
+Install the latest version of python 3 ([Python 3.7](https://www.python.org/downloads/release/python-370/)) or 2 ([Python 2.7.15](https://www.python.org/downloads/release/python-2715/)).
 Make sure that you pick correct version of Python to match your vim's architecture (32-bit python for 32-bit vim, 64-bit python for 64-bit vim).
 
 Verify that Python is working inside Vim with
 
 ```vim
-:echo has('python')
+:echo has('python3') || has('python')
 ```
 
 ### Asynchronous command execution
