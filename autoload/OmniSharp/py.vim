@@ -10,7 +10,7 @@ let g:OmniSharp_python_path = OmniSharp#util#path_join(['python', 'omnisharp'])
 let s:save_cpo = &cpo
 set cpo&vim
 
-if exists('*py3eval')
+if has('python3') && exists('*py3eval')
   let s:pyeval = function('py3eval')
 elseif exists('*pyeval')
   let s:pyeval = function('pyeval')
