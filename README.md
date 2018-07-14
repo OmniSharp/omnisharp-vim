@@ -1,5 +1,7 @@
 ![OmniSharp](logo.png)
 
+![Travis status](https://api.travis-ci.org/OmniSharp/omnisharp-vim.svg?branch=master)
+
 # OmniSharp
 
 OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#.
@@ -68,7 +70,7 @@ Install the vim plugin using your preferred plugin manager:
 OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. Download the latest **HTTP** release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the **HTTP** variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz`.
 
 ##### Important! Download the HTTP release!
-_Please pay attention to the previous paragraph, and download the HTTP OmniSharp-Roslyn release (it has "http" in the download filename"). The non-HTTP version uses stdio instead of HTTP and OmniSharp-vim cannot communicate with it. This trips a lot of people up, hence the added emphases!_
+_Please pay attention to the previous paragraph, and download the HTTP OmniSharp-Roslyn release (it has "http" in the download filename"). The non-HTTP version uses stdio instead of HTTP and OmniSharp-vim cannot communicate with it. This trips a lot of people up, hence the added emphasis!_
 
 Extract the binaries and configure your vimrc with the path to the `OmniSharp.exe` file, e.g.:
 
