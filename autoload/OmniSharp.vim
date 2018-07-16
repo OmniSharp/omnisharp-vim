@@ -754,7 +754,10 @@ function! s:json_decode(json) abort
 endfunction
 
 function! s:set_quickfix(list, title)
-  call setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title})
+  if !has('patch-8.0.0657')
+  \ || setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title}) == -1
+    call setqflist(a:list)
+  endif
   if g:OmniSharp_open_quickfix
     botright cwindow 4
   endif
