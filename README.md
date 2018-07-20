@@ -157,17 +157,7 @@ This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in 
 
 Add `-v Verbose` to get extra information from the server.
 
-
-When vim is closed and the OmniSharp server is running, vim will stop the server automatically.
-This behaviour can be altered with the `g:OmniSharp_stop_server` variable in your vimrc:
-
-```vim
-let g:OmniSharp_stop_server = 0  " Do not stop the server on exit
-let g:OmniSharp_stop_server = 1  " Ask whether to stop the server
-let g:OmniSharp_stop_server = 2  " Automatically stop the server
-```
-
-OmniSharp listens to requests from Vim on port 2000 by default, so make sure that your firewall is configured to accept requests from localhost on this port. This behavior can be changed by setting `let g:OmniSharp_use_random_port = 1` in your vimrc. When set, the OmniSharp server will run on a random port instead of using the default port.
+When vim starts an OmniSharp server, it will bind to a random port by default. If you need to run the server on a specific port (or you are running manually, as above) you can use `let g:OmniSharp_sln_ports = {'C:\path\to\project.sln': 2000}` to map solution files to specific ports, or you can `let g:OmniSharp_port = 2000` to always use a single port (though this will prevent you from running multiple OmniSharp servers).
 
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use a completion or autocompletion plugin.
 

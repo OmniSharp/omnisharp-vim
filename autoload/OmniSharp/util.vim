@@ -5,7 +5,6 @@ let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 "let s:dir_separator = has('win32') ? '\' : '/'
 let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
-let g:OmniSharp_running_slns = []
 
 function! s:resolve_local_config(solution_path) abort
   let configPath = fnamemodify(a:solution_path, ':p:h')
@@ -30,6 +29,13 @@ function! s:is_wsl() abort
   return strlen(system('grep Microsoft /proc/version')) > 0
 endfunction
 
+" :echoerr will throw if inside a try conditional, or function labeled 'abort'
+" This function will do the same thing without throwing
+function! OmniSharp#util#EchoErr(msg)
+  let v:errmsg = a:msg
+  echohl ErrorMsg | echomsg a:msg | echohl None
+endfunction
+
 function! OmniSharp#util#path_join(parts) abort
   if type(a:parts) == type('')
     let parts = [a:parts]
@@ -41,8 +47,8 @@ function! OmniSharp#util#path_join(parts) abort
   return join([s:plugin_root_dir] + parts, s:dir_separator)
 endfunction
 
-function! OmniSharp#util#get_start_cmd(solution_path) abort
-  let solution_path = a:solution_path
+function! OmniSharp#util#get_start_cmd(solution_file) abort
+  let solution_path = a:solution_file
   if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
     let solution_path = fnamemodify(solution_path, ':h')
   endif
@@ -62,8 +68,7 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
     let solution_path = substitute(solution_path, '/', '\\', 'g')
   endif
 
-  let g:OmniSharp_running_slns += [solution_path]
-  let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
+  let port = OmniSharp#GetPort(a:solution_file)
 
   let s:server_path = ''
   if !exists('g:OmniSharp_server_path')
@@ -77,7 +82,6 @@ function! OmniSharp#util#get_start_cmd(solution_path) abort
     let s:server_path = g:OmniSharp_server_path
   endif
 
-  let port = exists('b:OmniSharp_port') ? b:OmniSharp_port : g:OmniSharp_port
   let command = [
               \ s:server_path,
               \ '-p', port,

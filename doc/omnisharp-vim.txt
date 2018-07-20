@@ -42,16 +42,17 @@ Suggestion: Install a completer such as NeoComplete or SuperTab
 ===============================================================================
 OPTIONS                                                     *omnisharp-options*
 
+                                                           *'g:OmniSharp_port'*
+Always use this port when starting an OmniSharp server. Note that this means you
+will be unable to run more than one OmniSharp server at a time.
+Default: None >
+    let g:OmniSharp_port = 2000
+<
+
                                                    *'g:OmniSharp_start_server'*
 Use this option to specify whether OmniSharp will start automatically upon
 opening a `*.cs` file. Default: 1 >
     let g:OmniSharp_start_server = 1
-<
-
-                                                    *'g:OmniSharp_stop_server'*
-Use this option to specify whether OmniSharp will stop automatically upon
-closing Vim. Default: 2 >
-    let g:OmniSharp_stop_server = 1
 <
 
                                              *'g:OmniSharp_server_config_name'*
@@ -83,22 +84,18 @@ Default: 0 >
 <
 
                                                            *'g:OmniSharp_host'*
-Use this option to specify the host address of the OmniSharp server.
+Use this option to specify the host address of the OmniSharp server. Using this
+will not play well with the auto-start functionality, so you should probably set
+g:OmniSharp_start_server = 0
 Default: 'http://localhost:2000' >
     let g:OmniSharp_host = 'http://localhost:2000'
 <
 
-                                                *'g:OmniSharp_use_random_port'*
-Use this option to default to a random port when no port is selected.
-Default: 0 >
-    let g:OmniSharp_use_random_port = 0
-<
-
                                                        *'g:OmniSharp_loglevel'*
-Sets the log level for the python code. Possible values are debug, 'info',
+Sets the log level for the python code. Possible values are 'debug', 'info',
 'warning', 'error', and 'critical'.
 Default: warning >
-    let g:OmniSharp_loglevel = warning
+    let g:OmniSharp_loglevel = 'warning'
 <
 
                                                   *'g:OmniSharp_open_quickfix'*
@@ -107,6 +104,16 @@ after find usages, implementations etc. Set this variable to 0 to prevent the
 quickfix window being opened automatically.
 Default: 1 >
     let g:OmniSharp_open_quickfix = 0
+<
+
+                                                      *'g:OmniSharp_sln_ports'*
+Mapping of solution file to port. When auto-starting the OmniSharp server, it
+will bind to the port listed here if the solution file matches. If there is no
+match, the port will be chosen at random.
+Default: {} >
+    let g:OmniSharp_sln_ports = {
+      \ 'C:\path\to\myproject.sln': 2003,
+      \ }
 <
 
                                                         *'g:OmniSharp_timeout'*
@@ -262,9 +269,24 @@ COMMANDS                                                   *omnisharp-commands*
 :OmniSharpAddToProject
     Adds current file to closest `*.csproj`
 
+                                                  *:OmniSharpRestartAllServers*
+:OmniSharpRestartAllServers
+    Restarts all running OmniSharp servers
+    NOTE: Requires vim 8.0+, neovim or vim-dispatch
+
+                                                      *:OmniSharpRestartServer*
+:OmniSharpRestartServer
+    Restarts the OmniSharp server
+    NOTE: Requires vim 8.0+, neovim or vim-dispatch
+
                                                         *:OmniSharpStartServer*
 :OmniSharpStartServer
     Starts the OmniSharp server
+    NOTE: Requires vim 8.0+, neovim or vim-dispatch
+
+                                                     *:OmniSharpStopAllServers*
+:OmniSharpStopAllServers
+    Stops all running OmniSharp servers
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                          *:OmniSharpStopServer*

@@ -91,10 +91,7 @@ def getResponse(endPoint, additional_parameters=None, timeout=None):
     if timeout == None:
         timeout = int(vim.eval('g:OmniSharp_timeout'))
 
-    host = vim.eval('g:OmniSharp_host')
-
-    if vim.eval('exists("b:OmniSharp_host")') == '1':
-        host = vim.eval('b:OmniSharp_host')
+    host = vim.eval('OmniSharp#GetHost()')
 
     target = urlparse.urljoin(host, endPoint)
 
@@ -463,3 +460,9 @@ def find_free_port():
     with closing(s):
         s.bind(('', 0))
         return s.getsockname()[1]
+
+def checkAliveStatus():
+    try:
+        return getResponse("/checkalivestatus", timeout=0.2) == 'true'
+    except Exception as e:
+        return 0
