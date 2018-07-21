@@ -47,7 +47,9 @@ function! s:findcodeactions_action_table.run.func(candidate) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !g:OmniSharp#py#eval(command)
+  let result = g:OmniSharp#py#eval(command)
+  if OmniSharp#CheckPyError() | return | endif
+  if !result
     echo 'No action taken'
   endif
 endfunction
@@ -81,6 +83,7 @@ function! s:findtype.gather_candidates(args, context) abort
     return []
   endif
   let symbols = g:OmniSharp#py#eval('findTypes()')
+  if OmniSharp#CheckPyError() | return | endif
   return map(symbols, '{
   \   "word": get(split(v:val.text, "\t"), 0),
   \   "abbr": v:val.text,
