@@ -136,7 +136,7 @@ def formatPathForClient(ctx, filepath):
     # Shorten path names by checking if we can make them relative
     cwd = ctx.cwd
     if cwd and os.path.commonprefix([cwd, filepath]) == cwd:
-        filepath = os.path.relpath(filepath, cwd)
+        filepath = filepath[len(cwd):].lstrip('/\\')
     return filepath
 
 
