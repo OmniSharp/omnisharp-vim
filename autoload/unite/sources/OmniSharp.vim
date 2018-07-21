@@ -15,20 +15,12 @@ let s:findcodeactions = {
 function! s:findcodeactions.gather_candidates(args, context) abort
   let s:mode = get(a:args, 0, 'normal')
   let s:actions = get(a:args, 1, [])
-  let s:version = get(a:args, 2, 'roslyn')
 
-  if s:version ==# 'v1'
-    return map(s:actions, '{
-    \   "word": v:val,
-    \   "source__OmniSharp_action": v:key,
-    \ }')
-  else
-    let actions = map(copy(s:actions), {i,v -> get(v, 'Name')})
-    return map(actions, '{
-    \   "word": v:val,
-    \   "source__OmniSharp_action": v:val,
-    \ }')
-  endif
+  let actions = map(copy(s:actions), {i,v -> get(v, 'Name')})
+  return map(actions, '{
+  \   "word": v:val,
+  \   "source__OmniSharp_action": v:val,
+  \ }')
 endfunction
 
 let s:findcodeactions_action_table = {
@@ -39,15 +31,10 @@ let s:findcodeactions_action_table = {
 function! s:findcodeactions_action_table.run.func(candidate) abort
   let str = a:candidate.source__OmniSharp_action
 
-  if s:version ==# 'v1'
-    let action = index(s:actions, str)
-    let command = printf('runCodeAction(%s, %d)', string(s:mode), action)
-  else
-    let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# str})[0]
-    let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
-    let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
-  endif
-  let result = g:OmniSharp#py#eval(command)
+  let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# str})[0]
+  let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+  let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
+  let result = OmniSharp#py#eval(command)
   if OmniSharp#CheckPyError() | return | endif
   if !result
     echo 'No action taken'
@@ -73,29 +60,8 @@ function! s:findsymbols.gather_candidates(args, context) abort
 endfunction
 
 
-let s:findtype = {
-\   'name': 'OmniSharp/findtype',
-\   'description': 'candidates from C# types via OmniSharp',
-\   'default_kind': 'jump_list',
-\ }
-function! s:findtype.gather_candidates(args, context) abort
-  if !OmniSharp#ServerIsRunning()
-    return []
-  endif
-  let symbols = g:OmniSharp#py#eval('findTypes()')
-  if OmniSharp#CheckPyError() | return | endif
-  return map(symbols, '{
-  \   "word": get(split(v:val.text, "\t"), 0),
-  \   "abbr": v:val.text,
-  \   "action__path": v:val.filename,
-  \   "action__line": v:val.lnum,
-  \   "action__col": v:val.col,
-  \ }')
-endfunction
-
-
 function! unite#sources#OmniSharp#define() abort
-  return [s:findcodeactions, s:findsymbols, s:findtype]
+  return [s:findcodeactions, s:findsymbols]
 endfunction
 
 let &cpoptions = s:save_cpo

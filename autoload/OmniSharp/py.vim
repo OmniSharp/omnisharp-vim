@@ -34,7 +34,9 @@ function! OmniSharp#py#bootstrap()
   let s:bootstrap_complete = 1
 endfunction
 
-let g:OmniSharp#py#eval = s:pyeval
+function! OmniSharp#py#eval(cmd) abort
+  return s:pyeval(a:cmd)
+endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

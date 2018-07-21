@@ -139,72 +139,43 @@ def gotoDefinition():
 
 
 @vimcmd
-def getCodeActions(mode, version='v1'):
-    parameters = codeActionParameters(mode, version)
-    if version == 'v1':
-        endpoint = '/getcodeactions'
-    elif version == 'v2':
-        endpoint = '/v2/getcodeactions'
-    response = getResponse(ctx, endpoint, parameters, json=True)
+def getCodeActions(mode):
+    parameters = codeActionParameters(mode)
+    response = getResponse(ctx, '/v2/getcodeactions', parameters, json=True)
     return response['CodeActions']
 
 
 @vimcmd
-def runCodeAction(mode, action, version='v1'):
-    parameters = codeActionParameters(mode, version)
-    if version == 'v1':
-        parameters['codeaction'] = action
-        response = getResponse(ctx, '/runcodeaction', parameters, json=True)
-        if 'Text' in response:
-            setBuffer(response['Text'])
-            return True
-    elif version == 'v2':
-        parameters['identifier'] = action
-        response = getResponse(ctx, '/v2/runcodeaction', parameters, json=True)
-        changes = response.get('Changes')
-        if changes:
-            bufname = vim.current.buffer.name
-            pos = vim.current.window.cursor
-            for changeDefinition in changes:
-                filename = formatPathForClient(ctx,
-                                               changeDefinition['FileName'])
-                openFile(filename, noautocmd=1)
-                if not setBuffer(changeDefinition.get('Buffer')):
-                    for change in changeDefinition.get('Changes', []):
-                        setBuffer(change.get('NewText'))
-            openFile(bufname, pos[0], pos[1], 1)
-            return True
+def runCodeAction(mode, action):
+    parameters = codeActionParameters(mode)
+    parameters['identifier'] = action
+    response = getResponse(ctx, '/v2/runcodeaction', parameters, json=True)
+    changes = response.get('Changes')
+    if changes:
+        bufname = vim.current.buffer.name
+        pos = vim.current.window.cursor
+        for changeDefinition in changes:
+            filename = formatPathForClient(ctx,
+                                           changeDefinition['FileName'])
+            openFile(filename, noautocmd=1)
+            if not setBuffer(changeDefinition.get('Buffer')):
+                for change in changeDefinition.get('Changes', []):
+                    setBuffer(change.get('NewText'))
+        openFile(bufname, pos[0], pos[1], 1)
+        return True
     return False
 
 
-def codeActionParameters(mode, version='v1'):
+def codeActionParameters(mode):
     parameters = {}
     if mode == 'visual':
         start = vim.eval('getpos("\'<")')
         end = vim.eval('getpos("\'>")')
-        if version == 'v1':
-            parameters['SelectionStartLine'] = start[1]
-            parameters['SelectionStartColumn'] = start[2]
-            parameters['SelectionEndLine'] = end[1]
-            parameters['SelectionEndColumn'] = end[2]
-        elif version == 'v2':
-            parameters['Selection'] = {
-                'Start': {'Line': start[1], 'Column': start[2]},
-                'End': {'Line': end[1], 'Column': end[2]}
-            }
+        parameters['Selection'] = {
+            'Start': {'Line': start[1], 'Column': start[2]},
+            'End': {'Line': end[1], 'Column': end[2]}
+        }
     return parameters
-
-
-@vimcmd
-def fixCodeIssue():
-    response = getResponse(ctx, '/fixcodeissue', json=True)
-    setBuffer(response.get('Text'))
-
-
-@vimcmd
-def getCodeIssues():
-    response = getResponse(ctx, '/getcodeissues', json=True)
-    return quickfixes_from_response(ctx, response['QuickFixes'])
 
 
 @vimcmd
@@ -243,29 +214,6 @@ def renameTo(name):
 
 
 @vimcmd
-def build():
-    response = getResponse(ctx, '/build', {}, 60, json=True)
-    return {
-        'Success': bool(response['Success']),
-        'QuickFixes': quickfixes_from_response(ctx, response['QuickFixes']),
-    }
-
-
-@vimcmd
-def getBuildCommand():
-    return getResponse(ctx, '/buildcommand')
-
-
-@vimcmd
-def getTestCommand(mode):
-    parameters = {
-        'Type': mode,
-    }
-    response = getResponse(ctx, '/gettestcontext', parameters, json=True)
-    return response['TestCommand']
-
-
-@vimcmd
 def codeFormat():
     parameters = {}
     parameters['ExpandTab'] = bool(int(vim.eval('&expandtab')))
@@ -278,33 +226,6 @@ def fix_usings():
     response = getResponse(ctx, '/fixusings', json=True)
     setBuffer(response.get("Buffer"))
     return quickfixes_from_response(ctx, response['AmbiguousResults'])
-
-
-@vimcmd
-def addReference(ref):
-    parameters = {
-        'reference': formatPathForServer(ctx, ref),
-    }
-    response = getResponse(ctx, "/addreference", parameters, json=True)
-    return response['Message']
-
-
-@vimcmd
-def findSyntaxErrors():
-    response = getResponse(ctx, '/syntaxerrors', json=True)
-    return quickfixes_from_response(ctx, response['Errors'])
-
-
-@vimcmd
-def findSemanticErrors():
-    response = getResponse(ctx, '/semanticerrors', json=True)
-    return quickfixes_from_response(ctx, response['Errors'])
-
-
-@vimcmd
-def findTypes():
-    response = getResponse(ctx, '/findtypes', json=True)
-    return quickfixes_from_response(ctx, response['QuickFixes'])
 
 
 @vimcmd
@@ -337,16 +258,6 @@ def lookupAllUserTypes():
 
 
 @vimcmd
-def lookupAllUserTypesLegacy():
-    response = getResponse(ctx, '/lookupalltypes', json=True)
-    return {
-        'userTypes': response['Types'],
-        'userInterfaces': response['Interfaces'],
-        'userAttributes': '',
-    }
-
-
-@vimcmd
 def navigateUp():
     get_navigate_response('/navigateup')
 
@@ -375,18 +286,8 @@ def checkAliveStatus():
 
 
 @vimcmd
-def reloadSolution():
-    getResponse(ctx, '/reloadsolution')
-
-
-@vimcmd
 def updateBuffer():
     getResponse(ctx, "/updatebuffer")
-
-
-@vimcmd
-def addToProject():
-    getResponse(ctx, "/addtoproject")
 
 
 __all__ = [name for name, fxn in locals().items()

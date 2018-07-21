@@ -51,8 +51,6 @@ call add(g:ctrlp_ext_vars, {
 
 
 function! ctrlp#OmniSharp#findcodeactions#setactions(mode, actions) abort
-  " When using the roslyn server, use /v2/codeactions
-  let s:version = g:OmniSharp_server_type ==# 'roslyn' ? 'v2' : 'v1'
   let s:actions = a:actions
   let s:mode = a:mode
 endfunction
@@ -62,11 +60,7 @@ endfunction
 " Return: a Vim's List
 "
 function! ctrlp#OmniSharp#findcodeactions#init() abort
-  if s:version ==# 'v1'
-    return s:actions
-  else
-    return map(copy(s:actions), {i,v -> get(v, 'Name')})
-  endif
+  return map(copy(s:actions), {i,v -> get(v, 'Name')})
 endfunction
 
 
@@ -79,15 +73,10 @@ endfunction
 "
 function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
   call ctrlp#exit()
-  if s:version ==# 'v1'
-    let action = index(s:actions, a:str)
-    let command = printf('runCodeAction(%s, %d)', string(s:mode), action)
-  else
-    let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# a:str})[0]
-    let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
-    let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
-  endif
-  let result = g:OmniSharp#py#eval(command)
+  let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# a:str})[0]
+  let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+  let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
+  let result = OmniSharp#py#eval(command)
   if OmniSharp#CheckPyError() | return | endif
   if !result
     echo 'No action taken'

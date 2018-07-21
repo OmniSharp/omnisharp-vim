@@ -9,9 +9,6 @@ if !(has('python') || has('python3'))
   finish
 endif
 
-" Select a server: one of 'roslyn' or 'v1'
-let g:OmniSharp_server_type = get(g:, 'OmniSharp_server_type', 'roslyn')
-
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 

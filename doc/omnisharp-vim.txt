@@ -61,16 +61,8 @@ Default: 'omnisharp.json' >
     let g:OmniSharp_server_config_name = 'omnisharp.json'
 <
 
-                                                    *'g:OmniSharp_server_type'*
-Use this option to specify which version of OmniSharp will be used.
-Default: 'roslyn' >
-    let g:OmniSharp_server_type = 'roslyn'
-    OR
-    let g:OmniSharp_server_type = 'v1'
-<
-
                                                     *'g:OmniSharp_server_path'*
-Use this option to give the full path to the roslyn or v1 omnisharp server
+Use this option to give the full path to the roslyn omnisharp server
 executable. >
     let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
@@ -153,9 +145,7 @@ the |:OmniSharpDocumentation| command. Default: 0 >
 
                                                     *'g:syntastic_cs_checkers'*
 Use this option to enable syntastic integration >
-    let g:syntastic_cs_checkers = ['code_checker']                 " roslyn
-    OR
-    let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues'] " v1 server
+    let g:syntastic_cs_checkers = ['code_checker']
 <
 
                                                     *'g:OmniSharp_selector_ui'*
@@ -177,15 +167,6 @@ none are. >
 ===============================================================================
 COMMANDS                                                   *omnisharp-commands*
 
-                                                              *:OmniSharpBuild*
-:OmniSharpBuild
-    Builds solution and puts errors/warnings in quickfix list
-
-                                                         *:OmniSharpBuildAsync*
-:OmniSharpBuildAsync
-    Builds solution asynchronously and puts errors/warnings in quickfix list
-    NOTE: Must have vim 8.0+, neovim or vim-dispatch installed
-
                                                      *:OmniSharpGotoDefinition*
 :OmniSharpGotoDefinition
     Navigates to the definition of the symbol under the cursor
@@ -194,11 +175,6 @@ COMMANDS                                                   *omnisharp-commands*
 :OmniSharpFindImplementations
     Fills quicklist with implementations of interface/class under the cursor
     NOTE: Navigates to implementation if only one is found
-
-                                                           *:OmniSharpFindType*
-:OmniSharpFindType
-    Fuzzy-search through types
-    NOTE: Requires CtrlP, unite.vim or fzf.vim
 
                                                          *:OmniSharpFindSymbol*
 :OmniSharpFindSymbol
@@ -213,10 +189,6 @@ COMMANDS                                                   *omnisharp-commands*
                                                         *:OmniSharpFindMembers*
 :OmniSharpFindMembers
     Fills quicklist with members in current file
-
-                                                           *:OmniSharpFixIssue*
-:OmniSharpFixIssue
-    Fixes warning on current line
 
                                                           *:OmniSharpFixUsings*
 :OmniSharpFixUsings
@@ -257,17 +229,9 @@ COMMANDS                                                   *omnisharp-commands*
 :OmniSharpRename
     Renames symbol under cursor
 
-                                                     *:OmniSharpReloadSolution*
-:OmniSharpReloadSolution
-    Reloads solution in OmniSharp
-
                                                          *:OmniSharpCodeFormat*
 :OmniSharpCodeFormat
     Formats code
-
-                                                       *:OmniSharpAddToProject*
-:OmniSharpAddToProject
-    Adds current file to closest `*.csproj`
 
                                                   *:OmniSharpRestartAllServers*
 :OmniSharpRestartAllServers
