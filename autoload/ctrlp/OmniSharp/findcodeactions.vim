@@ -87,7 +87,9 @@ function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !g:OmniSharp#py#eval(command)
+  let result = g:OmniSharp#py#eval(command)
+  if OmniSharp#CheckPyError() | return | endif
+  if !result
     echo 'No action taken'
   endif
 endfunction

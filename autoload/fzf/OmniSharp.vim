@@ -20,6 +20,7 @@ function! fzf#OmniSharp#findtypes() abort
     return
   endif
   let s:quickfixes = g:OmniSharp#py#eval('findTypes()')
+  if OmniSharp#CheckPyError() | return | endif
   let types = []
   for quickfix in s:quickfixes
     call add(types, quickfix.text)
@@ -51,7 +52,9 @@ function! s:action_sink(str) abort
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'', ''v2'')', s:mode, command)
   endif
-  if !g:OmniSharp#py#eval(command)
+  let result = g:OmniSharp#py#eval(command)
+  if OmniSharp#CheckPyError() | return | endif
+  if !result
     echo 'No action taken'
   endif
 endfunction

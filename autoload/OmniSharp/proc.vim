@@ -128,10 +128,16 @@ function! OmniSharp#proc#RunAsyncCommand(command, jobkey) abort
     let job_id = OmniSharp#proc#neovimJobStart(a:command)
     if job_id > 0
       let s:jobs[a:jobkey] = job_id
+    else
+      call OmniSharp#util#EchoErr('command is not executable: ' . a:command[0])
     endif
   elseif OmniSharp#proc#supportsVimJobs()
     let job_id = OmniSharp#proc#vimJobStart(a:command)
-    let s:jobs[a:jobkey] = job_id
+    if job_status(job_id) ==# 'run'
+      let s:jobs[a:jobkey] = job_id
+    else
+      call OmniSharp#util#EchoErr('could not run command: ' . join(a:command, ' '))
+    endif
   elseif OmniSharp#proc#supportsVimDispatch()
     let req = call OmniSharp#proc#dispatchStart(a:command)
     let s:jobs[a:jobkey] = req
