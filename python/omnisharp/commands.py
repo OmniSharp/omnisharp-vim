@@ -358,7 +358,7 @@ def navigateDown():
 
 def get_navigate_response(endpoint):
     response = getResponse(ctx, endpoint, json=True)
-    vim.current.window.cursor = (response['Line'], response['Column'])
+    vim.current.window.cursor = (response['Line'], response['Column'] - 1)
 
 
 @vimcmd
