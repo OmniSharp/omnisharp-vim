@@ -885,6 +885,26 @@ function! OmniSharp#CheckPyError(...)
   return 0
 endfunction
 
+function! OmniSharp#Install() abort
+  if !has('unix')
+    throw 'Installation is currently only available on Linux, macOS, Cygwin and WSL'
+  endif
+  echo 'Installing OmniSharp Roslyn...'
+  if executable('curl')
+    call OmniSharp#StopAllServers()
+    call system('sh <(curl -s "https://raw.githubusercontent.com/axvr/codedump/master/Shell/omnisharp-manager.sh") -Hl "$HOME/.omnisharp/vim/"')
+    echomsg "OmniSharp installed to: ~/.omnisharp/vim/"
+    echomsg "Place this in your Vim config:"
+    if has('win32unix')
+      echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/OmniSharp.exe')"
+    else
+      echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/run')"
+    endif
+  else
+    throw "Curl is not installed"
+  endif
+endfunction
+
 function! s:find_solution_files() abort
   "get the path for the current buffer
   let dir = expand('%:p:h')
