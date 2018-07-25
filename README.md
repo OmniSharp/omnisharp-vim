@@ -24,7 +24,7 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (unused usings, use var....etc.) (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
-* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [Syntastic](https://github.com/vim-syntastic/syntastic))
+* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/w0rp/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
 * Semantic type highlighting
@@ -118,8 +118,13 @@ OmniSharp-vim can start the server and run asynchronous builds only if any of th
 * [vim-dispatch](https://github.com/tpope/vim-dispatch) is installed
 * [vimproc.vim](https://github.com/Shougo/vimproc.vim) is installed
 
+### (optional) Install ALE
+
+If [ALE](https://github.com/w0rp/ale) is installed, it will automatically be
+used to asynchronously check your code for errors.
+
 ### (optional) Install syntastic
-The vim plugin [syntastic](https://github.com/vim-syntastic/syntastic) is needed for displaying code issues and syntax errors.
+The vim plugin [syntastic](https://github.com/vim-syntastic/syntastic) can be used if you don't have ALE.
 Configure it to work with OmniSharp with the following line in your vimrc.
 
 ```vim

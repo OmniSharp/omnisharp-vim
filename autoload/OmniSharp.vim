@@ -43,15 +43,19 @@ function! OmniSharp#GetPort(...) abort
 endfunction
 
 " Called from python
-function! OmniSharp#GetHost() abort
-  if !exists('b:OmniSharp_host')
-    let port = OmniSharp#GetPort()
+function! OmniSharp#GetHost(...) abort
+  let bufnum = a:0 ? a:1 : bufnr('%')
+
+  if empty(getbufvar(bufnum, 'OmniSharp_host'))
+    let sln_file = OmniSharp#FindSolution(1, bufnum)
+    let port = OmniSharp#GetPort(sln_file)
     if port == 0
       return ''
     endif
-    let b:OmniSharp_host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
+    let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
+    call setbufvar(bufnum, 'OmniSharp_host', host)
   endif
-  return b:OmniSharp_host
+  return getbufvar(bufnum, 'OmniSharp_host')
 endfunction
 
 function! OmniSharp#GetCompletions(partial, ...) abort
@@ -162,59 +166,16 @@ endfunction
 " Caches result
 function! OmniSharp#FindSolution(...) abort
   let interactive = a:0 ? a:1 : 1
-  if !exists('b:OmniSharp_sln_file')
+  let bufnum = a:0 > 1 ? a:2 : bufnr('%')
+  if empty(getbufvar(bufnum, 'OmniSharp_sln_file'))
     try
-      let sln = s:FindSolution(interactive)
-    catch
+      let sln = s:FindSolution(interactive, bufnum)
+    catch e
       return ''
     endtry
-    let b:OmniSharp_sln_file = sln
+    call setbufvar(bufnum, 'OmniSharp_sln_file', sln)
   endif
-  return b:OmniSharp_sln_file
-endfunction
-
-function! s:FindSolution(interactive) abort
-  let solution_files = s:find_solution_files()
-  if empty(solution_files)
-    return ''
-  endif
-
-  if len(solution_files) == 1
-    return solution_files[0]
-  elseif g:OmniSharp_sln_list_index > -1 &&
-  \     g:OmniSharp_sln_list_index < len(solution_files)
-    return solution_files[g:OmniSharp_sln_list_index]
-  else
-    if g:OmniSharp_autoselect_existing_sln
-      let running_slns = []
-      for solutionfile in solution_files
-        if has_key(g:OmniSharp_sln_ports, solutionfile)
-          call add(running_slns, solutionfile)
-        endif
-      endfor
-      if len(running_slns) == 1
-        return running_slns[0]
-      endif
-    endif
-
-    if !a:interactive
-      throw 'Ambiguous solution file'
-    endif
-
-    let labels = ['Solution:']
-    let index = 1
-    for solutionfile in solution_files
-      call add(labels, index . ". " . solutionfile)
-      let index += 1
-    endfor
-
-    let choice = inputlist(labels)
-
-    if choice <= 0 || choice > len(solution_files)
-      throw 'No solution selected'
-    endif
-    return solution_files[choice - 1]
-  endif
+  return getbufvar(bufnum, 'OmniSharp_sln_file')
 endfunction
 
 function! OmniSharp#NavigateDown() abort
@@ -885,9 +846,53 @@ function! OmniSharp#CheckPyError(...)
   return 0
 endfunction
 
-function! s:find_solution_files() abort
+function! s:FindSolution(interactive, bufnum) abort
+  let solution_files = s:find_solution_files(a:bufnum)
+  if empty(solution_files)
+    return ''
+  endif
+
+  if len(solution_files) == 1
+    return solution_files[0]
+  elseif g:OmniSharp_sln_list_index > -1 &&
+  \     g:OmniSharp_sln_list_index < len(solution_files)
+    return solution_files[g:OmniSharp_sln_list_index]
+  else
+    if g:OmniSharp_autoselect_existing_sln
+      let running_slns = []
+      for solutionfile in solution_files
+        if has_key(g:OmniSharp_sln_ports, solutionfile)
+          call add(running_slns, solutionfile)
+        endif
+      endfor
+      if len(running_slns) == 1
+        return running_slns[0]
+      endif
+    endif
+
+    if !a:interactive
+      throw 'Ambiguous solution file'
+    endif
+
+    let labels = ['Solution:']
+    let index = 1
+    for solutionfile in solution_files
+      call add(labels, index . ". " . solutionfile)
+      let index += 1
+    endfor
+
+    let choice = inputlist(labels)
+
+    if choice <= 0 || choice > len(solution_files)
+      throw 'No solution selected'
+    endif
+    return solution_files[choice - 1]
+  endif
+endfunction
+
+function! s:find_solution_files(bufnum) abort
   "get the path for the current buffer
-  let dir = expand('%:p:h')
+  let dir = expand('#' . a:bufnum . ':p:h')
   let lastfolder = ''
   let solution_files = []
 
