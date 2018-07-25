@@ -72,12 +72,8 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
 
   let s:server_path = ''
   if !exists('g:OmniSharp_server_path')
-    if g:OmniSharp_server_type ==# 'v1'
-      let s:server_path = OmniSharp#util#path_join(['server', 'OmniSharp', 'bin', 'Debug', 'OmniSharp.exe'])
-    else
-      let s:server_extension = has('win32') || has('win32unix') ? '.cmd' : ''
-      let s:server_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'OmniSharp' . s:server_extension])
-    endif
+    let s:server_extension = has('win32') || has('win32unix') ? '.cmd' : ''
+    let s:server_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'OmniSharp' . s:server_extension])
   else
     let s:server_path = g:OmniSharp_server_path
   endif
@@ -87,13 +83,7 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
               \ '-p', port,
               \ '-s', solution_path]
 
-  if g:OmniSharp_server_type ==# 'v1'
-    let l:config_file = s:resolve_local_config(solution_path)
-    if l:config_file !=# ''
-      let command = command + ['-config', l:config_file]
-    endif
-  endif
-  if !has('win32') && !has('win32unix') && (g:OmniSharp_server_use_mono || g:OmniSharp_server_type ==# 'v1')
+  if !has('win32') && !has('win32unix') && g:OmniSharp_server_use_mono
     let command = insert(command, 'mono')
   endif
 

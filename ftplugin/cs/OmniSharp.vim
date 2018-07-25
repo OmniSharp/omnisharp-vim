@@ -31,18 +31,12 @@ if get(g:, 'OmniSharp_start_server', 0) == 1
 endif
 
 " Commands
-command! -buffer -bar OmniSharpAddToProject        call OmniSharp#AddToProject()
-command! -buffer -bar OmniSharpBuild               call OmniSharp#Build()
-command! -buffer -bar OmniSharpBuildAsync          call OmniSharp#BuildAsync()
 command! -buffer -bar OmniSharpCodeFormat          call OmniSharp#CodeFormat()
 command! -buffer -bar OmniSharpDocumentation       call OmniSharp#TypeLookupWithDocumentation()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
 command! -buffer -bar OmniSharpFindMembers         call OmniSharp#FindMembers()
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
-command! -buffer -bar OmniSharpFindSyntaxErrors    call OmniSharp#FindSyntaxErrors()
-command! -buffer -bar OmniSharpFindType            call OmniSharp#FindType()
 command! -buffer -bar OmniSharpFindUsages          call OmniSharp#FindUsages()
-command! -buffer -bar OmniSharpFixIssue            call OmniSharp#FixIssue()
 command! -buffer -bar OmniSharpFixUsings           call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions      call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGotoDefinition      call OmniSharp#GotoDefinition()
@@ -50,7 +44,6 @@ command! -buffer -bar OmniSharpHighlightTypes      call OmniSharp#EnableTypeHigh
 command! -buffer -bar OmniSharpNavigateUp          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown        call OmniSharp#NavigateDown()
 command! -buffer -bar OmniSharpOpenPythonLog       call OmniSharp#OpenPythonLog()
-command! -buffer -bar OmniSharpReloadSolution      call OmniSharp#ReloadSolution()
 command! -buffer -bar OmniSharpRename              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRestartAllServers   call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer       call OmniSharp#RestartServer()
@@ -73,9 +66,6 @@ command! -buffer -nargs=1 -complete=file
 \ OmniSharpStartServerSolution
 \ call OmniSharp#StartServerSolution(<q-args>)
 
-command! -buffer -nargs=1 -complete=file OmniSharpAddReference
-\ call OmniSharp#AddReference(<q-args>)
-
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
@@ -86,19 +76,12 @@ let b:undo_ftplugin .= '
 \ execute "autocmd! plugin-OmniSharp * <buffer>"
 \
 \|  unlet b:OmniSharp_ftplugin_loaded
-\|  delcommand OmniSharpAddReference
-\|  delcommand OmniSharpAddToProject
-\|  delcommand OmniSharpBuild
-\|  delcommand OmniSharpBuildAsync
 \|  delcommand OmniSharpCodeFormat
 \|  delcommand OmniSharpDocumentation
 \|  delcommand OmniSharpFindImplementations
 \|  delcommand OmniSharpFindMembers
 \|  delcommand OmniSharpFindSymbol
-\|  delcommand OmniSharpFindSyntaxErrors
-\|  delcommand OmniSharpFindType
 \|  delcommand OmniSharpFindUsages
-\|  delcommand OmniSharpFixIssue
 \|  delcommand OmniSharpFixUsings
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGotoDefinition
@@ -106,7 +89,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
 \|  delcommand OmniSharpOpenPythonLog
-\|  delcommand OmniSharpReloadSolution
 \|  delcommand OmniSharpRename
 \|  delcommand OmniSharpRenameTo
 \|  delcommand OmniSharpRestartAllServers
