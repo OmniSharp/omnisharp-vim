@@ -18,7 +18,7 @@ let g:OmniSharp_quickFixLength = get(g:, 'OmniSharp_quickFixLength', 60)
 
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
 
-let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', 0)
+let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', has('win32unix'))
 
 let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0)
 
