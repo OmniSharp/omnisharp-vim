@@ -713,6 +713,23 @@ function! s:FindSolution(interactive, bufnum) abort
   endif
 endfunction
 
+let s:script_location = expand('<sfile>:p:h:h').'/installer/omnisharp-manager.sh'
+function! OmniSharp#Install() abort
+  if !has('unix')
+    throw 'Installation is currently only available on Linux, macOS, Cygwin and WSL'
+  endif
+  echo 'Installing OmniSharp Roslyn...'
+  call OmniSharp#StopAllServers()
+  call system('sh '.s:script_location.' -Hl "$HOME/.omnisharp/vim/"')
+  echomsg "OmniSharp installed to: ~/.omnisharp/vim/"
+  echomsg "Place this in your Vim config:"
+  if has('win32unix')
+    echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/OmniSharp.exe')"
+  else
+    echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/run')"
+  endif
+endfunction
+
 function! s:find_solution_files(bufnum) abort
   "get the path for the current buffer
   let dir = expand('#' . a:bufnum . ':p:h')

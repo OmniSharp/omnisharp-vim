@@ -56,6 +56,7 @@ command! -buffer -bar OmniSharpStartServer         call OmniSharp#StartServer()
 command! -buffer -bar OmniSharpStopAllServers      call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookupWithoutDocumentation()
+command! -buffer -bar OmniSharpInstall             call OmniSharp#Install()
 
 
 command! -buffer -nargs=1 OmniSharpRenameTo
