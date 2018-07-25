@@ -31,21 +31,15 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 * Lookup type information of an type/variable/method
   * Can be printed to the status line or in the preview window
   * Displays documentation for an entity when using preview window
-* Syntax error highlighting
-* On the fly semantic error highlighting (nearly as good as a full compilation!)
-* Integrated xbuild/msbuild (can run asynchronously if supported)
+* Code error checking
 * Code formatter
-* [Test runner](https://github.com/OmniSharp/omnisharp-vim/wiki/Test-Runner)
 
 ## Screenshots
 #### Auto Complete
 ![OmniSharp screenshot](https://f.cloud.github.com/assets/667194/514371/dc03e2bc-be56-11e2-9745-c3202335e5ab.png)
 
-#### Find (and fix) Code Issues
-![Code issues screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/codeissues.png)
-
-#### Find Types / Symbols
-![Find Types screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindTypes.png)
+#### Find Symbols
+![Find Symbols screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindTypes.png)
 
 #### Find Usages
 ![Find Usages screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindUsages.png)
@@ -111,7 +105,7 @@ Verify that Python is working inside Vim with
 ```
 
 ### Asynchronous command execution
-OmniSharp-vim can start the server and run asynchronous builds only if any of the following criteria is met:
+OmniSharp-vim can start the server only if any of the following criteria is met:
 
 * Vim with job control API is used (8.0+)
 * [neovim](https://neovim.io) with job control API is used
@@ -160,26 +154,15 @@ This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in 
 [mono] OmniSharp.exe -p (portnumber) -s (path/to/sln)
 ```
 
-Add `-v Verbose` to get extra information from the server.
+Add `-v` to get extra information from the server.
 
-When vim starts an OmniSharp server, it will bind to a random port by default. If you need to run the server on a specific port (or you are running manually, as above) you can use `let g:OmniSharp_sln_ports = {'C:\path\to\project.sln': 2000}` to map solution files to specific ports, or you can `let g:OmniSharp_port = 2000` to always use a single port (though this will prevent you from running multiple OmniSharp servers).
+When vim starts an OmniSharp server, it will bind to a random port by default. If you need to run the server on a specific port (or you are running manually, as above) you can use `let g:OmniSharp_sln_ports = {'C:\path\to\project.sln': 2000}` to map solution files to specific ports, or you can `let g:OmniSharp_port = 2000` to always use a single port (though this will prevent you from running OmniSharp servers on multiple solutions).
 
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use a completion or autocompletion plugin.
 
 To use the other features, you'll want to create key bindings for them. See the example vimrc below for more info.
 
 See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom configuration examples.
-
-### Using with the legacy server
-
-Using the OmniSharp-Roslyn server is recommended, as this server is actively maintained and developed. However, if you wish to use the original [OmniSharp server](https://github.com/OmniSharp/omnisharp-server), follow the installation instructions in the server's git repo, then specify the server type in your vimrc:
-
-```vim
-let g:OmniSharp_server_type = 'v1'
-
-" The legacy server uses different syntastic checkers to roslyn
-let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
-```
 
 ## Configuration
 
@@ -219,15 +202,8 @@ let g:syntastic_cs_checkers = ['code_checker']
 augroup omnisharp_commands
     autocmd!
 
-    " Synchronous build (blocks Vim)
-    "autocmd FileType cs nnoremap <buffer> <F5> :wa!<CR>:OmniSharpBuild<CR>
-    " Builds can also run asynchronously with vim-dispatch installed
-    autocmd FileType cs nnoremap <buffer> <Leader>b :wa!<CR>:OmniSharpBuildAsync<CR>
     " Automatic syntax check on events (TextChanged requires Vim 7.4)
     autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
-
-    " Automatically add new cs files to the nearest project on save
-    autocmd BufWritePost *.cs call OmniSharp#AddToProject()
 
     " Show type information automatically when the cursor stops moving
     autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
@@ -241,8 +217,6 @@ augroup omnisharp_commands
     " Finds members in the current buffer
     autocmd FileType cs nnoremap <buffer> <Leader>fm :OmniSharpFindMembers<CR>
 
-    " Cursor can be anywhere on the line containing an issue
-    autocmd FileType cs nnoremap <buffer> <Leader>x  :OmniSharpFixIssue<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>fx :OmniSharpFixUsings<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>tt :OmniSharpTypeLookup<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>dc :OmniSharpDocumentation<CR>
@@ -266,11 +240,7 @@ nnoremap <F2> :OmniSharpRename<CR>
 " Rename without dialog - with cursor on the symbol to rename: `:Rename newname`
 command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
 
-" Force OmniSharp to reload the solution. Useful when switching branches etc.
-nnoremap <Leader>rl :OmniSharpReloadSolution<CR>
 nnoremap <Leader>cf :OmniSharpCodeFormat<CR>
-" Load the current .cs file to the nearest project
-nnoremap <Leader>tp :OmniSharpAddToProject<CR>
 
 " Start the omnisharp server for the current solution
 nnoremap <Leader>ss :OmniSharpStartServer<CR>
