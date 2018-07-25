@@ -713,23 +713,20 @@ function! s:FindSolution(interactive, bufnum) abort
   endif
 endfunction
 
+let s:script_location = expand('<sfile>:p:h:h').'/installer/omnisharp-manager.sh'
 function! OmniSharp#Install() abort
   if !has('unix')
     throw 'Installation is currently only available on Linux, macOS, Cygwin and WSL'
   endif
   echo 'Installing OmniSharp Roslyn...'
-  if executable('curl')
-    call OmniSharp#StopAllServers()
-    call system('sh <(curl -s "https://raw.githubusercontent.com/axvr/codedump/master/Shell/omnisharp-manager.sh") -Hl "$HOME/.omnisharp/vim/"')
-    echomsg "OmniSharp installed to: ~/.omnisharp/vim/"
-    echomsg "Place this in your Vim config:"
-    if has('win32unix')
-      echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/OmniSharp.exe')"
-    else
-      echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/run')"
-    endif
+  call OmniSharp#StopAllServers()
+  call system('sh '.s:script_location.' -Hl "$HOME/.omnisharp/vim/"')
+  echomsg "OmniSharp installed to: ~/.omnisharp/vim/"
+  echomsg "Place this in your Vim config:"
+  if has('win32unix')
+    echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/OmniSharp.exe')"
   else
-    throw "Curl is not installed"
+    echomsg "let g:OmniSharp_server_path = expand('~/.omnisharp/vim/run')"
   endif
 endfunction
 
