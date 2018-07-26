@@ -27,8 +27,7 @@ Required:~
 
 Optional:~
     - CtrlP, unite.vim or fzf.vim (for fuzzy-search capabilities)
-    - Syntastic plugin (for syntax and type checking)
-    NOTE: Must be enabled (see |'g:syntastic_cs_checkers'|)
+    - ALE or Syntastic plugin (for syntax and type checking)
 
 ===============================================================================
 USAGE                                                         *omnisharp-usage*
@@ -63,7 +62,9 @@ Default: 'omnisharp.json' >
 
                                                     *'g:OmniSharp_server_path'*
 Use this option to give the full path to the roslyn omnisharp server
-executable. >
+executable. If not set, the |:OmniSharpInstall| location is used.
+Default: '/home/username/.omnisharp/omnisharp-roslyn/run'
+     or: 'C:\Users\username\.omnisharp\omnisharp-roslyn\OmniSharp.exe' >
     let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
 
@@ -261,5 +262,14 @@ COMMANDS                                                   *omnisharp-commands*
                                                      *:OmniSharpHighlightTypes*
 :OmniSharpHighlightTypes
     Enable advanced type highlighting for current file
+
+                                                            *:OmniSharpInstall*
+:OmniSharpInstall
+    Download the latest OmniSharp-roslyn binaries and extract them into
+    ~/.omnisharp/omnisharp-roslyn. This can be used to install OmniSharp-roslyn
+    initially, and to upgrade to the latest version at any time.
+    Requires "curl" to be installed.
+    NOTE: This is not currently supported in Windows, except in Cygwin/WSL
+    environments
 
 ===============================================================================
