@@ -713,14 +713,17 @@ function! s:FindSolution(interactive, bufnum) abort
   endif
 endfunction
 
-let s:script_location = expand('<sfile>:p:h:h').'/installer/omnisharp-manager.sh'
+let s:extension = has('win32') ? '.ps1' : '.sh'
+let s:script_location = expand('<sfile>:p:h:h').'/installer/omnisharp-manager'.s:extension
 function! OmniSharp#Install() abort
-  if !has('unix')
-    throw 'Installation is currently only available on Linux, macOS, Cygwin and WSL'
-  endif
   echo 'Installing OmniSharp Roslyn...'
   call OmniSharp#StopAllServers()
-  call system('sh '.s:script_location.' -Hl "$HOME/.omnisharp/omnisharp-roslyn/"')
+  if !has('unix')
+    let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
+    call system("powershell & '".s:script_location."' -H -l '".l:location."'")
+  else
+    call system('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"')
+  endif
   echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
 endfunction
 

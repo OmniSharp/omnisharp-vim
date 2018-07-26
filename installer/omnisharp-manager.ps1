@@ -1,6 +1,6 @@
 # OmniSharp-roslyn Management tool
 #
-# Works on: Linux, macOS & Cygwin/WSL
+# Works on: Microsoft Windows
 
 # Options:
 # -v | version to use (otherwise use latest)
@@ -10,7 +10,7 @@
 
 [CmdletBinding()]
 Param(
-    [Parameter()][Alias('v')][string]$version = "",
+    [Parameter()][Alias('v')][string]$version,
     [Parameter()][Alias('l')][string]$location = "C:\omnisharp\",
     [Parameter()][Alias('u')][switch]$usage,
     [Parameter()][Alias('H')][switch]$http_check
