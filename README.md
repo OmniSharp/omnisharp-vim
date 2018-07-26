@@ -62,7 +62,12 @@ Install the vim plugin using your preferred plugin manager:
 | [Pathogen](https://github.com/tpope/vim-pathogen)    | `git clone git://github.com/OmniSharp/omnisharp-vim.git ~/.vim/bundle/omnisharp-vim` |
 
 ### Server
-OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. Download the latest **HTTP** release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the **HTTP** variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz`.
+OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use.
+
+#### Manual installation, and Windows users
+The automatic installation script is currently only available in Linux and macOS, and to Windows users when vim is run in a Cygwin/WSL environment. To install the server manually, follow these steps:
+
+Download the latest **HTTP** release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the **HTTP** variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz` etc.
 
 ##### Important! Download the HTTP release!
 _Please pay attention to the previous paragraph, and download the HTTP OmniSharp-Roslyn release (it has "http" in the download filename"). The non-HTTP version uses stdio instead of HTTP and OmniSharp-vim cannot communicate with it. This trips a lot of people up, hence the added emphasis!_
@@ -76,8 +81,12 @@ let g:OmniSharp_server_path = 'C:\OmniSharp\omnisharp.http-win-x64\OmniSharp.exe
 let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 ```
 
-#### Cygwin and WSL
-Windows users who wish to use OmniSharp-vim in a Cygwin or Windows Subsystem for Linux terminal vim, download the *Windows* OmniSharp-Rosyn release. Configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
+#### Windows: Cygwin
+No special configuration is required for cygwin. The automatic installation script for cygwin downloads the *Windows* OmniSharp-roslyn release. OmniSharp-vim detects that it is running in a cygwin environment and automatically enables Windows/cygwin file path translations by setting the default value of `g:OmniSharp_translate_cygwin_wsl` to `1`.
+
+#### Windows Subsystem for Linux (WSL)
+OmniSharp-roslyn can function perfectly well in WSL using linux binaries, if the environment is correctly configured (see [OmniSharp-roslyn](https://github.com/OmniSharp/omnisharp-roslyn) for requirements).
+However, if you have the .NET Framework installed in Windows, you may have better results using the Windows binaries. To do this, follow the Manual installation instructions above, configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
 
 ```vim
 let g:OmniSharp_server_path = '/mnt/c/OmniSharp/omnisharp.http-win-x64/OmniSharp.exe'
@@ -172,14 +181,11 @@ See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom 
 " OmniSharp won't work without this setting
 filetype plugin on
 
-" Set the path to the roslyn server
-let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
-
 " Set the type lookup function to use the preview window instead of echoing it
 "let g:OmniSharp_typeLookupInPreview = 1
 
 " Timeout in seconds to wait for a response from the server
-let g:OmniSharp_timeout = 1
+let g:OmniSharp_timeout = 5
 
 " Don't autoselect first omnicomplete option, show options even if there is only
 " one (so the preview documentation is accessible). Remove 'preview' if you
@@ -195,9 +201,6 @@ set completeopt=longest,menuone,preview
 " Set desired preview window height for viewing documentation.
 " You might also want to look at the echodoc plugin.
 set previewheight=5
-
-" Get code issues and syntax errors
-let g:syntastic_cs_checkers = ['code_checker']
 
 augroup omnisharp_commands
     autocmd!

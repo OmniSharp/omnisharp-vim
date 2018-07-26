@@ -2,7 +2,6 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 let s:dir_separator = fnamemodify('.', ':p')[-1 :]
-"let s:dir_separator = has('win32') ? '\' : '/'
 let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
@@ -72,8 +71,22 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
 
   let s:server_path = ''
   if !exists('g:OmniSharp_server_path')
-    let s:server_extension = has('win32') || has('win32unix') ? '.cmd' : ''
-    let s:server_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'artifacts', 'scripts', 'OmniSharp' . s:server_extension])
+    let parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
+    if has('win32') || s:is_cygwin()
+      let parts += ['OmniSharp.exe']
+    else
+      let parts += ['run']
+    endif
+    let s:server_path = join(parts, s:dir_separator)
+    if !executable(s:server_path)
+      echohl Question
+      let yn = input('The OmniSharp server is missing. Download it now? [y/N] ')
+      echohl None
+      if yn ==? 'y'
+        echo '\n'
+        call OmniSharp#Install()
+      endif
+    endif
   else
     let s:server_path = g:OmniSharp_server_path
   endif
@@ -83,7 +96,7 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
               \ '-p', port,
               \ '-s', solution_path]
 
-  if !has('win32') && !has('win32unix') && g:OmniSharp_server_use_mono
+  if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
     let command = insert(command, 'mono')
   endif
 
