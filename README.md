@@ -62,7 +62,7 @@ Install the vim plugin using your preferred plugin manager:
 | [Pathogen](https://github.com/tpope/vim-pathogen)    | `git clone git://github.com/OmniSharp/omnisharp-vim.git ~/.vim/bundle/omnisharp-vim` |
 
 ### Server
-OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use.
+OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use. *Note:* Requires curl.
 
 #### Manual installation, and Windows users
 The automatic installation script is currently only available in Linux and macOS, and to Windows users when vim is run in a Cygwin/WSL environment. To install the server manually, follow these steps:

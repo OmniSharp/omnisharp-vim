@@ -266,8 +266,10 @@ COMMANDS                                                   *omnisharp-commands*
                                                             *:OmniSharpInstall*
 :OmniSharpInstall
     Download the latest OmniSharp-roslyn binaries and extract them into
-    ~/.omnisharp/omnisharp-roslyn.
-    NOTE: This is currently only supported in Windows in Cygwin/WSL
+    ~/.omnisharp/omnisharp-roslyn. This can be used to install OmniSharp-roslyn
+    initially, and to upgrade to the latest version at any time.
+    Requires "curl" to be installed.
+    NOTE: This is not currently supported in Windows, except in Cygwin/WSL
     environments
 
 ===============================================================================

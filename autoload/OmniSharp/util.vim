@@ -79,12 +79,10 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
     endif
     let s:server_path = join(parts, s:dir_separator)
     if !executable(s:server_path)
-      echohl Question
-      let yn = input('The OmniSharp server is missing. Download it now? [y/N] ')
-      echohl None
-      if yn ==? 'y'
-        echo '\n'
+      if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No") == 1
         call OmniSharp#Install()
+      else
+        redraw
       endif
     endif
   else
