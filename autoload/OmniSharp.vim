@@ -718,9 +718,9 @@ let s:script_location = expand('<sfile>:p:h:h').'/installer/omnisharp-manager'.s
 function! OmniSharp#Install() abort
   echo 'Installing OmniSharp Roslyn...'
   call OmniSharp#StopAllServers()
-  if !has('unix')
+  if has('win32')
     let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
-    call system("powershell & '".s:script_location."' -H -l '".l:location."'")
+    call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location.'"')
   else
     call system('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"')
   endif

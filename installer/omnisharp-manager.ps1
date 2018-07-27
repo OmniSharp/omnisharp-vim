@@ -21,6 +21,8 @@ if ($usage) {
     exit
 }
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 function get_latest_version() {
     $tmp = Invoke-RestMethod -Uri "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
     return $tmp.tag_name
@@ -45,7 +47,9 @@ if ([Environment]::Is64BitOperatingSystem) {
 $url = "https://github.com/OmniSharp/omnisharp-roslyn/releases/download/$($version)/omnisharp$($http)-win-$($machine).zip"
 $out = "$($location)\omnisharp$($http)-win-$($machine).zip"
 
-Remove-Item $location -Force -Recurse
+if (Test-Path -Path $location) {
+    Remove-Item $location -Force -Recurse
+}
 New-Item -ItemType Directory -Force -Path $location
 
 Invoke-WebRequest -Uri $url -OutFile $out
