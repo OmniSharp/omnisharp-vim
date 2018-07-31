@@ -1,3 +1,7 @@
+if !get(g:, 'OmniSharp_loaded', 0)
+  finish
+endif
+
 if !(has('python') || has('python3'))
   finish
 endif
