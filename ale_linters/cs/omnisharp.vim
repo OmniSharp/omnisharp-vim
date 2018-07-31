@@ -1,3 +1,7 @@
+if !get(g:, 'OmniSharp_loaded', 0)
+  finish
+endif
+
 let s:delimiter = "@@@"
 
 function! ale_linters#cs#omnisharp#ProcessOutput(buffer, lines) abort
