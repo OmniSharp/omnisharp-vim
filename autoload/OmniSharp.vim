@@ -443,6 +443,9 @@ function! OmniSharp#EnableTypeHighlighting() abort
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
+  if bufname('%') ==# ''
+    return
+  endif
   if OmniSharp#BufferHasChanged() == 1
     call OmniSharp#py#eval('updateBuffer()')
     call OmniSharp#CheckPyError()
