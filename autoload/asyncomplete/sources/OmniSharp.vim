@@ -12,3 +12,5 @@ function! asyncomplete#sources#OmniSharp#completor(opt, ctx) abort
   call OmniSharp#GetCompletions(kw, {results->
   \ asyncomplete#complete(a:opt['name'], a:ctx, startcol, results)})
 endfunction
+
+" vim:et:sw=2:sts=2

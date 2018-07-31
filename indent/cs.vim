@@ -32,3 +32,5 @@ function! GetCSIndent(lnum) abort
   endif
 
 endfunction
+
+" vim:et:sw=2:sts=2

@@ -62,3 +62,5 @@ endif
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
 let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
+
+" vim:et:sw=2:sts=2

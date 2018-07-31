@@ -53,5 +53,4 @@ endfunction
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
-"
-" vim:nofen:fdl=0:ts=2:sw=2:sts=2
+" vim:et:sw=2:sts=2

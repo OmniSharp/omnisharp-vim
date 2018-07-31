@@ -2,18 +2,18 @@ if !get(g:, 'OmniSharp_loaded', 0)
   finish
 endif
 
-let s:delimiter = "@@@"
+let s:delimiter = '@@@'
 
 function! ale_linters#cs#omnisharp#ProcessOutput(buffer, lines) abort
   let list = []
   for line in a:lines
     let [filename, lnum, col, type, subtype, text] = split(line, s:delimiter)
     let item = {
-          \ "filename": filename,
-          \ "lnum": lnum,
-          \ "col": col,
-          \ "type": type,
-          \ "text": text,
+          \ 'filename': filename,
+          \ 'lnum': lnum,
+          \ 'col': col,
+          \ 'type': type,
+          \ 'text': text,
           \}
     if subtype ==? 'style'
       let item['sub_type'] = 'style'
@@ -43,3 +43,5 @@ call ale#linter#Define('cs', {
 \   'command_callback': 'ale_linters#cs#omnisharp#GetCommand',
 \   'callback': 'ale_linters#cs#omnisharp#ProcessOutput',
 \})
+
+" vim:et:sw=2:sts=2

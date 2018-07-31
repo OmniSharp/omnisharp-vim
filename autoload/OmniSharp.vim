@@ -2,8 +2,8 @@ if !(has('python') || has('python3'))
   finish
 endif
 
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
 " Load python helper functions
 call OmniSharp#py#bootstrap()
@@ -227,7 +227,7 @@ function! OmniSharp#CountCodeActions(...) abort
   let s:actions = actions
 
   " v:t_func was added in vim8 - this form is backwards-compatible
-  if a:0 && type(a:1) == type(function("tr"))
+  if a:0 && type(a:1) == type(function('tr'))
     let s:cb = a:1
   endif
 
@@ -536,7 +536,7 @@ endfunction
 function! OmniSharp#StartServer() abort
   let solution_file = OmniSharp#FindSolution()
   if empty(solution_file)
-    call OmniSharp#util#EchoErr("Could not find solution file")
+    call OmniSharp#util#EchoErr('Could not find solution file')
     return
   endif
 
@@ -585,7 +585,7 @@ endfunction
 function! OmniSharp#RestartServer() abort
   let solution_file = OmniSharp#FindSolution()
   if empty(solution_file)
-    call OmniSharp#util#EchoErr("Could not find solution file")
+    call OmniSharp#util#EchoErr('Could not find solution file')
     return
   endif
   call OmniSharp#StopServer(1, solution_file)
@@ -653,18 +653,18 @@ endfunction
 function! OmniSharp#OpenPythonLog() abort
   let logfile = OmniSharp#py#eval('getLogFile()')
   if OmniSharp#CheckPyError() | return | endif
-  exec "edit " . logfile
+  exec 'edit ' . logfile
 endfunction
 
 function! OmniSharp#CheckPyError(...)
   let should_print = a:0 ? a:1 : 1
   if !empty(g:OmniSharp_py_err)
     if should_print
-      call OmniSharp#util#EchoErr(g:OmniSharp_py_err.code . ": " . g:OmniSharp_py_err.msg)
+      call OmniSharp#util#EchoErr(g:OmniSharp_py_err.code . ': ' . g:OmniSharp_py_err.msg)
     endif
     " If we got a connection error when hitting the server, then the server may
     " not be running anymore and we should bust the 'alive' cache
-    if g:OmniSharp_py_err.code == 'CONNECTION'
+    if g:OmniSharp_py_err.code ==? 'CONNECTION'
       call s:BustAliveCache()
     endif
     return 1
@@ -681,7 +681,7 @@ function! s:FindSolution(interactive, bufnum) abort
   if len(solution_files) == 1
     return solution_files[0]
   elseif g:OmniSharp_sln_list_index > -1 &&
-  \     g:OmniSharp_sln_list_index < len(solution_files)
+  \      g:OmniSharp_sln_list_index < len(solution_files)
     return solution_files[g:OmniSharp_sln_list_index]
   else
     if g:OmniSharp_autoselect_existing_sln
@@ -703,7 +703,7 @@ function! s:FindSolution(interactive, bufnum) abort
     let labels = ['Solution:']
     let index = 1
     for solutionfile in solution_files
-      call add(labels, index . ". " . solutionfile)
+      call add(labels, index . '. ' . solutionfile)
       let index += 1
     endfor
 
@@ -814,7 +814,7 @@ else
   endfunction
 endif
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
-" vim: shiftwidth=2
+" vim:et:sw=2:sts=2
