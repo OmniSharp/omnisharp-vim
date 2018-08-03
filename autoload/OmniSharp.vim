@@ -50,7 +50,7 @@ function! OmniSharp#GetHost(...) abort
     let sln_file = OmniSharp#FindSolution(1, bufnum)
     let port = OmniSharp#GetPort(sln_file)
     if port == 0
-      return ''
+      return 'http://localhost:2000'
     endif
     let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     call setbufvar(bufnum, 'OmniSharp_host', host)
