@@ -1,3 +1,7 @@
+if !get(g:, 'OmniSharp_loaded', 0)
+  finish
+endif
+
 if !(has('python') || has('python3'))
   finish
 endif
@@ -86,6 +90,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGotoDefinition
 \|  delcommand OmniSharpHighlightTypes
+\|  delcommand OmniSharpInstall
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
 \|  delcommand OmniSharpOpenPythonLog
@@ -93,6 +98,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpRenameTo
 \|  delcommand OmniSharpRestartAllServers
 \|  delcommand OmniSharpRestartServer
+\|  delcommand OmniSharpSignatureHelp
 \|  delcommand OmniSharpStartServer
 \|  delcommand OmniSharpStartServerSolution
 \|  delcommand OmniSharpStopAllServers
@@ -104,3 +110,5 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpRunTests
 \
 \|  setlocal omnifunc< errorformat< makeprg<'
+
+" vim:et:sw=2:sts=2

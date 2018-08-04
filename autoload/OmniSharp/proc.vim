@@ -40,7 +40,7 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   call s:debug('Using Neovim jobstart to start the following command:')
   call s:debug(a:command)
   let opts = {'on_stderr': 'OmniSharp#proc#neovimErrHandler',
-              \  'on_exit': 'OmniSharp#proc#neovimExitHandler'}
+             \  'on_exit': 'OmniSharp#proc#neovimExitHandler'}
   if g:OmniSharp_proc_debug
     let opts['on_stdout'] = 'OmniSharp#proc#neovimOutHandler'
   endif
@@ -139,10 +139,10 @@ function! OmniSharp#proc#RunAsyncCommand(command, jobkey) abort
       call OmniSharp#util#EchoErr('could not run command: ' . join(a:command, ' '))
     endif
   elseif OmniSharp#proc#supportsVimDispatch()
-    let req = call OmniSharp#proc#dispatchStart(a:command)
+    let req = OmniSharp#proc#dispatchStart(a:command)
     let s:jobs[a:jobkey] = req
   elseif OmniSharp#proc#supportsVimProc()
-    let proc = call OmniSharp#proc#vimprocStart(a:command)
+    let proc = OmniSharp#proc#vimprocStart(a:command)
     let s:jobs[a:jobkey] = proc
   else
     call OmniSharp#util#EchoErr('Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc.vim plugin to use this feature')
@@ -186,7 +186,7 @@ function! OmniSharp#proc#IsJobRunning(jobkey) abort
   elseif OmniSharp#proc#supportsVimDispatch()
     return dispatch#completed(job_id)
   elseif OmniSharp#proc#supportsVimProc()
-    let [cond, status] = call job_id.checkpid()
+    let [cond, status] = job_id.checkpid()
     return status != 0
   endif
 endfunction
@@ -206,4 +206,4 @@ endfunction
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
-" vim: shiftwidth=2
+" vim:et:sw=2:sts=2

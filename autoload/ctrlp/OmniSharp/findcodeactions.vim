@@ -91,4 +91,4 @@ function! ctrlp#OmniSharp#findcodeactions#id() abort
   return s:id
 endfunction
 
-" vim:nofen:fdl=0:ts=2:sw=2:sts=2
+" vim:et:sw=2:sts=2

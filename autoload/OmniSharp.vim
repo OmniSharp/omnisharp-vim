@@ -2,8 +2,8 @@ if !(has('python') || has('python3'))
   finish
 endif
 
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
 " Load python helper functions
 call OmniSharp#py#bootstrap()
@@ -214,7 +214,301 @@ function! OmniSharp#FindSymbol(...) abort
   else
     let title = 'Symbols'.(len(filter) ? ': '.filter : '')
     call s:set_quickfix(quickfixes, title)
-  StartServerIfNotRunning() abort
+  endif
+endfunction
+
+" This function returns a count of the currently available code actions. It also
+" uses the code actions to pre-populate the code actions for
+" OmniSharp#GetCodeActions, and clears them on CursorMoved.
+"
+" If a callback function is passed in, the callback will also be called on
+" CursorMoved, allowing this function to be used to set up a temporary "Code
+" actions available" flag, e.g. in the statusline or signs column, and the
+" callback function can be used to clear the flag.
+function! OmniSharp#CountCodeActions(...) abort
+  let actions = OmniSharp#py#eval('getCodeActions("normal")')
+  if OmniSharp#CheckPyError() | return 0 | endif
+  let s:actions = actions
+
+  " v:t_func was added in vim8 - this form is backwards-compatible
+  if a:0 && type(a:1) == type(function('tr'))
+    let s:cb = a:1
+  endif
+
+  function! s:CleanupCodeActions() abort
+    unlet s:actions
+    if exists('s:cb')
+      call s:cb()
+      unlet s:cb
+    endif
+    autocmd! OmniSharp#CountCodeActions
+  endfunction
+
+  augroup OmniSharp#CountCodeActions
+    autocmd!
+    autocmd CursorMoved <buffer> call s:CleanupCodeActions()
+    autocmd CursorMovedI <buffer> call s:CleanupCodeActions()
+    autocmd BufLeave <buffer> call s:CleanupCodeActions()
+  augroup END
+
+  return len(s:actions)
+endfunction
+
+function! OmniSharp#GetCodeActions(mode) range abort
+  if exists('s:actions')
+    let actions = s:actions
+  else
+    let command = printf('getCodeActions(%s)', string(a:mode))
+    let actions = OmniSharp#py#eval(command)
+    if OmniSharp#CheckPyError() | return | endif
+  endif
+  if empty(actions)
+    echo 'No code actions found'
+    return
+  endif
+  if g:OmniSharp_selector_ui ==? 'unite'
+    let context = {'empty': 0, 'auto_resize': 1}
+    call unite#start([['OmniSharp/findcodeactions', a:mode, actions]], context)
+  elseif g:OmniSharp_selector_ui ==? 'ctrlp'
+    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
+    call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
+  elseif g:OmniSharp_selector_ui ==? 'fzf'
+    call fzf#OmniSharp#getcodeactions(a:mode, actions)
+  else
+    let message = []
+    let i = 0
+    for action in actions
+      let i += 1
+      call add(message, printf(' %2d. %s', i, action.Name))
+    endfor
+    call add(message, 'Enter an action number, or just hit Enter to cancel: ')
+    let selection = str2nr(input(join(message, "\n")))
+    if type(selection) == type(0) && selection > 0 && selection <= i
+      let action = actions[selection - 1]
+      let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+      let command = printf('runCodeAction(''%s'', ''%s'')', a:mode, command)
+
+      let action = OmniSharp#py#eval(command)
+      if OmniSharp#CheckPyError() | return | endif
+      if !action
+        echo 'No action taken'
+      endif
+    endif
+  endif
+endfunction
+
+function! OmniSharp#CodeCheck() abort
+  if pumvisible()
+    return get(b:, 'codecheck', [])
+  endif
+  if bufname('%') ==# ''
+    return []
+  endif
+  if OmniSharp#IsServerRunning()
+    let codecheck = OmniSharp#py#eval('codeCheck()')
+    if OmniSharp#CheckPyError() | return [] | endif
+    let b:codecheck = codecheck
+  endif
+  return get(b:, 'codecheck', [])
+endfunction
+
+function! OmniSharp#TypeLookupWithoutDocumentation() abort
+  call OmniSharp#TypeLookup(0)
+endfunction
+
+function! OmniSharp#TypeLookupWithDocumentation() abort
+  call OmniSharp#TypeLookup(1)
+endfunction
+
+function! OmniSharp#TypeLookup(includeDocumentation) abort
+  if g:OmniSharp_typeLookupInPreview || a:includeDocumentation
+    let ret = OmniSharp#py#eval('typeLookup(True)')
+    if OmniSharp#CheckPyError() | return | endif
+    if len(ret.doc) > 0
+      call s:writeToPreview(ret.type . "\n\n" . ret.doc)
+    else
+      call s:writeToPreview(ret.type)
+    endif
+  else
+    let ret = OmniSharp#py#eval('typeLookup(False)')
+    if OmniSharp#CheckPyError() | return | endif
+    call OmniSharp#Echo(ret.type)
+  endif
+endfunction
+
+function! OmniSharp#SignatureHelp() abort
+  let result = OmniSharp#py#eval('signatureHelp()')
+  if OmniSharp#CheckPyError() | return | endif
+  if type(result) != type({})
+    echo 'No signature help found'
+    " Clear existing preview content
+    let output = ''
+  else
+    if result.ActiveSignature == -1
+      " No signature matches - display all options
+      let output = join(map(result.Signatures, 'v:val.Label'), "\n")
+    else
+      let signature = result.Signatures[result.ActiveSignature]
+      if len(signature.Parameters) == 0
+        let output = signature.Label
+      else
+        let parameter = signature.Parameters[result.ActiveParameter]
+        let output = join([parameter.Label, parameter.Documentation], "\n")
+      endif
+    endif
+  endif
+  call s:writeToPreview(output)
+endfunction
+
+function! OmniSharp#Echo(message) abort
+  echo a:message[0:&columns * &cmdheight - 2]
+endfunction
+
+function! OmniSharp#Rename() abort
+  let renameto = inputdialog('Rename to:', expand('<cword>'))
+  if renameto !=# ''
+    call OmniSharp#RenameTo(renameto)
+  endif
+endfunction
+
+function! OmniSharp#RenameTo(renameto) abort
+  let command = printf('renameTo(%s)', string(a:renameto))
+  let changes = OmniSharp#py#eval(command)
+  if OmniSharp#CheckPyError() | return | endif
+
+  let save_lazyredraw = &lazyredraw
+  let save_eventignore = &eventignore
+  let buf = bufnr('%')
+  let curpos = getpos('.')
+  let view = winsaveview()
+  try
+    set lazyredraw eventignore=all
+    for change in changes
+      execute 'silent hide edit' fnameescape(change.FileName)
+      let modified = &modified
+      let content = split(change.Buffer, '\r\?\n')
+      silent % delete _
+      silent 1put =content
+      silent 1 delete _
+      if !modified
+        silent update
+      endif
+    endfor
+  finally
+    if bufnr('%') != buf
+      exec 'buffer ' . buf
+    endif
+    call setpos('.', curpos)
+    call winrestview(view)
+    silent update
+    let &eventignore = save_eventignore
+    silent edit  " reload to apply syntax
+    let &lazyredraw = save_lazyredraw
+  endtry
+endfunction
+
+function! OmniSharp#EnableTypeHighlightingForBuffer() abort
+  highlight default link csUserType Type
+  if !empty(s:allUserTypes)
+    exec 'syn keyword csUserType ' . s:allUserTypes
+  endif
+  highlight default link csUserInterface Include
+  if !empty(s:allUserInterfaces)
+    exec 'syn keyword csUserInterface ' . s:allUserInterfaces
+  endif
+  highlight default link csUserAttribute Include
+  if !empty(s:allUserAttributes)
+    exec 'syn keyword csUserAttribute ' . s:allUserAttributes
+  endif
+endfunction
+
+function! OmniSharp#EnableTypeHighlighting() abort
+  if !OmniSharp#IsServerRunning()
+    return
+  endif
+
+  let ret = OmniSharp#py#eval('lookupAllUserTypes()')
+  if OmniSharp#CheckPyError() | return | endif
+  let s:allUserTypes = ret.userTypes
+  let s:allUserInterfaces = ret.userInterfaces
+  let s:allUserAttributes = ret.userAttributes
+
+  let startBuf = bufnr('%')
+  " Perform highlighting for existing buffers
+  bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
+  exec 'b '. startBuf
+
+  call OmniSharp#EnableTypeHighlightingForBuffer()
+
+  augroup _omnisharp
+    autocmd!
+    autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
+  augroup END
+endfunction
+
+function! OmniSharp#UpdateBuffer() abort
+  if bufname('%') ==# ''
+    return
+  endif
+  if OmniSharp#BufferHasChanged() == 1
+    call OmniSharp#py#eval('updateBuffer()')
+    call OmniSharp#CheckPyError()
+  endif
+endfunction
+
+function! OmniSharp#BufferHasChanged() abort
+  if b:changedtick != get(b:, 'Omnisharp_UpdateChangeTick', -1)
+    let b:Omnisharp_UpdateChangeTick = b:changedtick
+    return 1
+  endif
+  return 0
+endfunction
+
+function! OmniSharp#CodeFormat() abort
+  call OmniSharp#py#eval('codeFormat()')
+  call OmniSharp#CheckPyError()
+endfunction
+
+function! OmniSharp#FixUsings() abort
+  let qf_taglist = OmniSharp#py#eval('fix_usings()')
+  if OmniSharp#CheckPyError() | return | endif
+
+  if len(qf_taglist) > 0
+    call s:set_quickfix(qf_taglist, 'Usings')
+  endif
+endfunction
+
+function! OmniSharp#IsAnyServerRunning() abort
+  return !empty(OmniSharp#proc#ListRunningJobs())
+endfunction
+
+function! OmniSharp#IsServerRunning(...) abort
+  let sln_file = a:0 ? a:1 : OmniSharp#FindSolution(0)
+  if empty(sln_file)
+    return 0
+  endif
+
+  " If the port is hardcoded, another vim instance may be running the server, so
+  " we don't look for a running job and go straight to the network check.
+  if !s:IsSolutionPortHardcoded(sln_file) && !OmniSharp#proc#IsJobRunning(sln_file)
+    return 0
+  endif
+
+  let idx = index(s:alive_cache, sln_file)
+  if idx >= 0
+    return 1
+  endif
+
+  let alive = OmniSharp#py#eval('checkAliveStatus()')
+  if OmniSharp#CheckPyError() | return 0 | endif
+  if alive
+    " Cache the alive status so subsequent calls are faster
+    call add(s:alive_cache, sln_file)
+  endif
+  return alive
+endfunction
+
+function! OmniSharp#StartServerIfNotRunning() abort
   if OmniSharp#FugitiveCheck()
     return
   endif
@@ -387,18 +681,18 @@ endfunction
 function! OmniSharp#OpenPythonLog() abort
   let logfile = OmniSharp#py#eval('getLogFile()')
   if OmniSharp#CheckPyError() | return | endif
-  exec "edit " . logfile
+  exec 'edit ' . logfile
 endfunction
 
 function! OmniSharp#CheckPyError(...)
   let should_print = a:0 ? a:1 : 1
   if !empty(g:OmniSharp_py_err)
     if should_print
-      call OmniSharp#util#EchoErr(g:OmniSharp_py_err.code . ": " . g:OmniSharp_py_err.msg)
+      call OmniSharp#util#EchoErr(g:OmniSharp_py_err.code . ': ' . g:OmniSharp_py_err.msg)
     endif
     " If we got a connection error when hitting the server, then the server may
     " not be running anymore and we should bust the 'alive' cache
-    if g:OmniSharp_py_err.code == 'CONNECTION'
+    if g:OmniSharp_py_err.code ==? 'CONNECTION'
       call s:BustAliveCache()
     endif
     return 1
@@ -415,7 +709,7 @@ function! s:FindSolution(interactive, bufnum) abort
   if len(solution_files) == 1
     return solution_files[0]
   elseif g:OmniSharp_sln_list_index > -1 &&
-  \     g:OmniSharp_sln_list_index < len(solution_files)
+  \      g:OmniSharp_sln_list_index < len(solution_files)
     return solution_files[g:OmniSharp_sln_list_index]
   else
     if g:OmniSharp_autoselect_existing_sln
@@ -437,7 +731,7 @@ function! s:FindSolution(interactive, bufnum) abort
     let labels = ['Solution:']
     let index = 1
     for solutionfile in solution_files
-      call add(labels, index . ". " . solutionfile)
+      call add(labels, index . '. ' . solutionfile)
       let index += 1
     endfor
 
@@ -548,7 +842,7 @@ else
   endfunction
 endif
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
-" vim: shiftwidth=2
+" vim:et:sw=2:sts=2

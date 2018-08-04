@@ -6,8 +6,8 @@ let s:pycmd = has('python3') ? 'python3' : 'python'
 let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
 let g:OmniSharp_python_path = OmniSharp#util#path_join(['python'])
 
-let s:save_cpo = &cpo
-set cpo&vim
+let s:save_cpo = &cpoptions
+set cpoptions&vim
 
 if has('python3') && exists('*py3eval')
   let s:pyeval = function('py3eval')
@@ -38,5 +38,7 @@ function! OmniSharp#py#eval(cmd) abort
   return s:pyeval(a:cmd)
 endfunction
 
-let &cpo = s:save_cpo
+let &cpoptions = s:save_cpo
 unlet s:save_cpo
+
+" vim:et:sw=2:sts=2
