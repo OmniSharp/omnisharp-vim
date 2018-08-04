@@ -12,7 +12,7 @@ function! s:location_sink(str) abort
     endif
   endfor
   echo quickfix.filename
-  call OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col)
+  call OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col, 0)
 endfunction
 
 function! fzf#OmniSharp#findsymbols(quickfixes) abort
