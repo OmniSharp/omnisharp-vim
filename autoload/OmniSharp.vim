@@ -8,9 +8,6 @@ set cpoptions&vim
 " Load python helper functions
 call OmniSharp#py#bootstrap()
 
-" Buffer variable constants
-let s:SERVER_BUF_VAR = 'Omnisharp_buf_server'
-
 " Setup variable defaults
 let s:allUserTypes = ''
 let s:allUserInterfaces = ''
@@ -54,7 +51,7 @@ function! OmniSharp#GetHost(...) abort
     let port = OmniSharp#GetPort(sln_or_dir)
     if port == 0
       " If user has not explicitly specified a port, try 2000
-      return 'http://localhost:2000'
+      let port = 2000
     endif
     let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     call setbufvar(bufnum, 'OmniSharp_host', host)
@@ -146,20 +143,18 @@ function! OmniSharp#NavigateUp() abort
   call OmniSharp#CheckPyError()
 endfunction
 
-" Find the solution for this file.
-" Caches result
+" Find the solution or directory for this file.
 function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnum = a:0 > 1 ? a:2 : bufnr('%')
-  if empty(getbufvar(bufnum, s:SERVER_BUF_VAR))
+  if empty(getbufvar(bufnum, 'Omnisharp_buf_server'))
     try
       let sln = s:FindSolution(interactive, bufnum)
     catch e
       return ''
     endtry
-    call setbufvar(bufnum, s:SERVER_BUF_VAR, sln)
   endif
-  return getbufvar(bufnum, s:SERVER_BUF_VAR)
+  return getbufvar(bufnum, 'Omnisharp_buf_server')
 endfunction
 
 function! OmniSharp#NavigateDown() abort
@@ -483,18 +478,18 @@ function! OmniSharp#IsAnyServerRunning() abort
 endfunction
 
 function! OmniSharp#IsServerRunning(...) abort
-  let sln_file = a:0 ? a:1 : OmniSharp#FindSolution(0)
-  if empty(sln_file)
+  let sln_or_dir = a:0 ? a:1 : OmniSharp#FindSolutionOrDir(0)
+  if empty(sln_or_dir)
     return 0
   endif
 
   " If the port is hardcoded, another vim instance may be running the server, so
   " we don't look for a running job and go straight to the network check.
-  if !s:IsSolutionPortHardcoded(sln_file) && !OmniSharp#proc#IsJobRunning(sln_file)
+  if !s:IsServerPortHardcoded(sln_or_dir) && !OmniSharp#proc#IsJobRunning(sln_or_dir)
     return 0
   endif
 
-  let idx = index(s:alive_cache, sln_file)
+  let idx = index(s:alive_cache, sln_or_dir)
   if idx >= 0
     return 1
   endif
@@ -503,7 +498,7 @@ function! OmniSharp#IsServerRunning(...) abort
   if OmniSharp#CheckPyError() | return 0 | endif
   if alive
     " Cache the alive status so subsequent calls are faster
-    call add(s:alive_cache, sln_file)
+    call add(s:alive_cache, sln_or_dir)
   endif
   return alive
 endfunction
@@ -538,8 +533,6 @@ function! OmniSharp#FugitiveCheck() abort
 endfunction
 
 function! OmniSharp#StartServer(...) abort
-  echo 'start server'
-  let isDirectory = 0
   if a:0
     let sln_or_dir = fnamemodify(a:1, ':p')
     if filereadable(sln_or_dir)
@@ -551,9 +544,6 @@ function! OmniSharp#StartServer(...) abort
     elseif !isdirectory(sln_or_dir)
       call OmniSharp#util#EchoErr("Provided path is not a sln file or a directory.")
       return
-    else
-      let isDirectory = 1
-    end
   else
     let sln_or_dir = OmniSharp#FindSolutionOrDir()
     if empty(sln_or_dir)
@@ -564,10 +554,8 @@ function! OmniSharp#StartServer(...) abort
 
   call s:StartServer(sln_or_dir)
 
-  if isDirectory
-    let bufnum = bufnr('%')
-    call setbufvar(bufnum, s:SERVER_BUF_VAR, sln_or_dir)
-  endif
+  " Cache sln or directory after successful server start
+  call setbufvar(bufnum, 'Omnisharp_buf_server', sln_or_dir)
 
 endfunction
 
@@ -594,7 +582,7 @@ function! OmniSharp#StopAllServers() abort
 endfunction
 
 function! OmniSharp#StopServer(...) abort
-  let sln_or_dir = get(b:, s:SERVER_BUF_VAR, '')
+  let sln_or_dir = get(b:, 'Omnisharp_buf_server', '')
   if a:0 > 0
     let force = a:1
     if a:0 > 1
@@ -613,7 +601,7 @@ endfunction
 function! OmniSharp#RestartServer() abort
   let sln_or_dir = OmniSharp#FindSolutionOrDir()
   if empty(sln_or_dir)
-    call OmniSharp#util#EchoErr("Could not find solution file")
+    call OmniSharp#util#EchoErr("Could not find solution file or directory")
     return
   endif
   call OmniSharp#StopServer(1, sln_or_dir)
@@ -792,11 +780,11 @@ function! s:find_solution_files(bufnum) abort
   return solution_files
 endfunction
 
-function! s:IsServerPortHardcoded(sln_file) abort
+function! s:IsServerPortHardcoded(sln_or_dir) abort
   if exists('g:OmniSharp_port')
     return 1
   endif
-  return has_key(s:initial_server_ports, a:sln_file)
+  return has_key(s:initial_server_ports, a:sln_or_dir)
 endfunction
 
 " Remove a solution from the alive_cache
