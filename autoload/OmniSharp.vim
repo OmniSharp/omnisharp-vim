@@ -725,7 +725,8 @@ function! OmniSharp#Install() abort
     let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
     call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location.'"')
   else
-    call system('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"')
+    let l:mono = g:OmniSharp_server_use_mono ? " -M" : ""
+    call system('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"'.l:mono)
   endif
   echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
 endfunction
