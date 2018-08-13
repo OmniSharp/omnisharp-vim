@@ -148,12 +148,19 @@ function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnum = a:0 > 1 ? a:2 : bufnr('%')
   if empty(getbufvar(bufnum, 'Omnisharp_buf_server'))
-    try
-      let sln = s:FindSolution(interactive, bufnum)
-    catch e
-      return ''
-    endtry
+    let dir = s:FindServerRunningOnParentDirectory(bufnum)
+    if !empty(dir)
+      call setbufvar(bufnum, 'Omnisharp_buf_server', dir)
+    else
+      try
+        let sln = s:FindSolution(interactive, bufnum)
+        call setbufvar(bufnum, 'Omnisharp_buf_server', sln)
+      catch e
+        return ''
+      endtry
+    endif
   endif
+
   return getbufvar(bufnum, 'Omnisharp_buf_server')
 endfunction
 
@@ -554,10 +561,6 @@ function! OmniSharp#StartServer(...) abort
   endif
 
   call s:StartServer(sln_or_dir)
-
-  " Cache sln or directory after successful server start
-  let bufnum = bufnr('%')
-  call setbufvar(bufnum, 'Omnisharp_buf_server', sln_or_dir)
 endfunction
 
 function! s:StartServer(sln_or_dir) abort
@@ -731,6 +734,33 @@ function! s:FindSolution(interactive, bufnum) abort
     endif
     return solution_files[choice - 1]
   endif
+endfunction
+
+function! s:FindServerRunningOnParentDirectory(bufnum) abort
+  let filename = expand('#' . a:bufnum . ':p')
+  let longest_dir_match = ''
+  let longest_dir_length = 0
+  let running_jobs = OmniSharp#proc#ListRunningJobs()
+  for sln_or_dir in running_jobs
+    if isdirectory(sln_or_dir) && s:DirectoryContainsFile(sln_or_dir, filename)
+      let dir_length = len(sln_or_dir)
+      if dir_length > longest_dir_length
+        let longest_dir_match = sln_or_dir
+        let longest_dir_length = dir_length
+      endif
+    endif
+  endfor
+
+  return longest_dir_match
+endfunction
+
+function! s:DirectoryContainsFile(directory, file)
+  let idx = stridx(a:file, a:directory)
+  if idx == 0
+    return 1
+  endif
+
+  return 0
 endfunction
 
 let s:extension = has('win32') ? '.ps1' : '.sh'
