@@ -50,8 +50,8 @@ function! OmniSharp#GetHost(...) abort
     let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnum)
     let port = OmniSharp#GetPort(sln_or_dir)
     if port == 0
-      " If user has not explicitly specified a port, try 2000
-      let port = 2000
+      " If user has not explicitly specified a port, try 2000 but don't cache
+      return 'http://localhost:2000'
     endif
     let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     call setbufvar(bufnum, 'OmniSharp_host', host)
@@ -533,7 +533,7 @@ function! OmniSharp#FugitiveCheck() abort
 endfunction
 
 function! OmniSharp#StartServer(...) abort
-  if a:0
+  if a:0 && a:1 !=# ''
     let sln_or_dir = fnamemodify(a:1, ':p')
     if filereadable(sln_or_dir)
       let file_ext = fnamemodify(sln_or_dir, ':e')
@@ -544,6 +544,7 @@ function! OmniSharp#StartServer(...) abort
     elseif !isdirectory(sln_or_dir)
       call OmniSharp#util#EchoErr("Provided path is not a sln file or a directory.")
       return
+    endif
   else
     let sln_or_dir = OmniSharp#FindSolutionOrDir()
     if empty(sln_or_dir)
@@ -555,8 +556,8 @@ function! OmniSharp#StartServer(...) abort
   call s:StartServer(sln_or_dir)
 
   " Cache sln or directory after successful server start
+  let bufnum = bufnr('%')
   call setbufvar(bufnum, 'Omnisharp_buf_server', sln_or_dir)
-
 endfunction
 
 function! s:StartServer(sln_or_dir) abort
