@@ -586,7 +586,7 @@ function! OmniSharp#StopAllServers() abort
 endfunction
 
 function! OmniSharp#StopServer(...) abort
-  let sln_or_dir = get(b:, 'Omnisharp_buf_server', '')
+  let sln_or_dir = OmniSharp#FindSolutionOrDir()
   if a:0 > 0
     let force = a:1
     if a:0 > 1
@@ -599,6 +599,7 @@ function! OmniSharp#StopServer(...) abort
   if force || OmniSharp#proc#IsJobRunning(sln_or_dir)
     call s:BustAliveCache(sln_or_dir)
     call OmniSharp#proc#StopJob(sln_or_dir)
+    setbufvar(bufnr('%'), 'Omnisharp_buf_server', '')
   endif
 endfunction
 
