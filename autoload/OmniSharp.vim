@@ -510,25 +510,15 @@ function! OmniSharp#IsServerRunning(...) abort
   return alive
 endfunction
 
-function! OmniSharp#StartServerIfNotRunning() abort
+function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck()
     return
   endif
 
-  let sln_or_dir = OmniSharp#FindSolutionOrDir()
-  if empty(sln_or_dir)
-    return
-  endif
-  let running = 0
-  let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
-  " If the port is hardcoded, we should check if any other vim instances have
-  " started this server
-  if !running && s:IsServerPortHardcoded(sln_or_dir)
-    let running = OmniSharp#IsServerRunning(sln_or_dir)
-  endif
-  if !running
-    call s:StartServer(sln_or_dir)
-  endif
+  let dir = ''
+  if a:0 | let dir = a:1 | endif
+
+  call OmniSharp#StartServer(dir, 1)
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
@@ -558,6 +548,19 @@ function! OmniSharp#StartServer(...) abort
       call OmniSharp#util#EchoErr("Could not find solution file or directory to start server")
       return
     endif
+  endif
+
+  " Optionally perform check if server is already running
+  if a:0 > 1 && a:2
+    let running = 0
+    let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
+    " If the port is hardcoded, we should check if any other vim instances have
+    " started this server
+    if !running && s:IsServerPortHardcoded(sln_or_dir)
+      let running = OmniSharp#IsServerRunning(sln_or_dir)
+    endif
+
+    if running | return | endif
   endif
 
   call s:StartServer(sln_or_dir)
