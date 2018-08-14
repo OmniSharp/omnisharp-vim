@@ -72,14 +72,14 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
   let s:server_path = ''
   if !exists('g:OmniSharp_server_path')
     let parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
-    if has('win32') || s:is_cygwin()
+    if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
     else
       let parts += ['run']
     endif
     let s:server_path = join(parts, s:dir_separator)
     if !executable(s:server_path)
-      if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No") == 1
+      if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No", 2) == 1
         call OmniSharp#Install()
       else
         redraw
