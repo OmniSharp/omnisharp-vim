@@ -60,8 +60,7 @@ command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniShar
 command! -buffer -bar OmniSharpStopAllServers                      call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer                          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup                          call OmniSharp#TypeLookupWithoutDocumentation()
-command! -buffer -bar OmniSharpInstall                             call OmniSharp#Install()
-
+command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniSharp#Install(<f-args>)
 
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)

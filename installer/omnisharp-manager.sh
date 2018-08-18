@@ -70,3 +70,5 @@ if [ "$ext" = "zip" ]; then
 else
     tar -zxvf "$location/$file_name" -C "$location/"
 fi
+
+[ "$mono" -eq 1 ] && chmod +x $(find "$location" -type f)

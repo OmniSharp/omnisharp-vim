@@ -123,8 +123,15 @@ OmniSharp-vim can start the server only if any of the following criteria is met:
 
 ### (optional) Install ALE
 
-If [ALE](https://github.com/w0rp/ale) is installed, it will automatically be
-used to asynchronously check your code for errors.
+If [ALE](https://github.com/w0rp/ale) is installed, it will automatically be used to asynchronously check your code for errors.
+
+No further configuration is necessary. However, be aware that ALE supports multiple C# linters, and will run all linters that are available on your system. To limit ALE to only use OmniSharp (recommended), add this to your .vimrc:
+
+```vim
+let g:ale_linters = {
+\ 'cs': ['OmniSharp']
+\}
+```
 
 ### (optional) Install syntastic
 The vim plugin [syntastic](https://github.com/vim-syntastic/syntastic) can be used if you don't have ALE.
@@ -202,11 +209,15 @@ set completeopt=longest,menuone,preview
 " You might also want to look at the echodoc plugin.
 set previewheight=5
 
+" Tell ALE to use OmniSharp for linting C# files, and no other linters.
+let g:ale_linters = { 'cs': ['OmniSharp'] }
+
 augroup omnisharp_commands
     autocmd!
 
-    " Automatic syntax check on events (TextChanged requires Vim 7.4)
-    autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
+    " When Syntastic is available but not ALE, automatic syntax check on events
+    " (TextChanged requires Vim 7.4)
+    " autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
 
     " Show type information automatically when the cursor stops moving
     autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
