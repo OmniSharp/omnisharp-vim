@@ -64,6 +64,12 @@ Install the vim plugin using your preferred plugin manager:
 ### Server
 OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use. *Note:* Requires curl on Linux, macOS, Cygwin and WSL.
 
+**NOTE:** There have been reports that the latest OmniSharp-Roslyn server (1.32.2) is not working well with OmniSharp-vim on some systems (MacOS High Sierra, Arch Linux). If this is the case, try downgrading to the previous OmniSharp-Roslyn by running the following from the vim command line:
+
+```vim
+:OmniSharpInstall 'v1.32.1'
+```
+
 #### Manual installation
 To install the server manually, follow these steps:
 
