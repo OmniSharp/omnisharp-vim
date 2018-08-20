@@ -443,7 +443,7 @@ function! OmniSharp#EnableTypeHighlighting() abort
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
-  if bufname('%') ==# ''
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck()
     return
   endif
   if OmniSharp#BufferHasChanged() == 1
@@ -526,11 +526,7 @@ function! OmniSharp#StartServerIfNotRunning() abort
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  if match( expand( '<afile>:p' ), 'fugitive:///' ) == 0
-    return 1
-  else
-    return 0
-  endif
+  return match(expand('<afile>:p'), 'fugitive:///' ) == 0
 endfunction
 
 function! OmniSharp#StartServer() abort
