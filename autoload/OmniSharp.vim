@@ -170,7 +170,12 @@ endfunction
 
 function! OmniSharp#JumpToLocation(filename, line, column, noautocmds) abort
   if a:filename !=# ''
-    if fnamemodify(a:filename, ':p') !=# expand('%:p')
+    if fnamemodify(a:filename, ':p') ==# expand('%:p')
+      " Update the ' mark, adding this location to the jumplist. This is not
+      " necessary when the location is in another buffer - :edit performs the
+      " same functionality.
+      normal m'
+    else
       let command = 'edit ' . fnameescape(a:filename)
       if a:noautocmds
         let command = 'noautocmd ' . command
