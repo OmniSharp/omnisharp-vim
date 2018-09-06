@@ -63,14 +63,8 @@ command! -buffer -bar OmniSharpStopServer          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup          call OmniSharp#TypeLookupWithoutDocumentation()
 command! -buffer -bar -nargs=? OmniSharpInstall    call OmniSharp#Install(<f-args>)
 
-
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)
-
-command! -buffer -nargs=1 -complete=file
-\ OmniSharpStartServerSolution
-\ call OmniSharp#StartServerSolution(<q-args>)
-
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
@@ -90,6 +84,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpFixUsings
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGotoDefinition
+\|  delcommand OmniSharpPreviewDefinition
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpInstall
 \|  delcommand OmniSharpNavigateUp
@@ -101,7 +96,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpRestartServer
 \|  delcommand OmniSharpSignatureHelp
 \|  delcommand OmniSharpStartServer
-\|  delcommand OmniSharpStartServerSolution
 \|  delcommand OmniSharpStopAllServers
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup
