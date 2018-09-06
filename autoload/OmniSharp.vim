@@ -176,8 +176,8 @@ function! OmniSharp#PreviewDefinition() abort
   " simple as `pedit %`:
   " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
   let winview = winsaveview()
-  let filepath = expand("%")
-  silent call s:writeToPreview("")
+  let filepath = expand('%')
+  silent call s:writeToPreview('')
   wincmd P
   exec 'silent edit '. filepath
   " Jump cursor back to symbol.
@@ -195,7 +195,7 @@ function! OmniSharp#JumpToLocation(filename, line, column, noautocmds) abort
       " Update the ' mark, adding this location to the jumplist. This is not
       " necessary when the location is in another buffer - :edit performs the
       " same functionality.
-      normal m'
+      normal! m'
     else
       let command = 'edit ' . fnameescape(a:filename)
       if a:noautocmds
@@ -750,12 +750,13 @@ function! OmniSharp#Install(...) abort
     let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
     call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location
           \ .'"'.l:version)
+    echomsg 'OmniSharp installed to: ' . l:location
   else
-    let l:mono = g:OmniSharp_server_use_mono ? " -M" : ""
+    let l:mono = g:OmniSharp_server_use_mono ? ' -M' : ''
     call system('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"'
           \ .l:mono.l:version)
+    echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
   endif
-  echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
 endfunction
 
 function! s:find_solution_files(bufnum) abort
