@@ -168,6 +168,27 @@ function! OmniSharp#GotoDefinition() abort
   call OmniSharp#CheckPyError()
 endfunction
 
+function! OmniSharp#PreviewDefinition() abort
+  let lazyredraw_bak = &lazyredraw
+  let &lazyredraw = 1
+
+  " Due to cursor jumping bug, opening preview at current file is not as
+  " simple as `pedit %`:
+  " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
+  let winview = winsaveview()
+  let filepath = expand("%")
+  silent call s:writeToPreview("")
+  wincmd P
+  exec 'silent edit '. filepath
+  " Jump cursor back to symbol.
+  call winrestview(winview)
+
+  call OmniSharp#GotoDefinition()
+  wincmd p
+
+  let &lazyredraw = lazyredraw_bak
+endfunction
+
 function! OmniSharp#JumpToLocation(filename, line, column, noautocmds) abort
   if a:filename !=# ''
     if fnamemodify(a:filename, ':p') ==# expand('%:p')
