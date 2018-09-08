@@ -11,7 +11,7 @@
 [CmdletBinding()]
 Param(
     [Parameter()][Alias('v')][string]$version,
-    [Parameter()][Alias('l')][string]$location = "C:\omnisharp\",
+    [Parameter()][Alias('l')][string]$location = "$($env:USERPROFILE)\.omnisharp\omnisharp-roslyn\",
     [Parameter()][Alias('u')][switch]$usage,
     [Parameter()][Alias('H')][switch]$http_check
 )
@@ -52,5 +52,27 @@ if (Test-Path -Path $location) {
 }
 New-Item -ItemType Directory -Force -Path $location
 
+#Run as SilentlyContinue to avoid progress bar that can't be seen
+$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri $url -OutFile $out
-Expand-Archive $out -DestinationPath $location -Force
+
+#Run Expand-Archive in versions that support it
+if ($PSVersionTable.PSVersion.Major -gt 4)
+{
+    Expand-Archive $out -DestinationPath $location -Force
+}
+else
+{
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory( $out, $location )
+}
+
+#Check for file to confirm download and unzip were successful
+if(Test-Path -path "$($location)\OmniSharp.Roslyn.dll")
+{
+    Write-Output "OmniSharp Roslyn Server installed at '$($location)'"
+}
+else
+{
+    Write-Output "Failure"
+}
