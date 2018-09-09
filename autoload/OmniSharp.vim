@@ -749,12 +749,12 @@ function! OmniSharp#Install(...) abort
   if has('win32')
     if ValidPowerShellSettings()
       let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
-      let l:install_result = system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location
+      call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location
           \ .'"'.l:version)
-      if l:install_result =~# '0'
-        echomsg 'OmniSharp installed to: ' . l:location
+      if v:shell_error
+        echomsg 'Installation to "' . l:location . '" failed inside PowerShell.'
       else
-        echomsg 'Installation to "' . l:location . '" failed inside PowerShell. "'. l:install_result. '" was returned.'
+        echomsg 'OmniSharp installed to: ' . l:location
       endif
     else
       echomsg 'Powershell is running at an ExecutionPolicy level that blocks OmniSharp-vim from installing the Roslyn server'

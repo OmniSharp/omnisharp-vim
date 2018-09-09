@@ -70,11 +70,9 @@ else
 #Check for file to confirm download and unzip were successful
 if(Test-Path -path "$($location)\OmniSharp.Roslyn.dll")
 {
-    Write-Output 0
     exit 0
 }
 else
 {
-    Write-Output 1
     exit 1
 }
