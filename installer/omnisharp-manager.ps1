@@ -11,7 +11,7 @@
 [CmdletBinding()]
 Param(
     [Parameter()][Alias('v')][string]$version,
-    [Parameter()][Alias('l')][string]$location = "$($env:USERPROFILE)\.omnisharp\omnisharp-roslyn\",
+    [Parameter()][Alias('l')][string]$location = "$($env:USERPROFILE)\.omnisharp\",
     [Parameter()][Alias('u')][switch]$usage,
     [Parameter()][Alias('H')][switch]$http_check
 )
@@ -50,7 +50,7 @@ $out = "$($location)\omnisharp$($http)-win-$($machine).zip"
 if (Test-Path -Path $location) {
     Remove-Item $location -Force -Recurse
 }
-New-Item -ItemType Directory -Force -Path $location
+New-Item -ItemType Directory -Force -Path $location | Out-Null
 
 #Run as SilentlyContinue to avoid progress bar that can't be seen
 $ProgressPreference = 'SilentlyContinue'
@@ -70,9 +70,11 @@ else
 #Check for file to confirm download and unzip were successful
 if(Test-Path -path "$($location)\OmniSharp.Roslyn.dll")
 {
-    Write-Output "OmniSharp Roslyn Server installed at '$($location)'"
+    Write-Output 0
+    exit 0
 }
 else
 {
-    Write-Output "Failure"
+    Write-Output 1
+    exit 1
 }
