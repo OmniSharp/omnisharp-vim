@@ -64,19 +64,16 @@ Install the vim plugin using your preferred plugin manager:
 ### Server
 OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use. *Note:* Requires curl on Linux, macOS, Cygwin and WSL.
 
-**NOTE:** There have been reports that the latest OmniSharp-Roslyn server (1.32.2) is not working well with OmniSharp-vim on some systems (MacOS High Sierra, Arch Linux). If this is the case, try downgrading to the previous OmniSharp-Roslyn by running the following from the vim command line:
+**NOTE:** The latest versions of the HTTP OmniSharp-Roslyn server are not accepting HTTP connections on Linux/Mac systems - see [OmniSharp-Roslyn#1274](https://github.com/OmniSharp/omnisharp-roslyn/issues/1274). Until this is resolved, OmniSharp-vim installs the latest working version of OmniSharp-Roslyn, `1.32.1`. To override this behaviour and install a particular release, use the `:OmniSharpInstall` command like this:
 
 ```vim
-:OmniSharpInstall 'v1.32.1'
+:OmniSharpInstall 'v1.32.5'
 ```
 
 #### Manual installation
 To install the server manually, follow these steps:
 
 Download the latest **HTTP** release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the **HTTP** variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz` etc.
-
-##### Important! Download the HTTP release!
-_Please pay attention to the previous paragraph, and download the HTTP OmniSharp-Roslyn release (it has "http" in the download filename"). The non-HTTP version uses stdio instead of HTTP and OmniSharp-vim cannot communicate with it. This trips a lot of people up, hence the added emphasis!_
 
 Extract the binaries and configure your vimrc with the path to the `OmniSharp.exe` file, e.g.:
 
