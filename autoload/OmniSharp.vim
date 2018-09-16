@@ -58,6 +58,29 @@ function! OmniSharp#GetHost(...) abort
   return getbufvar(bufnum, 'OmniSharp_host')
 endfunction
 
+function! OmniSharp#RunTests(mode) abort
+  wall
+  python buildcommand()
+
+  if a:mode !=# 'last'
+    python getTestCommand()
+  endif
+
+  let s:cmdheight=&cmdheight
+  set cmdheight=5
+  let b:dispatch = b:buildcommand . ' && ' . s:testcommand
+  if executable('sed')
+    " don't match on <filename unknown>:0
+    "let b:dispatch .= ' | sed "s/:0//"'
+	let b:dispatch .= ' '
+  endif
+  let &l:makeprg=b:dispatch
+  "errorformat=msbuild,nunit stack trace
+  setlocal errorformat=\ %#%f(%l\\\,%c):\ %m,%m\ in\ %#%f:%l
+  Make
+  let &cmdheight = s:cmdheight
+endfunction
+
 function! OmniSharp#GetCompletions(partial, ...) abort
   if !OmniSharp#IsServerRunning()
     let completions = []
