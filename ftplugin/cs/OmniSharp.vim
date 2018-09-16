@@ -35,6 +35,7 @@ if get(g:, 'OmniSharp_start_server', 0) == 1
 endif
 
 " Commands
+command! -buffer -bar OmniSharpBuildAsync          call OmniSharp#BuildAsync()
 command! -buffer -bar OmniSharpCodeFormat          call OmniSharp#CodeFormat()
 command! -buffer -bar OmniSharpDocumentation       call OmniSharp#TypeLookupWithDocumentation()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()

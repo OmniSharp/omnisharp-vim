@@ -58,6 +58,13 @@ function! OmniSharp#GetHost(...) abort
   return getbufvar(bufnum, 'OmniSharp_host')
 endfunction
 
+function! OmniSharp#BuildAsync() abort
+  python buildcommand()
+  let &l:makeprg=b:buildcommand
+  setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
+  Make
+endfunction
+
 function! OmniSharp#RunTests(mode) abort
   wall
   python buildcommand()
