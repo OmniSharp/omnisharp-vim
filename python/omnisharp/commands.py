@@ -253,6 +253,7 @@ def checkAliveStatus():
 def updateBuffer():
     getResponse(ctx, "/updatebuffer")
 	
+@vimcmd
 def buildcommand():
     vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
 
