@@ -256,7 +256,7 @@ def updateBuffer():
 @vimcmd
 def buildcommand():
 	vim.command(" '%s'" % getResponse('/buildcommand')) 
-    "vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
+    #vim.command("let b:buildcommand = '%s'" % getResponse('/buildcommand')) 
 
 
 
