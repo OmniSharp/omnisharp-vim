@@ -60,7 +60,7 @@ endfunction
 
 function! OmniSharp#BuildAsync() abort
   python buildcommand()
-  let &l:makeprg=b:buildcommand
+  "let &l:makeprg=b:buildcommand
   setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
   Make
 endfunction
