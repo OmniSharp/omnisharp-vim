@@ -58,6 +58,51 @@ function! OmniSharp#GetHost(...) abort
   return getbufvar(bufnum, 'OmniSharp_host')
 endfunction
 
+function! OmniSharp#BuildAsync() abort
+  "let qf_taglist = OmniSharp#py#eval('buildcommand()')
+  "if OmniSharp#CheckPyError() | return | endif
+
+  " Place the tags in the quickfix window, if possible
+  "if len(qf_taglist) > 0
+  "  call s:set_quickfix(qf_taglist, 'Build: '.expand('<cword>'))
+  "else
+  "  echo 'No build command found'
+  "endif
+  python buildcommand()
+  let &l:makeprg=b:buildcommand
+  setlocal errorformat=\ %#%f(%l\\\,%c):\ %m
+  Make
+endfunction
+
+function! OmniSharp#RunTests(mode) abort
+  wall
+  python buildcommand()
+
+  if a:mode !=# 'last'
+    python getTestCommand()
+  endif
+
+  let s:cmdheight=&cmdheight
+  set cmdheight=5
+  let b:dispatch = b:buildcommand . ' && ' . s:testcommand
+  if executable('sed')
+    " don't match on <filename unknown>:0
+    "let b:dispatch .= ' | sed "s/:0//"'
+	let b:dispatch .= ' '
+  endif
+  let &l:makeprg=b:dispatch
+  "errorformat=msbuild,nunit stack trace
+  setlocal errorformat=
+  \%E%n)\ Error\ :\ %m,
+  \%C%m\ :\ %s\Failure,
+  \%C\ \ \ at\ %s)\ in\ %f:line\ %l,
+  \%Z\n,
+  \%C%.%#
+  "\%C%#%f(%l\\\,%c):\ %m,%m\ in\ %#%f:%l
+  Make
+  let &cmdheight = s:cmdheight
+endfunction
+
 function! OmniSharp#GetCompletions(partial, ...) abort
   if !OmniSharp#IsServerRunning()
     let completions = []

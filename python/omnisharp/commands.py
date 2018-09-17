@@ -252,6 +252,24 @@ def checkAliveStatus():
 @vimcmd
 def updateBuffer():
     getResponse(ctx, "/updatebuffer")
+	
+@vimcmd
+def buildcommand():
+    parameters = {}
+    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
+    response = getResponse(ctx, '/buildcommand', parameters, json=True)
+    vim.command("let b:buildcommand = '%s'" % response['QuickFixes'][0]['Text'])
+ 
+@vimcmd
+def getTestCommand():
+    mode = vim.eval('a:mode')
+    parameters = {}
+    parameters['Type'] = mode
+    response = getResponse(ctx, '/gettestcontext', parameters, json=True)
+    testCommand = "let s:testcommand = '%s'" % response['TestCommand']
+    vim.command(testCommand)
+ 
+
 
 
 __all__ = [name for name, fxn in locals().items()
