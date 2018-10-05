@@ -22,6 +22,10 @@ get_latest_version() {
 
 location="$HOME/.omnisharp/"
 
+# TODO: Remove this default when omnisharp-roslyn #1274 is fixed:
+# https://github.com/OmniSharp/omnisharp-roslyn/issues/1274
+version='v1.32.1'
+
 while getopts v:l:HMu o "$@"
 do
     case "$o" in

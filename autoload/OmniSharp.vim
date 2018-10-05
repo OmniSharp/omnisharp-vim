@@ -174,9 +174,35 @@ function! OmniSharp#GotoDefinition() abort
   call OmniSharp#CheckPyError()
 endfunction
 
+function! OmniSharp#PreviewDefinition() abort
+  let lazyredraw_bak = &lazyredraw
+  let &lazyredraw = 1
+
+  " Due to cursor jumping bug, opening preview at current file is not as
+  " simple as `pedit %`:
+  " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
+  let winview = winsaveview()
+  let filepath = expand('%')
+  silent call s:writeToPreview('')
+  wincmd P
+  exec 'silent edit '. filepath
+  " Jump cursor back to symbol.
+  call winrestview(winview)
+
+  call OmniSharp#GotoDefinition()
+  wincmd p
+
+  let &lazyredraw = lazyredraw_bak
+endfunction
+
 function! OmniSharp#JumpToLocation(filename, line, column, noautocmds) abort
   if a:filename !=# ''
-    if fnamemodify(a:filename, ':p') !=# expand('%:p')
+    if fnamemodify(a:filename, ':p') ==# expand('%:p')
+      " Update the ' mark, adding this location to the jumplist. This is not
+      " necessary when the location is in another buffer - :edit performs the
+      " same functionality.
+      normal! m'
+    else
       let command = 'edit ' . fnameescape(a:filename)
       if a:noautocmds
         let command = 'noautocmd ' . command
@@ -449,7 +475,7 @@ function! OmniSharp#EnableTypeHighlighting() abort
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
-  if bufname('%') ==# ''
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck()
     return
   endif
   if OmniSharp#BufferHasChanged() == 1
@@ -522,11 +548,7 @@ function! OmniSharp#StartServerIfNotRunning(...) abort
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  if match( expand( '<afile>:p' ), 'fugitive:///' ) == 0
-    return 1
-  else
-    return 0
-  endif
+  return match(expand('<afile>:p'), 'fugitive:///' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort
@@ -602,7 +624,7 @@ function! OmniSharp#StopServer(...) abort
   if force || OmniSharp#proc#IsJobRunning(sln_or_dir)
     call s:BustAliveCache(sln_or_dir)
     call OmniSharp#proc#StopJob(sln_or_dir)
-    setbufvar(bufnr('%'), 'Omnisharp_buf_server', '')
+    call setbufvar(bufnr('%'), 'Omnisharp_buf_server', '')
   endif
 endfunction
 
@@ -776,15 +798,29 @@ function! OmniSharp#Install(...) abort
   let l:version = a:000 != [] ? ' -v '.a:000[0] : ''
 
   if has('win32')
-    let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
-    call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location
+    if ValidPowerShellSettings()
+      let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
+      call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location
           \ .'"'.l:version)
+      if v:shell_error
+        echomsg 'Installation to "' . l:location . '" failed inside PowerShell.'
+      else
+        echomsg 'OmniSharp installed to: ' . l:location
+      endif
+    else
+      echomsg 'Powershell is running at an ExecutionPolicy level that blocks OmniSharp-vim from installing the Roslyn server'
+    endif
   else
-    let l:mono = g:OmniSharp_server_use_mono ? " -M" : ""
+    let l:mono = g:OmniSharp_server_use_mono ? ' -M' : ''
     call system('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"'
           \ .l:mono.l:version)
+    echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
   endif
-  echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
+endfunction
+
+function! ValidPowerShellSettings()
+    let l:ps_policy_level = system('powershell Get-ExecutionPolicy')
+    return l:ps_policy_level !~# '^\(Restricted\|AllSigned\)'
 endfunction
 
 function! s:find_solution_files(bufnum) abort

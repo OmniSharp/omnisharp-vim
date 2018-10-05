@@ -44,6 +44,7 @@ command! -buffer -bar OmniSharpFindUsages                          call OmniShar
 command! -buffer -bar OmniSharpFixUsings                           call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions                      call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGotoDefinition                      call OmniSharp#GotoDefinition()
+command! -buffer -bar OmniSharpPreviewDefinition                   call OmniSharp#PreviewDefinition()
 command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#EnableTypeHighlighting()
 command! -buffer -bar OmniSharpNavigateUp                          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown                        call OmniSharp#NavigateDown()
@@ -65,11 +66,6 @@ command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniShar
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)
 
-command! -buffer -nargs=1 -complete=file
-\ OmniSharpStartServerSolution
-\ call OmniSharp#StartServerSolution(<q-args>)
-
-
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
 else
@@ -88,6 +84,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpFixUsings
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGotoDefinition
+\|  delcommand OmniSharpPreviewDefinition
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpInstall
 \|  delcommand OmniSharpNavigateUp
@@ -99,7 +96,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpRestartServer
 \|  delcommand OmniSharpSignatureHelp
 \|  delcommand OmniSharpStartServer
-\|  delcommand OmniSharpStartServerSolution
 \|  delcommand OmniSharpStopAllServers
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup

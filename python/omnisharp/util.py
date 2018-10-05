@@ -83,7 +83,9 @@ class VimUtilCtx(BaseCtx):
 
     @property
     def buffer_name(self):
-        return self._vim.current.buffer.name
+        # We can't use self._vim.current.buffer.name because it returns the real
+        # path. expand('%') will preserve the symlinked path, if one exists.
+        return self._vim.eval("expand('%:p')")
 
     @property
     def translate_cygwin_wsl(self):
