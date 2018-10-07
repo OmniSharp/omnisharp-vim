@@ -52,10 +52,6 @@ command! -buffer -bar OmniSharpOpenPythonLog                       call OmniShar
 command! -buffer -bar OmniSharpRename                              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRestartAllServers                   call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer                       call OmniSharp#RestartServer()
-command! -buffer -bar OmniSharpRunAllTests                         call OmniSharp#RunTests('all')
-command! -buffer -bar OmniSharpRunLastTests                        call OmniSharp#RunTests('last')
-command! -buffer -bar OmniSharpRunTestFixture                      call OmniSharp#RunTests('fixture')
-command! -buffer -bar OmniSharpRunTests                            call OmniSharp#RunTests('single')
 command! -buffer -bar OmniSharpSignatureHelp                       call OmniSharp#SignatureHelp()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers                      call OmniSharp#StopAllServers()
@@ -99,10 +95,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpStopAllServers
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup
-\|  delcommand OmniSharpRunAllTests
-\|  delcommand OmniSharpRunLastTests
-\|  delcommand OmniSharpRunTestFixture
-\|  delcommand OmniSharpRunTests
 \
 \|  setlocal omnifunc< errorformat< makeprg<'
 

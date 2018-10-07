@@ -27,9 +27,9 @@ function! ale_linters#cs#omnisharp#GetCommand(bufnum) abort
   let linter = OmniSharp#util#path_join(['python', 'ale_lint.py'])
   let host = OmniSharp#GetHost(a:bufnum)
   let cmd = printf(
-        \ '%%e %s --filename %%s --host %s --level %s --cwd %s --delimiter %s',
+        \ '%%e %s --filename %%s --host %s --level %s --cwd %s --delimiter %s --encoding %s',
         \ ale#Escape(linter), ale#Escape(host), ale#Escape(g:OmniSharp_loglevel),
-        \ ale#Escape(getcwd()), ale#Escape(s:delimiter))
+        \ ale#Escape(getcwd()), ale#Escape(s:delimiter), &encoding)
   if g:OmniSharp_translate_cygwin_wsl
     let cmd = cmd . ' --translate'
   endif

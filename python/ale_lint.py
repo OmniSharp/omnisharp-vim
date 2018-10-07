@@ -50,16 +50,18 @@ def main():
                         choices=log_levels.keys(), default='info')
     parser.add_argument('--translate', action='store_true',
                         help="If provided, translate cygwin/wsl paths")
+    parser.add_argument('--encoding', required=True,
+                        help="Encoding for output")
     args = parser.parse_args()
     logger = _setup_logging(log_levels[args.level])
     try:
         do_codecheck(logger, args.filename.strip(), args.host, args.cwd,
-                     args.translate, args.delimiter)
+                     args.translate, args.delimiter, args.encoding)
     except Exception as e:
         logger.exception("Error doing codecheck")
 
 
-def do_codecheck(logger, filename, host, cwd, translate, delimiter):
+def do_codecheck(logger, filename, host, cwd, translate, delimiter, encoding):
     ctx = UtilCtx(
         buffer_name=filename,
         translate_cygwin_wsl=translate,
@@ -74,7 +76,8 @@ def do_codecheck(logger, filename, host, cwd, translate, delimiter):
 
     keys = ['filename', 'lnum', 'col', 'type', 'subtype', 'text']
     for item in quickfixes:
-        print(delimiter.join([str(item.get(k, '')) for k in keys]))
+        s = delimiter.join([str(item.get(k, '')) for k in keys]) + '\n'
+        sys.stdout.buffer.write(s.encode(encoding))
 
 
 if __name__ == '__main__':
