@@ -76,7 +76,6 @@ def do_codecheck(logger, filename, host, cwd, translate, delimiter, encoding):
 
     keys = ['filename', 'lnum', 'col', 'type', 'subtype', 'text']
     for item in quickfixes:
-        # print(delimiter.join([str(item.get(k, '')) for k in keys]))
         s = delimiter.join([str(item.get(k, '')) for k in keys]) + '\n'
         sys.stdout.buffer.write(s.encode(encoding))
 
