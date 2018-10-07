@@ -245,8 +245,17 @@ none are. >
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                         *:OmniSharpStartServer*
-:OmniSharpStartServer
-    Starts the OmniSharp server
+:OmniSharpStartServer {sln-or-dir}
+    Starts an OmniSharp server. If no arguments are provided, this command
+    will attempt to find a solution file located in the same directory
+    as the current buffer and start a server for that file. Alternatively, you
+    can explicitly provide the path of a solution file or a directory to start
+    the server for. >
+
+      OmniSharpStartServer ~/project/project.sln
+      OR
+      OmniSharpStartServer ~/project/
+<
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                      *:OmniSharpStopAllServers*

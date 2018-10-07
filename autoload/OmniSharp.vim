@@ -17,7 +17,6 @@ let s:last_completion_dictionary = {}
 let s:alive_cache = []
 let g:OmniSharp_py_err = {}
 
-" Note: something about backwards compatibility
 let s:initial_server_ports = copy(g:OmniSharp_sln_ports)
 
 function! OmniSharp#GetPort(...) abort
@@ -779,11 +778,7 @@ endfunction
 
 function! s:DirectoryContainsFile(directory, file)
   let idx = stridx(a:file, a:directory)
-  if idx == 0
-    return 1
-  endif
-
-  return 0
+  return (idx == 0)
 endfunction
 
 let s:extension = has('win32') ? '.ps1' : '.sh'
