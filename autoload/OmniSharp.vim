@@ -541,9 +541,7 @@ function! OmniSharp#StartServerIfNotRunning(...) abort
     return
   endif
 
-  let dir = ''
-  if a:0 | let dir = a:1 | endif
-
+  let dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(dir, 1)
 endfunction
 
@@ -574,7 +572,6 @@ function! OmniSharp#StartServer(...) abort
 
   " Optionally perform check if server is already running
   if a:0 > 1 && a:2
-    let running = 0
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
     " If the port is hardcoded, we should check if any other vim instances have
     " started this server
