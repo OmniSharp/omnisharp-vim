@@ -49,8 +49,7 @@ function! OmniSharp#GetHost(...) abort
     let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnum)
     let port = OmniSharp#GetPort(sln_or_dir)
     if port == 0
-      " If user has not explicitly specified a port, try 2000 but don't cache
-      return 'http://localhost:2000'
+      return ''
     endif
     let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     call setbufvar(bufnum, 'OmniSharp_host', host)
@@ -620,7 +619,6 @@ function! OmniSharp#StopServer(...) abort
   if force || OmniSharp#proc#IsJobRunning(sln_or_dir)
     call s:BustAliveCache(sln_or_dir)
     call OmniSharp#proc#StopJob(sln_or_dir)
-    call setbufvar(bufnr('%'), 'Omnisharp_buf_server', '')
   endif
 endfunction
 
@@ -856,7 +854,7 @@ function! s:IsServerPortHardcoded(sln_or_dir) abort
   return has_key(s:initial_server_ports, a:sln_or_dir)
 endfunction
 
-" Remove a solution from the alive_cache
+" Remove a server from the alive_cache
 function! s:BustAliveCache(...) abort
   let sln_or_dir = a:0 ? a:1 : OmniSharp#FindSolutionOrDir(0)
   let idx = index(s:alive_cache, sln_or_dir)
