@@ -77,7 +77,10 @@ def do_codecheck(logger, filename, host, cwd, translate, delimiter, encoding):
     keys = ['filename', 'lnum', 'col', 'type', 'subtype', 'text']
     for item in quickfixes:
         s = delimiter.join([str(item.get(k, '')) for k in keys]) + '\n'
-        sys.stdout.buffer.write(s.encode(encoding))
+        if sys.version_info.major == 3:
+            sys.stdout.buffer.write(s.encode(encoding))
+        elif sys.version_info.major == 2:
+            sys.stdout.write(unicode(s).encode(encoding))
 
 
 if __name__ == '__main__':
