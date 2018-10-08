@@ -109,6 +109,13 @@ Default: {} >
       \ }
 <
 
+                                                       *'b:OmniSharp_sln_path'*
+Buffer specific custom solution file path. This setting can be useful if your
+project's solution file is generated or cannot be easily located by OmniSharp
+search algorithm.
+Default: None >
+    let b:OmniSharp_sln_path = 'C:\path\to\myproject.sln'
+<
                                                         *'g:OmniSharp_timeout'*
 Use this option to specify the time (in seconds) to wait for a response from the
 server. Default: 1 >

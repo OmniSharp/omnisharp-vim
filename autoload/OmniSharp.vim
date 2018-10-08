@@ -773,6 +773,11 @@ function! ValidPowerShellSettings()
 endfunction
 
 function! s:find_solution_files(bufnum) abort
+  let bufferSolutionPath = getbufvar(a:bufnum, 'OmniSharp_sln_path')
+  if !empty(bufferSolutionPath)
+    return [bufferSolutionPath]
+  endif
+
   "get the path for the current buffer
   let dir = expand('#' . a:bufnum . ':p:h')
   let lastfolder = ''
