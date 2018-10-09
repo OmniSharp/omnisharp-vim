@@ -172,9 +172,13 @@ def renameTo(name):
     }
     response = getResponse(ctx, '/rename', parameters, json=True)
     changes = response['Changes']
+    ret = []
     for change in changes:
-        change['FileName'] = formatPathForClient(ctx, change['FileName'])
-    return changes
+        ret.append({
+            'FileName': formatPathForClient(ctx, change['FileName']),
+            'Buffer': change['Buffer'],
+        })
+    return ret
 
 
 @vimcmd
