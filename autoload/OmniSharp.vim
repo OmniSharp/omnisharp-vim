@@ -19,7 +19,7 @@ let g:OmniSharp_py_err = {}
 
 " Preserve backwards compatibility with older version of
 " g:OmniSharp_server_ports option
-if exists(g:OmniSharp_sln_ports)
+if exists('g:OmniSharp_sln_ports')
   let g:OmniSharp_server_ports = g:OmniSharp_sln_ports
 else
 
