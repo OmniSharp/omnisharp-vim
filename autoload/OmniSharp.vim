@@ -555,11 +555,11 @@ function! OmniSharp#StartServer(...) abort
     if filereadable(sln_or_dir)
       let file_ext = fnamemodify(sln_or_dir, ':e')
       if file_ext !=? 'sln'
-        call OmniSharp#util#EchoErr("Provided file is not a solution.")
+        call OmniSharp#util#EchoErr("Provided file '" . sln_or_dir . "' is not a solution.")
         return
       endif
     elseif !isdirectory(sln_or_dir)
-      call OmniSharp#util#EchoErr("Provided path is not a sln file or a directory.")
+      call OmniSharp#util#EchoErr("Provided path '" . sln_or_dir . "' is not a sln file or a directory.")
       return
     endif
   else
