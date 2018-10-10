@@ -41,8 +41,8 @@ let g:OmniSharp_server_config_name = get(g:, 'OmniSharp_server_config_name', 'om
 " Default value for python log level
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', 'warning')
 
-" Default map of solution file to port
-let g:OmniSharp_sln_ports = get(g:, 'OmniSharp_sln_ports', {})
+" Default map of solution files and directories to ports
+let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', {})
 
 " Initialize OmniSharp as an asyncomplete source
 autocmd User asyncomplete_setup call asyncomplete#register_source({

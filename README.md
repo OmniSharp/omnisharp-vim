@@ -177,7 +177,7 @@ This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in 
 
 Add `-v` to get extra information from the server.
 
-When vim starts an OmniSharp server, it will bind to a random port by default. If you need to run the server on a specific port (or you are running manually, as above) you can use `let g:OmniSharp_sln_ports = {'C:\path\to\project.sln': 2000}` to map solution files to specific ports, or you can `let g:OmniSharp_port = 2000` to always use a single port (though this will prevent you from running OmniSharp servers on multiple solutions).
+When vim starts an OmniSharp server, it will bind to a random port by default. If you need to run servers on specific ports (or you are running manually, as above) you can use `let g:OmniSharp_server_ports = {'C:\path\to\project.sln': 2000, 'C:\path\to\other\project': 2001}` to map solution files and/or project directories to specific ports, or you can `let g:OmniSharp_port = 2000` to always use a single port (though this will prevent you from running OmniSharp servers on multiple projects).
 
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use a completion or autocompletion plugin.
 

@@ -17,7 +17,13 @@ let s:last_completion_dictionary = {}
 let s:alive_cache = []
 let g:OmniSharp_py_err = {}
 
-let s:initial_server_ports = copy(g:OmniSharp_sln_ports)
+" Preserve backwards compatibility with older version of
+" g:OmniSharp_server_ports option
+if exists(g:OmniSharp_sln_ports)
+  let g:OmniSharp_server_ports = g:OmniSharp_sln_ports
+else
+
+let s:initial_server_ports = copy(g:OmniSharp_server_ports)
 
 function! OmniSharp#GetPort(...) abort
   if exists('g:OmniSharp_port')
@@ -30,14 +36,14 @@ function! OmniSharp#GetPort(...) abort
   endif
 
   " If we're already running this solution, choose the port we're running on
-  if has_key(g:OmniSharp_sln_ports, sln_or_dir)
-    return g:OmniSharp_sln_ports[sln_or_dir]
+  if has_key(g:OmniSharp_server_ports, sln_or_dir)
+    return g:OmniSharp_server_ports[sln_or_dir]
   endif
 
   " Otherwise, find a free port and use that for this solution
   let port = OmniSharp#py#eval('find_free_port()')
   if OmniSharp#CheckPyError() | return 0 | endif
-  let g:OmniSharp_sln_ports[sln_or_dir] = port
+  let g:OmniSharp_server_ports[sln_or_dir] = port
   return port
 endfunction
 
@@ -729,7 +735,7 @@ function! s:FindSolution(interactive, bufnum) abort
     if g:OmniSharp_autoselect_existing_sln
       let running_slns = []
       for solutionfile in solution_files
-        if has_key(g:OmniSharp_sln_ports, solutionfile)
+        if has_key(g:OmniSharp_server_ports, solutionfile)
           call add(running_slns, solutionfile)
         endif
       endfor
