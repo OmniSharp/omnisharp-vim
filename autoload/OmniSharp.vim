@@ -782,7 +782,7 @@ function! s:FindServerRunningOnParentDirectory(bufnum) abort
   return longest_dir_match
 endfunction
 
-function! s:DirectoryContainsFile(directory, file)
+function! s:DirectoryContainsFile(directory, file) abort
   let idx = stridx(a:file, a:directory)
   return (idx == 0)
 endfunction
