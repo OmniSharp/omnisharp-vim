@@ -548,8 +548,10 @@ function! OmniSharp#FugitiveCheck() abort
 endfunction
 
 function! OmniSharp#StartServer(...) abort
-  if a:0 && a:1 !=# ''
-    let sln_or_dir = fnamemodify(a:1, ':p')
+  let sln_or_dir = a:0 ? fnamemodify(a:1, ':p') : ''
+  let check_is_running = a:0 > 1 && a:2
+
+  if sln_or_dir !=# ''
     if filereadable(sln_or_dir)
       let file_ext = fnamemodify(sln_or_dir, ':e')
       if file_ext !=? 'sln'
@@ -569,7 +571,7 @@ function! OmniSharp#StartServer(...) abort
   endif
 
   " Optionally perform check if server is already running
-  if a:0 > 1 && a:2
+  if check_is_running
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
     " If the port is hardcoded, we should check if any other vim instances have
     " started this server
