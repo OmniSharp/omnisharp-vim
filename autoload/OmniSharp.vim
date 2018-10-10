@@ -21,7 +21,7 @@ let g:OmniSharp_py_err = {}
 " g:OmniSharp_server_ports option
 if exists('g:OmniSharp_sln_ports')
   let g:OmniSharp_server_ports = g:OmniSharp_sln_ports
-else
+endif
 
 let s:initial_server_ports = copy(g:OmniSharp_server_ports)
 
@@ -554,7 +554,7 @@ function! OmniSharp#FugitiveCheck() abort
 endfunction
 
 function! OmniSharp#StartServer(...) abort
-  let sln_or_dir = a:0 ? fnamemodify(a:1, ':p') : ''
+  let sln_or_dir = a:0 && a:1 !=# '' ? fnamemodify(a:1, ':p') : ''
   let check_is_running = a:0 > 1 && a:2
 
   if sln_or_dir !=# ''
