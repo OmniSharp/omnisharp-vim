@@ -539,8 +539,8 @@ function! OmniSharp#StartServerIfNotRunning(...) abort
     return
   endif
 
-  let dir = a:0 ? a:1 : ''
-  call OmniSharp#StartServer(dir, 1)
+  let sln_or_dir = a:0 ? a:1 : ''
+  call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
