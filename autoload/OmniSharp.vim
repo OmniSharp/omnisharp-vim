@@ -151,21 +151,21 @@ endfunction
 function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnum = a:0 > 1 ? a:2 : bufnr('%')
-  if empty(getbufvar(bufnum, 'Omnisharp_buf_server'))
+  if empty(getbufvar(bufnum, 'OmniSharp_buf_server'))
     let dir = s:FindServerRunningOnParentDirectory(bufnum)
     if !empty(dir)
-      call setbufvar(bufnum, 'Omnisharp_buf_server', dir)
+      call setbufvar(bufnum, 'OmniSharp_buf_server', dir)
     else
       try
         let sln = s:FindSolution(interactive, bufnum)
-        call setbufvar(bufnum, 'Omnisharp_buf_server', sln)
+        call setbufvar(bufnum, 'OmniSharp_buf_server', sln)
       catch e
         return ''
       endtry
     endif
   endif
 
-  return getbufvar(bufnum, 'Omnisharp_buf_server')
+  return getbufvar(bufnum, 'OmniSharp_buf_server')
 endfunction
 
 function! OmniSharp#NavigateDown() abort
@@ -571,7 +571,7 @@ function! OmniSharp#StartServer(...) abort
   else
     let sln_or_dir = OmniSharp#FindSolutionOrDir()
     if empty(sln_or_dir)
-      call OmniSharp#util#EchoErr("Could not find solution file or directory to start server")
+      call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
       return
     endif
   endif
@@ -633,7 +633,7 @@ endfunction
 function! OmniSharp#RestartServer() abort
   let sln_or_dir = OmniSharp#FindSolutionOrDir()
   if empty(sln_or_dir)
-    call OmniSharp#util#EchoErr("Could not find solution file or directory")
+    call OmniSharp#util#EchoErr('Could not find solution file or directory')
     return
   endif
   call OmniSharp#StopServer(1, sln_or_dir)
