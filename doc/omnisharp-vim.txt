@@ -99,13 +99,14 @@ Default: 1 >
     let g:OmniSharp_open_quickfix = 0
 <
 
-                                                      *'g:OmniSharp_sln_ports'*
-Mapping of solution file to port. When auto-starting the OmniSharp server, it
-will bind to the port listed here if the solution file matches. If there is no
+                                                      *'g:OmniSharp_server_ports'*
+Mapping of solution files and/or directories to ports. When auto-starting the OmniSharp server, it
+will bind to the port listed here if the solution file or directory matches. If there is no
 match, the port will be chosen at random.
 Default: {} >
-    let g:OmniSharp_sln_ports = {
+    let g:OmniSharp_server_ports = {
       \ 'C:\path\to\myproject.sln': 2003,
+      \ 'C:\path\to\other\project': 2004,
       \ }
 <
 
@@ -245,8 +246,17 @@ none are. >
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                         *:OmniSharpStartServer*
-:OmniSharpStartServer
-    Starts the OmniSharp server
+:OmniSharpStartServer {sln-or-dir}
+    Starts an OmniSharp server. If no arguments are provided, this command
+    will attempt to find a solution file located in a parent directory
+    of the current buffer and start a server for that file. Alternatively, you
+    can explicitly provide the path of a solution file or a directory to start
+    the server for. >
+
+      OmniSharpStartServer ~/project/project.sln
+      OR
+      OmniSharpStartServer ~/project/
+<
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                      *:OmniSharpStopAllServers*
