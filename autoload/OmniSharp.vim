@@ -439,42 +439,59 @@ function! OmniSharp#RenameTo(renameto) abort
   endtry
 endfunction
 
-function! OmniSharp#EnableTypeHighlightingForBuffer() abort
-  highlight default link csUserType Type
-  if !empty(s:allUserTypes)
-    exec 'syn keyword csUserType ' . s:allUserTypes
+function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
+  if exists('b:types') && !a:refresh | return | endif
+  if !OmniSharp#IsServerRunning() | return | endif
+
+  let ret = OmniSharp#py#eval('findHighlightTypes()')
+  if OmniSharp#CheckPyError() | return | endif
+
+  let b:types = s:ReadHighlightKeywords(ret.bufferTypes)
+  let b:interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
+
+  if exists('b:allTypes')
+    silent call s:ClearHighlightKeywords()
   endif
-  highlight default link csUserInterface Include
-  if !empty(s:allUserInterfaces)
-    exec 'syn keyword csUserInterface ' . s:allUserInterfaces
+
+  if !empty(b:types)
+    exec 'syntax keyword csUserType ' . join(b:types)
   endif
-  highlight default link csUserAttribute Include
-  if !empty(s:allUserAttributes)
-    exec 'syn keyword csUserAttribute ' . s:allUserAttributes
+  if !empty(b:interfaces)
+    exec 'syntax keyword csUserInterface ' . join(b:interfaces)
   endif
+
+  " TODO: Remove this line once csUserType is contained in the standard vim
+  " runtime files
+  syntax region csNewType
+  \ start="@\@1<!\<new\>"hs=s+4
+  \ end="[;\n{(<\[]"me=e-1
+  \ contains=csNew,csUserType
+endfunction
+
+" Wrap this functionality in a function so it can be called with :silent
+function! s:ClearHighlightKeywords() abort
+  syntax clear csUserType
+  syntax clear csUserInterface
+  " TODO: Remove this line once csUserType is contained in the standard vim
+  " runtime files
+  syntax clear csNewType
+endfunction
+
+function! s:ReadHighlightKeywords(spans) abort
+  let l:types = []
+  for span in a:spans
+    let line = getline(span['line'])
+    call add(l:types, line[span['start']-1 : span['end']-2])
+  endfor
+  return sort(uniq(l:types))
 endfunction
 
 function! OmniSharp#EnableTypeHighlighting() abort
-  if !OmniSharp#IsServerRunning()
-    return
-  endif
+  call OmniSharp#EnableTypeHighlightingForBuffer(0)
 
-  let ret = OmniSharp#py#eval('lookupAllUserTypes()')
-  if OmniSharp#CheckPyError() | return | endif
-  let s:allUserTypes = ret.userTypes
-  let s:allUserInterfaces = ret.userInterfaces
-  let s:allUserAttributes = ret.userAttributes
-
-  let startBuf = bufnr('%')
-  " Perform highlighting for existing buffers
-  bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
-  exec 'b '. startBuf
-
-  call OmniSharp#EnableTypeHighlightingForBuffer()
-
-  augroup _omnisharp
+  augroup OmniSharp#HighlightTypes
     autocmd!
-    autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
+    autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer(0)
   augroup END
 endfunction
 

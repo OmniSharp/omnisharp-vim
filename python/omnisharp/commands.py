@@ -205,23 +205,26 @@ def findSymbols(filter=''):
 
 
 @vimcmd
-def lookupAllUserTypes():
-    response = getResponse(ctx, '/findsymbols', {'filter': ''}, json=True)
-    qf = response.get('QuickFixes', [])
-    slnTypes = []
-    slnInterfaces = []
-    slnAttributes = []
-    for symbol in qf:
-        if symbol['Kind'] == 'Class':
-            slnTypes.append(symbol['Text'])
-            if symbol['Text'].endswith('Attribute'):
-                slnAttributes.append(symbol['Text'][:-9])
-        elif symbol['Kind'] == 'Interface':
-            slnInterfaces.append(symbol['Text'])
+def findHighlightTypes():
+    response = getResponse(ctx, '/highlight', json=True)
+    highlights = response.get('Highlights', [])
+    bufTypes = []
+    bufInterfaces = []
+    for hi in highlights:
+        # 'class name', 'enum name', 'interface name'
+        if ' name' in hi['Kind']:
+            span = {
+                'line': hi['StartLine'],
+                'start': hi['StartColumn'],
+                'end': hi['EndColumn']
+            }
+            if 'class ' in hi['Kind'] or 'enum ' in hi['Kind']:
+                bufTypes.append(span)
+            else:
+                bufInterfaces.append(span)
     return {
-        'userTypes': ' '.join(slnTypes),
-        'userInterfaces': ' '.join(slnInterfaces),
-        'userAttributes': ' '.join(slnAttributes),
+        'bufferTypes': bufTypes,
+        'bufferInterfaces': bufInterfaces
     }
 
 
