@@ -448,10 +448,14 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
 
   let b:types = s:ReadHighlightKeywords(ret.bufferTypes)
   let b:interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
+  let b:identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
+
+  echom string(b:identifiers)
 
   if exists('b:types')
     silent call s:ClearHighlight('csUserType')
     silent call s:ClearHighlight('csUserInterface')
+    silent call s:ClearHighlight('csUserIdentifier')
   endif
 
   if !empty(b:types)
@@ -459,6 +463,9 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
   endif
   if !empty(b:interfaces)
     execute 'syntax keyword csUserInterface' join(b:interfaces)
+  endif
+  if !empty(b:identifiers)
+    execute 'syntax keyword csUserIdentifier' join(b:identifiers)
   endif
 
   " TODO: Remove this line once csUserType is contained in the standard vim
@@ -479,6 +486,7 @@ function! s:ClearHighlight(groupname)
 endfunction
 
 function! s:ReadHighlightKeywords(spans) abort
+  echom len(a:spans)
   let l:types = []
   for span in a:spans
     let line = getline(span['line'])

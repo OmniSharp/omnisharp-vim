@@ -210,21 +210,24 @@ def findHighlightTypes():
     highlights = response.get('Highlights', [])
     bufTypes = []
     bufInterfaces = []
+    bufIdentifiers = []
     for hi in highlights:
+        span = {
+            'line': hi['StartLine'],
+            'start': hi['StartColumn'],
+            'end': hi['EndColumn']
+        }
         # 'class name', 'enum name', 'interface name'
-        if ' name' in hi['Kind']:
-            span = {
-                'line': hi['StartLine'],
-                'start': hi['StartColumn'],
-                'end': hi['EndColumn']
-            }
-            if 'class ' in hi['Kind'] or 'enum ' in hi['Kind'] or 'struct ' in hi['Kind']:
-                bufTypes.append(span)
-            elif 'interface ' in hi['Kind']:
-                bufInterfaces.append(span)
+        if hi['Kind'] in ['class name', 'enum name', 'struct name']:
+            bufTypes.append(span)
+        elif hi['Kind'] == 'interface name':
+            bufInterfaces.append(span)
+        elif hi['Kind'] == 'identifier':
+            bufIdentifiers.append(span)
     return {
         'bufferTypes': bufTypes,
-        'bufferInterfaces': bufInterfaces
+        'bufferInterfaces': bufInterfaces,
+        'bufferIdentifiers': bufIdentifiers
     }
 
 

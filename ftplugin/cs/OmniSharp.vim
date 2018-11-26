@@ -66,6 +66,7 @@ highlight default link csUserType Type
 " TODO: interfaces should probably also link to Type - but keep them distinct
 " for testing purposes
 highlight default link csUserInterface Include
+highlight default link csUserIdentifier Identifier
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
