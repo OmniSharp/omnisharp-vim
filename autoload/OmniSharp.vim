@@ -449,8 +449,9 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
   let b:types = s:ReadHighlightKeywords(ret.bufferTypes)
   let b:interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
 
-  if exists('b:allTypes')
-    silent call s:ClearHighlightKeywords()
+  if exists('b:types')
+    silent call s:ClearHighlight('csUserType')
+    silent call s:ClearHighlight('csUserInterface')
   endif
 
   if !empty(b:types)
@@ -462,6 +463,7 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
 
   " TODO: Remove this line once csUserType is contained in the standard vim
   " runtime files
+  silent call s:ClearHighlight('csNewType')
   syntax region csNewType
   \ start="@\@1<!\<new\>"hs=s+4
   \ end="[;\n{(<\[]"me=e-1
@@ -469,12 +471,11 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
 endfunction
 
 " Wrap this functionality in a function so it can be called with :silent
-function! s:ClearHighlightKeywords() abort
-  syntax clear csUserType
-  syntax clear csUserInterface
-  " TODO: Remove this line once csUserType is contained in the standard vim
-  " runtime files
-  syntax clear csNewType
+function! s:ClearHighlight(groupname)
+  try
+    execute 'syntax clear' a:groupname
+  catch
+  endtry
 endfunction
 
 function! s:ReadHighlightKeywords(spans) abort
@@ -491,7 +492,7 @@ function! OmniSharp#EnableTypeHighlighting() abort
 
   augroup OmniSharp#HighlightTypes
     autocmd!
-    autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer(0)
+    autocmd BufEnter *.cs call OmniSharp#EnableTypeHighlightingForBuffer(0)
   augroup END
 endfunction
 
