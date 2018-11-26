@@ -450,15 +450,15 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
   let b:interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
 
   if exists('b:types')
-    silent call s:ClearHighlight('csOSType')
-    silent call s:ClearHighlight('csOSInterface')
+    silent call s:ClearHighlight('csUserType')
+    silent call s:ClearHighlight('csUserInterface')
   endif
 
   if !empty(b:types)
-    execute 'syntax keyword csOSType' join(b:types)
+    execute 'syntax keyword csUserType' join(b:types)
   endif
   if !empty(b:interfaces)
-    execute 'syntax keyword csOSInterface' join(b:interfaces)
+    execute 'syntax keyword csUserInterface' join(b:interfaces)
   endif
 
   " TODO: Remove this line once csUserType is contained in the standard vim
@@ -467,7 +467,7 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
   syntax region csNewType
   \ start="@\@1<!\<new\>"hs=s+4
   \ end="[;\n{(<\[]"me=e-1
-  \ contains=csNew,csOSType
+  \ contains=csNew,csUserType
 endfunction
 
 " Wrap this functionality in a function so it can be called with :silent

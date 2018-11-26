@@ -218,9 +218,9 @@ def findHighlightTypes():
                 'start': hi['StartColumn'],
                 'end': hi['EndColumn']
             }
-            if 'class ' in hi['Kind'] or 'enum ' in hi['Kind']:
+            if 'class ' in hi['Kind'] or 'enum ' in hi['Kind'] or 'struct ' in hi['Kind']:
                 bufTypes.append(span)
-            else:
+            elif 'interface ' in hi['Kind']:
                 bufInterfaces.append(span)
     return {
         'bufferTypes': bufTypes,
