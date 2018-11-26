@@ -450,8 +450,6 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
   let b:interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
   let b:identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
 
-  echom string(b:identifiers)
-
   if exists('b:types')
     silent call s:ClearHighlight('csUserType')
     silent call s:ClearHighlight('csUserInterface')
@@ -468,13 +466,13 @@ function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
     execute 'syntax keyword csUserIdentifier' join(b:identifiers)
   endif
 
-  " TODO: Remove this line once csUserType is contained in the standard vim
-  " runtime files
+  " TODO: Remove this line once csUserType and csUserIdentifier is contained in
+  " the standard vim runtime files
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType
   \ start="@\@1<!\<new\>"hs=s+4
   \ end="[;\n{(<\[]"me=e-1
-  \ contains=csNew,csUserType
+  \ contains=csNew,csUserType,csUserIdentifier
 endfunction
 
 " Wrap this functionality in a function so it can be called with :silent
@@ -486,7 +484,6 @@ function! s:ClearHighlight(groupname)
 endfunction
 
 function! s:ReadHighlightKeywords(spans) abort
-  echom len(a:spans)
   let l:types = []
   for span in a:spans
     let line = getline(span['line'])
