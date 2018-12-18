@@ -205,23 +205,29 @@ def findSymbols(filter=''):
 
 
 @vimcmd
-def lookupAllUserTypes():
-    response = getResponse(ctx, '/findsymbols', {'filter': ''}, json=True)
-    qf = response.get('QuickFixes', [])
-    slnTypes = []
-    slnInterfaces = []
-    slnAttributes = []
-    for symbol in qf:
-        if symbol['Kind'] == 'Class':
-            slnTypes.append(symbol['Text'])
-            if symbol['Text'].endswith('Attribute'):
-                slnAttributes.append(symbol['Text'][:-9])
-        elif symbol['Kind'] == 'Interface':
-            slnInterfaces.append(symbol['Text'])
+def findHighlightTypes():
+    response = getResponse(ctx, '/highlight', json=True)
+    highlights = response.get('Highlights', [])
+    bufTypes = []
+    bufInterfaces = []
+    bufIdentifiers = []
+    for hi in highlights:
+        span = {
+            'line': hi['StartLine'],
+            'start': hi['StartColumn'],
+            'end': hi['EndColumn']
+        }
+        # 'class name', 'enum name', 'interface name'
+        if hi['Kind'] in ['class name', 'enum name', 'struct name']:
+            bufTypes.append(span)
+        elif hi['Kind'] == 'interface name':
+            bufInterfaces.append(span)
+        elif hi['Kind'] == 'identifier':
+            bufIdentifiers.append(span)
     return {
-        'userTypes': ' '.join(slnTypes),
-        'userInterfaces': ' '.join(slnInterfaces),
-        'userAttributes': ' '.join(slnAttributes),
+        'bufferTypes': bufTypes,
+        'bufferInterfaces': bufInterfaces,
+        'bufferIdentifiers': bufIdentifiers
     }
 
 

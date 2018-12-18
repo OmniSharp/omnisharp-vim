@@ -68,12 +68,29 @@ Default: '/home/username/.omnisharp/omnisharp-roslyn/run'
     let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
 
+                                                   *'g:OmniSharp_server_ports'*
+Mapping of solution files and/or directories to ports. When auto-starting the
+OmniSharp server, it will bind to the port listed here if the solution file or
+directory matches. If there is no match, the port will be chosen at random.
+Default: {} >
+    let g:OmniSharp_server_ports = {
+      \ 'C:\path\to\myproject.sln': 2003,
+      \ 'C:\path\to\other\project': 2004,
+      \ }
+<
+
                                                 *'g:OmniSharp_server_use_mono'*
 The roslyn server must be run with mono on Linux and OSX. The roslyn server
 binaries usually come with an embedded mono, but this can be overridden to use
 the installed mono with this option. Note that mono must be in the $PATH.
 Default: 0 >
     let g:OmniSharp_server_use_mono = 1
+<
+
+                                                *'g:OmniSharp_highlight_types'*
+Enable semantic type/interface/identifier highlighting on BufEnter.
+Default: 0 >
+    let g:OmniSharp_highlight_types = 1
 <
 
                                                            *'g:OmniSharp_host'*
@@ -99,15 +116,20 @@ Default: 1 >
     let g:OmniSharp_open_quickfix = 0
 <
 
-                                                      *'g:OmniSharp_server_ports'*
-Mapping of solution files and/or directories to ports. When auto-starting the OmniSharp server, it
-will bind to the port listed here if the solution file or directory matches. If there is no
-match, the port will be chosen at random.
-Default: {} >
-    let g:OmniSharp_server_ports = {
-      \ 'C:\path\to\myproject.sln': 2003,
-      \ 'C:\path\to\other\project': 2004,
-      \ }
+                                                    *'g:OmniSharp_selector_ui'*
+Use this option to specify a selector UI for choosing code actions and
+navigating to symbols. When no selector UI plugin is detected, or
+g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
+window will be used instead.
+Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
+none are. >
+    let g:OmniSharp_selector_ui = 'unite'
+    OR
+    let g:OmniSharp_selector_ui = 'ctrlp'
+    OR
+    let g:OmniSharp_selector_ui = 'fzf'
+    OR
+    let g:OmniSharp_selector_ui = ''
 <
 
                                                         *'g:OmniSharp_timeout'*
@@ -148,22 +170,6 @@ the |:OmniSharpDocumentation| command. Default: 0 >
                                                     *'g:syntastic_cs_checkers'*
 Use this option to enable syntastic integration >
     let g:syntastic_cs_checkers = ['code_checker']
-<
-
-                                                    *'g:OmniSharp_selector_ui'*
-Use this option to specify a selector UI for choosing code actions and
-navigating to symbols. When no selector UI plugin is detected, or
-g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
-window will be used instead.
-Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
-none are. >
-    let g:OmniSharp_selector_ui = 'unite'
-    OR
-    let g:OmniSharp_selector_ui = 'ctrlp'
-    OR
-    let g:OmniSharp_selector_ui = 'fzf'
-    OR
-    let g:OmniSharp_selector_ui = ''
 <
 
 ===============================================================================
@@ -271,7 +277,8 @@ none are. >
 
                                                      *:OmniSharpHighlightTypes*
 :OmniSharpHighlightTypes
-    Enable advanced type highlighting for current file
+    Highlight/refresh semantic type/interface/identifier highlighting for the
+    current file
 
                                                             *:OmniSharpInstall*
 :OmniSharpInstall

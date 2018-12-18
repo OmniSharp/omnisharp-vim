@@ -15,7 +15,7 @@ if !exists('g:omnicomplete_fetch_full_documentation')
   let g:omnicomplete_fetch_full_documentation = 0
 endif
 
-augroup plugin-OmniSharp
+augroup OmniSharp#FileType
   autocmd! * <buffer>
 
   autocmd BufLeave <buffer>
@@ -45,7 +45,7 @@ command! -buffer -bar OmniSharpFixUsings                           call OmniShar
 command! -buffer -bar OmniSharpGetCodeActions                      call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGotoDefinition                      call OmniSharp#GotoDefinition()
 command! -buffer -bar OmniSharpPreviewDefinition                   call OmniSharp#PreviewDefinition()
-command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#EnableTypeHighlighting()
+command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp                          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown                        call OmniSharp#NavigateDown()
 command! -buffer -bar OmniSharpOpenPythonLog                       call OmniSharp#OpenPythonLog()
@@ -62,13 +62,17 @@ command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniShar
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)
 
+highlight default link csUserType Type
+highlight default link csUserInterface Include
+highlight default link csUserIdentifier Identifier
+
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
 else
   let b:undo_ftplugin = ''
 endif
 let b:undo_ftplugin .= '
-\ execute "autocmd! plugin-OmniSharp * <buffer>"
+\ execute "autocmd! OmniSharp#FileType * <buffer>"
 \
 \|  unlet b:OmniSharp_ftplugin_loaded
 \|  delcommand OmniSharpCodeFormat

@@ -217,6 +217,9 @@ set previewheight=5
 " Tell ALE to use OmniSharp for linting C# files, and no other linters.
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
+" Fetch semantic type/interface/identifier names on BufEnter and highlight them
+let g:OmniSharp_highlight_types = 1
+
 augroup omnisharp_commands
     autocmd!
 
@@ -242,6 +245,8 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <buffer> <C-\> :OmniSharpSignatureHelp<CR>
     autocmd FileType cs inoremap <buffer> <C-\> <C-o>:OmniSharpSignatureHelp<CR>
 
+    " Refresh syntax highlighting for types and interfaces for the current buffer
+    autocmd FileType cs nnoremap <buffer> <Leader>th :OmniSharpHighlightTypes<CR>
 
     " Navigate up and down by method/property/field
     autocmd FileType cs nnoremap <buffer> <C-k> :OmniSharpNavigateUp<CR>
@@ -264,9 +269,6 @@ nnoremap <Leader>cf :OmniSharpCodeFormat<CR>
 " Start the omnisharp server for the current solution
 nnoremap <Leader>ss :OmniSharpStartServer<CR>
 nnoremap <Leader>sp :OmniSharpStopServer<CR>
-
-" Add syntax highlighting for types and interfaces
-nnoremap <Leader>th :OmniSharpHighlightTypes<CR>
 
 " Enable snippet completion
 " let g:OmniSharp_want_snippet=1

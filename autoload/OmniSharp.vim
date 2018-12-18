@@ -439,43 +439,50 @@ function! OmniSharp#RenameTo(renameto) abort
   endtry
 endfunction
 
-function! OmniSharp#EnableTypeHighlightingForBuffer() abort
-  highlight default link csUserType Type
-  if !empty(s:allUserTypes)
-    exec 'syn keyword csUserType ' . s:allUserTypes
-  endif
-  highlight default link csUserInterface Include
-  if !empty(s:allUserInterfaces)
-    exec 'syn keyword csUserInterface ' . s:allUserInterfaces
-  endif
-  highlight default link csUserAttribute Include
-  if !empty(s:allUserAttributes)
-    exec 'syn keyword csUserAttribute ' . s:allUserAttributes
-  endif
-endfunction
+function! OmniSharp#HighlightBuffer() abort
+  if !OmniSharp#IsServerRunning() | return | endif
 
-function! OmniSharp#EnableTypeHighlighting() abort
-  if !OmniSharp#IsServerRunning()
-    return
-  endif
-
-  let ret = OmniSharp#py#eval('lookupAllUserTypes()')
+  let ret = OmniSharp#py#eval('findHighlightTypes()')
   if OmniSharp#CheckPyError() | return | endif
-  let s:allUserTypes = ret.userTypes
-  let s:allUserInterfaces = ret.userInterfaces
-  let s:allUserAttributes = ret.userAttributes
 
-  let startBuf = bufnr('%')
-  " Perform highlighting for existing buffers
-  bufdo if &ft == 'cs' | call OmniSharp#EnableTypeHighlightingForBuffer() | endif
-  exec 'b '. startBuf
+  function! s:ClearHighlight(groupname)
+    try
+      execute 'syntax clear' a:groupname
+    catch | endtry
+  endfunction
 
-  call OmniSharp#EnableTypeHighlightingForBuffer()
+  function! s:ReadHighlightKeywords(spans) abort
+    let l:types = []
+    for span in a:spans
+      let line = getline(span['line'])
+      call add(l:types, line[span['start']-1 : span['end']-2])
+    endfor
+    return uniq(sort(l:types))
+  endfunction
 
-  augroup _omnisharp
-    autocmd!
-    autocmd BufRead *.cs call OmniSharp#EnableTypeHighlightingForBuffer()
-  augroup END
+  let b:OmniSharp_types = s:ReadHighlightKeywords(ret.bufferTypes)
+  let b:OmniSharp_interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
+  let b:OmniSharp_identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
+
+  if exists('b:OmniSharp_types')
+    silent call s:ClearHighlight('csUserType')
+    silent call s:ClearHighlight('csUserInterface')
+    silent call s:ClearHighlight('csUserIdentifier')
+  endif
+
+  if !empty(b:OmniSharp_types)
+    execute 'syntax keyword csUserType' join(b:OmniSharp_types)
+  endif
+  if !empty(b:OmniSharp_interfaces)
+    execute 'syntax keyword csUserInterface' join(b:OmniSharp_interfaces)
+  endif
+  if !empty(b:OmniSharp_identifiers)
+    execute 'syntax keyword csUserIdentifier' join(b:OmniSharp_identifiers)
+  endif
+
+  silent call s:ClearHighlight('csNewType')
+  syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
+  \ contains=csNew,csUserType,csUserIdentifier
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
@@ -550,7 +557,7 @@ function! OmniSharp#StartServerIfNotRunning(...) abort
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  return match(expand('<afile>:p'), 'fugitive:///' ) == 0
+  return &buftype ==# 'nofile' || match(expand('<afile>:p'), 'fugitive:///' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort
