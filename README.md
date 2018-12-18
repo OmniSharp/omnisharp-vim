@@ -1,4 +1,4 @@
-![OmniSharp](logo.png)
+![OmniSharp](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/logo-OmniSharp.png)
 
 ![Travis status](https://api.travis-ci.org/OmniSharp/omnisharp-vim.svg?branch=master)
 ![AppVeyor status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
