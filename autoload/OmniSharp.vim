@@ -457,7 +457,7 @@ function! OmniSharp#HighlightBuffer() abort
       let line = getline(span['line'])
       call add(l:types, line[span['start']-1 : span['end']-2])
     endfor
-    return sort(uniq(l:types))
+    return uniq(sort(l:types))
   endfunction
 
   let b:OmniSharp_types = s:ReadHighlightKeywords(ret.bufferTypes)
