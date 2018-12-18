@@ -44,6 +44,15 @@ let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', 'warning')
 " Default map of solution files and directories to ports
 let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', {})
 
+" Initialise automatic type and interface highlighting
+let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)
+if g:OmniSharp_highlight_types
+  augroup OmniSharp#HighlightTypes
+    autocmd!
+    autocmd BufEnter *.cs call OmniSharp#HighlightBuffer()
+  augroup END
+endif
+
 " Initialize OmniSharp as an asyncomplete source
 autocmd User asyncomplete_setup call asyncomplete#register_source({
 \   'name': 'OmniSharp',

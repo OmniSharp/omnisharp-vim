@@ -439,66 +439,50 @@ function! OmniSharp#RenameTo(renameto) abort
   endtry
 endfunction
 
-function! OmniSharp#EnableTypeHighlightingForBuffer(refresh) abort
-  if exists('b:types') && !a:refresh | return | endif
+function! OmniSharp#HighlightBuffer() abort
   if !OmniSharp#IsServerRunning() | return | endif
 
   let ret = OmniSharp#py#eval('findHighlightTypes()')
   if OmniSharp#CheckPyError() | return | endif
 
-  let b:types = s:ReadHighlightKeywords(ret.bufferTypes)
-  let b:interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
-  let b:identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
+  function! s:ClearHighlight(groupname)
+    try
+      execute 'syntax clear' a:groupname
+    catch | endtry
+  endfunction
 
-  if exists('b:types')
+  function! s:ReadHighlightKeywords(spans) abort
+    let l:types = []
+    for span in a:spans
+      let line = getline(span['line'])
+      call add(l:types, line[span['start']-1 : span['end']-2])
+    endfor
+    return sort(uniq(l:types))
+  endfunction
+
+  let b:OmniSharp_types = s:ReadHighlightKeywords(ret.bufferTypes)
+  let b:OmniSharp_interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
+  let b:OmniSharp_identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
+
+  if exists('b:OmniSharp_types')
     silent call s:ClearHighlight('csUserType')
     silent call s:ClearHighlight('csUserInterface')
     silent call s:ClearHighlight('csUserIdentifier')
   endif
 
-  if !empty(b:types)
-    execute 'syntax keyword csUserType' join(b:types)
+  if !empty(b:OmniSharp_types)
+    execute 'syntax keyword csUserType' join(b:OmniSharp_types)
   endif
-  if !empty(b:interfaces)
-    execute 'syntax keyword csUserInterface' join(b:interfaces)
+  if !empty(b:OmniSharp_interfaces)
+    execute 'syntax keyword csUserInterface' join(b:OmniSharp_interfaces)
   endif
-  if !empty(b:identifiers)
-    execute 'syntax keyword csUserIdentifier' join(b:identifiers)
+  if !empty(b:OmniSharp_identifiers)
+    execute 'syntax keyword csUserIdentifier' join(b:OmniSharp_identifiers)
   endif
 
-  " TODO: Remove this line once csUserType and csUserIdentifier is contained in
-  " the standard vim runtime files
   silent call s:ClearHighlight('csNewType')
-  syntax region csNewType
-  \ start="@\@1<!\<new\>"hs=s+4
-  \ end="[;\n{(<\[]"me=e-1
+  syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
   \ contains=csNew,csUserType,csUserIdentifier
-endfunction
-
-" Wrap this functionality in a function so it can be called with :silent
-function! s:ClearHighlight(groupname)
-  try
-    execute 'syntax clear' a:groupname
-  catch
-  endtry
-endfunction
-
-function! s:ReadHighlightKeywords(spans) abort
-  let l:types = []
-  for span in a:spans
-    let line = getline(span['line'])
-    call add(l:types, line[span['start']-1 : span['end']-2])
-  endfor
-  return sort(uniq(l:types))
-endfunction
-
-function! OmniSharp#EnableTypeHighlighting() abort
-  call OmniSharp#EnableTypeHighlightingForBuffer(0)
-
-  augroup OmniSharp#HighlightTypes
-    autocmd!
-    autocmd BufEnter *.cs call OmniSharp#EnableTypeHighlightingForBuffer(0)
-  augroup END
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
@@ -573,7 +557,7 @@ function! OmniSharp#StartServerIfNotRunning(...) abort
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  return match(expand('<afile>:p'), 'fugitive:///' ) == 0
+  return &buftype ==# 'nofile' || match(expand('<afile>:p'), 'fugitive:///' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort
