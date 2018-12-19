@@ -230,6 +230,12 @@ augroup omnisharp_commands
     " Show type information automatically when the cursor stops moving
     autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
 
+    " Update the highlighting whenever leaving insert mode
+    autocmd InsertLeave *.cs call OmniSharp#HighlightBuffer()
+
+    " Alternatively, use a mapping to refresh highlighting for the current buffer
+    autocmd FileType cs nnoremap <buffer> <Leader>th :OmniSharpHighlightTypes<CR>
+
     " The following commands are contextual, based on the cursor position.
     autocmd FileType cs nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>
     autocmd FileType cs nnoremap <buffer> <Leader>fi :OmniSharpFindImplementations<CR>
@@ -244,9 +250,6 @@ augroup omnisharp_commands
     autocmd FileType cs nnoremap <buffer> <Leader>dc :OmniSharpDocumentation<CR>
     autocmd FileType cs nnoremap <buffer> <C-\> :OmniSharpSignatureHelp<CR>
     autocmd FileType cs inoremap <buffer> <C-\> <C-o>:OmniSharpSignatureHelp<CR>
-
-    " Refresh syntax highlighting for types and interfaces for the current buffer
-    autocmd FileType cs nnoremap <buffer> <Leader>th :OmniSharpHighlightTypes<CR>
 
     " Navigate up and down by method/property/field
     autocmd FileType cs nnoremap <buffer> <C-k> :OmniSharpNavigateUp<CR>
