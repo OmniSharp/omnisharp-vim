@@ -114,20 +114,19 @@ function! OmniSharp#FindImplementations() abort
   let qf_taglist = OmniSharp#py#eval('findImplementations()')
   if OmniSharp#CheckPyError() | return | endif
 
-  if len(qf_taglist) == 0
+  let numImpls = len(qf_taglist)
+  if numImpls == 0
     echo 'No implementations found'
+  else
+    if numImpls == 1
+      let usage = qf_taglist[0]
+      call OmniSharp#JumpToLocation(usage.filename, usage.lnum, usage.col, 0)
+    else " numImpls > 1
+      call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
+    endif
   endif
 
-  if len(qf_taglist) == 1
-    let usage = qf_taglist[0]
-    call OmniSharp#JumpToLocation(usage.filename, usage.lnum, usage.col, 0)
-  endif
-
-  if len(qf_taglist) > 1
-    call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
-  endif
-
-  return len(qf_taglist)
+  return numImpls
 endfunction
 
 function! OmniSharp#FindMembers() abort
@@ -174,28 +173,59 @@ function! OmniSharp#NavigateDown() abort
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
-  call OmniSharp#py#eval('gotoDefinition()')
-  call OmniSharp#CheckPyError()
+  let loc = OmniSharp#py#eval('gotoDefinition()')
+  if OmniSharp#CheckPyError() | return | endif
+  if type(loc) != type({}) " Check whether a dict was returned
+    echo 'Not found'
+  else
+    call OmniSharp#JumpToLocation(loc.filename, loc.lnum, loc.col, 0)
+  endif
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
+  let loc = OmniSharp#py#eval('gotoDefinition()')
+  if OmniSharp#CheckPyError() | return | endif
+  if type(loc) != type({}) " Check whether a dict was returned
+    echo 'Not found'
+  else
+    call s:openLocationInPreview(loc)
+    echo fnamemodify(loc.filename, ':.')
+  endif
+endfunction
+
+function! OmniSharp#PreviewImplementation() abort
+  let locations = OmniSharp#py#eval('findImplementations()')
+  if OmniSharp#CheckPyError() | return | endif
+  let numImplementations = len(locations)
+  if numImplementations == 0
+    echo 'No implementations found'
+  else
+    call s:openLocationInPreview(locations[0])
+    let fname = fnamemodify(locations[0].filename, ':.')
+    if numImplementations == 1
+      echo fname
+    else
+      echo fname . ': Implementation 1 of ' . numImplementations
+    endif
+  endif
+endfunction
+
+function! s:openLocationInPreview(loc) abort
   let lazyredraw_bak = &lazyredraw
   let &lazyredraw = 1
-
   " Due to cursor jumping bug, opening preview at current file is not as
   " simple as `pedit %`:
   " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
   let winview = winsaveview()
-  let filepath = expand('%')
-  silent call s:writeToPreview('')
-  wincmd P
-  exec 'silent edit '. filepath
-  " Jump cursor back to symbol.
-  call winrestview(winview)
 
-  call OmniSharp#GotoDefinition()
+  execute 'silent pedit' a:loc.filename
+  wincmd P
+  call cursor(a:loc.lnum, a:loc.col)
+  normal! zt
   wincmd p
 
+  " Jump cursor back to symbol.
+  call winrestview(winview)
   let &lazyredraw = lazyredraw_bak
 endfunction
 

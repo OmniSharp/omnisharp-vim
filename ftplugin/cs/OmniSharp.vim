@@ -45,6 +45,7 @@ command! -buffer -bar OmniSharpFixUsings                           call OmniShar
 command! -buffer -bar OmniSharpGetCodeActions                      call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGotoDefinition                      call OmniSharp#GotoDefinition()
 command! -buffer -bar OmniSharpPreviewDefinition                   call OmniSharp#PreviewDefinition()
+command! -buffer -bar OmniSharpPreviewImplementation               call OmniSharp#PreviewImplementation()
 command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp                          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown                        call OmniSharp#NavigateDown()
