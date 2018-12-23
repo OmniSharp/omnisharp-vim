@@ -184,6 +184,16 @@ Use this option to enable syntastic integration >
     Fills quicklist with implementations of interface/class under the cursor
     NOTE: Navigates to implementation if only one is found
 
+                                                  *:OmniSharpPreviewDefinition*
+:OmniSharpPreviewDefinition
+    Displays the definition of the symbol under the cursor in the preview window
+
+                                             *:OmniSharpPreviewImplementations*
+:OmniSharpPreviewImplementations
+    Displays the implementation of the interface/class under the cursor in the
+    preview window. If more than one implementation exists, the number of
+    implementations is echoed.
+
                                                          *:OmniSharpFindSymbol*
 :OmniSharpFindSymbol
     Fuzzy-search through symbols
