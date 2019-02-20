@@ -927,7 +927,7 @@ function! s:set_quickfix(list, title)
     call setqflist(a:list)
   endif
   if g:OmniSharp_open_quickfix
-    botright cwindow 4
+    botright cwindow
   endif
 endfunction
 
