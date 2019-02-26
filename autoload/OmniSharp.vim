@@ -481,34 +481,49 @@ function! OmniSharp#HighlightBuffer() abort
     catch | endtry
   endfunction
 
-  function! s:ReadHighlightKeywords(spans) abort
+  let b:OmniSharp_highlight_matches = get(b:, 'OmniSharp_highlight_matches', [])
+
+  function! s:Highlight(spans, name, group) abort
+    silent call s:ClearHighlight(a:group)
     let l:types = []
     for span in a:spans
       let line = getline(span['line'])
       call add(l:types, line[span['start']-1 : span['end']-2])
     endfor
-    return uniq(sort(l:types))
+    if empty(l:types)
+      return
+    endif
+
+    " Cannot use vim syntax options as keywords, so remove types with these
+    " names. See :h :syn-keyword /Note
+    let l:opts = split('cchar conceal concealends contained containedin ' .
+    \ 'contains display extend fold nextgroup oneline skipempty skipnl ' .
+    \ 'skipwhite transparent')
+
+    " Create a :syn-match for each type with an option name.
+    let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
+    for l:tomatch in l:illegal
+      call add(b:OmniSharp_highlight_matches,
+      \ matchadd(a:group, '\<' . l:tomatch . '\>'))
+    endfor
+
+    " sort(), uniq() and filter() all operate on the list 'in place'
+    call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
+    call uniq(sort(l:types))
+
+    execute 'syntax keyword' a:group join(l:types)
   endfunction
 
-  let b:OmniSharp_types = s:ReadHighlightKeywords(ret.bufferTypes)
-  let b:OmniSharp_interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
-  let b:OmniSharp_identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
+  " Clear any matches - highlights with :syn keyword {option} names which cannot
+  " be created with :syn keyword
+  for l:matchid in b:OmniSharp_highlight_matches
+    call matchdelete(l:matchid)
+  endfor
+  let b:OmniSharp_highlight_matches = []
 
-  if exists('b:OmniSharp_types')
-    silent call s:ClearHighlight('csUserType')
-    silent call s:ClearHighlight('csUserInterface')
-    silent call s:ClearHighlight('csUserIdentifier')
-  endif
-
-  if !empty(b:OmniSharp_types)
-    execute 'syntax keyword csUserType' join(b:OmniSharp_types)
-  endif
-  if !empty(b:OmniSharp_interfaces)
-    execute 'syntax keyword csUserInterface' join(b:OmniSharp_interfaces)
-  endif
-  if !empty(b:OmniSharp_identifiers)
-    execute 'syntax keyword csUserIdentifier' join(b:OmniSharp_identifiers)
-  endif
+  call s:Highlight(ret.bufferTypes, 'types', 'csUserType')
+  call s:Highlight(ret.bufferInterfaces, 'interfaces', 'csUserInterface')
+  call s:Highlight(ret.bufferIdentifiers, 'identifiers', 'csUserIdentifier')
 
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
