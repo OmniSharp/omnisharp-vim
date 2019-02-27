@@ -600,7 +600,7 @@ function! OmniSharp#StartServerIfNotRunning(...) abort
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  return &buftype ==# 'nofile' || match(expand('%:p'), 'fugitive:///' ) == 0
+  return &buftype ==# 'nofile' || match(expand('%:p'), '\vfugitive:(///|\\\\)' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort
