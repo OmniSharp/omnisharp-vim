@@ -482,14 +482,14 @@ function! OmniSharp#HighlightBuffer() abort
     catch | endtry
   endfunction
 
-  let b:OmniSharp_highlight_matches = get(b:, 'OmniSharp_highlight_matches', [])
+  let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
 
   function! s:Highlight(types, group) abort
     silent call s:ClearHighlight(a:group)
     if empty(a:types)
       return
     endif
-    let l:types = a:types
+    let l:types = uniq(sort(a:types))
 
     " Cannot use vim syntax options as keywords, so remove types with these
     " names. See :h :syn-keyword /Note
@@ -499,14 +499,13 @@ function! OmniSharp#HighlightBuffer() abort
 
     " Create a :syn-match for each type with an option name.
     let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
-    for l:tomatch in l:illegal
-      call add(b:OmniSharp_highlight_matches,
-      \ matchadd(a:group, '\<' . l:tomatch . '\>'))
+    for l:ill in l:illegal
+      " call add(b:OmniSharp_hl_matches, matchadd(a:group, '\<' . l:ill . '\>'))
+      let matchid = matchadd(a:group, '\<' . l:ill . '\>')
+      call add(b:OmniSharp_hl_matches, matchid)
     endfor
 
-    " sort(), uniq() and filter() all operate on the list 'in place'
     call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
-    call uniq(sort(l:types))
 
     if len(l:types)
       execute 'syntax keyword' a:group join(l:types)
@@ -515,10 +514,12 @@ function! OmniSharp#HighlightBuffer() abort
 
   " Clear any matches - highlights with :syn keyword {option} names which cannot
   " be created with :syn keyword
-  for l:matchid in b:OmniSharp_highlight_matches
-    call matchdelete(l:matchid)
+  for l:matchid in b:OmniSharp_hl_matches
+    try
+      call matchdelete(l:matchid)
+    catch | endtry
   endfor
-  let b:OmniSharp_highlight_matches = []
+  let b:OmniSharp_hl_matches = []
 
   call s:Highlight(ret.bufferIdentifiers, 'csUserIdentifier')
   call s:Highlight(ret.bufferInterfaces, 'csUserInterface')
