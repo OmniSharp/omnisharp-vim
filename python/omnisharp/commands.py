@@ -208,6 +208,8 @@ def findSymbols(filter=''):
 
 @vimcmd
 def findHighlightTypes():
+    # Original buffer lines
+    lines = ctx.buffer.split('\r\n')
     response = getResponse(ctx, '/highlight', json=True)
     highlights = response.get('Highlights', [])
     bufIdentifiers = []
@@ -220,16 +222,17 @@ def findHighlightTypes():
             'start': hi['StartColumn'],
             'end': hi['EndColumn']
         }
+        keyword = lines[span['line']-1][span['start']-1:span['end']-1]
         if hi['Kind'] in ['class name', 'enum name', 'namespace name',
                           'static symbol', 'struct name']:
-            bufTypes.append(span)
+            bufTypes.append(keyword)
         elif hi['Kind'] in ['interface name']:
-            bufInterfaces.append(span)
+            bufInterfaces.append(keyword)
         elif hi['Kind'] in ['field name', 'local name', 'property name',
                             'identifier', 'parameter name']:
-            bufIdentifiers.append(span)
+            bufIdentifiers.append(keyword)
         elif hi['Kind'] in ['method name']:
-            bufMethods.append(span)
+            bufMethods.append(keyword)
     return {
         'bufferIdentifiers': bufIdentifiers,
         'bufferInterfaces': bufInterfaces,

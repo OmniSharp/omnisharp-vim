@@ -470,6 +470,7 @@ function! OmniSharp#RenameTo(renameto) abort
 endfunction
 
 function! OmniSharp#HighlightBuffer() abort
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if !OmniSharp#IsServerRunning() | return | endif
 
   let ret = OmniSharp#py#eval('findHighlightTypes()')
@@ -483,16 +484,12 @@ function! OmniSharp#HighlightBuffer() abort
 
   let b:OmniSharp_highlight_matches = get(b:, 'OmniSharp_highlight_matches', [])
 
-  function! s:Highlight(spans, group) abort
+  function! s:Highlight(types, group) abort
     silent call s:ClearHighlight(a:group)
-    let l:types = []
-    for span in a:spans
-      let line = getline(span['line'])
-      call add(l:types, line[span['start']-1 : span['end']-2])
-    endfor
-    if empty(l:types)
+    if empty(a:types)
       return
     endif
+    let l:types = a:types
 
     " Cannot use vim syntax options as keywords, so remove types with these
     " names. See :h :syn-keyword /Note
@@ -511,7 +508,9 @@ function! OmniSharp#HighlightBuffer() abort
     call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
     call uniq(sort(l:types))
 
-    execute 'syntax keyword' a:group join(l:types)
+    if len(l:types)
+      execute 'syntax keyword' a:group join(l:types)
+    endif
   endfunction
 
   " Clear any matches - highlights with :syn keyword {option} names which cannot
@@ -532,9 +531,8 @@ function! OmniSharp#HighlightBuffer() abort
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck()
-    return
-  endif
+  if !OmniSharp#IsServerRunning() | return | endif
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if OmniSharp#BufferHasChanged() == 1
     call OmniSharp#py#eval('updateBuffer()')
     call OmniSharp#CheckPyError()
@@ -594,16 +592,14 @@ function! OmniSharp#IsServerRunning(...) abort
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
-  if OmniSharp#FugitiveCheck()
-    return
-  endif
+  if OmniSharp#FugitiveCheck() | return | endif
 
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  return &buftype ==# 'nofile' || match(expand('<afile>:p'), 'fugitive:///' ) == 0
+  return &buftype ==# 'nofile' || match(expand('%:p'), 'fugitive:///' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort
