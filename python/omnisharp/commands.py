@@ -223,15 +223,16 @@ def findHighlightTypes():
             'end': hi['EndColumn']
         }
         keyword = lines[span['line']-1][span['start']-1:span['end']-1]
-        if hi['Kind'] in ['class name', 'enum name', 'namespace name',
-                          'static symbol', 'struct name']:
+        if hi['Kind'] in ['class name', 'constant name', 'enum name',
+                          'enum member name', 'namespace name', 'static symbol',
+                          'struct name']:
             bufTypes.append(keyword)
         elif hi['Kind'] in ['interface name']:
             bufInterfaces.append(keyword)
         elif hi['Kind'] in ['field name', 'local name', 'property name',
                             'identifier', 'parameter name']:
             bufIdentifiers.append(keyword)
-        elif hi['Kind'] in ['method name']:
+        elif hi['Kind'] in ['extension method name', 'method name']:
             bufMethods.append(keyword)
     return {
         'bufferIdentifiers': bufIdentifiers,
