@@ -210,26 +210,31 @@ def findSymbols(filter=''):
 def findHighlightTypes():
     response = getResponse(ctx, '/highlight', json=True)
     highlights = response.get('Highlights', [])
-    bufTypes = []
-    bufInterfaces = []
     bufIdentifiers = []
+    bufInterfaces = []
+    bufMethods = []
+    bufTypes = []
     for hi in highlights:
         span = {
             'line': hi['StartLine'],
             'start': hi['StartColumn'],
             'end': hi['EndColumn']
         }
-        # 'class name', 'enum name', 'interface name'
-        if hi['Kind'] in ['class name', 'enum name', 'struct name']:
+        if hi['Kind'] in ['class name', 'enum name', 'namespace name',
+                          'static symbol', 'struct name']:
             bufTypes.append(span)
-        elif hi['Kind'] == 'interface name':
+        elif hi['Kind'] in ['interface name']:
             bufInterfaces.append(span)
-        elif hi['Kind'] == 'identifier':
+        elif hi['Kind'] in ['field name', 'local name', 'property name',
+                            'identifier', 'parameter name']:
             bufIdentifiers.append(span)
+        elif hi['Kind'] in ['method name']:
+            bufMethods.append(span)
     return {
-        'bufferTypes': bufTypes,
+        'bufferIdentifiers': bufIdentifiers,
         'bufferInterfaces': bufInterfaces,
-        'bufferIdentifiers': bufIdentifiers
+        'bufferMethods': bufMethods,
+        'bufferTypes': bufTypes
     }
 
 

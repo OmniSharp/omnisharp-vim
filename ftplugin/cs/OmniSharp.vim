@@ -63,9 +63,10 @@ command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniShar
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)
 
-highlight default link csUserType Type
-highlight default link csUserInterface Include
 highlight default link csUserIdentifier Identifier
+highlight default link csUserInterface Include
+highlight default link csUserMethod Function
+highlight default link csUserType Type
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '

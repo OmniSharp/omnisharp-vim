@@ -483,7 +483,7 @@ function! OmniSharp#HighlightBuffer() abort
 
   let b:OmniSharp_highlight_matches = get(b:, 'OmniSharp_highlight_matches', [])
 
-  function! s:Highlight(spans, name, group) abort
+  function! s:Highlight(spans, group) abort
     silent call s:ClearHighlight(a:group)
     let l:types = []
     for span in a:spans
@@ -521,9 +521,10 @@ function! OmniSharp#HighlightBuffer() abort
   endfor
   let b:OmniSharp_highlight_matches = []
 
-  call s:Highlight(ret.bufferTypes, 'types', 'csUserType')
-  call s:Highlight(ret.bufferInterfaces, 'interfaces', 'csUserInterface')
-  call s:Highlight(ret.bufferIdentifiers, 'identifiers', 'csUserIdentifier')
+  call s:Highlight(ret.bufferIdentifiers, 'csUserIdentifier')
+  call s:Highlight(ret.bufferInterfaces, 'csUserInterface')
+  call s:Highlight(ret.bufferMethods, 'csUserMethod')
+  call s:Highlight(ret.bufferTypes, 'csUserType')
 
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
