@@ -521,10 +521,10 @@ function! OmniSharp#HighlightBuffer() abort
   endfor
   let b:OmniSharp_hl_matches = []
 
-  call s:Highlight(ret.bufferIdentifiers, 'csUserIdentifier')
-  call s:Highlight(ret.bufferInterfaces, 'csUserInterface')
-  call s:Highlight(ret.bufferMethods, 'csUserMethod')
-  call s:Highlight(ret.bufferTypes, 'csUserType')
+  call s:Highlight(ret.identifiers, 'csUserIdentifier')
+  call s:Highlight(ret.interfaces, 'csUserInterface')
+  call s:Highlight(ret.methods, 'csUserMethod')
+  call s:Highlight(ret.types, 'csUserType')
 
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
