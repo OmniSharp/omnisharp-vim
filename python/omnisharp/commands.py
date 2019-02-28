@@ -222,7 +222,12 @@ def findHighlightTypes():
 
     types = []
     for hi in highlights:
-        line = bufferLines[hi['StartLine'] - 1]
+        lnum = hi['StartLine'] - 1
+        if lnum >= len(bufferLines):
+            # An error has occurred with invalid line endings - perhaps a
+            # combination of unix and dos line endings?
+            return { 'error': 'Invalid buffer - check line endings' }
+        line = bufferLines[lnum]
         types.append({
             'kind': hi['Kind'],
             'name': line[hi['StartColumn'] - 1:hi['EndColumn'] - 1]

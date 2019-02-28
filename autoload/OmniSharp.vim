@@ -476,6 +476,11 @@ function! OmniSharp#HighlightBuffer() abort
   let ret = OmniSharp#py#eval('findHighlightTypes()')
   if OmniSharp#CheckPyError() | return | endif
 
+  if has_key(ret, 'error')
+    echohl WarningMsg | echom ret.error | echohl None
+    return
+  endif
+
   function! s:ClearHighlight(groupname)
     try
       execute 'syntax clear' a:groupname
