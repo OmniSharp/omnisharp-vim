@@ -226,7 +226,7 @@ def findHighlightTypes():
         if lnum >= len(bufferLines):
             # An error has occurred with invalid line endings - perhaps a
             # combination of unix and dos line endings?
-            return { 'error': 'Invalid buffer - check line endings' }
+            return {'error': 'Invalid buffer - check line endings'}
         line = bufferLines[lnum]
         types.append({
             'kind': hi['Kind'],
