@@ -470,10 +470,16 @@ function! OmniSharp#RenameTo(renameto) abort
 endfunction
 
 function! OmniSharp#HighlightBuffer() abort
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if !OmniSharp#IsServerRunning() | return | endif
 
   let ret = OmniSharp#py#eval('findHighlightTypes()')
   if OmniSharp#CheckPyError() | return | endif
+
+  if has_key(ret, 'error')
+    echohl WarningMsg | echom ret.error | echohl None
+    return
+  endif
 
   function! s:ClearHighlight(groupname)
     try
@@ -481,34 +487,49 @@ function! OmniSharp#HighlightBuffer() abort
     catch | endtry
   endfunction
 
-  function! s:ReadHighlightKeywords(spans) abort
-    let l:types = []
-    for span in a:spans
-      let line = getline(span['line'])
-      call add(l:types, line[span['start']-1 : span['end']-2])
+  let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
+
+  function! s:Highlight(types, group) abort
+    silent call s:ClearHighlight(a:group)
+    if empty(a:types)
+      return
+    endif
+    let l:types = uniq(sort(a:types))
+
+    " Cannot use vim syntax options as keywords, so remove types with these
+    " names. See :h :syn-keyword /Note
+    let l:opts = split('cchar conceal concealends contained containedin ' .
+    \ 'contains display extend fold nextgroup oneline skipempty skipnl ' .
+    \ 'skipwhite transparent')
+
+    " Create a :syn-match for each type with an option name.
+    let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
+    for l:ill in l:illegal
+      " call add(b:OmniSharp_hl_matches, matchadd(a:group, '\<' . l:ill . '\>'))
+      let matchid = matchadd(a:group, '\<' . l:ill . '\>')
+      call add(b:OmniSharp_hl_matches, matchid)
     endfor
-    return uniq(sort(l:types))
+
+    call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
+
+    if len(l:types)
+      execute 'syntax keyword' a:group join(l:types)
+    endif
   endfunction
 
-  let b:OmniSharp_types = s:ReadHighlightKeywords(ret.bufferTypes)
-  let b:OmniSharp_interfaces = s:ReadHighlightKeywords(ret.bufferInterfaces)
-  let b:OmniSharp_identifiers = s:ReadHighlightKeywords(ret.bufferIdentifiers)
+  " Clear any matches - highlights with :syn keyword {option} names which cannot
+  " be created with :syn keyword
+  for l:matchid in b:OmniSharp_hl_matches
+    try
+      call matchdelete(l:matchid)
+    catch | endtry
+  endfor
+  let b:OmniSharp_hl_matches = []
 
-  if exists('b:OmniSharp_types')
-    silent call s:ClearHighlight('csUserType')
-    silent call s:ClearHighlight('csUserInterface')
-    silent call s:ClearHighlight('csUserIdentifier')
-  endif
-
-  if !empty(b:OmniSharp_types)
-    execute 'syntax keyword csUserType' join(b:OmniSharp_types)
-  endif
-  if !empty(b:OmniSharp_interfaces)
-    execute 'syntax keyword csUserInterface' join(b:OmniSharp_interfaces)
-  endif
-  if !empty(b:OmniSharp_identifiers)
-    execute 'syntax keyword csUserIdentifier' join(b:OmniSharp_identifiers)
-  endif
+  call s:Highlight(ret.identifiers, 'csUserIdentifier')
+  call s:Highlight(ret.interfaces, 'csUserInterface')
+  call s:Highlight(ret.methods, 'csUserMethod')
+  call s:Highlight(ret.types, 'csUserType')
 
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
@@ -516,9 +537,8 @@ function! OmniSharp#HighlightBuffer() abort
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck()
-    return
-  endif
+  if !OmniSharp#IsServerRunning() | return | endif
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if OmniSharp#BufferHasChanged() == 1
     call OmniSharp#py#eval('updateBuffer()')
     call OmniSharp#CheckPyError()
@@ -578,16 +598,14 @@ function! OmniSharp#IsServerRunning(...) abort
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
-  if OmniSharp#FugitiveCheck()
-    return
-  endif
+  if OmniSharp#FugitiveCheck() | return | endif
 
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  return &buftype ==# 'nofile' || match(expand('<afile>:p'), 'fugitive:///' ) == 0
+  return &buftype ==# 'nofile' || match(expand('%:p'), '\vfugitive:(///|\\\\)' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort

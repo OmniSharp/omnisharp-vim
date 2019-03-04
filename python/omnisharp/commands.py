@@ -208,28 +208,36 @@ def findSymbols(filter=''):
 
 @vimcmd
 def findHighlightTypes():
+    # Original buffer lines
+    bufferLines = ctx.buffer.split('\r\n')
     response = getResponse(ctx, '/highlight', json=True)
     highlights = response.get('Highlights', [])
-    bufTypes = []
-    bufInterfaces = []
-    bufIdentifiers = []
+
+    identifierKinds = ['constant name', 'enum member name', 'field name',
+                       'identifier', 'local name', 'parameter name',
+                       'property name', 'static symbol']
+    interfaceKinds = ['interface name']
+    methodKinds = ['extension method name', 'method name']
+    typeKinds = ['class name', 'enum name', 'namespace name', 'struct name']
+
+    types = []
     for hi in highlights:
-        span = {
-            'line': hi['StartLine'],
-            'start': hi['StartColumn'],
-            'end': hi['EndColumn']
-        }
-        # 'class name', 'enum name', 'interface name'
-        if hi['Kind'] in ['class name', 'enum name', 'struct name']:
-            bufTypes.append(span)
-        elif hi['Kind'] == 'interface name':
-            bufInterfaces.append(span)
-        elif hi['Kind'] == 'identifier':
-            bufIdentifiers.append(span)
+        lnum = hi['StartLine'] - 1
+        if lnum >= len(bufferLines):
+            # An error has occurred with invalid line endings - perhaps a
+            # combination of unix and dos line endings?
+            return {'error': 'Invalid buffer - check line endings'}
+        line = bufferLines[lnum]
+        types.append({
+            'kind': hi['Kind'],
+            'name': line[hi['StartColumn'] - 1:hi['EndColumn'] - 1]
+        })
+
     return {
-        'bufferTypes': bufTypes,
-        'bufferInterfaces': bufInterfaces,
-        'bufferIdentifiers': bufIdentifiers
+        'identifiers': [t['name'] for t in types if t['kind'] in identifierKinds],
+        'interfaces': [t['name'] for t in types if t['kind'] in interfaceKinds],
+        'methods': [t['name'] for t in types if t['kind'] in methodKinds],
+        'types': [t['name'] for t in types if t['kind'] in typeKinds]
     }
 
 
