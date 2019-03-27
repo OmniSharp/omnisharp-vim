@@ -30,7 +30,10 @@ def setBuffer(text):
     lines = text.splitlines()
     lines = [line.encode('utf-8') for line in lines]
     vim.current.buffer[:] = lines
-    vim.current.window.cursor = pos
+    try:
+        vim.current.window.cursor = pos
+    except vim.error:
+        vim.current.window.cursor = (len(vim.current.buffer), pos[1])
     return True
 
 
@@ -119,7 +122,9 @@ def runCodeAction(mode, action):
     changes = response.get('Changes')
     if changes:
         bufname = vim.current.buffer.name
+        bufnum = vim.current.buffer.number
         pos = vim.current.window.cursor
+        vim.command('let l:hidden_bak = &hidden | set hidden')
         for changeDefinition in changes:
             filename = formatPathForClient(ctx,
                                            changeDefinition['FileName'])
@@ -127,7 +132,10 @@ def runCodeAction(mode, action):
             if not setBuffer(changeDefinition.get('Buffer')):
                 for change in changeDefinition.get('Changes', []):
                     setBuffer(change.get('NewText'))
+            if vim.current.buffer.number != bufnum:
+                vim.command('silent write | silent edit')
         openFile(bufname, pos[0], pos[1], 1)
+        vim.command('let &hidden = l:hidden_bak | unlet l:hidden_bak')
         return True
     return False
 
