@@ -174,11 +174,12 @@ endfunction
 
 function! OmniSharp#GotoDefinition() abort
   let loc = OmniSharp#py#eval('gotoDefinition()')
-  if OmniSharp#CheckPyError() | return | endif
+  if OmniSharp#CheckPyError() | return 0 | endif
   if type(loc) != type({}) " Check whether a dict was returned
     echo 'Not found'
+    return 0
   else
-    call OmniSharp#JumpToLocation(loc.filename, loc.lnum, loc.col, 0)
+    return OmniSharp#JumpToLocation(loc.filename, loc.lnum, loc.col, 0)
   endif
 endfunction
 
