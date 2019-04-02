@@ -64,11 +64,17 @@ Install the vim plugin using your preferred plugin manager:
 ### Server
 OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use. *Note:* Requires [`curl`](https://curl.haxx.se/) or [`wget`](https://www.gnu.org/software/wget/) on Linux, macOS, Cygwin and WSL.
 
-**NOTE:** The latest versions of the HTTP OmniSharp-Roslyn server are not accepting HTTP connections on Linux/Mac systems - see [OmniSharp-Roslyn#1274](https://github.com/OmniSharp/omnisharp-roslyn/issues/1274). Until this is resolved, OmniSharp-vim installs the latest working version of OmniSharp-Roslyn, `1.32.1`. To override this behaviour and install a particular release, use the `:OmniSharpInstall` command like this:
+Running the command `:OmniSharpInstall` in vim will also install/upgrade to the latest OmniSharp-roslyn release.
+To install a particular release, including pre-releases, specify the version number like this:
 
 ```vim
-:OmniSharpInstall 'v1.32.5'
+:OmniSharpInstall 'v1.32.13'
 ```
+
+NOTE: There have been OmniSharp-roslyn HTTP connection problems on Linux/Mac systems since `v1.32.1` - see [OmniSharp-Roslyn#1274](https://github.com/OmniSharp/omnisharp-roslyn/issues/1274).
+These have now been resolved with OmniSharp-roslyn pre-release version `v1.32.13`.
+The installer therefore installs this pre-release version by default - once a full release with working HTTP connections is available, OmniSharp-vim will revert to the standard behaviour of installing the latest OmniSharp-roslyn release by default.
+If you find that you have problems with this pre-release version, try running `:OmniSharpInstall 'v1.32.1'` for the latest full release that is known to work well with OmniSharp-vim.
 
 #### Manual installation
 To install the server manually, follow these steps:
