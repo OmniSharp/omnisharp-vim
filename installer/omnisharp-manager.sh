@@ -132,4 +132,6 @@ if [ -n "$mono" ] && [ $mono -eq 1 ]; then
     chmod +x $(find "$location" -type f)
 fi
 
+echo "OmniSharp $version" > "$location/OmniSharpInstall-version.txt"
+
 exit 0
