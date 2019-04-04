@@ -70,6 +70,7 @@ else
 #Check for file to confirm download and unzip were successful
 if(Test-Path -path "$($location)\OmniSharp.Roslyn.dll")
 {
+    Set-Content -Path "$($location)\OmniSharpInstall-version.txt" -Value "OmniSharp $($version)"
     exit 0
 }
 else
