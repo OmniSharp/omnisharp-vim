@@ -31,9 +31,6 @@ get_latest_version() {
 
 location="$HOME/.omnisharp/"
 
-# TODO: Remove this default after the next full OmniSharp-roslyn release, after v1.32.13
-version='v1.32.13'
-
 while getopts v:l:HMuh o "$@"
 do
     case "$o" in

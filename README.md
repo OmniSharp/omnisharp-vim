@@ -71,11 +71,6 @@ To install a particular release, including pre-releases, specify the version num
 :OmniSharpInstall 'v1.32.13'
 ```
 
-NOTE: There have been OmniSharp-roslyn HTTP connection problems on Linux/Mac systems since `v1.32.1` - see [OmniSharp-Roslyn#1274](https://github.com/OmniSharp/omnisharp-roslyn/issues/1274).
-These have now been resolved with OmniSharp-roslyn pre-release version `v1.32.13`.
-The installer therefore installs this pre-release version by default - once a full release with working HTTP connections is available, OmniSharp-vim will revert to the standard behaviour of installing the latest OmniSharp-roslyn release by default.
-If you find that you have problems with this pre-release version, try running `:OmniSharpInstall 'v1.32.1'` for the latest full release that is known to work well with OmniSharp-vim.
-
 #### Manual installation
 To install the server manually, follow these steps:
 
