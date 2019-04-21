@@ -26,7 +26,7 @@ get_latest_version() {
         curl --silent "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
     elif [ "$(command -v wget)" ]; then
         wget -qO- "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
-    fi | grep '"tag_name":' | sed 's/.*"\([^"]\+\)".*/\1/'
+    fi | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
 
 location="$HOME/.omnisharp/"
