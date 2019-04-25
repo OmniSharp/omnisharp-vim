@@ -159,7 +159,9 @@ def formatPathForServer(ctx, filepath):
             pattern = r'^/cygdrive/([a-zA-Z])/'
         else:
             pattern = r'^/mnt/([a-zA-Z])/'
-        return re.sub(pattern, r'\1:\\', filepath).replace('/', '\\')
+        def drive_replace(match):
+            return match.group(1).upper() + ':\\'
+        return re.sub(pattern, drive_replace, filepath).replace('/', '\\')
     return filepath
 
 
