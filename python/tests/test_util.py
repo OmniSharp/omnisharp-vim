@@ -106,17 +106,17 @@ def test_translate_for_server(ctx):
     ctx.is_msys = True
 
     path = '/c/foo/bar'
-    assert formatPathForServer(ctx, path) == r'c:\foo\bar'
+    assert formatPathForServer(ctx, path) == r'C:\foo\bar'
 
     ctx.is_msys = False
     ctx.is_cygwin = True
     path = '/cygdrive/c/foo/bar'
-    assert formatPathForServer(ctx, path) == r'c:\foo\bar'
+    assert formatPathForServer(ctx, path) == r'C:\foo\bar'
 
     ctx.is_cygwin = False
     ctx.is_wsl = True
     path = '/mnt/c/foo/bar'
-    assert formatPathForServer(ctx, path) == r'c:\foo\bar'
+    assert formatPathForServer(ctx, path) == r'C:\foo\bar'
 
 
 def test_translate_for_client(ctx):
