@@ -627,8 +627,12 @@ function! OmniSharp#StartServer(...) abort
   else
     let sln_or_dir = OmniSharp#FindSolutionOrDir()
     if empty(sln_or_dir)
-      call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
-      return
+      if expand('%:e') ==# 'csx'
+        let sln_or_dir = expand('%:p:h')
+      else
+        call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
+        return
+      endif
     endif
   endif
 
