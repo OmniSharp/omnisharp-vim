@@ -17,6 +17,37 @@ function! s:is_wsl() abort
   return strlen(system('grep Microsoft /proc/version')) > 0
 endfunction
 
+function! OmniSharp#util#check_capabilities(...) abort
+  let verbose = a:0 > 0 && a:1 ==? 'verbose'
+
+  if g:OmniSharp_server_stdio
+    if has('nvim')
+      if verbose
+        call OmniSharp#util#EchoErr('Error: neovim support for stdio has not yet been added')
+      endif
+      return 0
+    endif
+
+    if !(has('job') && has('channel') && has('lambda'))
+      if verbose
+        call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
+      endif
+      return 0
+    endif
+
+    return 1
+  endif
+
+  if !(has('python') || has('python3'))
+    if verbose
+      call OmniSharp#util#EchoErr('Error: OmniSharp requires Vim compiled with +python or +python3')
+    endif
+    return 0
+  endif
+
+  return 1
+endfunction
+
 " :echoerr will throw if inside a try conditional, or function labeled 'abort'
 " This function will do the same thing without throwing
 function! OmniSharp#util#EchoErr(msg)

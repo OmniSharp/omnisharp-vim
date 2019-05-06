@@ -1,6 +1,4 @@
-if !(has('python') || has('python3'))
-  finish
-endif
+if !OmniSharp#util#check_capabilities() | finish | endif
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim

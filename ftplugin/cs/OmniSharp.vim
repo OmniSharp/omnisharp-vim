@@ -1,19 +1,7 @@
-if !get(g:, 'OmniSharp_loaded', 0)
-  finish
-endif
-
-if !(has('python') || has('python3'))
-  finish
-endif
-
-if get(b:, 'OmniSharp_ftplugin_loaded', 0)
-  finish
-endif
+if !get(g:, 'OmniSharp_loaded', 0) | finish | endif
+if !OmniSharp#util#check_capabilities() | finish | endif
+if get(b:, 'OmniSharp_ftplugin_loaded', 0) | finish | endif
 let b:OmniSharp_ftplugin_loaded = 1
-
-if !exists('g:omnicomplete_fetch_full_documentation')
-  let g:omnicomplete_fetch_full_documentation = 0
-endif
 
 augroup OmniSharp#FileType
   autocmd! * <buffer>

@@ -1,13 +1,8 @@
-if exists('g:OmniSharp_loaded')
-  finish
-endif
-
+if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
-if !(has('python') || has('python3'))
-  echoerr 'Error: OmniSharp requires Vim compiled with +python or +python3'
-  finish
-endif
+let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
+if !OmniSharp#util#check_capabilities('verbose') | finish | endif
 
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
@@ -66,6 +61,8 @@ endif
 
 " Set to 1 when ultisnips is installed
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
+
+let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
 
 let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
 
