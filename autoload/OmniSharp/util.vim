@@ -17,7 +17,7 @@ function! s:is_wsl() abort
   return strlen(system('grep Microsoft /proc/version')) > 0
 endfunction
 
-function! OmniSharp#util#check_capabilities(...) abort
+function! OmniSharp#util#CheckCapabilities(...) abort
   let verbose = a:0 > 0 && a:1 ==? 'verbose'
 
   if g:OmniSharp_server_stdio
@@ -55,7 +55,7 @@ function! OmniSharp#util#EchoErr(msg)
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! OmniSharp#util#get_start_cmd(solution_file) abort
+function! OmniSharp#util#GetStartCmd(solution_file) abort
   let solution_path = a:solution_file
   if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
     let solution_path = fnamemodify(solution_path, ':h')
@@ -110,7 +110,7 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
   return command
 endfunction
 
-function! OmniSharp#util#path_join(parts) abort
+function! OmniSharp#util#PathJoin(parts) abort
   if type(a:parts) == type('')
     let parts = [a:parts]
   elseif type(a:parts) == type([])

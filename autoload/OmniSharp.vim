@@ -1,4 +1,4 @@
-if !OmniSharp#util#check_capabilities() | finish | endif
+if !OmniSharp#util#CheckCapabilities() | finish | endif
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
@@ -655,7 +655,7 @@ function! s:StartServer(sln_or_dir) abort
     return
   endif
 
-  let l:command = OmniSharp#util#get_start_cmd(a:sln_or_dir)
+  let l:command = OmniSharp#util#GetStartCmd(a:sln_or_dir)
 
   if l:command ==# []
     call OmniSharp#util#EchoErr('Could not determine the command to start the OmniSharp server!')

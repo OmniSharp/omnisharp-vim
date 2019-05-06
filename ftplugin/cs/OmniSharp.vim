@@ -1,5 +1,5 @@
 if !get(g:, 'OmniSharp_loaded', 0) | finish | endif
-if !OmniSharp#util#check_capabilities() | finish | endif
+if !OmniSharp#util#CheckCapabilities() | finish | endif
 if get(b:, 'OmniSharp_ftplugin_loaded', 0) | finish | endif
 let b:OmniSharp_ftplugin_loaded = 1
 

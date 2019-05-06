@@ -1,4 +1,4 @@
-if !OmniSharp#util#check_capabilities() | finish | endif
+if !OmniSharp#util#CheckCapabilities() | finish | endif
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim

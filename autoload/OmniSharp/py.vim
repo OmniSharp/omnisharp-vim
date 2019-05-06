@@ -4,7 +4,7 @@ endif
 
 let s:pycmd = has('python3') ? 'python3' : 'python'
 let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
-let g:OmniSharp_python_path = OmniSharp#util#path_join(['python'])
+let g:OmniSharp_python_path = OmniSharp#util#PathJoin(['python'])
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
@@ -22,7 +22,7 @@ endif
 
 function! OmniSharp#py#load(filename)
   call OmniSharp#py#bootstrap()
-  exec s:pyfile fnameescape(OmniSharp#util#path_join(['python', 'omnisharp', a:filename]))
+  exec s:pyfile fnameescape(OmniSharp#util#PathJoin(['python', 'omnisharp', a:filename]))
 endfunction
 
 function! OmniSharp#py#bootstrap()
@@ -30,7 +30,7 @@ function! OmniSharp#py#bootstrap()
     return
   endif
   exec s:pycmd "sys.path.append(r'" . g:OmniSharp_python_path . "')"
-  exec s:pyfile fnameescape(OmniSharp#util#path_join(['python', 'bootstrap.py']))
+  exec s:pyfile fnameescape(OmniSharp#util#PathJoin(['python', 'bootstrap.py']))
   let s:bootstrap_complete = 1
 endfunction
 

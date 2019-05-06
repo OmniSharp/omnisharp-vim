@@ -1,11 +1,11 @@
 Execute (Test start command construction):
-  let project_path = OmniSharp#util#path_join(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json'])
+  let project_path = OmniSharp#util#PathJoin(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json'])
   let g:OmniSharp_server_type = 'roslyn'
-  let command = OmniSharp#util#get_start_cmd(project_path)
+  let command = OmniSharp#util#GetStartCmd(project_path)
   Assert command[0] =~ "artifacts.scripts.OmniSharp"
 
   let g:OmniSharp_server_type = 'v1'
-  let command = OmniSharp#util#get_start_cmd(project_path)
+  let command = OmniSharp#util#GetStartCmd(project_path)
   if !has('win32')
     AssertEqual 'mono', command[0]
   endif
@@ -13,12 +13,12 @@ Execute (Test start command construction):
 " Execute (Test start omnisharp-v1 server):
 "   function! GetClassicCmd()
 "     let g:OmniSharp_server_type = 'v1'
-"     return OmniSharp#util#get_start_cmd(OmniSharp#util#path_join(['server', 'OmniSharp.sln']))
+"     return OmniSharp#util#GetStartCmd(OmniSharp#util#PathJoin(['server', 'OmniSharp.sln']))
 "   endfunction
 "
 "   function! GetRoslynCmd()
 "     let g:OmniSharp_server_type = 'roslyn'
-"     return OmniSharp#util#get_start_cmd(OmniSharp#util#path_join(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json']))
+"     return OmniSharp#util#GetStartCmd(OmniSharp#util#PathJoin(['omnisharp-roslyn', 'src', 'OmniSharp', 'project.json']))
 "   endfunction
 "
 "   let g:OmniSharp_proc_debug = 0

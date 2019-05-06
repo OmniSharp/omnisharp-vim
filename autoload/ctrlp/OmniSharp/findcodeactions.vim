@@ -1,4 +1,4 @@
-if !OmniSharp#util#check_capabilities() | finish | endif
+if !OmniSharp#util#CheckCapabilities() | finish | endif
 if get(g:, 'loaded_ctrlp_OmniSharp_findcodeactions', 0) | finish | endif
 let g:loaded_ctrlp_OmniSharp_findcodeactions = 1
 
