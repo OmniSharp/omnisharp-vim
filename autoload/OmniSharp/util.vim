@@ -24,17 +24,6 @@ function! OmniSharp#util#EchoErr(msg)
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! OmniSharp#util#path_join(parts) abort
-  if type(a:parts) == type('')
-    let parts = [a:parts]
-  elseif type(a:parts) == type([])
-    let parts = a:parts
-  else
-    throw 'Unsupported type for joining paths'
-  endif
-  return join([s:plugin_root_dir] + parts, s:dir_separator)
-endfunction
-
 function! OmniSharp#util#get_start_cmd(solution_file) abort
   let solution_path = a:solution_file
   if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
@@ -88,6 +77,17 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
   endif
 
   return command
+endfunction
+
+function! OmniSharp#util#path_join(parts) abort
+  if type(a:parts) == type('')
+    let parts = [a:parts]
+  elseif type(a:parts) == type([])
+    let parts = a:parts
+  else
+    throw 'Unsupported type for joining paths'
+  endif
+  return join([s:plugin_root_dir] + parts, s:dir_separator)
 endfunction
 
 let &cpoptions = s:save_cpo
