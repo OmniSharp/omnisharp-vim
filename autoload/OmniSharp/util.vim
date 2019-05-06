@@ -76,10 +76,9 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     let solution_path = substitute(solution_path, '/', '\\', 'g')
   endif
 
-  let port = OmniSharp#GetPort(a:solution_file)
-
-  let s:server_path = ''
-  if !exists('g:OmniSharp_server_path')
+  if exists('g:OmniSharp_server_path')
+    let s:server_path = g:OmniSharp_server_path
+  else
     let parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
     if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
@@ -92,16 +91,16 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
         call OmniSharp#Install()
       else
         redraw
+        return
       endif
     endif
-  else
-    let s:server_path = g:OmniSharp_server_path
   endif
 
-  let command = [
-              \ s:server_path,
-              \ '-p', port,
-              \ '-s', solution_path]
+  let command = [ s:server_path ]
+  if !g:OmniSharp_server_stdio
+    let command += [ '-p', OmniSharp#GetPort(a:solution_file) ]
+  endif
+  let command += [ '-s', solution_path ]
 
   if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
     let command = insert(command, 'mono')

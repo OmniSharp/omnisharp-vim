@@ -576,10 +576,20 @@ function! OmniSharp#IsServerRunning(...) abort
     return 0
   endif
 
-  " If the port is hardcoded, another vim instance may be running the server, so
-  " we don't look for a running job and go straight to the network check.
-  if !s:IsServerPortHardcoded(sln_or_dir) && !OmniSharp#proc#IsJobRunning(sln_or_dir)
-    return 0
+  let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
+
+  if g:OmniSharp_server_stdio
+    if !running
+      return 0
+    endif
+  else
+    " If the HTTP port is hardcoded, another vim instance may be running the
+    " server, so we don't look for a running job and go straight to the network
+    " check. Note that this only applies to HTTP servers - Stdio servers must be
+    " started by _this_ vim session.
+    if !s:IsServerPortHardcoded(sln_or_dir) && !running
+      return 0
+    endif
   endif
 
   let idx = index(s:alive_cache, sln_or_dir)
@@ -639,7 +649,7 @@ function! OmniSharp#StartServer(...) abort
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
     " If the port is hardcoded, we should check if any other vim instances have
     " started this server
-    if !running && s:IsServerPortHardcoded(sln_or_dir)
+    if !running && !g:OmniSharp_server_stdio && s:IsServerPortHardcoded(sln_or_dir)
       let running = OmniSharp#IsServerRunning(sln_or_dir)
     endif
 
@@ -662,7 +672,7 @@ function! s:StartServer(sln_or_dir) abort
     return
   endif
 
-  call OmniSharp#proc#RunAsyncCommand(command, a:sln_or_dir)
+  call OmniSharp#proc#Start(command, a:sln_or_dir)
 endfunction
 
 function! OmniSharp#StopAllServers() abort

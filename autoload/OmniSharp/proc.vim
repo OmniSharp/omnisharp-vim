@@ -6,16 +6,16 @@ let s:jobs = {}
 " Neovim jobs {{{ "
 
 function! OmniSharp#proc#supportsNeovimJobs() abort
-  return exists('*jobstart')
+  return exists('*jobstart') && !g:OmniSharp_server_stdio
 endfunction
 
 function! OmniSharp#proc#neovimOutHandler(job_id, data, event) dict abort
-  let l:message = printf('%s: %s',a:event,string(a:data))
+  let l:message = printf('%s: %s', a:event, string(a:data))
   echom l:message
 endfunction
 
 function! OmniSharp#proc#neovimErrHandler(job_id, data, event) dict abort
-  let l:message = printf('%s: %s',a:event,string(a:data))
+  let l:message = printf('%s: %s', a:event, string(a:data))
   call OmniSharp#util#EchoErr(l:message)
 endfunction
 
@@ -34,6 +34,9 @@ endfunction
 
 function! OmniSharp#proc#neovimJobStart(command) abort
   if !OmniSharp#proc#supportsNeovimJobs()
+    if g:OmniSharp_server_stdio
+      call OmniSharp#util#EchoErr('Stdio support has not yet been added for neovim')
+    endif
     call OmniSharp#util#EchoErr('Not using neovim')
     return -1
   endif
@@ -56,7 +59,14 @@ function! OmniSharp#proc#supportsVimJobs() abort
 endfunction
 
 function! OmniSharp#proc#vimOutHandler(channel, message) abort
-  echom printf('%s: %s', string(a:channel), string(a:message))
+  if g:OmniSharp_proc_debug
+    echom printf('%s: %s', string(a:channel), string(a:message))
+  endif
+  if g:OmniSharp_server_stdio
+    " a:channel example:  'channel 7 open'
+    let channelid = substitute(a:channel, '^channel \(\d\+\) \w\+$', '\1', '')
+    call OmniSharp#stdio#HandleResponse(channelid, a:message)
+  endif
 endfunction
 
 function! OmniSharp#proc#vimErrHandler(channel, message) abort
@@ -72,7 +82,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
   call s:debug('Using vim job_start to start the following command:')
   call s:debug(a:command)
   let opts = {'err_cb': 'OmniSharp#proc#vimErrHandler'}
-  if g:OmniSharp_proc_debug
+  if g:OmniSharp_server_stdio || g:OmniSharp_proc_debug
     let opts['out_cb'] = 'OmniSharp#proc#vimOutHandler'
   endif
   return job_start(a:command, opts)
@@ -83,7 +93,7 @@ endfunction
 " vim-dispatch {{{ "
 
 function! OmniSharp#proc#supportsVimDispatch() abort
-  return exists(':Dispatch') == 2
+  return exists(':Dispatch') == 2 && !g:OmniSharp_server_stdio
 endfunction
 
 function! OmniSharp#proc#dispatchStart(command) abort
@@ -102,6 +112,7 @@ endfunction
 " vim-proc {{{ "
 
 function! OmniSharp#proc#supportsVimProc() abort
+  if g:OmniSharp_server_stdio | return 0 | endif
   let l:is_vimproc = 0
   silent! let l:is_vimproc = vimproc#version()
   return l:is_vimproc
@@ -120,7 +131,7 @@ endfunction
 
 " public functions {{{ "
 
-function! OmniSharp#proc#RunAsyncCommand(command, jobkey) abort
+function! OmniSharp#proc#Start(command, jobkey) abort
   if OmniSharp#proc#IsJobRunning(a:jobkey)
     return
   endif
