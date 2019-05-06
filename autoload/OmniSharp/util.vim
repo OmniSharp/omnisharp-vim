@@ -5,17 +5,6 @@ let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
-function! s:resolve_local_config(solution_path) abort
-  let configPath = fnamemodify(a:solution_path, ':p:h')
-  \ . s:dir_separator
-  \ . g:OmniSharp_server_config_name
-
-  if filereadable(configPath)
-    return configPath
-  endif
-  return ''
-endfunction
-
 function! s:is_msys() abort
   return strlen(system('grep MSYS_NT /proc/version')) > 0
 endfunction

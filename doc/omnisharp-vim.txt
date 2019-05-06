@@ -54,12 +54,6 @@ opening a `*.cs` file. Default: 1 >
     let g:OmniSharp_start_server = 1
 <
 
-                                             *'g:OmniSharp_server_config_name'*
-Use this option to specify the OmniSharp server config filename.
-Default: 'omnisharp.json' >
-    let g:OmniSharp_server_config_name = 'omnisharp.json'
-<
-
                                                     *'g:OmniSharp_server_path'*
 Use this option to give the full path to the roslyn omnisharp server
 executable. If not set, the |:OmniSharpInstall| location is used.

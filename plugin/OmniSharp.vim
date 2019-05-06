@@ -35,9 +35,6 @@ let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_soluti
 " Automatically start server
 let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
 
-" Provide custom server configuration file name
-let g:OmniSharp_server_config_name = get(g:, 'OmniSharp_server_config_name', 'omnisharp.json')
-
 " Default value for python log level
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', 'warning')
 
