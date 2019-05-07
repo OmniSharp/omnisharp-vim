@@ -7,9 +7,6 @@ set cpoptions&vim
 call OmniSharp#py#bootstrap()
 
 " Setup variable defaults
-let s:allUserTypes = ''
-let s:allUserInterfaces = ''
-let s:allUserAttributes = ''
 let s:generated_snippets = {}
 let s:last_completion_dictionary = {}
 let s:alive_cache = []
@@ -504,7 +501,6 @@ function! OmniSharp#HighlightBuffer() abort
     " Create a :syn-match for each type with an option name.
     let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
     for l:ill in l:illegal
-      " call add(b:OmniSharp_hl_matches, matchadd(a:group, '\<' . l:ill . '\>'))
       let matchid = matchadd(a:group, '\<' . l:ill . '\>')
       call add(b:OmniSharp_hl_matches, matchid)
     endfor
