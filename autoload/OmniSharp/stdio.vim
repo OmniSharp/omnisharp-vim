@@ -6,7 +6,12 @@ let s:requests = {}
 
 function! s:Request(command, EndpointResponseHandler) abort
   let filename = OmniSharp#util#TranslatePathForServer(expand('%:p'))
-  let buffer = join(getline(1, '$'), '\r\n')
+  " Unique string separator which must not exist in the buffer
+  let sep = matchstr(reltimestr(reltime()), '\v\.@<=\d+')
+  while search(sep, 'n')
+    let sep = matchstr(reltimestr(reltime()), '\v\.@<=\d+')
+  endwhile
+  let buffer = join(getline(1, '$'), sep)
 
   let body = {
   \ 'Seq': s:nextseq,
@@ -19,7 +24,7 @@ function! s:Request(command, EndpointResponseHandler) abort
   \   'Buffer': buffer
   \  }
   \}
-  let body = substitute(json_encode(body), '\\\\r\\\\n', '\\r\\n', 'g')
+  let body = substitute(json_encode(body), sep, '\\r\\n', 'g')
 
   let s:requests[s:nextseq] = a:EndpointResponseHandler
   let s:nextseq += 1
