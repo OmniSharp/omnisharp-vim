@@ -67,6 +67,45 @@ function! OmniSharp#stdio#HandleResponse(channelid, message) abort
   call EndPointResponseHandler(response)
 endfunction
 
+function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
+  let bufferLines = getline(1, '$')
+  call s:Request('highlight', function('s:FindHighlightTypesResponseHandler', [a:Callback, bufferLines]))
+endfunction
+
+function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) abort
+  let highlights = get(a:response.Body, 'Highlights', [])
+  let identifierKinds = ['constant name', 'enum member name', 'field name',
+  \ 'identifier', 'local name', 'parameter name', 'property name',
+  \ 'static symbol']
+  let interfaceKinds = ['interface name']
+  let methodKinds = ['extension method name', 'method name']
+  let typeKinds = ['class name', 'enum name', 'namespace name', 'struct name']
+  let types = []
+  for hl in highlights
+    let lnum = hl.StartLine - 1
+    if lnum >= len(a:bufferLines)
+      " An error has occurred with invalid line endings - perhaps a combination
+      " of unix and dos line endings?
+      call a:Callback({'error': 'Invalid buffer - check line endings'})
+      return
+    endif
+    let line = a:bufferLines[lnum]
+    call add(types, {
+    \ 'kind': hl['Kind'],
+    \ 'name': line[hl['StartColumn'] - 1 : hl['EndColumn'] - 2]
+    \})
+  endfor
+
+  let hltypes = {
+  \ 'identifiers': map(filter(copy(types), 'index(identifierKinds, v:val.kind) >= 0'), 'v:val.name'),
+  \ 'interfaces': map(filter(copy(types), 'index(interfaceKinds, v:val.kind) >= 0'), 'v:val.name'),
+  \ 'methods': map(filter(copy(types), 'index(methodKinds, v:val.kind) >= 0'), 'v:val.name'),
+  \ 'types': map(filter(copy(types), 'index(typeKinds, v:val.kind) >= 0'), 'v:val.name')
+  \}
+
+  call a:Callback(hltypes)
+endfunction
+
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
   call s:Request('gotodefinition', function('s:GotoDefinitionResponseHandler', [a:Callback]))
 endfunction

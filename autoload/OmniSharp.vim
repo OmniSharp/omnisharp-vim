@@ -481,11 +481,18 @@ function! OmniSharp#HighlightBuffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if !OmniSharp#IsServerRunning() | return | endif
 
-  let ret = OmniSharp#py#eval('findHighlightTypes()')
-  if OmniSharp#CheckPyError() | return | endif
+  if g:OmniSharp_server_stdio
+    let ret = OmniSharp#stdio#FindHighlightTypes(function('s:CBHighlightBuffer'))
+  else
+    let hltypes = OmniSharp#py#eval('findHighlightTypes()')
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBHighlightBuffer(hltypes)
+  endif
+endfunction
 
-  if has_key(ret, 'error')
-    echohl WarningMsg | echom ret.error | echohl None
+function! s:CBHighlightBuffer(hltypes) abort
+  if has_key(a:hltypes, 'error')
+    echohl WarningMsg | echom a:hltypes.error | echohl None
     return
   endif
 
@@ -500,10 +507,10 @@ function! OmniSharp#HighlightBuffer() abort
   endfor
   let b:OmniSharp_hl_matches = []
 
-  call s:Highlight(ret.identifiers, 'csUserIdentifier')
-  call s:Highlight(ret.interfaces, 'csUserInterface')
-  call s:Highlight(ret.methods, 'csUserMethod')
-  call s:Highlight(ret.types, 'csUserType')
+  call s:Highlight(a:hltypes.identifiers, 'csUserIdentifier')
+  call s:Highlight(a:hltypes.interfaces, 'csUserInterface')
+  call s:Highlight(a:hltypes.methods, 'csUserMethod')
+  call s:Highlight(a:hltypes.types, 'csUserType')
 
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
@@ -605,8 +612,13 @@ function! OmniSharp#IsServerRunning(...) abort
     return 1
   endif
 
-  let alive = OmniSharp#py#eval('checkAliveStatus()')
-  if OmniSharp#CheckPyError() | return 0 | endif
+  if g:OmniSharp_server_stdio
+    " TODO: Call "/checkalivestatus"?
+    let alive = 1
+  else
+    let alive = OmniSharp#py#eval('checkAliveStatus()')
+    if OmniSharp#CheckPyError() | return 0 | endif
+  endif
   if alive
     " Cache the alive status so subsequent calls are faster
     call add(s:alive_cache, sln_or_dir)
