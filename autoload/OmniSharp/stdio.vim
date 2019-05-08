@@ -116,7 +116,11 @@ function! OmniSharp#stdio#GotoDefinition(Callback) abort
 endfunction
 
 function! s:GotoDefinitionResponseHandler(Callback, response) abort
-  call a:Callback(s:QuickFixesFromResponse(a:response))
+  if get(a:response.Body, 'FileName', v:null) != v:null
+    call a:Callback(s:QuickFixesFromResponse(a:response))
+  else
+    call a:Callback(0)
+  endif
 endfunction
 
 let &cpoptions = s:save_cpo

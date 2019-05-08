@@ -100,11 +100,8 @@ def gotoDefinition():
     definition = getResponse(ctx, '/gotodefinition', json=True)
     if definition.get('FileName'):
         return quickfixes_from_response(ctx, [definition])[0]
-        # filename = formatPathForClient(ctx, definition['FileName'].replace("'", "''"))
-        # openFile(filename, definition['Line'], definition['Column'])
     else:
         return None
-        # print("Not found")
 
 
 @vimcmd
