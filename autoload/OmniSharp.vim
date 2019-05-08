@@ -489,40 +489,7 @@ function! OmniSharp#HighlightBuffer() abort
     return
   endif
 
-  function! s:ClearHighlight(groupname)
-    try
-      execute 'syntax clear' a:groupname
-    catch | endtry
-  endfunction
-
   let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
-
-  function! s:Highlight(types, group) abort
-    silent call s:ClearHighlight(a:group)
-    if empty(a:types)
-      return
-    endif
-    let l:types = uniq(sort(a:types))
-
-    " Cannot use vim syntax options as keywords, so remove types with these
-    " names. See :h :syn-keyword /Note
-    let l:opts = split('cchar conceal concealends contained containedin ' .
-    \ 'contains display extend fold nextgroup oneline skipempty skipnl ' .
-    \ 'skipwhite transparent')
-
-    " Create a :syn-match for each type with an option name.
-    let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
-    for l:ill in l:illegal
-      let matchid = matchadd(a:group, '\<' . l:ill . '\>')
-      call add(b:OmniSharp_hl_matches, matchid)
-    endfor
-
-    call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
-
-    if len(l:types)
-      execute 'syntax keyword' a:group join(l:types)
-    endif
-  endfunction
 
   " Clear any matches - highlights with :syn keyword {option} names which cannot
   " be created with :syn keyword
@@ -541,6 +508,39 @@ function! OmniSharp#HighlightBuffer() abort
   silent call s:ClearHighlight('csNewType')
   syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
   \ contains=csNew,csUserType,csUserIdentifier
+endfunction
+
+function! s:ClearHighlight(groupname)
+  try
+    execute 'syntax clear' a:groupname
+  catch | endtry
+endfunction
+
+function! s:Highlight(types, group) abort
+  silent call s:ClearHighlight(a:group)
+  if empty(a:types)
+    return
+  endif
+  let l:types = uniq(sort(a:types))
+
+  " Cannot use vim syntax options as keywords, so remove types with these
+  " names. See :h :syn-keyword /Note
+  let l:opts = split('cchar conceal concealends contained containedin ' .
+  \ 'contains display extend fold nextgroup oneline skipempty skipnl ' .
+  \ 'skipwhite transparent')
+
+  " Create a :syn-match for each type with an option name.
+  let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
+  for l:ill in l:illegal
+    let matchid = matchadd(a:group, '\<' . l:ill . '\>')
+    call add(b:OmniSharp_hl_matches, matchid)
+  endfor
+
+  call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
+
+  if len(l:types)
+    execute 'syntax keyword' a:group join(l:types)
+  endif
 endfunction
 
 function! OmniSharp#UpdateBuffer() abort
