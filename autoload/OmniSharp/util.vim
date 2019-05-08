@@ -55,12 +55,24 @@ function! OmniSharp#util#EchoErr(msg)
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! OmniSharp#util#GetStartCmd(solution_file) abort
-  let solution_path = a:solution_file
-  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
-    let solution_path = fnamemodify(solution_path, ':h')
+function! OmniSharp#util#TranslatePathForClient(filename) abort
+  let filename = a:filename
+  if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_msys() || s:is_cygwin() || s:is_wsl())
+    if s:is_msys()
+      let prefix = '/'
+    elseif s:is_cygwin()
+      let prefix = '/cygdrive/'
+    else
+      let prefix = '/mnt/'
+    endif
+    let filename = substitute(filename, '^\([a-zA-Z]\):\\', prefix . '\l\1/', '')
+    let filename = substitute(filename, '\\', '/', 'g')
   endif
+  return fnamemodify(filename, ':.')
+endfunction
 
+function! OmniSharp#util#TranslatePathForServer(filename) abort
+  let filename = a:filename
   if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_msys() || s:is_cygwin() || s:is_wsl())
     " Future releases of WSL will have a wslpath tool, similar to cygpath - when
     " this becomes standard then this block can be replaced with a call to
@@ -72,9 +84,19 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     else
       let prefix = '^/mnt/'
     endif
-    let solution_path = substitute(solution_path, prefix.'\([a-zA-Z]\)/', '\u\1:\\', '')
-    let solution_path = substitute(solution_path, '/', '\\', 'g')
+    let filename = substitute(filename, prefix . '\([a-zA-Z]\)/', '\u\1:\\', '')
+    let filename = substitute(filename, '/', '\\', 'g')
   endif
+  return filename
+endfunction
+
+function! OmniSharp#util#GetStartCmd(solution_file) abort
+  let solution_path = a:solution_file
+  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
+    let solution_path = fnamemodify(solution_path, ':h')
+  endif
+
+  let solution_path = OmniSharp#util#TranslatePathForServer(solution_path)
 
   if exists('g:OmniSharp_server_path')
     let s:server_path = g:OmniSharp_server_path
