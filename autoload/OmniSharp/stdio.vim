@@ -4,7 +4,7 @@ set cpoptions&vim
 let s:nextseq = 1001
 let s:requests = {}
 
-function! s:Request(command, Callback) abort
+function! s:Request(command, EndpointResponseHandler) abort
   let filename = OmniSharp#util#TranslatePathForServer(expand('%:p'))
   let buffer = join(getline(1, '$'), '\r\n')
 
@@ -21,7 +21,7 @@ function! s:Request(command, Callback) abort
   \}
   let body = substitute(json_encode(body), '\\\\r\\\\n', '\\r\\n', 'g')
 
-  let s:requests[s:nextseq] = a:Callback
+  let s:requests[s:nextseq] = a:EndpointResponseHandler
   let s:nextseq += 1
   call ch_sendraw(OmniSharp#GetHost(), body . "\n")
 endfunction
@@ -62,13 +62,17 @@ function! OmniSharp#stdio#HandleResponse(channelid, message) abort
   if !has_key(response, 'Request_seq') || !has_key(s:requests, response.Request_seq)
     return
   endif
-  let Callback = s:requests[response.Request_seq]
+  let EndPointResponseHandler = s:requests[response.Request_seq]
   call remove(s:requests, response.Request_seq)
-  call Callback(s:QuickFixesFromResponse(response))
+  call EndPointResponseHandler(response)
 endfunction
 
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
-  call s:Request('gotodefinition', a:Callback)
+  call s:Request('gotodefinition', function('s:GotoDefinitionResponseHandler', [a:Callback]))
+endfunction
+
+function! s:GotoDefinitionResponseHandler(Callback, response) abort
+  call a:Callback(s:QuickFixesFromResponse(a:response))
 endfunction
 
 let &cpoptions = s:save_cpo
