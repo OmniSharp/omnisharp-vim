@@ -48,11 +48,15 @@ function! OmniSharp#GetHost(...) abort
 
   if empty(getbufvar(bufnum, 'OmniSharp_host'))
     let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnum)
-    let port = OmniSharp#GetPort(sln_or_dir)
-    if port == 0
-      return ''
+    if g:OmniSharp_server_stdio
+      let host = OmniSharp#proc#GetJob(sln_or_dir)
+    else
+      let port = OmniSharp#GetPort(sln_or_dir)
+      if port == 0
+        return ''
+      endif
+      let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     endif
-    let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     call setbufvar(bufnum, 'OmniSharp_host', host)
   endif
   return getbufvar(bufnum, 'OmniSharp_host')
@@ -168,13 +172,21 @@ function! OmniSharp#NavigateDown() abort
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
-  let loc = OmniSharp#py#eval('gotoDefinition()')
-  if OmniSharp#CheckPyError() | return 0 | endif
-  if type(loc) != type({}) " Check whether a dict was returned
+  if g:OmniSharp_server_stdio
+    let loc = OmniSharp#stdio#GotoDefinition(function('s:CBGotoDefinition'))
+  else
+    let loc = OmniSharp#py#eval('gotoDefinition()')
+    if OmniSharp#CheckPyError() | return 0 | endif
+    return s:CBGotoDefinition(loc)
+  endif
+endfunction
+
+function! s:CBGotoDefinition(loc) abort
+  if type(a:loc) != type({}) " Check whether a dict was returned
     echo 'Not found'
     return 0
   else
-    return OmniSharp#JumpToLocation(loc.filename, loc.lnum, loc.col, 0)
+    return OmniSharp#JumpToLocation(a:loc.filename, a:loc.lnum, a:loc.col, 0)
   endif
 endfunction
 

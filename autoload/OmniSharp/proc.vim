@@ -202,6 +202,10 @@ function! OmniSharp#proc#IsJobRunning(jobkey) abort
   endif
 endfunction
 
+function! OmniSharp#proc#GetJob(jobkey) abort
+  return get(s:jobs, a:jobkey)
+endfunction
+
 " }}} public functions "
 
 " private functions {{{ "
