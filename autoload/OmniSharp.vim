@@ -119,7 +119,7 @@ function! OmniSharp#FindImplementations() abort
   else
     if numImpls == 1
       let usage = qf_taglist[0]
-      call OmniSharp#JumpToLocation(usage.filename, usage.lnum, usage.col, 0)
+      call OmniSharp#JumpToLocation(usage, 0)
     else " numImpls > 1
       call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
     endif
@@ -181,12 +181,12 @@ function! OmniSharp#GotoDefinition() abort
   endif
 endfunction
 
-function! s:CBGotoDefinition(loc) abort
-  if type(a:loc) != type({}) " Check whether a dict was returned
+function! s:CBGotoDefinition(location) abort
+  if type(a:location) != type({}) " Check whether a dict was returned
     echo 'Not found'
     return 0
   else
-    return OmniSharp#JumpToLocation(a:loc.filename, a:loc.lnum, a:loc.col, 0)
+    return OmniSharp#JumpToLocation(a:location, 0)
   endif
 endfunction
 
@@ -237,15 +237,15 @@ function! s:openLocationInPreview(loc) abort
   let &lazyredraw = lazyredraw_bak
 endfunction
 
-function! OmniSharp#JumpToLocation(filename, line, column, noautocmds) abort
-  if a:filename !=# ''
-    if fnamemodify(a:filename, ':p') ==# expand('%:p')
+function! OmniSharp#JumpToLocation(location, noautocmds) abort
+  if a:location.filename !=# ''
+    if fnamemodify(a:location.filename, ':p') ==# expand('%:p')
       " Update the ' mark, adding this location to the jumplist. This is not
       " necessary when the location is in another buffer - :edit performs the
       " same functionality.
       normal! m'
     else
-      let command = 'edit ' . fnameescape(a:filename)
+      let command = 'edit ' . fnameescape(a:location.filename)
       if a:noautocmds
         let command = 'noautocmd ' . command
       endif
@@ -256,8 +256,8 @@ function! OmniSharp#JumpToLocation(filename, line, column, noautocmds) abort
         return 0
       endtry
     endif
-    if a:line > 0 && a:column > 0
-      call cursor(a:line, a:column)
+    if a:location.lnum > 0 && a:location.col > 0
+      call cursor(a:location.lnum, a:location.col)
     endif
     return 1
   endif

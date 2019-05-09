@@ -18,9 +18,9 @@ ctx = VimUtilCtx(vim)
 
 
 def openFile(filename, line=0, column=0, noautocmd=0):
-    cmd = "call OmniSharp#JumpToLocation('{0}', {1}, {2}, {3})" \
-          .format(filename, line, column, noautocmd)
-    vim.command(cmd)
+    vim.command("let l:loc = {{ 'filename': '{0}', 'lnum': {1}, 'col': {2} }}"
+                .format(filename, line, column))
+    vim.command("call OmniSharp#JumpToLocation(l:loc, {0})".format(noautocmd))
 
 
 def setBuffer(text):
