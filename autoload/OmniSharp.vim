@@ -101,10 +101,7 @@ endfunction
 " returned (synchronously or asynchronously) with the number of usages
 function! OmniSharp#FindUsages(...) abort
   let target = expand('<cword>')
-  let opts = {}
-  if a:0 > 0
-    let opts.Callback = a:1
-  endif
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindUsages', [target, opts])
     let loc = OmniSharp#stdio#FindUsages(Callback)
@@ -116,24 +113,23 @@ function! OmniSharp#FindUsages(...) abort
 endfunction
 
 function! s:CBFindUsages(target, opts, locations) abort
-  if len(a:locations) > 0
+  let numUsages = len(a:locations)
+  if numUsages > 0
     call s:set_quickfix(a:locations, 'Usages: ' . a:target)
   else
     echo 'No usages found'
   endif
   if has_key(a:opts, 'Callback')
-    call a:opts.Callback(len(a:locations))
+    call a:opts.Callback(numUsages)
   endif
+  return numUsages
 endfunction
 
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of implementations
 function! OmniSharp#FindImplementations(...) abort
   let target = expand('<cword>')
-  let opts = {}
-  if a:0 > 0
-    let opts.Callback = a:1
-  endif
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindImplementations', [target, opts])
     let loc = OmniSharp#stdio#FindImplementations(Callback)
@@ -145,21 +141,21 @@ function! OmniSharp#FindImplementations(...) abort
 endfunction
 
 function! s:CBFindImplementations(target, opts, locations) abort
-  let numImpls = len(a:locations)
-  if numImpls == 0
+  let numImplementations = len(a:locations)
+  if numImplementations == 0
     echo 'No implementations found'
   else
-    if numImpls == 1
+    if numImplementations == 1
       call OmniSharp#JumpToLocation(a:locations[0], 0)
-    else " numImpls > 1
+    else " numImplementations > 1
       call s:set_quickfix(a:locations, 'Implementations: ' . a:target)
     endif
   endif
 
   if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numImpls)
+    call a:opts.Callback(numImplementations)
   endif
-  return numImpls
+  return numImplementations
 endfunction
 
 function! OmniSharp#FindMembers() abort
@@ -207,7 +203,7 @@ endfunction
 
 function! OmniSharp#GotoDefinition() abort
   if g:OmniSharp_server_stdio
-    let loc = OmniSharp#stdio#GotoDefinition(function('s:CBGotoDefinition'))
+    call OmniSharp#stdio#GotoDefinition(function('s:CBGotoDefinition'))
   else
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return 0 | endif
@@ -401,19 +397,29 @@ function! OmniSharp#GetCodeActions(mode) range abort
   endif
 endfunction
 
-function! OmniSharp#CodeCheck() abort
-  if pumvisible()
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with the results
+function! OmniSharp#CodeCheck(...) abort
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
+  if pumvisible() || !OmniSharp#IsServerRunning()
     return get(b:, 'codecheck', [])
   endif
-  if bufname('%') ==# ''
-    return []
-  endif
-  if OmniSharp#IsServerRunning()
+  let opts = a:0 ? { 'Callback': a:1 } : {}
+  if g:OmniSharp_server_stdio
+    let loc = OmniSharp#stdio#CodeCheck(function('s:CBCodeCheck', [opts]))
+  else
     let codecheck = OmniSharp#py#eval('codeCheck()')
-    if OmniSharp#CheckPyError() | return [] | endif
-    let b:codecheck = codecheck
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBCodeCheck(opts, codecheck)
   endif
-  return get(b:, 'codecheck', [])
+endfunction
+
+function! s:CBCodeCheck(opts, codecheck) abort
+  let b:codecheck = a:codecheck
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(a:codecheck)
+  endif
+  return b:codecheck
 endfunction
 
 function! OmniSharp#TypeLookupWithoutDocumentation() abort
@@ -520,7 +526,7 @@ function! OmniSharp#HighlightBuffer() abort
   else
     let hltypes = OmniSharp#py#eval('findHighlightTypes()')
     if OmniSharp#CheckPyError() | return | endif
-    return s:CBHighlightBuffer(hltypes)
+    call s:CBHighlightBuffer(hltypes)
   endif
 endfunction
 

@@ -80,6 +80,14 @@ function! OmniSharp#stdio#HandleResponse(channelid, message) abort
   endif
 endfunction
 
+function! OmniSharp#stdio#CodeCheck(Callback) abort
+  call s:Request('/codecheck', function('s:CodeCheckResponseHandler', [a:Callback]))
+endfunction
+
+function! s:CodeCheckResponseHandler(Callback, response) abort
+  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
   let bufferLines = getline(1, '$')
   call s:Request('/highlight', function('s:FindHighlightTypesResponseHandler', [a:Callback, bufferLines]))
