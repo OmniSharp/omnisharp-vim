@@ -39,26 +39,19 @@ def setBuffer(text):
 
 @vimcmd
 def findUsages():
-    parameters = {}
-    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    response = getResponse(ctx, '/findusages', parameters, json=True)
+    response = getResponse(ctx, '/findusages', json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 
 
 @vimcmd
 def findMembers():
-    parameters = {}
-    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    response = getResponse(ctx, '/currentfilemembersasflat', parameters,
-                           json=True)
+    response = getResponse(ctx, '/currentfilemembersasflat', json=True)
     return quickfixes_from_response(ctx, response)
 
 
 @vimcmd
 def findImplementations():
-    parameters = {}
-    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    response = getResponse(ctx, '/findimplementations', parameters, json=True)
+    response = getResponse(ctx, '/findimplementations', json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 
 
@@ -123,8 +116,7 @@ def runCodeAction(mode, action):
         pos = vim.current.window.cursor
         vim.command('let l:hidden_bak = &hidden | set hidden')
         for changeDefinition in changes:
-            filename = formatPathForClient(ctx,
-                                           changeDefinition['FileName'])
+            filename = formatPathForClient(ctx, changeDefinition['FileName'])
             openFile(filename, noautocmd=1)
             if not setBuffer(changeDefinition.get('Buffer')):
                 for change in changeDefinition.get('Changes', []):

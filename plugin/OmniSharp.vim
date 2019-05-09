@@ -8,8 +8,6 @@ let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 
 let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
 
-let g:OmniSharp_quickFixLength = get(g:, 'OmniSharp_quickFixLength', 60)
-
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
 
 let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', has('win32unix'))
