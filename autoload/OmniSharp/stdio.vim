@@ -34,29 +34,33 @@ function! s:Request(command, ...) abort
   call ch_sendraw(OmniSharp#GetHost(), body . "\n")
 endfunction
 
-function! s:QuickFixesFromResponse(response) abort
-  let text = get(a:response, 'Text', get(a:response, 'Message', ''))
-  let filename = get(a:response.Body, 'FileName', '')
-  if filename ==# ''
-    let filename = expand('%:p')
-  else
-    let filename = OmniSharp#util#TranslatePathForClient(filename)
-  endif
-  let item = {
-  \ 'filename': filename,
-  \ 'text': text,
-  \ 'lnum': a:response.Body.Line,
-  \ 'col': a:response.Body.Column,
-  \ 'vcol': 0
-  \}
-  let loglevel = get(a:response, 'LogLevel', '')
-  if loglevel !=# ''
-    let item.type = loglevel ==# 'Error' ? 'E' : 'W'
-    if loglevel ==# 'Hidden'
-      let item.subtype = 'Style'
+function! s:LocationsFromResponse(quickfixes) abort
+  let locations = []
+  for quickfix in a:quickfixes
+    let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
+    let filename = get(quickfix, 'FileName', '')
+    if filename ==# ''
+      let filename = expand('%:p')
+    else
+      let filename = OmniSharp#util#TranslatePathForClient(filename)
     endif
-  endif
-  return item
+    let location = {
+    \ 'filename': filename,
+    \ 'text': text,
+    \ 'lnum': quickfix.Line,
+    \ 'col': quickfix.Column,
+    \ 'vcol': 0
+    \}
+    let loglevel = get(quickfix, 'LogLevel', '')
+    if loglevel !=# ''
+      let location.type = loglevel ==# 'Error' ? 'E' : 'W'
+      if loglevel ==# 'Hidden'
+        let location.subtype = 'Style'
+      endif
+    endif
+    call add(locations, location)
+  endfor
+  return locations
 endfunction
 
 function! OmniSharp#stdio#HandleResponse(channelid, message) abort
@@ -82,6 +86,7 @@ function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
 endfunction
 
 function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) abort
+  if !a:response.Success | return | endif
   let highlights = get(a:response.Body, 'Highlights', [])
   let identifierKinds = ['constant name', 'enum member name', 'field name',
   \ 'identifier', 'local name', 'parameter name', 'property name',
@@ -115,13 +120,21 @@ function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) a
   call a:Callback(hltypes)
 endfunction
 
+function! OmniSharp#stdio#FindUsages(Callback) abort
+  call s:Request('/findusages', function('s:FindUsagesResponseHandler', [a:Callback]))
+endfunction
+
+function! s:FindUsagesResponseHandler(Callback, response) abort
+  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
   call s:Request('/gotodefinition', function('s:GotoDefinitionResponseHandler', [a:Callback]))
 endfunction
 
 function! s:GotoDefinitionResponseHandler(Callback, response) abort
   if get(a:response.Body, 'FileName', v:null) != v:null
-    call a:Callback(s:QuickFixesFromResponse(a:response))
+    call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
   else
     call a:Callback(0)
   endif

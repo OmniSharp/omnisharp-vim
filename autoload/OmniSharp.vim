@@ -97,15 +97,32 @@ function! OmniSharp#Complete(findstart, base) abort
   endif
 endfunction
 
-function! OmniSharp#FindUsages() abort
-  let qf_taglist = OmniSharp#py#eval('findUsages()')
-  if OmniSharp#CheckPyError() | return | endif
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously)
+function! OmniSharp#FindUsages(...) abort
+  let target = expand('<cword>')
+  let opts = {}
+  if a:0 > 0
+    let opts.Callback = a:1
+  endif
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBFindUsages', [target, opts])
+    let loc = OmniSharp#stdio#FindUsages(Callback)
+  else
+    let locs = OmniSharp#py#eval('findUsages()')
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBFindUsages(target, opts, locs)
+  endif
+endfunction
 
-  " Place the tags in the quickfix window, if possible
-  if len(qf_taglist) > 0
-    call s:set_quickfix(qf_taglist, 'Usages: '.expand('<cword>'))
+function! s:CBFindUsages(target, opts, locations) abort
+  if len(a:locations) > 0
+    call s:set_quickfix(a:locations, 'Usages: ' . a:target)
   else
     echo 'No usages found'
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(len(a:locations))
   endif
 endfunction
 
