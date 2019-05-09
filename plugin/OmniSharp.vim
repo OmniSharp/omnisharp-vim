@@ -2,7 +2,6 @@ if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
 let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
-if !OmniSharp#util#CheckCapabilities('verbose') | finish | endif
 
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
