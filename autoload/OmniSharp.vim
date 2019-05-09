@@ -98,7 +98,7 @@ function! OmniSharp#Complete(findstart, base) abort
 endfunction
 
 " Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously)
+" returned (synchronously or asynchronously) with the number of usages
 function! OmniSharp#FindUsages(...) abort
   let target = expand('<cword>')
   let opts = {}
@@ -126,22 +126,39 @@ function! s:CBFindUsages(target, opts, locations) abort
   endif
 endfunction
 
-function! OmniSharp#FindImplementations() abort
-  let qf_taglist = OmniSharp#py#eval('findImplementations()')
-  if OmniSharp#CheckPyError() | return | endif
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with the number of implementations
+function! OmniSharp#FindImplementations(...) abort
+  let target = expand('<cword>')
+  let opts = {}
+  if a:0 > 0
+    let opts.Callback = a:1
+  endif
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBFindImplementations', [target, opts])
+    let loc = OmniSharp#stdio#FindImplementations(Callback)
+  else
+    let locs = OmniSharp#py#eval('findImplementations()')
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBFindImplementations(target, opts, locs)
+  endif
+endfunction
 
-  let numImpls = len(qf_taglist)
+function! s:CBFindImplementations(target, opts, locations) abort
+  let numImpls = len(a:locations)
   if numImpls == 0
     echo 'No implementations found'
   else
     if numImpls == 1
-      let usage = qf_taglist[0]
-      call OmniSharp#JumpToLocation(usage, 0)
+      call OmniSharp#JumpToLocation(a:locations[0], 0)
     else " numImpls > 1
-      call s:set_quickfix(qf_taglist, 'Implementations: '.expand('<cword>'))
+      call s:set_quickfix(a:locations, 'Implementations: ' . a:target)
     endif
   endif
 
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(numImpls)
+  endif
   return numImpls
 endfunction
 

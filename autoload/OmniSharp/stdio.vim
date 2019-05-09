@@ -120,6 +120,14 @@ function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) a
   call a:Callback(hltypes)
 endfunction
 
+function! OmniSharp#stdio#FindImplementations(Callback) abort
+  call s:Request('/findimplementations', function('s:FindImplementationsResponseHandler', [a:Callback]))
+endfunction
+
+function! s:FindImplementationsResponseHandler(Callback, response) abort
+  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
 function! OmniSharp#stdio#FindUsages(Callback) abort
   call s:Request('/findusages', function('s:FindUsagesResponseHandler', [a:Callback]))
 endfunction
