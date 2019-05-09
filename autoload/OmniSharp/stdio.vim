@@ -4,7 +4,7 @@ set cpoptions&vim
 let s:nextseq = 1001
 let s:requests = {}
 
-function! s:Request(command, EndpointResponseHandler) abort
+function! s:Request(command, ...) abort
   let filename = OmniSharp#util#TranslatePathForServer(expand('%:p'))
   " Unique string separator which must not exist in the buffer
   let sep = matchstr(reltimestr(reltime()), '\v\.@<=\d+')
@@ -26,7 +26,10 @@ function! s:Request(command, EndpointResponseHandler) abort
   \}
   let body = substitute(json_encode(body), sep, '\\r\\n', 'g')
 
-  let s:requests[s:nextseq] = a:EndpointResponseHandler
+  let s:requests[s:nextseq] = { 'Seq': s:nextseq }
+  if a:0 > 0
+    let s:requests[s:nextseq].EndpointResponseHandler = a:1
+  endif
   let s:nextseq += 1
   call ch_sendraw(OmniSharp#GetHost(), body . "\n")
 endfunction
@@ -59,22 +62,23 @@ endfunction
 function! OmniSharp#stdio#HandleResponse(channelid, message) abort
   " TODO: Log it
   try
-    let response = json_decode(a:message)
+    let res = json_decode(a:message)
   catch
     " TODO: Log it
     return
   endtry
-  if !has_key(response, 'Request_seq') || !has_key(s:requests, response.Request_seq)
+  if !has_key(res, 'Request_seq') || !has_key(s:requests, res.Request_seq)
     return
   endif
-  let EndPointResponseHandler = s:requests[response.Request_seq]
-  call remove(s:requests, response.Request_seq)
-  call EndPointResponseHandler(response)
+  let req = remove(s:requests, res.Request_seq)
+  if has_key(req, 'EndpointResponseHandler')
+    call req.EndpointResponseHandler(res)
+  endif
 endfunction
 
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
   let bufferLines = getline(1, '$')
-  call s:Request('highlight', function('s:FindHighlightTypesResponseHandler', [a:Callback, bufferLines]))
+  call s:Request('/highlight', function('s:FindHighlightTypesResponseHandler', [a:Callback, bufferLines]))
 endfunction
 
 function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) abort
@@ -112,7 +116,7 @@ function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) a
 endfunction
 
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
-  call s:Request('gotodefinition', function('s:GotoDefinitionResponseHandler', [a:Callback]))
+  call s:Request('/gotodefinition', function('s:GotoDefinitionResponseHandler', [a:Callback]))
 endfunction
 
 function! s:GotoDefinitionResponseHandler(Callback, response) abort
@@ -121,6 +125,10 @@ function! s:GotoDefinitionResponseHandler(Callback, response) abort
   else
     call a:Callback(0)
   endif
+endfunction
+
+function! OmniSharp#stdio#UpdateBuffer() abort
+  call s:Request('/updatebuffer')
 endfunction
 
 let &cpoptions = s:save_cpo

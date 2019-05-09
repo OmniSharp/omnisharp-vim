@@ -554,8 +554,12 @@ function! OmniSharp#UpdateBuffer() abort
   if !OmniSharp#IsServerRunning() | return | endif
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if OmniSharp#BufferHasChanged() == 1
-    call OmniSharp#py#eval('updateBuffer()')
-    call OmniSharp#CheckPyError()
+    if g:OmniSharp_server_stdio
+      call OmniSharp#stdio#UpdateBuffer()
+    else
+      call OmniSharp#py#eval('updateBuffer()')
+      call OmniSharp#CheckPyError()
+    endif
   endif
 endfunction
 
