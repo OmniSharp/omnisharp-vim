@@ -63,22 +63,44 @@ function! OmniSharp#GetHost(...) abort
 endfunction
 
 function! OmniSharp#GetCompletions(partial, ...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if !OmniSharp#IsServerRunning()
     let completions = []
   else
-    let completions = OmniSharp#py#eval(printf('getCompletions(%s)', string(a:partial)))
-    if OmniSharp#CheckPyError() | return [] | endif
+    if g:OmniSharp_server_stdio
+      let s:complete_pending = 1
+      let Callback = function('s:CBGetCompletions', [opts])
+      call OmniSharp#stdio#GetCompletions(a:partial, Callback)
+      if !has_key(opts, 'Callback')
+        " No callback has been passed in, so this function should return
+        " synchronously, so it can be used as an omnifunc
+        let starttime = reltime()
+        while s:complete_pending && reltime(starttime)[0] < g:OmniSharp_timeout
+          sleep 50m
+        endwhile
+        if s:complete_pending | return [] | endif
+        return s:last_completions
+      endif
+    else
+      let completions = OmniSharp#py#eval(
+      \ printf('getCompletions(%s)', string(a:partial)))
+      if OmniSharp#CheckPyError() | let completions = [] | endif
+      return s:CBGetCompletions(opts, completions)
+    endif
   endif
+endfunction
+
+function! s:CBGetCompletions(opts, completions) abort
+  let s:last_completions = a:completions
+  let s:complete_pending = 0
   let s:last_completion_dictionary = {}
-  for completion in completions
+  for completion in a:completions
     let s:last_completion_dictionary[get(completion, 'word')] = completion
   endfor
-  if a:0 > 0
-    " If a callback has been passed in, then use it
-    call a:1(completions)
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(a:completions)
   else
-    " Otherwise just return the results
-    return completions
+    return a:completions
   endif
 endfunction
 

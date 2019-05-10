@@ -58,7 +58,7 @@ def findImplementations():
 @vimcmd
 def getCompletions(partialWord):
     parameters = {}
-    parameters['wordToComplete'] = partialWord
+    parameters['WordToComplete'] = partialWord
 
     parameters['WantDocumentationForEveryCompletionResult'] = \
         bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))

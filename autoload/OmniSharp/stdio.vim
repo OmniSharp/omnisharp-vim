@@ -4,7 +4,7 @@ set cpoptions&vim
 let s:nextseq = 1001
 let s:requests = {}
 
-function! s:Request(command, ...) abort
+function! s:Request(command, opts) abort
   let filename = OmniSharp#util#TranslatePathForServer(expand('%:p'))
   " Unique string separator which must not exist in the buffer
   let sep = matchstr(reltimestr(reltime()), '\v\.@<=\d+')
@@ -24,11 +24,14 @@ function! s:Request(command, ...) abort
   \   'Buffer': buffer
   \  }
   \}
+  if has_key(a:opts, 'Parameters')
+    call extend(body.Arguments, a:opts.Parameters, 'force')
+  endif
   let body = substitute(json_encode(body), sep, '\\r\\n', 'g')
 
   let s:requests[s:nextseq] = { 'Seq': s:nextseq }
-  if a:0 > 0
-    let s:requests[s:nextseq].EndpointResponseHandler = a:1
+  if has_key(a:opts, 'ResponseHandler')
+    let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
   call ch_sendraw(OmniSharp#GetHost(), body . "\n")
@@ -75,25 +78,31 @@ function! OmniSharp#stdio#HandleResponse(channelid, message) abort
     return
   endif
   let req = remove(s:requests, res.Request_seq)
-  if has_key(req, 'EndpointResponseHandler')
-    call req.EndpointResponseHandler(res)
+  if has_key(req, 'ResponseHandler')
+    call req.ResponseHandler(res)
   endif
 endfunction
 
 function! OmniSharp#stdio#CodeCheck(Callback) abort
-  call s:Request('/codecheck', function('s:CodeCheckResponseHandler', [a:Callback]))
+  let opts = {
+  \ 'ResponseHandler': function('s:CodeCheckRH', [a:Callback])
+  \}
+  call s:Request('/codecheck', opts)
 endfunction
 
-function! s:CodeCheckResponseHandler(Callback, response) abort
+function! s:CodeCheckRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
   let bufferLines = getline(1, '$')
-  call s:Request('/highlight', function('s:FindHighlightTypesResponseHandler', [a:Callback, bufferLines]))
+  let opts = {
+  \ 'ResponseHandler': function('s:FindHighlightTypesRH', [a:Callback, bufferLines])
+  \}
+  call s:Request('/highlight', opts)
 endfunction
 
-function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) abort
+function! s:FindHighlightTypesRH(Callback, bufferLines, response) abort
   if !a:response.Success | return | endif
   let highlights = get(a:response.Body, 'Highlights', [])
   let identifierKinds = ['constant name', 'enum member name', 'field name',
@@ -129,26 +138,35 @@ function! s:FindHighlightTypesResponseHandler(Callback, bufferLines, response) a
 endfunction
 
 function! OmniSharp#stdio#FindImplementations(Callback) abort
-  call s:Request('/findimplementations', function('s:FindImplementationsResponseHandler', [a:Callback]))
+  let opts = {
+  \ 'ResponseHandler': function('s:FindImplementationsRH', [a:Callback])
+  \}
+  call s:Request('/findimplementations', opts)
 endfunction
 
-function! s:FindImplementationsResponseHandler(Callback, response) abort
+function! s:FindImplementationsRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
 function! OmniSharp#stdio#FindUsages(Callback) abort
-  call s:Request('/findusages', function('s:FindUsagesResponseHandler', [a:Callback]))
+  let opts = {
+  \ 'ResponseHandler': function('s:FindUsagesRH', [a:Callback])
+  \}
+  call s:Request('/findusages', opts)
 endfunction
 
-function! s:FindUsagesResponseHandler(Callback, response) abort
+function! s:FindUsagesRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
-  call s:Request('/gotodefinition', function('s:GotoDefinitionResponseHandler', [a:Callback]))
+  let opts = {
+  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback])
+  \}
+  call s:Request('/gotodefinition', opts)
 endfunction
 
-function! s:GotoDefinitionResponseHandler(Callback, response) abort
+function! s:GotoDefinitionRH(Callback, response) abort
   if get(a:response.Body, 'FileName', v:null) != v:null
     call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
   else
@@ -156,8 +174,40 @@ function! s:GotoDefinitionResponseHandler(Callback, response) abort
   endif
 endfunction
 
+function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
+  let want_doc = g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
+  let want_snippet = g:OmniSharp_want_snippet ? 'true' : 'false'
+  let parameters = {
+  \ 'WordToComplete': a:partial,
+  \ 'WantDocumentationForEveryCompletionResult': want_doc,
+  \ 'WantSnippet': want_snippet,
+  \ 'WantMethodHeader': want_snippet,
+  \ 'WantReturnType': want_snippet
+  \}
+  let opts = {
+  \ 'ResponseHandler': function('s:GetCompletionsRH', [a:Callback]),
+  \ 'Parameters': parameters
+  \}
+  call s:Request('/autocomplete', opts)
+endfunction
+
+function! s:GetCompletionsRH(Callback, response) abort
+  let completions = []
+  for completion in a:response.Body
+    call add(completions, {
+    \ 'snip': get(completion, 'Snippet', ''),
+    \ 'word': get(completion, 'MethodHeader', completion.CompletionText),
+    \ 'menu': get(completion, 'ReturnType', completion.DisplayText),
+    \ 'info': substitute(get(completion, 'Description', ' '), '\r\n', '\n', 'g'),
+    \ 'icase': 1,
+    \ 'dup': 1
+    \})
+  endfor
+  call a:Callback(completions)
+endfunction
+
 function! OmniSharp#stdio#UpdateBuffer() abort
-  call s:Request('/updatebuffer')
+  call s:Request('/updatebuffer', {})
 endfunction
 
 let &cpoptions = s:save_cpo
