@@ -22,7 +22,7 @@ function! s:Request(command, opts) abort
   \   'Line': line('.'),
   \   'Column': col('.'),
   \   'Buffer': buffer
-  \  }
+  \ }
   \}
   if has_key(a:opts, 'Parameters')
     call extend(body.Arguments, a:opts.Parameters, 'force')
@@ -145,6 +145,18 @@ function! OmniSharp#stdio#FindImplementations(Callback) abort
 endfunction
 
 function! s:FindImplementationsRH(Callback, response) abort
+  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
+function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:FindSymbolRH', [a:Callback]),
+  \ 'Parameters': { 'Filter': a:filter }
+  \}
+  call s:Request('/findsymbols', opts)
+endfunction
+
+function! s:FindSymbolRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 

@@ -126,7 +126,7 @@ function! OmniSharp#FindUsages(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindUsages', [target, opts])
-    let loc = OmniSharp#stdio#FindUsages(Callback)
+    call OmniSharp#stdio#FindUsages(Callback)
   else
     let locs = OmniSharp#py#eval('findUsages()')
     if OmniSharp#CheckPyError() | return | endif
@@ -317,25 +317,32 @@ endfunction
 
 function! OmniSharp#FindSymbol(...) abort
   let filter = a:0 ? a:1 : ''
-  if !OmniSharp#IsServerRunning()
-    return
+  if !OmniSharp#IsServerRunning() | return | endif
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBFindSymbol', [filter])
+    call OmniSharp#stdio#FindSymbol(filter, Callback)
+  else
+    let locs = OmniSharp#py#eval(printf('findSymbols(%s)', string(filter)))
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBFindSymbol(filter, locs)
   endif
-  let quickfixes = OmniSharp#py#eval(printf('findSymbols(%s)', string(filter)))
-  if OmniSharp#CheckPyError() | return | endif
-  if empty(quickfixes)
+endfunction
+
+function! s:CBFindSymbol(filter, locations) abort
+  if empty(a:locations)
     echo 'No symbols found'
     return
   endif
   if g:OmniSharp_selector_ui ==? 'unite'
-    call unite#start([['OmniSharp/findsymbols', quickfixes]])
+    call unite#start([['OmniSharp/findsymbols', a:locations]])
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    call ctrlp#OmniSharp#findsymbols#setsymbols(quickfixes)
+    call ctrlp#OmniSharp#findsymbols#setsymbols(a:locations)
     call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#findsymbols(quickfixes)
+    call fzf#OmniSharp#findsymbols(a:locations)
   else
-    let title = 'Symbols'.(len(filter) ? ': '.filter : '')
-    call s:set_quickfix(quickfixes, title)
+    let title = 'Symbols' . (len(a:filter) ? ': ' . a:filter : '')
+    call s:set_quickfix(a:locations, title)
   endif
 endfunction
 
