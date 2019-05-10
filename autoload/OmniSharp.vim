@@ -942,18 +942,20 @@ function! s:DirectoryContainsFile(directory, file) abort
 endfunction
 
 let s:extension = has('win32') ? '.ps1' : '.sh'
-let s:script_location = expand('<sfile>:p:h:h').'/installer/omnisharp-manager'.s:extension
+let s:script_location = expand('<sfile>:p:h:h') . '/installer/omnisharp-manager' . s:extension
 function! OmniSharp#Install(...) abort
   echo 'Installing OmniSharp Roslyn...'
   call OmniSharp#StopAllServers()
 
+  let l:http = g:OmniSharp_server_stdio ? '' : ' -H'
   let l:version = a:000 != [] ? ' -v '.a:000[0] : ''
 
   if has('win32')
     if s:check_valid_powershell_settings()
-      let l:location = expand('$HOME').'\.omnisharp\omnisharp-roslyn'
-      call system('powershell "& ""'.s:script_location.'""" -H -l "'.l:location
-            \ .'"'.l:version)
+      let l:location = expand('$HOME') . '\.omnisharp\omnisharp-roslyn'
+      call system(
+      \ 'powershell "& ""' . s:script_location . '"""' . l:http .
+      \ ' -l "' . l:location . '"' . l:version)
 
       if v:shell_error
         echohl ErrorMsg
@@ -969,8 +971,9 @@ function! OmniSharp#Install(...) abort
     endif
   else
     let l:mono = g:OmniSharp_server_use_mono ? ' -M' : ''
-    let l:result =  systemlist('sh "'.s:script_location.'" -Hl "$HOME/.omnisharp/omnisharp-roslyn/"'
-          \ .l:mono.l:version)
+    let l:result = systemlist(
+    \ 'sh "' . s:script_location . '"' . l:http .
+    \ ' -l ' . '"$HOME/.omnisharp/omnisharp-roslyn/"' . l:mono . l:version)
 
     if v:shell_error
       echohl ErrorMsg
