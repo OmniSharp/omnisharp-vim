@@ -183,10 +183,6 @@ endfunction
 function! OmniSharp#FindMembers() abort
   let qf_taglist = OmniSharp#py#eval('findMembers()')
   if OmniSharp#CheckPyError() | return | endif
-
-  " Place the tags in the quickfix window, if possible
-  " TODO: Should this use the location window instead, since it is
-  " buffer-specific?
   if len(qf_taglist) > 1
     call s:set_quickfix(qf_taglist, 'Members')
   endif
@@ -548,11 +544,11 @@ endfunction
 
 function! OmniSharp#HighlightBuffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  if !OmniSharp#IsServerRunning() | return | endif
 
   if g:OmniSharp_server_stdio
     let ret = OmniSharp#stdio#FindHighlightTypes(function('s:CBHighlightBuffer'))
   else
+    if !OmniSharp#IsServerRunning() | return | endif
     let hltypes = OmniSharp#py#eval('findHighlightTypes()')
     if OmniSharp#CheckPyError() | return | endif
     call s:CBHighlightBuffer(hltypes)
@@ -686,8 +682,7 @@ function! OmniSharp#IsServerRunning(...) abort
   endif
 
   if g:OmniSharp_server_stdio
-    " TODO: Listen to server events to determine when the server is ready
-    let alive = 1
+    let alive = OmniSharp#proc#GetJob(sln_or_dir).loaded
   else
     let alive = OmniSharp#py#eval('checkAliveStatus()')
     if OmniSharp#CheckPyError() | return 0 | endif

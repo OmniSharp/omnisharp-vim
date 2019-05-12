@@ -46,7 +46,7 @@ function! s:Request(command, opts) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call ch_sendraw(OmniSharp#GetHost(), body . "\n")
+  call ch_sendraw(OmniSharp#GetHost().job_id, body . "\n")
 endfunction
 
 function! s:LocationsFromResponse(quickfixes) abort
@@ -78,7 +78,7 @@ function! s:LocationsFromResponse(quickfixes) abort
   return locations
 endfunction
 
-function! OmniSharp#stdio#HandleResponse(channelid, message) abort
+function! OmniSharp#stdio#HandleResponse(job, message) abort
   " TODO: Log it
   try
     let res = json_decode(a:message)
@@ -86,6 +86,15 @@ function! OmniSharp#stdio#HandleResponse(channelid, message) abort
     " TODO: Log it
     return
   endtry
+  if get(res, 'Type', '') ==# 'event'
+    if !a:job.loaded
+      let message = get(res.Body, 'Message', '')
+      if message ==# 'Configuration finished.'
+        call OmniSharp#proc#JobLoaded(a:job.job_id)
+      endif
+    endif
+    return
+  endif
   if !has_key(res, 'Request_seq') || !has_key(s:requests, res.Request_seq)
     return
   endif

@@ -2,6 +2,7 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 let s:jobs = {}
+let s:channels = {}
 
 " Neovim jobs {{{ "
 
@@ -21,8 +22,8 @@ endfunction
 
 function! OmniSharp#proc#neovimExitHandler(job_id, data, event) dict abort
   let jobkey = ''
-  for [key, id] in items(s:jobs)
-    if a:job_id == id
+  for [key, val] in items(s:jobs)
+    if a:job_id == val.job_id
       let jobkey = key
       break
     endif
@@ -47,7 +48,11 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   if g:OmniSharp_proc_debug
     let opts['on_stdout'] = 'OmniSharp#proc#neovimOutHandler'
   endif
-  return jobstart(a:command, opts)
+  let job = {
+  \ 'job_id': jobstart(a:command, opts),
+  \ 'loaded': 0
+  \}
+  return job
 endfunction
 
 " }}} Neovim jobs "
@@ -63,9 +68,7 @@ function! OmniSharp#proc#vimOutHandler(channel, message) abort
     echom printf('%s: %s', string(a:channel), string(a:message))
   endif
   if g:OmniSharp_server_stdio
-    " a:channel example:  'channel 7 open'
-    let channelid = substitute(a:channel, '^channel \(\d\+\) \w\+$', '\1', '')
-    call OmniSharp#stdio#HandleResponse(channelid, a:message)
+    call OmniSharp#stdio#HandleResponse(s:channels[a:channel], a:message)
   endif
 endfunction
 
@@ -85,7 +88,13 @@ function! OmniSharp#proc#vimJobStart(command) abort
   if g:OmniSharp_server_stdio || g:OmniSharp_proc_debug
     let opts['out_cb'] = 'OmniSharp#proc#vimOutHandler'
   endif
-  return job_start(a:command, opts)
+  let job = {
+  \ 'job_id': job_start(a:command, opts),
+  \ 'loaded': 0
+  \}
+  let channel_id = job_getchannel(job.job_id)
+  let s:channels[channel_id] = job
+  return job
 endfunction
 
 " }}} Vim jobs "
@@ -136,16 +145,16 @@ function! OmniSharp#proc#Start(command, jobkey) abort
     return
   endif
   if OmniSharp#proc#supportsNeovimJobs()
-    let job_id = OmniSharp#proc#neovimJobStart(a:command)
-    if job_id > 0
-      let s:jobs[a:jobkey] = job_id
+    let job = OmniSharp#proc#neovimJobStart(a:command)
+    if job.job_id > 0
+      let s:jobs[a:jobkey] = job
     else
       call OmniSharp#util#EchoErr('command is not executable: ' . a:command[0])
     endif
   elseif OmniSharp#proc#supportsVimJobs()
-    let job_id = OmniSharp#proc#vimJobStart(a:command)
-    if job_status(job_id) ==# 'run'
-      let s:jobs[a:jobkey] = job_id
+    let job = OmniSharp#proc#vimJobStart(a:command)
+    if job_status(job.job_id) ==# 'run'
+      let s:jobs[a:jobkey] = job
     else
       call OmniSharp#util#EchoErr('could not run command: ' . join(a:command, ' '))
     endif
@@ -164,16 +173,16 @@ function! OmniSharp#proc#StopJob(jobkey) abort
   if !OmniSharp#proc#IsJobRunning(a:jobkey)
     return
   endif
-  let job_id = s:jobs[a:jobkey]
+  let job = s:jobs[a:jobkey]
 
   if OmniSharp#proc#supportsNeovimJobs()
-    call jobstop(job_id)
+    call jobstop(job.job_id)
   elseif OmniSharp#proc#supportsVimJobs()
-    call job_stop(job_id)
+    call job_stop(job.job_id)
   elseif OmniSharp#proc#supportsVimDispatch()
-    call dispatch#abort_command(0, job_id.command)
+    call dispatch#abort_command(0, job.command)
   elseif OmniSharp#proc#supportsVimProc()
-    call job_id.kill()
+    call job.kill()
   endif
   if has_key(s:jobs, a:jobkey)
     call remove(s:jobs, a:jobkey)
@@ -188,22 +197,30 @@ function! OmniSharp#proc#IsJobRunning(jobkey) abort
   if !has_key(s:jobs, a:jobkey)
     return 0
   endif
-  let job_id = get(s:jobs, a:jobkey)
+  let job = get(s:jobs, a:jobkey)
   if OmniSharp#proc#supportsNeovimJobs()
     return 1
   elseif OmniSharp#proc#supportsVimJobs()
-    let status = job_status(job_id)
+    let status = job_status(job.job_id)
     return status ==# 'run'
   elseif OmniSharp#proc#supportsVimDispatch()
-    return dispatch#completed(job_id)
+    return dispatch#completed(job)
   elseif OmniSharp#proc#supportsVimProc()
-    let [cond, status] = job_id.checkpid()
+    let [cond, status] = job.checkpid()
     return status != 0
   endif
 endfunction
 
 function! OmniSharp#proc#GetJob(jobkey) abort
-  return get(s:jobs, a:jobkey)
+  return get(s:jobs, a:jobkey, '')
+endfunction
+
+function! OmniSharp#proc#JobLoaded(job_id) abort
+  for [key, val] in items(s:jobs)
+    if a:job_id == val.job_id
+      let s:jobs[key].loaded = 1
+    endif
+  endfor
 endfunction
 
 " }}} public functions "
