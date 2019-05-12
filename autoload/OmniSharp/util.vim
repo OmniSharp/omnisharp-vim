@@ -6,15 +6,30 @@ let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
 function! s:is_msys() abort
-  return strlen(system('grep MSYS_NT /proc/version')) > 0
+  if get(s:, 'is_msys_checked', 0)
+    return s:is_msys_val
+  endif
+  let s:is_msys_val = strlen(system('grep MSYS_NT /proc/version')) > 0
+  let s:is_msys_checked = 1
+  return s:is_msys_val
 endfunction
 
 function! s:is_cygwin() abort
-  return has('win32unix')
+  if get(s:, 'is_cygwin_checked', 0)
+    return s:is_cygwin_val
+  endif
+  let s:is_cygwin_val = has('win32unix')
+  let s:is_cygwin_checked = 1
+  return s:is_cygwin_val
 endfunction
 
 function! s:is_wsl() abort
-  return strlen(system('grep Microsoft /proc/version')) > 0
+  if get(s:, 'is_wsl_checked', 0)
+    return s:is_wsl_val
+  endif
+  let s:is_wsl_val = strlen(system('grep Microsoft /proc/version')) > 0
+  let s:is_wsl_checked = 1
+  return s:is_wsl_val
 endfunction
 
 function! OmniSharp#util#CheckCapabilities(...) abort
@@ -57,7 +72,7 @@ endfunction
 
 function! OmniSharp#util#TranslatePathForClient(filename) abort
   let filename = a:filename
-  if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_msys() || s:is_cygwin() || s:is_wsl())
+  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
     if s:is_msys()
       let prefix = '/'
     elseif s:is_cygwin()
@@ -73,7 +88,7 @@ endfunction
 
 function! OmniSharp#util#TranslatePathForServer(filename) abort
   let filename = a:filename
-  if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_msys() || s:is_cygwin() || s:is_wsl())
+  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
     " Future releases of WSL will have a wslpath tool, similar to cygpath - when
     " this becomes standard then this block can be replaced with a call to
     " wslpath/cygpath
