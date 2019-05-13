@@ -4,6 +4,12 @@ set cpoptions&vim
 let s:nextseq = 1001
 let s:requests = {}
 
+let s:logfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
+function! s:Log(message) abort
+  " Consider adding flag 's', to unsure the file is always flushed to disk
+  call writefile([a:message], s:logfile, 'a')
+endfunction
+
 function! s:Request(command, opts) abort
   if has_key(a:opts, 'BufNum') && a:opts.BufNum != buffer_number('%')
     let bufnum = a:opts.BufNum
@@ -46,7 +52,10 @@ function! s:Request(command, opts) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call ch_sendraw(OmniSharp#GetHost().job_id, body . "\n")
+  let job_id = OmniSharp#GetHost().job_id
+  call s:Log(job_id . '  Request: ' . a:command)
+  call s:Log(body)
+  call ch_sendraw(job_id, body . "\n")
 endfunction
 
 function! s:LocationsFromResponse(quickfixes) abort
@@ -79,11 +88,11 @@ function! s:LocationsFromResponse(quickfixes) abort
 endfunction
 
 function! OmniSharp#stdio#HandleResponse(job, message) abort
-  " TODO: Log it
+  call s:Log(a:job.job_id . '  ' . a:message)
   try
     let res = json_decode(a:message)
   catch
-    " TODO: Log it
+    call s:Log(a:job.job_id . '  JSON error: ' . v:exception)
     return
   endtry
   if get(res, 'Type', '') ==# 'event'
