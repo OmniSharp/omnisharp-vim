@@ -180,11 +180,24 @@ function! s:CBFindImplementations(target, opts, locations) abort
   return numImplementations
 endfunction
 
-function! OmniSharp#FindMembers() abort
-  let qf_taglist = OmniSharp#py#eval('findMembers()')
-  if OmniSharp#CheckPyError() | return | endif
-  if len(qf_taglist) > 1
-    call s:set_quickfix(qf_taglist, 'Members')
+function! OmniSharp#FindMembers(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#FindMembers(function('s:CBFindMembers', [opts]))
+  else
+    let locs = OmniSharp#py#eval('findMembers()')
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBFindMembers(opts, locs)
+  endif
+endfunction
+
+function! s:CBFindMembers(opts, locations) abort
+  let numMembers = len(a:locations)
+  if numMembers > 0
+    call s:set_quickfix(a:locations, 'Members')
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(numMembers)
   endif
 endfunction
 

@@ -179,6 +179,17 @@ function! s:FindImplementationsRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
+function! OmniSharp#stdio#FindMembers(Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:FindMembersRH', [a:Callback])
+  \}
+  call s:Request('/currentfilemembersasflat', opts)
+endfunction
+
+function! s:FindMembersRH(Callback, response) abort
+  call a:Callback(s:LocationsFromResponse(a:response.Body))
+endfunction
+
 function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindSymbolRH', [a:Callback]),
