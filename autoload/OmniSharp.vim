@@ -3,21 +3,16 @@ if !OmniSharp#util#CheckCapabilities() | finish | endif
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-" Load python helper functions
-call OmniSharp#py#bootstrap()
+if !g:OmniSharp_server_stdio
+  " Load python helper functions
+  call OmniSharp#py#bootstrap()
+  let g:OmniSharp_py_err = {}
+endif
 
 " Setup variable defaults
 let s:generated_snippets = {}
 let s:last_completion_dictionary = {}
 let s:alive_cache = []
-let g:OmniSharp_py_err = {}
-
-" Preserve backwards compatibility with older version of
-" g:OmniSharp_server_ports option
-if exists('g:OmniSharp_sln_ports')
-  let g:OmniSharp_server_ports = g:OmniSharp_sln_ports
-endif
-
 let s:initial_server_ports = copy(g:OmniSharp_server_ports)
 
 function! OmniSharp#GetPort(...) abort
@@ -204,27 +199,6 @@ endfunction
 function! OmniSharp#NavigateUp() abort
   call OmniSharp#py#eval('navigateUp()')
   call OmniSharp#CheckPyError()
-endfunction
-
-" Find the solution or directory for this file.
-function! OmniSharp#FindSolutionOrDir(...) abort
-  let interactive = a:0 ? a:1 : 1
-  let bufnum = a:0 > 1 ? a:2 : bufnr('%')
-  if empty(getbufvar(bufnum, 'OmniSharp_buf_server'))
-    let dir = s:FindServerRunningOnParentDirectory(bufnum)
-    if !empty(dir)
-      call setbufvar(bufnum, 'OmniSharp_buf_server', dir)
-    else
-      try
-        let sln = s:FindSolution(interactive, bufnum)
-        call setbufvar(bufnum, 'OmniSharp_buf_server', sln)
-      catch e
-        return ''
-      endtry
-    endif
-  endif
-
-  return getbufvar(bufnum, 'OmniSharp_buf_server')
 endfunction
 
 function! OmniSharp#NavigateDown() abort
@@ -705,6 +679,27 @@ function! OmniSharp#IsServerRunning(...) abort
     call add(s:alive_cache, sln_or_dir)
   endif
   return alive
+endfunction
+
+" Find the solution or directory for this file.
+function! OmniSharp#FindSolutionOrDir(...) abort
+  let interactive = a:0 ? a:1 : 1
+  let bufnum = a:0 > 1 ? a:2 : bufnr('%')
+  if empty(getbufvar(bufnum, 'OmniSharp_buf_server'))
+    let dir = s:FindServerRunningOnParentDirectory(bufnum)
+    if !empty(dir)
+      call setbufvar(bufnum, 'OmniSharp_buf_server', dir)
+    else
+      try
+        let sln = s:FindSolution(interactive, bufnum)
+        call setbufvar(bufnum, 'OmniSharp_buf_server', sln)
+      catch e
+        return ''
+      endtry
+    endif
+  endif
+
+  return getbufvar(bufnum, 'OmniSharp_buf_server')
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
