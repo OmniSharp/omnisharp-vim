@@ -42,12 +42,24 @@ if g:OmniSharp_highlight_types
   augroup END
 endif
 
-" Initialize OmniSharp as an asyncomplete source
-autocmd User asyncomplete_setup call asyncomplete#register_source({
-\   'name': 'OmniSharp',
-\   'whitelist': ['cs'],
-\   'completor': function('asyncomplete#sources#OmniSharp#completor')
-\ })
+augroup OmniSharp#Integrations
+  autocmd!
+
+  " Initialize OmniSharp as an asyncomplete source
+  autocmd User asyncomplete_setup call asyncomplete#register_source({
+  \ 'name': 'OmniSharp',
+  \ 'whitelist': ['cs'],
+  \ 'completor': function('asyncomplete#sources#OmniSharp#completor')
+  \})
+
+  " Listen for ALE requests
+  if g:OmniSharp_server_stdio
+    autocmd User ALEWantResults |
+    \ if getbufvar(g:ale_want_results_buffer, '&filetype') ==# 'cs' |
+    \   call ale#sources#OmniSharp#WantResults(g:ale_want_results_buffer) |
+    \ endif
+  endif
+augroup END
 
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(

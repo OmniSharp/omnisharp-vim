@@ -5,13 +5,25 @@ let s:nextseq = 1001
 let s:requests = {}
 
 function! s:Request(command, opts) abort
-  let filename = OmniSharp#util#TranslatePathForServer(expand('%:p'))
+  if has_key(a:opts, 'BufNum') && a:opts.BufNum != buffer_number('%')
+    let bufnum = a:opts.BufNum
+    let lnum = 1
+    let cnum = 1
+  else
+    let bufnum = buffer_number('%')
+    let lnum = line('.')
+    let cnum = col('.')
+  endif
+  let filename = OmniSharp#util#TranslatePathForServer(
+  \ fnamemodify(bufname(bufnum), ':p'))
+  let lines = getbufline(bufnum, 1, '$')
+  let tmp = join(lines, '')
   " Unique string separator which must not exist in the buffer
-  let sep = matchstr(reltimestr(reltime()), '\v\.@<=\d+')
-  while search(sep, 'n')
-    let sep = matchstr(reltimestr(reltime()), '\v\.@<=\d+')
+  let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
+  while stridx(tmp, sep) >= 0
+    let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
   endwhile
-  let buffer = join(getline(1, '$'), sep)
+  let buffer = join(lines, sep)
 
   let body = {
   \ 'Seq': s:nextseq,
@@ -19,8 +31,8 @@ function! s:Request(command, opts) abort
   \ 'Type': 'Request',
   \ 'Arguments': {
   \   'Filename': filename,
-  \   'Line': line('.'),
-  \   'Column': col('.'),
+  \   'Line': lnum,
+  \   'Column': cnum,
   \   'Buffer': buffer
   \ }
   \}
@@ -58,7 +70,7 @@ function! s:LocationsFromResponse(quickfixes) abort
     if loglevel !=# ''
       let location.type = loglevel ==# 'Error' ? 'E' : 'W'
       if loglevel ==# 'Hidden'
-        let location.subtype = 'Style'
+        let location.subtype = 'style'
       endif
     endif
     call add(locations, location)
@@ -83,10 +95,11 @@ function! OmniSharp#stdio#HandleResponse(channelid, message) abort
   endif
 endfunction
 
-function! OmniSharp#stdio#CodeCheck(Callback) abort
+function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:CodeCheckRH', [a:Callback])
   \}
+  call extend(opts, a:opts, 'force')
   call s:Request('/codecheck', opts)
 endfunction
 

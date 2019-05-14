@@ -435,7 +435,7 @@ function! OmniSharp#CodeCheck(...) abort
   endif
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    let loc = OmniSharp#stdio#CodeCheck(function('s:CBCodeCheck', [opts]))
+    call OmniSharp#stdio#CodeCheck({}, function('s:CBCodeCheck', [opts]))
   else
     let codecheck = OmniSharp#py#eval('codeCheck()')
     if OmniSharp#CheckPyError() | return | endif
@@ -686,7 +686,7 @@ function! OmniSharp#IsServerRunning(...) abort
   endif
 
   if g:OmniSharp_server_stdio
-    " TODO: Call "/checkalivestatus"?
+    " TODO: Listen to server events to determine when the server is ready
     let alive = 1
   else
     let alive = OmniSharp#py#eval('checkAliveStatus()')

@@ -1,5 +1,8 @@
 if !get(g:, 'OmniSharp_loaded', 0) | finish | endif
 if !OmniSharp#util#CheckCapabilities() | finish | endif
+" When using async/stdio, a different method is used, see
+" autoload/ale/sources/OmniSharp.vim
+if g:OmniSharp_server_stdio | finish | endif
 
 let s:delimiter = '@@@'
 
