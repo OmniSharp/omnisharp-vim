@@ -260,6 +260,26 @@ function! s:GetCompletionsRH(Callback, response) abort
   call a:Callback(completions)
 endfunction
 
+function! OmniSharp#stdio#TypeLookup(includeDocumentation, Callback) abort
+  let includeDocumentation = a:includeDocumentation ? 'true' : 'false'
+  let opts = {
+  \ 'ResponseHandler': function('s:TypeLookupRH', [a:Callback]),
+  \ 'Parameters': { 'IncludeDocumentation': includeDocumentation}
+  \}
+  call s:Request('/typelookup', opts)
+endfunction
+
+function! s:TypeLookupRH(Callback, response) abort
+  if !a:response.Success
+    call a:Callback({ 'type': '', 'doc': '' })
+  endif
+  let body = a:response.Body
+  call a:Callback({
+  \ 'type': body.Type != v:null ? body.Type : '',
+  \ 'doc': body.Documentation != v:null ? body.Documentation : ''
+  \})
+endfunction
+
 function! OmniSharp#stdio#UpdateBuffer() abort
   call s:Request('/updatebuffer', {})
 endfunction

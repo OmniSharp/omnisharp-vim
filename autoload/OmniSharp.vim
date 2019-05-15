@@ -435,27 +435,42 @@ function! s:CBCodeCheck(opts, codecheck) abort
   return b:codecheck
 endfunction
 
-function! OmniSharp#TypeLookupWithoutDocumentation() abort
-  call OmniSharp#TypeLookup(0)
+function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
+  call OmniSharp#TypeLookup(0, a:0 ? a:1 : 0)
 endfunction
 
-function! OmniSharp#TypeLookupWithDocumentation() abort
-  call OmniSharp#TypeLookup(1)
+function! OmniSharp#TypeLookupWithDocumentation(...) abort
+  call OmniSharp#TypeLookup(1, a:0 ? a:1 : 0)
 endfunction
 
-function! OmniSharp#TypeLookup(includeDocumentation) abort
-  if g:OmniSharp_typeLookupInPreview || a:includeDocumentation
-    let ret = OmniSharp#py#eval('typeLookup(True)')
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with the type (not the
+" documentation)
+function! OmniSharp#TypeLookup(includeDocumentation, ...) abort
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
+  let opts.Doc = g:OmniSharp_typeLookupInPreview || a:includeDocumentation
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#TypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
+  else
+    let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
+    let response = OmniSharp#py#eval(pycmd)
     if OmniSharp#CheckPyError() | return | endif
-    if len(ret.doc) > 0
-      call s:writeToPreview(ret.type . "\n\n" . ret.doc)
+    return s:CBCodeCheck(opts, response)
+  endif
+endfunction
+
+function! s:CBTypeLookup(opts, response) abort
+  if a:opts.Doc
+    if len(a:response.doc) > 0
+      call s:writeToPreview(a:response.type . "\n\n" . a:response.doc)
     else
-      call s:writeToPreview(ret.type)
+      call s:writeToPreview(a:response.type)
     endif
   else
-    let ret = OmniSharp#py#eval('typeLookup(False)')
-    if OmniSharp#CheckPyError() | return | endif
-    call OmniSharp#Echo(ret.type)
+    echo a:response.type[0 : &columns * &cmdheight - 2]
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(a:response.type)
   endif
 endfunction
 
@@ -481,10 +496,6 @@ function! OmniSharp#SignatureHelp() abort
     endif
   endif
   call s:writeToPreview(output)
-endfunction
-
-function! OmniSharp#Echo(message) abort
-  echo a:message[0:&columns * &cmdheight - 2]
 endfunction
 
 function! OmniSharp#Rename() abort
