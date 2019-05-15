@@ -656,7 +656,13 @@ function! OmniSharp#IsAnyServerRunning() abort
 endfunction
 
 function! OmniSharp#IsServerRunning(...) abort
-  let sln_or_dir = a:0 ? a:1 : OmniSharp#FindSolutionOrDir(0)
+  let opts = a:0 ? a:1 : {}
+  if has_key(opts, 'sln_or_dir')
+    let sln_or_dir = opts.sln_or_dir
+  else
+    let bufnum = get(opts, 'bufnum', bufnr('%'))
+    let sln_or_dir = OmniSharp#FindSolutionOrDir(bufnum)
+  endif
   if empty(sln_or_dir)
     return 0
   endif
@@ -760,7 +766,7 @@ function! OmniSharp#StartServer(...) abort
     " If the port is hardcoded, we should check if any other vim instances have
     " started this server
     if !running && !g:OmniSharp_server_stdio && s:IsServerPortHardcoded(sln_or_dir)
-      let running = OmniSharp#IsServerRunning(sln_or_dir)
+      let running = OmniSharp#IsServerRunning({ 'sln_or_dir': sln_or_dir })
     endif
 
     if running | return | endif

@@ -1,6 +1,6 @@
 function! ale#sources#OmniSharp#WantResults(buffer) abort
   if OmniSharp#FugitiveCheck() | return | endif
-  if !OmniSharp#IsServerRunning() | return | endif
+  if !OmniSharp#IsServerRunning({ 'bufnum': a:buffer }) | return | endif
 
   call ale#other_source#StartChecking(a:buffer, 'OmniSharp')
   let opts = { 'BufNum': a:buffer }

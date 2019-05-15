@@ -55,10 +55,12 @@ augroup OmniSharp#Integrations
 
   " Listen for ALE requests
   if g:OmniSharp_server_stdio
-    autocmd User ALEWantResults |
-    \ if getbufvar(g:ale_want_results_buffer, '&filetype') ==# 'cs' |
-    \   call ale#sources#OmniSharp#WantResults(g:ale_want_results_buffer) |
-    \ endif
+    function! s:ALEWantResults() abort
+      if getbufvar(g:ale_want_results_buffer, '&filetype') ==# 'cs'
+        call ale#sources#OmniSharp#WantResults(g:ale_want_results_buffer)
+      endif
+    endfunction
+    autocmd User ALEWantResults call s:ALEWantResults()
   endif
 augroup END
 
