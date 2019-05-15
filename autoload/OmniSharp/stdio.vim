@@ -218,21 +218,6 @@ function! s:FindUsagesRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
-function! OmniSharp#stdio#GotoDefinition(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback])
-  \}
-  call s:Request('/gotodefinition', opts)
-endfunction
-
-function! s:GotoDefinitionRH(Callback, response) abort
-  if get(a:response.Body, 'FileName', v:null) != v:null
-    call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
-  else
-    call a:Callback(0)
-  endif
-endfunction
-
 function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
   let want_doc = g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
   let want_snippet = g:OmniSharp_want_snippet ? 'true' : 'false'
@@ -263,6 +248,41 @@ function! s:GetCompletionsRH(Callback, response) abort
     \})
   endfor
   call a:Callback(completions)
+endfunction
+
+function! OmniSharp#stdio#GotoDefinition(Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback])
+  \}
+  call s:Request('/gotodefinition', opts)
+endfunction
+
+function! s:GotoDefinitionRH(Callback, response) abort
+  if get(a:response.Body, 'FileName', v:null) != v:null
+    call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
+  else
+    call a:Callback(0)
+  endif
+endfunction
+
+function! OmniSharp#stdio#NavigateDown() abort
+  let opts = {
+  \ 'ResponseHandler': function('s:NavigateRH')
+  \}
+  call s:Request('/navigatedown', opts)
+endfunction
+
+function! OmniSharp#stdio#NavigateUp() abort
+  let opts = {
+  \ 'ResponseHandler': function('s:NavigateRH')
+  \}
+  call s:Request('/navigateup', opts)
+endfunction
+
+function! s:NavigateRH(response) abort
+  if !a:response.Success | return | endif
+  normal! m'
+  call cursor(a:response.Body.Line, a:response.Body.Column)
 endfunction
 
 function! OmniSharp#stdio#TypeLookup(includeDocumentation, Callback) abort

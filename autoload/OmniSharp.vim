@@ -149,7 +149,7 @@ function! OmniSharp#FindImplementations(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindImplementations', [target, opts])
-    let loc = OmniSharp#stdio#FindImplementations(Callback)
+    call OmniSharp#stdio#FindImplementations(Callback)
   else
     let locs = OmniSharp#py#eval('findImplementations()')
     if OmniSharp#CheckPyError() | return | endif
@@ -196,14 +196,22 @@ function! s:CBFindMembers(opts, locations) abort
   endif
 endfunction
 
-function! OmniSharp#NavigateUp() abort
-  call OmniSharp#py#eval('navigateUp()')
-  call OmniSharp#CheckPyError()
+function! OmniSharp#NavigateDown() abort
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#NavigateDown()
+  else
+    call OmniSharp#py#eval('navigateDown()')
+    call OmniSharp#CheckPyError()
+  endif
 endfunction
 
-function! OmniSharp#NavigateDown() abort
-  call OmniSharp#py#eval('navigateDown()')
-  call OmniSharp#CheckPyError()
+function! OmniSharp#NavigateUp() abort
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#NavigateUp()
+  else
+    call OmniSharp#py#eval('navigateUp()')
+    call OmniSharp#CheckPyError()
+  endif
 endfunction
 
 function! OmniSharp#GotoDefinition() abort
