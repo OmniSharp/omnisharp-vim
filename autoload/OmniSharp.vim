@@ -293,6 +293,7 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
     endif
     if a:location.lnum > 0 && a:location.col > 0
       call cursor(a:location.lnum, a:location.col)
+      redraw
     endif
     return 1
   endif
