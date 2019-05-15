@@ -483,22 +483,30 @@ function! s:CBTypeLookup(opts, response) abort
 endfunction
 
 function! OmniSharp#SignatureHelp() abort
-  let result = OmniSharp#py#eval('signatureHelp()')
-  if OmniSharp#CheckPyError() | return | endif
-  if type(result) != type({})
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#SignatureHelp(function('s:CBSignatureHelp'))
+  else
+    let response = OmniSharp#py#eval('signatureHelp()')
+    if OmniSharp#CheckPyError() | return | endif
+    call s:CBSignatureHelp(response)
+  endif
+endfunction
+
+function! s:CBSignatureHelp(response) abort
+  if type(a:response) != type({})
     echo 'No signature help found'
     " Clear existing preview content
     let output = ''
   else
-    if result.ActiveSignature == -1
+    if a:response.ActiveSignature == -1
       " No signature matches - display all options
-      let output = join(map(result.Signatures, 'v:val.Label'), "\n")
+      let output = join(map(a:response.Signatures, 'v:val.Label'), "\n")
     else
-      let signature = result.Signatures[result.ActiveSignature]
+      let signature = a:response.Signatures[a:response.ActiveSignature]
       if len(signature.Parameters) == 0
         let output = signature.Label
       else
-        let parameter = signature.Parameters[result.ActiveParameter]
+        let parameter = signature.Parameters[a:response.ActiveParameter]
         let output = join([parameter.Label, parameter.Documentation], "\n")
       endif
     endif

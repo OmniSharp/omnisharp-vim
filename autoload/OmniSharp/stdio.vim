@@ -285,6 +285,18 @@ function! s:NavigateRH(response) abort
   call cursor(a:response.Body.Line, a:response.Body.Column)
 endfunction
 
+function! OmniSharp#stdio#SignatureHelp(Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:SignatureHelpRH', [a:Callback])
+  \}
+  call s:Request('/signaturehelp', opts)
+endfunction
+
+function! s:SignatureHelpRH(Callback, response) abort
+  if !a:response.Success | return | endif
+  call a:Callback(a:response.Body)
+endfunction
+
 function! OmniSharp#stdio#TypeLookup(includeDocumentation, Callback) abort
   let includeDocumentation = a:includeDocumentation ? 'true' : 'false'
   let opts = {
