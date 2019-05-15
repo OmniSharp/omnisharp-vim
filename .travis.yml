@@ -1,8 +1,14 @@
 sudo: false
 language: python
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
+  - 2.7
+  - 3.5
+  - 3.6
+# Enable 3.7 without globally enabling sudo and dist: xenial for other build jobs
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
 install: pip install tox-travis
 script: cd ${TRAVIS_BUILD_DIR}/python; tox
