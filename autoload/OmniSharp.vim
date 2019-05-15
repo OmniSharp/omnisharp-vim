@@ -288,16 +288,10 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
       " same functionality.
       normal! m'
     else
-      let command = 'edit ' . fnameescape(a:location.filename)
-      if a:noautocmds
-        let command = 'noautocmd ' . command
-      endif
-      try
-        execute command
-      catch /^Vim(edit):E37/
-        call OmniSharp#util#EchoErr('No write since last change')
-        return 0
-      endtry
+      execute
+      \ (a:noautocmds ? 'noautocmd' : '')
+      \ (&modified && !&hidden ? 'split' : 'edit')
+      \ fnameescape(a:location.filename)
     endif
     if a:location.lnum > 0 && a:location.col > 0
       call cursor(a:location.lnum, a:location.col)
