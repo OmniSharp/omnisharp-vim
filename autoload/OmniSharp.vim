@@ -543,22 +543,24 @@ endfunction
 
 function! OmniSharp#HighlightBuffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-
+  let opts = { 'BufNum':  bufnr('%') }
   if g:OmniSharp_server_stdio
-    let ret = OmniSharp#stdio#FindHighlightTypes(function('s:CBHighlightBuffer'))
+    let Callback = function('s:CBHighlightBuffer', [opts])
+    call OmniSharp#stdio#FindHighlightTypes(Callback)
   else
     if !OmniSharp#IsServerRunning() | return | endif
     let hltypes = OmniSharp#py#eval('findHighlightTypes()')
     if OmniSharp#CheckPyError() | return | endif
-    call s:CBHighlightBuffer(hltypes)
+    call s:CBHighlightBuffer(opts, hltypes)
   endif
 endfunction
 
-function! s:CBHighlightBuffer(hltypes) abort
+function! s:CBHighlightBuffer(opts, hltypes) abort
   if has_key(a:hltypes, 'error')
     echohl WarningMsg | echom a:hltypes.error | echohl None
     return
   endif
+  if bufnr('%') != a:opts.BufNum | return | endif
 
   let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
 

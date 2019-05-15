@@ -11,12 +11,18 @@ function! s:Log(message) abort
 endfunction
 
 function! s:Request(command, opts) abort
-  if has_key(a:opts, 'BufNum') && a:opts.BufNum != buffer_number('%')
+  let job = OmniSharp#GetHost()
+  if type(job) != type({}) || !has_key(job, 'job_id')
+    return 0
+  endif
+  let job_id = job.job_id
+  call s:Log(job_id . '  Request: ' . a:command)
+  if has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
     let bufnum = a:opts.BufNum
     let lnum = 1
     let cnum = 1
   else
-    let bufnum = buffer_number('%')
+    let bufnum = bufnr('%')
     let lnum = line('.')
     let cnum = col('.')
   endif
@@ -52,10 +58,9 @@ function! s:Request(command, opts) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  let job_id = OmniSharp#GetHost().job_id
-  call s:Log(job_id . '  Request: ' . a:command)
   call s:Log(body)
   call ch_sendraw(job_id, body . "\n")
+  return 1
 endfunction
 
 function! s:LocationsFromResponse(quickfixes) abort
