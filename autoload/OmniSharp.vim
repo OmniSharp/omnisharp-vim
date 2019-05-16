@@ -345,42 +345,68 @@ endfunction
 " uses the code actions to pre-populate the code actions for
 " OmniSharp#GetCodeActions, and clears them on CursorMoved.
 "
-" If a callback function is passed in, the callback will also be called on
+" If a single callback function is passed in, the callback will be called on
 " CursorMoved, allowing this function to be used to set up a temporary "Code
 " actions available" flag, e.g. in the statusline or signs column, and the
 " callback function can be used to clear the flag.
+"
+" If a dict is passed in, the dict may contain one or both of 'CallbackCleanup'
+" and 'CallbackCount' funcrefs. 'CallbackCleanup' is the single callback
+" function mentioned above. 'CallbackCount' is called after a response with the
+" number of actions available.
+"
+" call OmniSharp#CountCodeActions({-> execute('sign unplace 99')})
+" call OmniSharp#CountCodeActions({
+" \ 'CallbackCleanup': {-> execute('sign unplace 99')},
+" \ 'CallbackCount': function('PlaceSign')
+" \}
 function! OmniSharp#CountCodeActions(...) abort
-  let actions = OmniSharp#py#eval('getCodeActions("normal")')
-  if OmniSharp#CheckPyError() | return 0 | endif
-  let s:actions = actions
-
-  " v:t_func was added in vim8 - this form is backwards-compatible
   if a:0 && type(a:1) == type(function('tr'))
-    let s:cb = a:1
+    let opts = { 'CallbackCleanup': a:1 }
+  elseif a:0 && type(a:1) == type({})
+    let opts = a:1
   endif
 
-  function! s:CleanupCodeActions() abort
-    unlet s:actions
-    if exists('s:cb')
-      call s:cb()
-      unlet s:cb
-    endif
-    autocmd! OmniSharp#CountCodeActions
-  endfunction
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBCountCodeActions', [opts])
+    call OmniSharp#stdio#GetCodeActions('normal', Callback)
+  else
+    let actions = OmniSharp#py#eval('getCodeActions("normal")')
+    if OmniSharp#CheckPyError() | return | endif
+    call s:CBCountCodeActions(opts, actions)
+  endif
+endfunction
+
+function! s:CBCountCodeActions(opts, actions) abort
+  let s:actions = a:actions
+
+  if has_key(a:opts, 'CallbackCount')
+    call a:opts.CallbackCount(len(s:actions))
+  endif
+  let s:Cleanup = function('s:CleanupCodeActions', [a:opts])
 
   augroup OmniSharp#CountCodeActions
     autocmd!
-    autocmd CursorMoved <buffer> call s:CleanupCodeActions()
-    autocmd CursorMovedI <buffer> call s:CleanupCodeActions()
-    autocmd BufLeave <buffer> call s:CleanupCodeActions()
+    autocmd CursorMoved <buffer> call s:Cleanup()
+    autocmd CursorMovedI <buffer> call s:Cleanup()
+    autocmd BufLeave <buffer> call s:Cleanup()
   augroup END
 
   return len(s:actions)
 endfunction
 
+function! s:CleanupCodeActions(opts) abort
+  unlet s:actions
+  unlet s:Cleanup
+  if has_key(a:opts, 'CallbackCleanup')
+    call a:opts.CallbackCleanup()
+  endif
+  autocmd! OmniSharp#CountCodeActions
+endfunction
+
 function! OmniSharp#GetCodeActions(mode) range abort
   if exists('s:actions')
-    let actions = s:actions
+    call s:CBGetCodeActions(a:mode, s:actions)
   elseif g:OmniSharp_server_stdio
     let Callback = function('s:CBGetCodeActions', [a:mode])
     call OmniSharp#stdio#GetCodeActions(a:mode, Callback)
