@@ -92,6 +92,15 @@ function! s:LocationsFromResponse(quickfixes) abort
   return locations
 endfunction
 
+function! s:SetBuffer(text) abort
+  if a:text == v:null | return 0 | endif
+  let pos = getpos('.')
+  %delete | call setline(1, split(a:text, "\r\n"))
+  let pos[1] = min([pos[1], line('$')])
+  call setpos('.', pos)
+  return 1
+endfunction
+
 function! OmniSharp#stdio#HandleResponse(job, message) abort
   call s:Log(a:job.job_id . '  ' . a:message)
   try
@@ -218,6 +227,35 @@ function! s:FindUsagesRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
+function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:GetCodeActionsRH', [a:Callback])
+  \}
+  if a:mode ==# 'visual'
+    let start = getpos("'<")
+    let end = getpos("'>")
+    let s:codeActionParameters = {
+    \ 'Selection': {
+    \   'Start': {
+    \     'Line': start[1],
+    \     'Column': start[2]
+    \   },
+    \   'End': {
+    \     'Line': end[1],
+    \     'Column': end[2]
+    \   }
+    \ }
+    \}
+    let opts.Parameters = s:codeActionParameters
+  endif
+  call s:Request('/v2/getcodeactions', opts)
+endfunction
+
+function! s:GetCodeActionsRH(Callback, response) abort
+  if !a:response.Success | return | endif
+  call a:Callback(a:response.Body.CodeActions)
+endfunction
+
 function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
   let want_doc = g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
   let want_snippet = g:OmniSharp_want_snippet ? 'true' : 'false'
@@ -291,6 +329,51 @@ function! s:NavigateRH(response) abort
   if !a:response.Success | return | endif
   normal! m'
   call cursor(a:response.Body.Line, a:response.Body.Column)
+endfunction
+
+function! OmniSharp#stdio#RunCodeAction(action) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:RunCodeActionRH'),
+  \ 'Parameters': {
+  \   'Identifier': a:action.Identifier
+  \ }
+  \}
+  if exists('s:codeActionParameters')
+    call extend(opts.Parameters, s:codeActionParameters, 'force')
+  endif
+  call s:Request('/v2/runcodeaction', opts)
+endfunction
+
+function! s:RunCodeActionRH(response) abort
+  if !a:response.Success | return | endif
+  let changes = get(a:response.Body, 'Changes', [])
+  if len(changes) == 0
+    echo 'No action taken'
+    return
+  endif
+  let bufname = bufname('%')
+  let bufnum = bufnr('%')
+  let pos = getpos('.')
+  let hidden_bak = &hidden | set hidden
+  for change in changes
+    call OmniSharp#JumpToLocation({
+    \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
+    \}, 1)
+    if !s:SetBuffer(get(change, 'Buffer', v:null))
+      for filechange in get(change, 'Changes', [])
+        call s:SetBuffer(get(filechange, 'NewText', v:null))
+      endfor
+    endif
+    if bufnr('%') != bufnum
+      silent write | silent edit
+    endif
+    call OmniSharp#JumpToLocation({
+    \ 'filename': bufname,
+    \ 'lnum': pos[1],
+    \ 'col': pos[2]
+    \}, 1)
+    let &hidden = hidden_bak
+  endfor
 endfunction
 
 function! OmniSharp#stdio#SignatureHelp(Callback) abort

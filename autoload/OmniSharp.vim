@@ -302,7 +302,7 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
       \ (&modified && !&hidden ? 'split' : 'edit')
       \ fnameescape(a:location.filename)
     endif
-    if a:location.lnum > 0 && a:location.col > 0
+    if has_key(a:location, 'lnum') && a:location.lnum > 0
       call cursor(a:location.lnum, a:location.col)
       redraw
     endif
@@ -381,41 +381,51 @@ endfunction
 function! OmniSharp#GetCodeActions(mode) range abort
   if exists('s:actions')
     let actions = s:actions
+  elseif g:OmniSharp_server_stdio
+    let Callback = function('s:CBGetCodeActions', [a:mode])
+    call OmniSharp#stdio#GetCodeActions(a:mode, Callback)
   else
     let command = printf('getCodeActions(%s)', string(a:mode))
     let actions = OmniSharp#py#eval(command)
     if OmniSharp#CheckPyError() | return | endif
+    call s:CBGetCodeActions(a:mode, actions)
   endif
-  if empty(actions)
+endfunction
+
+function! s:CBGetCodeActions(mode, actions) abort
+  if empty(a:actions)
     echo 'No code actions found'
     return
   endif
   if g:OmniSharp_selector_ui ==? 'unite'
     let context = {'empty': 0, 'auto_resize': 1}
-    call unite#start([['OmniSharp/findcodeactions', a:mode, actions]], context)
+    call unite#start([['OmniSharp/findcodeactions', a:mode, a:actions]], context)
   elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, actions)
+    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, a:actions)
     call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#getcodeactions(a:mode, actions)
+    call fzf#OmniSharp#getcodeactions(a:mode, a:actions)
   else
     let message = []
     let i = 0
-    for action in actions
+    for action in a:actions
       let i += 1
       call add(message, printf(' %2d. %s', i, action.Name))
     endfor
     call add(message, 'Enter an action number, or just hit Enter to cancel: ')
     let selection = str2nr(input(join(message, "\n")))
     if type(selection) == type(0) && selection > 0 && selection <= i
-      let action = actions[selection - 1]
-      let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
-      let command = printf('runCodeAction(''%s'', ''%s'')', a:mode, command)
-
-      let action = OmniSharp#py#eval(command)
-      if OmniSharp#CheckPyError() | return | endif
-      if !action
-        echo 'No action taken'
+      let action = a:actions[selection - 1]
+      if g:OmniSharp_server_stdio
+        call OmniSharp#stdio#RunCodeAction(action)
+      else
+        let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+        let command = printf('runCodeAction(''%s'', ''%s'')', a:mode, command)
+        let action = OmniSharp#py#eval(command)
+        if OmniSharp#CheckPyError() | return | endif
+        if !action
+          echo 'No action taken'
+        endif
       endif
     endif
   endif
