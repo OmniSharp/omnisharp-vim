@@ -225,8 +225,8 @@ function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
   \ 'WordToComplete': a:partial,
   \ 'WantDocumentationForEveryCompletionResult': want_doc,
   \ 'WantSnippet': want_snippet,
-  \ 'WantMethodHeader': want_snippet,
-  \ 'WantReturnType': want_snippet
+  \ 'WantMethodHeader': 'true',
+  \ 'WantReturnType': 'true'
   \}
   let opts = {
   \ 'ResponseHandler': function('s:GetCompletionsRH', [a:Callback]),
@@ -237,12 +237,20 @@ endfunction
 
 function! s:GetCompletionsRH(Callback, response) abort
   let completions = []
-  for completion in a:response.Body
+  for cmp in a:response.Body
+    if g:OmniSharp_want_snippet
+      let word = cmp.MethodHeader != v:null ? cmp.MethodHeader : cmp.CompletionText
+      let menu = cmp.ReturnType != v:null ? cmp.ReturnType : cmp.DisplayText
+    else
+      let word = cmp.CompletionText != v:null ? cmp.CompletionText : cmp.MethodHeader
+      let menu = (cmp.ReturnType != v:null ? cmp.ReturnType . ' ' : '') .
+      \ ' ' . (cmp.DisplayText != v:null ? cmp.DisplayText : cmp.MethodHeader)
+    endif
     call add(completions, {
-    \ 'snip': get(completion, 'Snippet', ''),
-    \ 'word': get(completion, 'MethodHeader', completion.CompletionText),
-    \ 'menu': get(completion, 'ReturnType', completion.DisplayText),
-    \ 'info': substitute(get(completion, 'Description', ' '), '\r\n', '\n', 'g'),
+    \ 'snip': get(cmp, 'Snippet', ''),
+    \ 'word': word,
+    \ 'menu': menu,
+    \ 'info': substitute(get(cmp, 'Description', ' '), '\r\n', '\n', 'g'),
     \ 'icase': 1,
     \ 'dup': 1
     \})
