@@ -193,11 +193,16 @@ function! OmniSharp#proc#ListRunningJobs() abort
   return filter(keys(s:jobs), 'OmniSharp#proc#IsJobRunning(v:val)')
 endfunction
 
-function! OmniSharp#proc#IsJobRunning(jobkey) abort
-  if !has_key(s:jobs, a:jobkey)
-    return 0
+function! OmniSharp#proc#IsJobRunning(job) abort
+  " Either a jobkey (sln_or_dir) or a job may be passed in
+  if type(a:job) == type({})
+    let job = a:job
+  else
+    if !has_key(s:jobs, a:job)
+      return 0
+    endif
+    let job = get(s:jobs, a:job)
   endif
-  let job = get(s:jobs, a:jobkey)
   if OmniSharp#proc#supportsNeovimJobs()
     return 1
   elseif OmniSharp#proc#supportsVimJobs()

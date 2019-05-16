@@ -11,8 +11,8 @@ function! s:Log(message) abort
 endfunction
 
 function! s:Request(command, opts) abort
-  let job = OmniSharp#GetHost()
-  if type(job) != type({}) || !has_key(job, 'job_id')
+  let job = OmniSharp#GetHost().job
+  if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
     return 0
   endif
   let job_id = job.job_id

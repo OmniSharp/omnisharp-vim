@@ -44,7 +44,10 @@ function! OmniSharp#GetHost(...) abort
   if empty(getbufvar(bufnum, 'OmniSharp_host'))
     let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnum)
     if g:OmniSharp_server_stdio
-      let host = OmniSharp#proc#GetJob(sln_or_dir)
+      let host = {
+      \ 'job': OmniSharp#proc#GetJob(sln_or_dir),
+      \ 'sln_or_dir': sln_or_dir
+      \}
     else
       let port = OmniSharp#GetPort(sln_or_dir)
       if port == 0
@@ -53,6 +56,12 @@ function! OmniSharp#GetHost(...) abort
       let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     endif
     call setbufvar(bufnum, 'OmniSharp_host', host)
+  endif
+  if g:OmniSharp_server_stdio
+    let host = getbufvar(bufnum, 'OmniSharp_host')
+    if !OmniSharp#proc#IsJobRunning(host.job)
+      let host.job = OmniSharp#proc#GetJob(host.sln_or_dir)
+    endif
   endif
   return getbufvar(bufnum, 'OmniSharp_host')
 endfunction
@@ -693,10 +702,7 @@ function! OmniSharp#IsServerRunning(...) abort
     endif
   endif
 
-  let idx = index(s:alive_cache, sln_or_dir)
-  if idx >= 0
-    return 1
-  endif
+  if index(s:alive_cache, sln_or_dir) >= 0 | return 1 | endif
 
   if g:OmniSharp_server_stdio
     let alive = OmniSharp#proc#GetJob(sln_or_dir).loaded
@@ -808,15 +814,8 @@ function! OmniSharp#StopAllServers() abort
 endfunction
 
 function! OmniSharp#StopServer(...) abort
-  let sln_or_dir = OmniSharp#FindSolutionOrDir()
-  if a:0 > 0
-    let force = a:1
-    if a:0 > 1
-      let sln_or_dir = a:2
-    endif
-  else
-    let force = 0
-  endif
+  let force = a:0 ? a:1 : 0
+  let sln_or_dir = a:0 > 1 ? a:2 : OmniSharp#FindSolutionOrDir()
 
   if force || OmniSharp#proc#IsJobRunning(sln_or_dir)
     call s:BustAliveCache(sln_or_dir)
