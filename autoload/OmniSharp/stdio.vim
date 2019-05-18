@@ -142,6 +142,7 @@ function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
 endfunction
 
 function! s:CodeCheckRH(Callback, response) abort
+  if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
@@ -209,6 +210,7 @@ function! OmniSharp#stdio#FindImplementations(Callback) abort
 endfunction
 
 function! s:FindImplementationsRH(Callback, response) abort
+  if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
@@ -220,6 +222,7 @@ function! OmniSharp#stdio#FindMembers(Callback) abort
 endfunction
 
 function! s:FindMembersRH(Callback, response) abort
+  if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body))
 endfunction
 
@@ -232,6 +235,7 @@ function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
 endfunction
 
 function! s:FindSymbolRH(Callback, response) abort
+  if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
@@ -243,7 +247,22 @@ function! OmniSharp#stdio#FindUsages(Callback) abort
 endfunction
 
 function! s:FindUsagesRH(Callback, response) abort
+  if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
+function! OmniSharp#stdio#FixUsings(Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:FixUsingsRH', [a:Callback])
+  \}
+  call s:Request('/fixusings', opts)
+endfunction
+
+function! s:FixUsingsRH(Callback, response) abort
+  if !a:response.Success | return | endif
+  call s:SetBuffer(a:response.Body.Buffer)
+  let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
+  call a:Callback(locations)
 endfunction
 
 function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
@@ -293,6 +312,7 @@ function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
 endfunction
 
 function! s:GetCompletionsRH(Callback, response) abort
+  if !a:response.Success | return | endif
   let completions = []
   for cmp in a:response.Body
     if g:OmniSharp_want_snippet
@@ -323,6 +343,7 @@ function! OmniSharp#stdio#GotoDefinition(Callback) abort
 endfunction
 
 function! s:GotoDefinitionRH(Callback, response) abort
+  if !a:response.Success | return | endif
   if get(a:response.Body, 'FileName', v:null) != v:null
     call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
   else

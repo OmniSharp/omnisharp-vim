@@ -702,11 +702,18 @@ function! OmniSharp#CodeFormat() abort
 endfunction
 
 function! OmniSharp#FixUsings() abort
-  let qf_taglist = OmniSharp#py#eval('fix_usings()')
-  if OmniSharp#CheckPyError() | return | endif
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#FixUsings(function('s:CBFixUsings'))
+  else
+    let locs = OmniSharp#py#eval('fix_usings()')
+    if OmniSharp#CheckPyError() | return | endif
+    call s:CBFixUsings(locs)
+  endif
+endfunction
 
-  if len(qf_taglist) > 0
-    call s:set_quickfix(qf_taglist, 'Usings')
+function! s:CBFixUsings(locations) abort
+  if len(a:locations) > 0
+    call s:set_quickfix(a:locations, 'Usings')
   endif
 endfunction
 
