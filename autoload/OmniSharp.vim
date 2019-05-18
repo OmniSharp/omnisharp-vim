@@ -693,8 +693,12 @@ function! OmniSharp#BufferHasChanged() abort
 endfunction
 
 function! OmniSharp#CodeFormat() abort
-  call OmniSharp#py#eval('codeFormat()')
-  call OmniSharp#CheckPyError()
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#CodeFormat()
+  else
+    call OmniSharp#py#eval('codeFormat()')
+    call OmniSharp#CheckPyError()
+  endif
 endfunction
 
 function! OmniSharp#FixUsings() abort

@@ -95,7 +95,13 @@ endfunction
 function! s:SetBuffer(text) abort
   if a:text == v:null | return 0 | endif
   let pos = getpos('.')
-  %delete | call setline(1, split(a:text, "\r\n"))
+  let lines = split(a:text, "\r\n")
+  let text = join(lines, "\n")
+  let lines = split(text, "\n")
+  if len(lines) < line('$')
+    call deletebufline('%', len(lines) + 1, '$')
+  endif
+  call setline(1, lines)
   let pos[1] = min([pos[1], line('$')])
   call setpos('.', pos)
   return 1
@@ -137,6 +143,19 @@ endfunction
 
 function! s:CodeCheckRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
+function! OmniSharp#stdio#CodeFormat() abort
+  let opts = {
+  \ 'ResponseHandler': function('s:CodeFormatRH'),
+  \ 'ExpandTab': &expandtab
+  \}
+  call s:Request('/codeformat', opts)
+endfunction
+
+function! s:CodeFormatRH(response) abort
+  if !a:response.Success | return | endif
+  call s:SetBuffer(a:response.Body.Buffer)
 endfunction
 
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
