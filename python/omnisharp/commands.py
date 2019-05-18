@@ -139,7 +139,7 @@ def codeActionParameters(mode):
         end = vim.eval('getpos("\'>")')
         parameters['Selection'] = {
             'Start': {'Line': start[1], 'Column': start[2]},
-            'End': {'Line': end[1], 'Column': end[2]}
+            'End': {'Line': end[1], 'Column': end[1]}
         }
     return parameters
 
