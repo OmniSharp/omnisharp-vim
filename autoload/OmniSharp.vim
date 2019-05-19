@@ -141,7 +141,7 @@ endfunction
 function! s:CBFindUsages(target, opts, locations) abort
   let numUsages = len(a:locations)
   if numUsages > 0
-    call s:set_quickfix(a:locations, 'Usages: ' . a:target)
+    call s:SetQuickFix(a:locations, 'Usages: ' . a:target)
   else
     echo 'No usages found'
   endif
@@ -174,7 +174,7 @@ function! s:CBFindImplementations(target, opts, locations) abort
     if numImplementations == 1
       call OmniSharp#JumpToLocation(a:locations[0], 0)
     else " numImplementations > 1
-      call s:set_quickfix(a:locations, 'Implementations: ' . a:target)
+      call s:SetQuickFix(a:locations, 'Implementations: ' . a:target)
     endif
   endif
 
@@ -198,7 +198,7 @@ endfunction
 function! s:CBFindMembers(opts, locations) abort
   let numMembers = len(a:locations)
   if numMembers > 0
-    call s:set_quickfix(a:locations, 'Members')
+    call s:SetQuickFix(a:locations, 'Members')
   endif
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numMembers)
@@ -248,7 +248,7 @@ function! OmniSharp#PreviewDefinition() abort
   if type(loc) != type({}) " Check whether a dict was returned
     echo 'Not found'
   else
-    call s:openLocationInPreview(loc)
+    call s:OpenLocationInPreview(loc)
     echo fnamemodify(loc.filename, ':.')
   endif
 endfunction
@@ -260,7 +260,7 @@ function! OmniSharp#PreviewImplementation() abort
   if numImplementations == 0
     echo 'No implementations found'
   else
-    call s:openLocationInPreview(locations[0])
+    call s:OpenLocationInPreview(locations[0])
     let fname = fnamemodify(locations[0].filename, ':.')
     if numImplementations == 1
       echo fname
@@ -270,7 +270,7 @@ function! OmniSharp#PreviewImplementation() abort
   endif
 endfunction
 
-function! s:openLocationInPreview(loc) abort
+function! s:OpenLocationInPreview(loc) abort
   let lazyredraw_bak = &lazyredraw
   let &lazyredraw = 1
   " Due to cursor jumping bug, opening preview at current file is not as
@@ -334,10 +334,10 @@ function! s:CBFindSymbol(filter, locations) abort
     call ctrlp#OmniSharp#findsymbols#setsymbols(a:locations)
     call ctrlp#init(ctrlp#OmniSharp#findsymbols#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#findsymbols(a:locations)
+    call fzf#OmniSharp#FindSymbols(a:locations)
   else
     let title = 'Symbols' . (len(a:filter) ? ': ' . a:filter : '')
-    call s:set_quickfix(a:locations, title)
+    call s:SetQuickFix(a:locations, title)
   endif
 endfunction
 
@@ -430,7 +430,7 @@ function! s:CBGetCodeActions(mode, actions) abort
     call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, a:actions)
     call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#getcodeactions(a:mode, a:actions)
+    call fzf#OmniSharp#GetCodeActions(a:mode, a:actions)
   else
     let message = []
     let i = 0
@@ -509,9 +509,9 @@ endfunction
 function! s:CBTypeLookup(opts, response) abort
   if a:opts.Doc
     if len(a:response.doc) > 0
-      call s:writeToPreview(a:response.type . "\n\n" . a:response.doc)
+      call s:WriteToPreview(a:response.type . "\n\n" . a:response.doc)
     else
-      call s:writeToPreview(a:response.type)
+      call s:WriteToPreview(a:response.type)
     endif
   else
     echo a:response.type[0 : &columns * &cmdheight - 2]
@@ -550,7 +550,7 @@ function! s:CBSignatureHelp(response) abort
       endif
     endif
   endif
-  call s:writeToPreview(output)
+  call s:WriteToPreview(output)
 endfunction
 
 function! OmniSharp#Rename() abort
@@ -713,7 +713,7 @@ endfunction
 
 function! s:CBFixUsings(locations) abort
   if len(a:locations) > 0
-    call s:set_quickfix(a:locations, 'Usings')
+    call s:SetQuickFix(a:locations, 'Usings')
   endif
 endfunction
 
@@ -961,7 +961,7 @@ function! OmniSharp#CheckPyError(...)
 endfunction
 
 function! s:FindSolution(interactive, bufnum) abort
-  let solution_files = s:find_solution_files(a:bufnum)
+  let solution_files = s:FindSolutionsFiles(a:bufnum)
   if empty(solution_files)
     return ''
   endif
@@ -1037,7 +1037,7 @@ function! OmniSharp#Install(...) abort
   let l:version = a:000 != [] ? ' -v '.a:000[0] : ''
 
   if has('win32')
-    if s:check_valid_powershell_settings()
+    if s:CheckValidPowershellSettings()
       let l:location = expand('$HOME') . '\.omnisharp\omnisharp-roslyn'
       call system(
       \ 'powershell "& ""' . s:script_location . '"""' . l:http .
@@ -1072,12 +1072,12 @@ function! OmniSharp#Install(...) abort
   endif
 endfunction
 
-function! s:check_valid_powershell_settings()
+function! s:CheckValidPowershellSettings()
   let l:ps_policy_level = system('powershell Get-ExecutionPolicy')
   return l:ps_policy_level !~# '^\(Restricted\|AllSigned\)'
 endfunction
 
-function! s:find_solution_files(bufnum) abort
+function! s:FindSolutionsFiles(bufnum) abort
   "get the path for the current buffer
   let dir = expand('#' . a:bufnum . ':p:h')
   let lastfolder = ''
@@ -1127,7 +1127,7 @@ function! s:BustAliveCache(...) abort
   endif
 endfunction
 
-function! s:set_quickfix(list, title)
+function! s:SetQuickFix(list, title)
   if !has('patch-8.0.0657')
   \ || setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title}) == -1
     call setqflist(a:list)
@@ -1139,7 +1139,7 @@ endfunction
 
 " Manually write content to the preview window.
 " Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
-function! s:writeToPreview(content)
+function! s:WriteToPreview(content)
   silent pedit __OmniSharpScratch__
   silent wincmd P
   setlocal modifiable noreadonly
