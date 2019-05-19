@@ -95,9 +95,7 @@ endfunction
 function! s:SetBuffer(text) abort
   if a:text == v:null | return 0 | endif
   let pos = getpos('.')
-  let lines = split(a:text, "\r\n")
-  let text = join(lines, "\n")
-  let lines = split(text, "\n")
+  let lines = split(a:text, '\r\?\n')
   if len(lines) < line('$')
     call deletebufline('%', len(lines) + 1, '$')
   endif
@@ -371,9 +369,19 @@ function! s:NavigateRH(response) abort
   call cursor(a:response.Body.Line, a:response.Body.Column)
 endfunction
 
+function! OmniSharp#stdio#RenameTo(renameto) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:PerformChangesRH'),
+  \ 'Parameters': {
+  \   'RenameTo': a:renameto
+  \ }
+  \}
+  call s:Request('/rename', opts)
+endfunction
+
 function! OmniSharp#stdio#RunCodeAction(action) abort
   let opts = {
-  \ 'ResponseHandler': function('s:RunCodeActionRH'),
+  \ 'ResponseHandler': function('s:PerformChangesRH'),
   \ 'Parameters': {
   \   'Identifier': a:action.Identifier
   \ }
@@ -384,7 +392,7 @@ function! OmniSharp#stdio#RunCodeAction(action) abort
   call s:Request('/v2/runcodeaction', opts)
 endfunction
 
-function! s:RunCodeActionRH(response) abort
+function! s:PerformChangesRH(response) abort
   if !a:response.Success | return | endif
   let changes = get(a:response.Body, 'Changes', [])
   if len(changes) == 0

@@ -554,46 +554,50 @@ function! s:CBSignatureHelp(response) abort
 endfunction
 
 function! OmniSharp#Rename() abort
-  let renameto = inputdialog('Rename to:', expand('<cword>'))
+  let renameto = inputdialog('Rename to: ', expand('<cword>'))
   if renameto !=# ''
     call OmniSharp#RenameTo(renameto)
   endif
 endfunction
 
 function! OmniSharp#RenameTo(renameto) abort
-  let command = printf('renameTo(%s)', string(a:renameto))
-  let changes = OmniSharp#py#eval(command)
-  if OmniSharp#CheckPyError() | return | endif
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#RenameTo(a:renameto)
+  else
+    let command = printf('renameTo(%s)', string(a:renameto))
+    let changes = OmniSharp#py#eval(command)
+    if OmniSharp#CheckPyError() | return | endif
 
-  let save_lazyredraw = &lazyredraw
-  let save_eventignore = &eventignore
-  let buf = bufnr('%')
-  let curpos = getpos('.')
-  let view = winsaveview()
-  try
-    set lazyredraw eventignore=all
-    for change in changes
-      execute 'silent hide edit' fnameescape(change.FileName)
-      let modified = &modified
-      let content = split(change.Buffer, '\r\?\n')
-      silent % delete _
-      silent 1put =content
-      silent 1 delete _
-      if !modified
-        silent update
+    let save_lazyredraw = &lazyredraw
+    let save_eventignore = &eventignore
+    let buf = bufnr('%')
+    let curpos = getpos('.')
+    let view = winsaveview()
+    try
+      set lazyredraw eventignore=all
+      for change in changes
+        execute 'silent hide edit' fnameescape(change.FileName)
+        let modified = &modified
+        let content = split(change.Buffer, '\r\?\n')
+        silent % delete _
+        silent 1put =content
+        silent 1 delete _
+        if !modified
+          silent update
+        endif
+      endfor
+    finally
+      if bufnr('%') != buf
+        exec 'buffer ' . buf
       endif
-    endfor
-  finally
-    if bufnr('%') != buf
-      exec 'buffer ' . buf
-    endif
-    call setpos('.', curpos)
-    call winrestview(view)
-    silent update
-    let &eventignore = save_eventignore
-    silent edit  " reload to apply syntax
-    let &lazyredraw = save_lazyredraw
-  endtry
+      call setpos('.', curpos)
+      call winrestview(view)
+      silent update
+      let &eventignore = save_eventignore
+      silent edit  " reload to apply syntax
+      let &lazyredraw = save_lazyredraw
+    endtry
+  endif
 endfunction
 
 function! OmniSharp#HighlightBuffer() abort
