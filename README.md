@@ -15,7 +15,7 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 
 For vim8 and neovim, OmniSharp-vim can now use the OmniSharp-roslyn stdio server instead of the HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
 
-This is initially opt-in only until some user feedback is received. To switch from the HTTP server to stdio, add this to your .vimrc:
+This is initially opt-in only until some [user feedback](https://github.com/OmniSharp/omnisharp-vim/issues/468) is received. To switch from the HTTP server to stdio, add this to your .vimrc:
 
 ```vim
 let g:OmniSharp_server_stdio = 1
