@@ -280,6 +280,12 @@ function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
   if a:mode ==# 'visual'
     let start = getpos("'<")
     let end = getpos("'>")
+    " In visual line mode, getpos("'>")[2] is a large number (2147483647).
+    " When this value is too large, use the length of the line as the column
+    " position.
+    if end[2] > 99999
+      let end[2] = len(getline(end[1]))
+    endif
     let s:codeActionParameters = {
     \ 'Selection': {
     \   'Start': {
