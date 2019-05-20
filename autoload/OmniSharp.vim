@@ -942,6 +942,16 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
   endif
 endfunction
 
+function! OmniSharp#OpenLog() abort
+  if g:OmniSharp_server_stdio
+    let logfile = OmniSharp#stdio#GetLogFile()
+  else
+    let logfile = OmniSharp#py#eval('getLogFile()')
+    if OmniSharp#CheckPyError() | return | endif
+  endif
+  exec 'edit ' . logfile
+endfunction
+
 function! OmniSharp#OpenPythonLog() abort
   let logfile = OmniSharp#py#eval('getLogFile()')
   if OmniSharp#CheckPyError() | return | endif

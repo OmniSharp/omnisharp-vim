@@ -114,6 +114,10 @@ function! s:SetBuffer(text) abort
   return 1
 endfunction
 
+function! OmniSharp#stdio#GetLogFile() abort
+  return s:logfile
+endfunction
+
 function! OmniSharp#stdio#HandleResponse(job, message) abort
   call s:Log(a:job.job_id . '  ' . a:message)
   try

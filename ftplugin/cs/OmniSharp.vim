@@ -37,6 +37,7 @@ command! -buffer -bar OmniSharpPreviewImplementation               call OmniShar
 command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp                          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown                        call OmniSharp#NavigateDown()
+command! -buffer -bar OmniSharpOpenLog                             call OmniSharp#OpenLog()
 command! -buffer -bar OmniSharpOpenPythonLog                       call OmniSharp#OpenPythonLog()
 command! -buffer -bar OmniSharpRename                              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRestartAllServers                   call OmniSharp#RestartAllServers()
@@ -79,6 +80,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpInstall
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
+\|  delcommand OmniSharpOpenLog
 \|  delcommand OmniSharpOpenPythonLog
 \|  delcommand OmniSharpRename
 \|  delcommand OmniSharpRenameTo
