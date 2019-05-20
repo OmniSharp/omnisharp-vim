@@ -5,9 +5,19 @@ let s:nextseq = 1001
 let s:requests = {}
 
 let s:logfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
-function! s:Log(message) abort
-  " Consider adding flag 's', to unsure the file is always flushed to disk
-  call writefile([a:message], s:logfile, 'a')
+function! s:Log(message, loglevel) abort
+  let logit = 0
+  if g:OmniSharp_loglevel ==? 'debug'
+    " Log everything
+    let logit = 1
+  elseif g:OmniSharp_loglevel ==? 'info'
+    let logit = a:loglevel ==# 'info'
+  else
+    " g:OmniSharp_loglevel ==? 'none'
+  endif
+  if logit
+    call writefile([a:message], s:logfile, 'a')
+  endif
 endfunction
 
 function! s:Request(command, opts) abort
@@ -16,7 +26,7 @@ function! s:Request(command, opts) abort
     return 0
   endif
   let job_id = job.job_id
-  call s:Log(job_id . '  Request: ' . a:command)
+  call s:Log(job_id . '  Request: ' . a:command, 'debug')
   if has_key(a:opts, 'UsePreviousPosition')
     let [bufnum, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
@@ -63,7 +73,7 @@ function! s:Request(command, opts) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call s:Log(body)
+  call s:Log(body, 'debug')
   if has('nvim')
     call chansend(job_id, body . "\n")
   else
@@ -119,13 +129,15 @@ function! OmniSharp#stdio#GetLogFile() abort
 endfunction
 
 function! OmniSharp#stdio#HandleResponse(job, message) abort
-  call s:Log(a:job.job_id . '  ' . a:message)
   try
     let res = json_decode(a:message)
   catch
-    call s:Log(a:job.job_id . '  JSON error: ' . v:exception)
+    call s:Log(a:job.job_id . '  ' . a:message, 'info')
+    call s:Log(a:job.job_id . '  JSON error: ' . v:exception, 'info')
     return
   endtry
+  let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
+  call s:Log(a:job.job_id . '  ' . a:message, loglevel)
   if get(res, 'Type', '') ==# 'event'
     if !a:job.loaded && has_key(res, 'Body') && type(res.Body) == type({})
       let message = get(res.Body, 'Message', '')

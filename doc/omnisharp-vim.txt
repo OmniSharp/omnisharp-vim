@@ -111,9 +111,15 @@ Default: 'http://localhost:2000' >
 <
 
                                                          *'g:OmniSharp_loglevel'*
-                                                                      HTTP only
-Sets the log level for the python code. Possible values are 'debug', 'info',
-'warning', 'error', and 'critical'.
+Sets the log level.
+
+For stdio (when |g:OmniSharp_server_stdio| is 1), the possible values are
+'debug', 'info' and 'none'. 'info' means log messages received from the
+server, and 'debug' means also log the raw JSON request and response bodies.
+Default: info
+
+For HTTP, sets the log level for the python code. Possible values are 'debug',
+'info', 'warning', 'error', and 'critical'.
 Default: warning >
     let g:OmniSharp_loglevel = 'warning'
 <

@@ -27,8 +27,8 @@ let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_soluti
 " Automatically start server
 let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
 
-" Default value for python log level
-let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', 'warning')
+let defaultlevel = g:OmniSharp_server_stdio ? 'info' : 'warning'
+let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 
 " Default map of solution files and directories to ports.
 " Preserve backwards compatibility with older version "g:OmniSharp_sln_ports
