@@ -3,6 +3,11 @@ let g:OmniSharp_loaded = 1
 
 let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
 
+" When g:OmniSharp_server_stdio_quickload = 1, consider server 'loaded' once
+" 'Configuration finished' is received.  When this is 0, wait for notification
+" that all projects have been loaded.
+let g:OmniSharp_server_stdio_quickload = get(g:, 'OmniSharp_server_stdio_quickload', 0)
+
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 

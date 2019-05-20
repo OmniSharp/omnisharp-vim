@@ -4,6 +4,39 @@ set cpoptions&vim
 let s:nextseq = 1001
 let s:requests = {}
 
+function! s:ListenToServer(job, res) abort
+  if !a:job.loaded && has_key(a:res, 'Body') && type(a:res.Body) == type({})
+    if g:OmniSharp_server_stdio_quickload
+      " Quick load: Mark server as loaded as soon as configuration is finished
+      let message = get(a:res.Body, 'Message', '')
+      if message ==# 'Configuration finished.'
+        let a:job.loaded = 1
+      endif
+    else
+      " Complete load: Wait for all projects to be loaded before marking server
+      " as loaded
+      if !has_key(a:job, 'loading')
+        let a:job.loading = []
+      endif
+      let name = get(a:res.Body, 'Name', '')
+      let message = get(a:res.Body, 'Message', '')
+      if name ==# 'OmniSharp.MSBuild.ProjectManager'
+        let project = matchstr(message, '''\zs.*\ze''$')
+        if message =~# '^Queue project'
+          call add(a:job.loading, project)
+        endif
+        if message =~# '^Successfully loaded project'
+          call filter(a:job.loading, {idx,val -> val ==# project})
+          if len(a:job.loading) == 0
+            let a:job.loaded = 1
+            unlet a:job.loading
+          endif
+        endif
+      endif
+    endif
+  endif
+endfunction
+
 let s:logfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
 function! s:Log(message, loglevel) abort
   let logit = 0
@@ -139,12 +172,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
   let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
   call s:Log(a:job.job_id . '  ' . a:message, loglevel)
   if get(res, 'Type', '') ==# 'event'
-    if !a:job.loaded && has_key(res, 'Body') && type(res.Body) == type({})
-      let message = get(res.Body, 'Message', '')
-      if message ==# 'Configuration finished.'
-        call OmniSharp#proc#JobLoaded(a:job.job_id)
-      endif
-    endif
+    call s:ListenToServer(a:job, res)
     return
   endif
   if !has_key(res, 'Request_seq') || !has_key(s:requests, res.Request_seq)

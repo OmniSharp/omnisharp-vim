@@ -236,14 +236,6 @@ function! OmniSharp#proc#GetJob(jobkey) abort
   return get(s:jobs, a:jobkey, '')
 endfunction
 
-function! OmniSharp#proc#JobLoaded(job_id) abort
-  for [key, val] in items(s:jobs)
-    if a:job_id == val.job_id
-      let s:jobs[key].loaded = 1
-    endif
-  endfor
-endfunction
-
 " }}} public functions "
 
 " private functions {{{ "
