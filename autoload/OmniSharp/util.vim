@@ -37,17 +37,19 @@ function! OmniSharp#util#CheckCapabilities(...) abort
 
   if g:OmniSharp_server_stdio
     if has('nvim')
-      if verbose
-        call OmniSharp#util#EchoErr('Error: neovim support for stdio has not yet been added')
+      if !(exists('*jobstart') && has('lambda'))
+        if verbose
+          call OmniSharp#util#EchoErr('Error: A newer version of neovim is required for stdio')
+        endif
+        return 0
       endif
-      return 0
-    endif
-
-    if !(has('job') && has('channel') && has('lambda'))
-      if verbose
-        call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
+    else
+      if !(has('job') && has('channel') && has('lambda'))
+        if verbose
+          call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
+        endif
+        return 0
       endif
-      return 0
     endif
 
     return 1

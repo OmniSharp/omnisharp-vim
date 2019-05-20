@@ -59,7 +59,11 @@ function! s:Request(command, opts) abort
   endif
   let s:nextseq += 1
   call s:Log(body)
-  call ch_sendraw(job_id, body . "\n")
+  if has('nvim')
+    call chansend(job_id, body . "\n")
+  else
+    call ch_sendraw(job_id, body . "\n")
+  endif
   return 1
 endfunction
 
@@ -114,7 +118,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
     return
   endtry
   if get(res, 'Type', '') ==# 'event'
-    if !a:job.loaded
+    if !a:job.loaded && has_key(res, 'Body') && type(res.Body) == type({})
       let message = get(res.Body, 'Message', '')
       if message ==# 'Configuration finished.'
         call OmniSharp#proc#JobLoaded(a:job.job_id)

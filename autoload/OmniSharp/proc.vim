@@ -7,12 +7,29 @@ let s:channels = {}
 " Neovim jobs {{{ "
 
 function! OmniSharp#proc#supportsNeovimJobs() abort
-  return exists('*jobstart') && !g:OmniSharp_server_stdio
+  return exists('*jobstart')
 endfunction
 
 function! OmniSharp#proc#neovimOutHandler(job_id, data, event) dict abort
-  let l:message = printf('%s: %s', a:event, string(a:data))
-  echom l:message
+  if g:OmniSharp_proc_debug
+    echom printf('%s: %s', string(a:event), string(a:data))
+  endif
+  if g:OmniSharp_server_stdio
+    let job = s:channels[a:job_id]
+
+    let messages = a:data[:-2]
+
+    if len(a:data) > 1
+        let messages[0] = job.partial . messages[0]
+        let job.partial = a:data[-1]
+    else
+        let job.partial = job.partial . a:data[0]
+    endif
+
+    for message in messages
+      call OmniSharp#stdio#HandleResponse(job, message)
+    endfor
+  endif
 endfunction
 
 function! OmniSharp#proc#neovimErrHandler(job_id, data, event) dict abort
@@ -35,9 +52,6 @@ endfunction
 
 function! OmniSharp#proc#neovimJobStart(command) abort
   if !OmniSharp#proc#supportsNeovimJobs()
-    if g:OmniSharp_server_stdio
-      call OmniSharp#util#EchoErr('Stdio support has not yet been added for neovim')
-    endif
     call OmniSharp#util#EchoErr('Not using neovim')
     return -1
   endif
@@ -45,13 +59,15 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   call s:debug(a:command)
   let opts = {'on_stderr': 'OmniSharp#proc#neovimErrHandler',
              \  'on_exit': 'OmniSharp#proc#neovimExitHandler'}
-  if g:OmniSharp_proc_debug
+  if g:OmniSharp_server_stdio || g:OmniSharp_proc_debug
     let opts['on_stdout'] = 'OmniSharp#proc#neovimOutHandler'
   endif
   let job = {
   \ 'job_id': jobstart(a:command, opts),
-  \ 'loaded': 0
+  \ 'loaded': 0,
+  \ 'partial': ''
   \}
+  let s:channels[job.job_id] = job
   return job
 endfunction
 
