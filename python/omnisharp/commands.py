@@ -18,9 +18,9 @@ ctx = VimUtilCtx(vim)
 
 
 def openFile(filename, line=0, column=0, noautocmd=0):
-    cmd = "call OmniSharp#JumpToLocation('{0}', {1}, {2}, {3})" \
-          .format(filename, line, column, noautocmd)
-    vim.command(cmd)
+    vim.command("let l:loc = {{ 'filename': '{0}', 'lnum': {1}, 'col': {2} }}"
+                .format(filename, line, column))
+    vim.command("call OmniSharp#JumpToLocation(l:loc, {0})".format(noautocmd))
 
 
 def setBuffer(text):
@@ -39,33 +39,26 @@ def setBuffer(text):
 
 @vimcmd
 def findUsages():
-    parameters = {}
-    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    response = getResponse(ctx, '/findusages', parameters, json=True)
+    response = getResponse(ctx, '/findusages', json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 
 
 @vimcmd
 def findMembers():
-    parameters = {}
-    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    response = getResponse(ctx, '/currentfilemembersasflat', parameters,
-                           json=True)
+    response = getResponse(ctx, '/currentfilemembersasflat', json=True)
     return quickfixes_from_response(ctx, response)
 
 
 @vimcmd
 def findImplementations():
-    parameters = {}
-    parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
-    response = getResponse(ctx, '/findimplementations', parameters, json=True)
+    response = getResponse(ctx, '/findimplementations', json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 
 
 @vimcmd
 def getCompletions(partialWord):
     parameters = {}
-    parameters['wordToComplete'] = partialWord
+    parameters['WordToComplete'] = partialWord
 
     parameters['WantDocumentationForEveryCompletionResult'] = \
         bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
@@ -100,11 +93,8 @@ def gotoDefinition():
     definition = getResponse(ctx, '/gotodefinition', json=True)
     if definition.get('FileName'):
         return quickfixes_from_response(ctx, [definition])[0]
-        # filename = formatPathForClient(ctx, definition['FileName'].replace("'", "''"))
-        # openFile(filename, definition['Line'], definition['Column'])
     else:
         return None
-        # print("Not found")
 
 
 @vimcmd
@@ -126,8 +116,7 @@ def runCodeAction(mode, action):
         pos = vim.current.window.cursor
         vim.command('let l:hidden_bak = &hidden | set hidden')
         for changeDefinition in changes:
-            filename = formatPathForClient(ctx,
-                                           changeDefinition['FileName'])
+            filename = formatPathForClient(ctx, changeDefinition['FileName'])
             openFile(filename, noautocmd=1)
             if not setBuffer(changeDefinition.get('Buffer')):
                 for change in changeDefinition.get('Changes', []):

@@ -1,9 +1,5 @@
-
-" Load guard
-if ( exists('g:OmniSharp_loaded_ctrlp_findsymbols') && g:OmniSharp_loaded_ctrlp_findsymbols )
-\ || v:version < 700 || &cp
-  finish
-endif
+if !OmniSharp#util#CheckCapabilities() | finish | endif
+if get(g:, 'loaded_ctrlp_OmniSharp_findsymbols', 0) | finish | endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -78,7 +74,7 @@ function! ctrlp#OmniSharp#findsymbols#accept(mode, str) abort
     endif
   endfor
   echo quickfix.filename
-  call  OmniSharp#JumpToLocation(quickfix.filename, quickfix.lnum, quickfix.col, 0)
+  call  OmniSharp#JumpToLocation(quickfix, 0)
 endfunction
 
 " Give the extension an ID

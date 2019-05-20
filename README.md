@@ -1,7 +1,7 @@
 ![OmniSharp](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/logo-OmniSharp.png)
 
-![Travis status](https://api.travis-ci.org/OmniSharp/omnisharp-vim.svg?branch=master)
-![AppVeyor status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
+[![Travis status](https://api.travis-ci.org/OmniSharp/omnisharp-vim.svg)](https://travis-ci.org/OmniSharp/omnisharp-vim)
+[![AppVeyor status](https://ci.appveyor.com/api/projects/status/github/OmniSharp/omnisharp-vim?svg=true)](https://ci.appveyor.com/project/nickspoons/omnisharp-vim)
 
 # OmniSharp
 
@@ -10,6 +10,18 @@ OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#.
 OmniSharp works on Windows, and on Linux and OS X with Mono.
 
 The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code, Emacs, Atom and others.
+
+## New! Asynchronous server interactions
+
+For vim8 and neovim, OmniSharp-vim can now use the OmniSharp-roslyn stdio server instead of the HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
+
+This is initially opt-in only until some user feedback is received. To switch from the HTTP server to stdio, add this to your .vimrc:
+
+```vim
+let g:OmniSharp_server_stdio = 1
+```
+
+Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall`. Restart vim and feel the difference!
 
 ## Features
 
@@ -71,18 +83,30 @@ To install a particular release, including pre-releases, specify the version num
 :OmniSharpInstall 'v1.32.13'
 ```
 
-#### Manual installation
-To install the server manually, follow these steps:
+*Note:* These methods depend on the `g:OmniSharp_server_stdio` variable to decide which OmniSharp-roslyn server to download. If you are unsure, try using the new stdio option first, and only fall back to HTTP if you have problems.
 
-Download the latest **HTTP** release for your platform from the [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. OmniSharp-vim uses http to communicate with the server, so select the **HTTP** variant for your architecture. This means that for a 64-bit Windows system, the `omnisharp.http-win-x64.zip` package should be downloaded, whereas Mac users should select `omnisharp.http-osx.tar.gz` etc.
+* **vim8.0+ or neovim**: Use the stdio server, it is used asynchronously and there is no python requirement.
 
-Extract the binaries and configure your vimrc with the path to the `OmniSharp.exe` file, e.g.:
+* **< vim8.0**: Use the HTTP server. Your vim must have python (2 or 3) support, and you'll need either [vim-dispatch](https://github.com/tpope/vim-dispatch) or [vimproc.vim](https://github.com/Shougo/vimproc.vim) to be installed
 
 ```vim
-let g:OmniSharp_server_path = 'C:\OmniSharp\omnisharp.http-win-x64\OmniSharp.exe'
+" Use the stdio version of OmniSharp-roslyn:
+let g:OmniSharp_server_stdio = 1
+
+" Use the HTTP version of OmniSharp-roslyn:
+let g:OmniSharp_server_stdio = 0
+```
+
+#### Manual installation
+To install the server manually, first decide which version (stdio or HTTP) you wish to use, as described above. Download the latest release for your platform from the [OmniSharp-roslyn releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. For stdio on a 64-bit Windows system, the `omnisharp.win-x64.zip` package should be downloaded, whereas Mac users wanting to use the HTTP version should select `omnisharp.http-osx.tar.gz` etc.
+
+Extract the binaries and configure your vimrc with the path to the `run` script (Linux and Mac) or `OmniSharp.exe` file (Window), e.g.:
+
+```vim
+let g:OmniSharp_server_path = 'C:\OmniSharp\omnisharp.win-x64\OmniSharp.exe'
 ```
 ```vim
-let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
+let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/run'
 ```
 
 #### Windows: Cygwin
@@ -93,23 +117,25 @@ OmniSharp-roslyn can function perfectly well in WSL using linux binaries, if the
 However, if you have the .NET Framework installed in Windows, you may have better results using the Windows binaries. To do this, follow the Manual installation instructions above, configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
 
 ```vim
-let g:OmniSharp_server_path = '/mnt/c/OmniSharp/omnisharp.http-win-x64/OmniSharp.exe'
+let g:OmniSharp_server_path = '/mnt/c/OmniSharp/omnisharp.win-x64/OmniSharp.exe'
 let g:OmniSharp_translate_cygwin_wsl = 1
 ```
 
 #### Linux and Mac
-OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) usually come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
+OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
 
 ```vim
     let g:OmniSharp_server_use_mono = 1
 ```
 
 ##### libuv
-OmniSharp-Roslyn also requires [libuv](http://libuv.org/) on Linux and Mac. This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv1-dev` on debian/Ubuntu, `pacman -S libuv` on arch linux, `dnf install libuv libuv-devel` on Fedora/CentOS, etc.
+For the HTTP version, OmniSharp-Roslyn also requires [libuv](http://libuv.org/) on Linux and Mac. This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv1-dev` on debian/Ubuntu, `pacman -S libuv` on arch linux, `dnf install libuv libuv-devel` on Fedora/CentOS, etc.
 
 Please note that if your distro has a "dev" package (`libuv1-dev`, `libuv-devel` etc.) then you will probably need it.
 
-### Install Python
+**Note:** This is **not** necessary for the stdio version of OmniSharp-roslyn.
+
+### Install Python (HTTP only)
 Install the latest version of python 3 ([Python 3.7](https://www.python.org/downloads/release/python-370/)) or 2 ([Python 2.7.15](https://www.python.org/downloads/release/python-2715/)).
 Make sure that you pick correct version of Python to match your vim's architecture (32-bit python for 32-bit vim, 64-bit python for 64-bit vim).
 
@@ -118,6 +144,8 @@ Verify that Python is working inside Vim with
 ```vim
 :echo has('python3') || has('python')
 ```
+
+**Note:** If you are using the stdio version of OmniSharp-roslyn, you do not need python.
 
 ### Asynchronous command execution
 OmniSharp-vim can start the server only if any of the following criteria is met:
@@ -173,12 +201,10 @@ In older versions of vim, the server will be started in different ways depending
 This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in your vimrc. You can then start the server manually from within vim with `:OmniSharpStartServer`. Alternatively, the server can be manually started from outside vim:
 
 ```sh
-[mono] OmniSharp.exe -p (portnumber) -s (path/to/sln)
+[mono] OmniSharp.exe -s (path/to/sln)
 ```
 
-Add `-v` to get extra information from the server.
-
-When vim starts an OmniSharp server, it will bind to a random port by default. If you need to run servers on specific ports (or you are running manually, as above) you can use `let g:OmniSharp_server_ports = {'C:\path\to\project.sln': 2000, 'C:\path\to\other\project': 2001}` to map solution files and/or project directories to specific ports, or you can `let g:OmniSharp_port = 2000` to always use a single port (though this will prevent you from running OmniSharp servers on multiple projects).
+Add `-v` to get extra debugging output from the server.
 
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use a completion or autocompletion plugin.
 
@@ -191,8 +217,17 @@ See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom 
 ### Example vimrc
 
 ```vim
-" OmniSharp won't work without this setting
-filetype plugin on
+" Use the vim-plug plugin manager
+silent! if plug#begin('~/.vim/plugged')
+Plug 'OmniSharp/omnisharp-vim'
+Plug 'w0rp/ale'
+call plug#end()
+endif
+
+filetype indent plugin on
+
+" Use the stdio OmniSharp-roslyn server
+let g:OmniShaarp_server_stdio = 1
 
 " Set the type lookup function to use the preview window instead of echoing it
 "let g:OmniSharp_typeLookupInPreview = 1
@@ -206,7 +241,6 @@ let g:OmniSharp_timeout = 5
 set completeopt=longest,menuone,preview
 
 " Fetch full documentation during omnicomplete requests.
-" There is a performance penalty with this (especially on Mono).
 " By default, only Type/Method signatures are fetched. Full documentation can
 " still be fetched when you need it with the :OmniSharpDocumentation command.
 "let g:omnicomplete_fetch_full_documentation = 1

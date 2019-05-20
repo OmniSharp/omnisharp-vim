@@ -5,27 +5,64 @@ let s:dir_separator = fnamemodify('.', ':p')[-1 :]
 let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
-function! s:resolve_local_config(solution_path) abort
-  let configPath = fnamemodify(a:solution_path, ':p:h')
-  \ . s:dir_separator
-  \ . g:OmniSharp_server_config_name
-
-  if filereadable(configPath)
-    return configPath
-  endif
-  return ''
-endfunction
-
 function! s:is_msys() abort
-  return strlen(system('grep MSYS_NT /proc/version')) > 0
+  if get(s:, 'is_msys_checked', 0)
+    return s:is_msys_val
+  endif
+  let s:is_msys_val = strlen(system('grep MSYS_NT /proc/version')) > 0
+  let s:is_msys_checked = 1
+  return s:is_msys_val
 endfunction
 
 function! s:is_cygwin() abort
-  return has('win32unix')
+  if get(s:, 'is_cygwin_checked', 0)
+    return s:is_cygwin_val
+  endif
+  let s:is_cygwin_val = has('win32unix')
+  let s:is_cygwin_checked = 1
+  return s:is_cygwin_val
 endfunction
 
 function! s:is_wsl() abort
-  return strlen(system('grep Microsoft /proc/version')) > 0
+  if get(s:, 'is_wsl_checked', 0)
+    return s:is_wsl_val
+  endif
+  let s:is_wsl_val = strlen(system('grep Microsoft /proc/version')) > 0
+  let s:is_wsl_checked = 1
+  return s:is_wsl_val
+endfunction
+
+function! OmniSharp#util#CheckCapabilities(...) abort
+  let verbose = a:0 > 0 && a:1 ==? 'verbose'
+
+  if g:OmniSharp_server_stdio
+    if has('nvim')
+      if !(exists('*jobstart') && has('lambda'))
+        if verbose
+          call OmniSharp#util#EchoErr('Error: A newer version of neovim is required for stdio')
+        endif
+        return 0
+      endif
+    else
+      if !(has('job') && has('channel') && has('lambda'))
+        if verbose
+          call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
+        endif
+        return 0
+      endif
+    endif
+
+    return 1
+  endif
+
+  if !(has('python') || has('python3'))
+    if verbose
+      call OmniSharp#util#EchoErr('Error: OmniSharp requires Vim compiled with +python or +python3')
+    endif
+    return 0
+  endif
+
+  return 1
 endfunction
 
 " :echoerr will throw if inside a try conditional, or function labeled 'abort'
@@ -35,24 +72,25 @@ function! OmniSharp#util#EchoErr(msg)
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
-function! OmniSharp#util#path_join(parts) abort
-  if type(a:parts) == type('')
-    let parts = [a:parts]
-  elseif type(a:parts) == type([])
-    let parts = a:parts
-  else
-    throw 'Unsupported type for joining paths'
+function! OmniSharp#util#TranslatePathForClient(filename) abort
+  let filename = a:filename
+  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
+    if s:is_msys()
+      let prefix = '/'
+    elseif s:is_cygwin()
+      let prefix = '/cygdrive/'
+    else
+      let prefix = '/mnt/'
+    endif
+    let filename = substitute(filename, '^\([a-zA-Z]\):\\', prefix . '\l\1/', '')
+    let filename = substitute(filename, '\\', '/', 'g')
   endif
-  return join([s:plugin_root_dir] + parts, s:dir_separator)
+  return fnamemodify(filename, ':.')
 endfunction
 
-function! OmniSharp#util#get_start_cmd(solution_file) abort
-  let solution_path = a:solution_file
-  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
-    let solution_path = fnamemodify(solution_path, ':h')
-  endif
-
-  if g:OmniSharp_translate_cygwin_wsl == 1 && (s:is_msys() || s:is_cygwin() || s:is_wsl())
+function! OmniSharp#util#TranslatePathForServer(filename) abort
+  let filename = a:filename
+  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
     " Future releases of WSL will have a wslpath tool, similar to cygpath - when
     " this becomes standard then this block can be replaced with a call to
     " wslpath/cygpath
@@ -63,14 +101,23 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
     else
       let prefix = '^/mnt/'
     endif
-    let solution_path = substitute(solution_path, prefix.'\([a-zA-Z]\)/', '\u\1:\\', '')
-    let solution_path = substitute(solution_path, '/', '\\', 'g')
+    let filename = substitute(filename, prefix . '\([a-zA-Z]\)/', '\u\1:\\', '')
+    let filename = substitute(filename, '/', '\\', 'g')
+  endif
+  return filename
+endfunction
+
+function! OmniSharp#util#GetStartCmd(solution_file) abort
+  let solution_path = a:solution_file
+  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
+    let solution_path = fnamemodify(solution_path, ':h')
   endif
 
-  let port = OmniSharp#GetPort(a:solution_file)
+  let solution_path = OmniSharp#util#TranslatePathForServer(solution_path)
 
-  let s:server_path = ''
-  if !exists('g:OmniSharp_server_path')
+  if exists('g:OmniSharp_server_path')
+    let s:server_path = g:OmniSharp_server_path
+  else
     let parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
     if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
@@ -83,22 +130,33 @@ function! OmniSharp#util#get_start_cmd(solution_file) abort
         call OmniSharp#Install()
       else
         redraw
+        return
       endif
     endif
-  else
-    let s:server_path = g:OmniSharp_server_path
   endif
 
-  let command = [
-              \ s:server_path,
-              \ '-p', port,
-              \ '-s', solution_path]
+  let command = [ s:server_path ]
+  if !g:OmniSharp_server_stdio
+    let command += [ '-p', OmniSharp#GetPort(a:solution_file) ]
+  endif
+  let command += [ '-s', solution_path ]
 
   if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
     let command = insert(command, 'mono')
   endif
 
   return command
+endfunction
+
+function! OmniSharp#util#PathJoin(parts) abort
+  if type(a:parts) == type('')
+    let parts = [a:parts]
+  elseif type(a:parts) == type([])
+    let parts = a:parts
+  else
+    throw 'Unsupported type for joining paths'
+  endif
+  return join([s:plugin_root_dir] + parts, s:dir_separator)
 endfunction
 
 let &cpoptions = s:save_cpo

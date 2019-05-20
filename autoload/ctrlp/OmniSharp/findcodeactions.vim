@@ -1,14 +1,6 @@
-" Load guard
-"if ( exists('g:loaded_ctrlp_findsymbols') && g:loaded_ctrlp_findsymbols )
-" \ || v:version < 700 || &cp
-" finish
-"endif
-"let g:loaded_ctrlp_findsymbols = 1
-
-if !(has('python') || has('python3'))
-  finish
-endif
-
+if !OmniSharp#util#CheckCapabilities() | finish | endif
+if get(g:, 'loaded_ctrlp_OmniSharp_findcodeactions', 0) | finish | endif
+let g:loaded_ctrlp_OmniSharp_findcodeactions = 1
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -74,12 +66,16 @@ endfunction
 function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
   call ctrlp#exit()
   let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# a:str})[0]
-  let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
-  let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
-  let result = OmniSharp#py#eval(command)
-  if OmniSharp#CheckPyError() | return | endif
-  if !result
-    echo 'No action taken'
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#RunCodeAction(action)
+  else
+    let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+    let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
+    let result = OmniSharp#py#eval(command)
+    if OmniSharp#CheckPyError() | return | endif
+    if !result
+      echo 'No action taken'
+    endif
   endif
 endfunction
 

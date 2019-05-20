@@ -2,7 +2,7 @@ function! asyncomplete#sources#OmniSharp#completor(opt, ctx) abort
   let column = a:ctx['col']
   let typed = a:ctx['typed']
 
-  let kw = matchstr(typed, '\v\S+$')
+  let kw = matchstr(typed, '\w\+$')
   let kwlen = len(kw)
   if kwlen < 1
     return

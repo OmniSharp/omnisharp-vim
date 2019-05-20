@@ -1,6 +1,4 @@
-if !(has('python') || has('python3'))
-  finish
-endif
+if !OmniSharp#util#CheckCapabilities() | finish | endif
 
 let s:save_cpo = &cpoptions
 set cpoptions&vim
@@ -32,12 +30,16 @@ function! s:findcodeactions_action_table.run.func(candidate) abort
   let str = a:candidate.source__OmniSharp_action
 
   let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# str})[0]
-  let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
-  let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
-  let result = OmniSharp#py#eval(command)
-  if OmniSharp#CheckPyError() | return | endif
-  if !result
-    echo 'No action taken'
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#RunCodeAction(action)
+  else
+    let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
+    let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
+    let result = OmniSharp#py#eval(command)
+    if OmniSharp#CheckPyError() | return | endif
+    if !result
+      echo 'No action taken'
+    endif
   endif
 endfunction
 let s:findcodeactions.action_table = s:findcodeactions_action_table
