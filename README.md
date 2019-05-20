@@ -227,7 +227,7 @@ endif
 filetype indent plugin on
 
 " Use the stdio OmniSharp-roslyn server
-let g:OmniShaarp_server_stdio = 1
+let g:OmniSharp_server_stdio = 1
 
 " Set the type lookup function to use the preview window instead of echoing it
 "let g:OmniSharp_typeLookupInPreview = 1
