@@ -17,7 +17,9 @@ function! s:Request(command, opts) abort
   endif
   let job_id = job.job_id
   call s:Log(job_id . '  Request: ' . a:command)
-  if has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
+  if has_key(a:opts, 'UsePreviousPosition')
+    let [bufnum, lnum, cnum] = s:lastPosition
+  elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
     let bufnum = a:opts.BufNum
     let lnum = 1
     let cnum = 1
@@ -25,6 +27,9 @@ function! s:Request(command, opts) abort
     let bufnum = bufnr('%')
     let lnum = line('.')
     let cnum = col('.')
+  endif
+  if has_key(a:opts, 'SavePosition')
+    let s:lastPosition = [bufnum, lnum, cnum]
   endif
   let filename = OmniSharp#util#TranslatePathForServer(
   \ fnamemodify(bufname(bufnum), ':p'))
@@ -269,7 +274,8 @@ endfunction
 
 function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
   let opts = {
-  \ 'ResponseHandler': function('s:GetCodeActionsRH', [a:Callback])
+  \ 'ResponseHandler': function('s:GetCodeActionsRH', [a:Callback]),
+  \ 'SavePosition': 1
   \}
   if a:mode ==# 'visual'
     let start = getpos("'<")
@@ -388,7 +394,8 @@ function! OmniSharp#stdio#RunCodeAction(action) abort
   \ 'ResponseHandler': function('s:PerformChangesRH'),
   \ 'Parameters': {
   \   'Identifier': a:action.Identifier
-  \ }
+  \ },
+  \ 'UsePreviousPosition': 1
   \}
   if exists('s:codeActionParameters')
     call extend(opts.Parameters, s:codeActionParameters, 'force')
