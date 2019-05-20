@@ -137,9 +137,16 @@ def codeActionParameters(mode):
     if mode == 'visual':
         start = vim.eval('getpos("\'<")')
         end = vim.eval('getpos("\'>")')
+        # In visual line mode, getpos("'>")[2] is a large number (2147483647).
+        # In python this is represented as a string, so when the length of this
+        # string is greater than 5 it means the position is greater than 99999.
+        # In this case, use the length of the line as the column position.
+        if len(end[2]) > 5:
+            end[2] = vim.eval('len(getline(%s))' % end[1])
+        logger.error(end)
         parameters['Selection'] = {
             'Start': {'Line': start[1], 'Column': start[2]},
-            'End': {'Line': end[1], 'Column': end[1]}
+            'End': {'Line': end[1], 'Column': end[2]}
         }
     return parameters
 
