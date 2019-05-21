@@ -249,9 +249,9 @@ Use this option to enable syntastic integration >
 :OmniSharpNavigateDown
     Navigates to next method or class
 
-                                                        *:OmniSharpOpenPythonLog*
-:OmniSharpOpenPythonLog
-    Open the python log file
+                                                              *:OmniSharpOpenLog*
+:OmniSharpOpenLog
+    Open the log file
 
                                                        *:OmniSharpGetCodeActions*
 :OmniSharpGetCodeActions
