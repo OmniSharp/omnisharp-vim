@@ -149,7 +149,11 @@ function! s:SetBuffer(text) abort
   let pos = getpos('.')
   let lines = split(a:text, '\r\?\n')
   if len(lines) < line('$')
-    call deletebufline('%', len(lines) + 1, '$')
+    if exists('*deletebufline')
+      call deletebufline('%', len(lines) + 1, '$')
+    else
+      %delete
+    endif
   endif
   call setline(1, lines)
   let pos[1] = min([pos[1], line('$')])
