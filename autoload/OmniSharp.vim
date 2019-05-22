@@ -696,12 +696,18 @@ function! OmniSharp#BufferHasChanged() abort
   return 0
 endfunction
 
-function! OmniSharp#CodeFormat() abort
+" Optionally accepts a callback function. This can be used to write after
+" formatting, for example.
+function! OmniSharp#CodeFormat(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#CodeFormat()
+    call OmniSharp#stdio#CodeFormat(opts)
   else
     call OmniSharp#py#eval('codeFormat()')
     call OmniSharp#CheckPyError()
+    if has_key(opts, 'Callback')
+      call opts.Callback()
+    endif
   endif
 endfunction
 

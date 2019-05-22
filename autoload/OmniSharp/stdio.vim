@@ -201,17 +201,20 @@ function! s:CodeCheckRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
-function! OmniSharp#stdio#CodeFormat() abort
+function! OmniSharp#stdio#CodeFormat(opts) abort
   let opts = {
-  \ 'ResponseHandler': function('s:CodeFormatRH'),
+  \ 'ResponseHandler': function('s:CodeFormatRH', [a:opts]),
   \ 'ExpandTab': &expandtab
   \}
   call s:Request('/codeformat', opts)
 endfunction
 
-function! s:CodeFormatRH(response) abort
+function! s:CodeFormatRH(opts, response) abort
   if !a:response.Success | return | endif
   call s:SetBuffer(a:response.Body.Buffer)
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback()
+  endif
 endfunction
 
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
