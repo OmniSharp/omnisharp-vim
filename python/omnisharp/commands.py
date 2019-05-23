@@ -156,7 +156,6 @@ def codeCheck():
 @vimcmd
 def globalCodeCheck():
     parameters = {}
-    # parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
     response = doRequest(ctx.host, '/codecheck', parameters, json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 
