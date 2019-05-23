@@ -36,7 +36,7 @@ Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall
 * Find implementations/derived types
 * Find usages
 * Contextual code actions (unused usings, use var....etc.) (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
-* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/w0rp/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
+* Find code issues in current file as well as globally (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/w0rp/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
 * Semantic type highlighting
@@ -289,6 +289,9 @@ augroup omnisharp_commands
     " Navigate up and down by method/property/field
     autocmd FileType cs nnoremap <buffer> <C-k> :OmniSharpNavigateUp<CR>
     autocmd FileType cs nnoremap <buffer> <C-j> :OmniSharpNavigateDown<CR>
+
+    " Find all code errors/warnings for the current solution and populate the quickfix window
+    autocmd FileType cs nnoremap <buffer> <Leader>cc :OmniSharpGlobalCodeCheck<CR>
 augroup END
 
 " Contextual code actions (uses fzf, CtrlP or unite.vim when available)
