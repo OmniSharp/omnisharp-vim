@@ -54,12 +54,6 @@ function! s:Log(message, loglevel) abort
 endfunction
 
 function! s:Request(command, opts) abort
-  let job = OmniSharp#GetHost().job
-  if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
-    return 0
-  endif
-  let job_id = job.job_id
-  call s:Log(job_id . '  Request: ' . a:command, 'debug')
   if has_key(a:opts, 'UsePreviousPosition')
     let [bufnum, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
@@ -86,9 +80,6 @@ function! s:Request(command, opts) abort
   let buffer = join(lines, sep)
 
   let body = {
-  \ 'Seq': s:nextseq,
-  \ 'Command': a:command,
-  \ 'Type': 'Request',
   \ 'Arguments': {
   \   'Filename': filename,
   \   'Line': lnum,
@@ -96,21 +87,48 @@ function! s:Request(command, opts) abort
   \   'Buffer': buffer
   \ }
   \}
-  if has_key(a:opts, 'Parameters')
-    call extend(body.Arguments, a:opts.Parameters, 'force')
+  call s:RawRequest(body, a:command, a:opts, sep)
+endfunction
+
+" body -> request body dict
+" command -> command string. eg: /codecheck
+" opts -> command arugments dict
+" sep -> line separator. Optional, if not given line ending replacemment is not done
+function! s:RawRequest(...) abort
+  let body = get(a:, 1, 0)
+  let command = get(a:, 2, 0)
+  let opts = get(a:, 3, 0)
+  let sep = get(a:, 4, 0)
+
+  let job = OmniSharp#GetHost().job
+  if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
+    return 0
   endif
-  let body = substitute(json_encode(body), sep, '\\r\\n', 'g')
+  let job_id = job.job_id
+  call s:Log(job_id . '  Request: ' . command, 'debug')
+
+  let body['Command'] = command
+  let body['Seq'] = s:nextseq
+  let body['Type'] = 'Request'
+  if has_key(opts, 'Parameters')
+    call extend(body.Arguments, opts.Parameters, 'force')
+  endif
+  if type(sep) == type('')
+    let l:body = substitute(json_encode(body), sep, '\\r\\n', 'g')
+  else
+    let l:body = json_encode(l:body)
+  endif
 
   let s:requests[s:nextseq] = { 'Seq': s:nextseq }
-  if has_key(a:opts, 'ResponseHandler')
-    let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
+  if has_key(opts, 'ResponseHandler')
+    let s:requests[s:nextseq].ResponseHandler = opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call s:Log(body, 'debug')
+  call s:Log(l:body, 'debug')
   if has('nvim')
-    call chansend(job_id, body . "\n")
+    call chansend(job_id, l:body . "\n")
   else
-    call ch_sendraw(job_id, body . "\n")
+    call ch_sendraw(job_id, l:body . "\n")
   endif
   return 1
 endfunction
@@ -197,6 +215,18 @@ function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
 endfunction
 
 function! s:CodeCheckRH(Callback, response) abort
+  if !a:response.Success | return | endif
+  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
+function! OmniSharp#stdio#GlobalCodeCheck(Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:GlobalCodeCheckRH', [a:Callback])
+  \}
+  call s:RawRequest({}, '/codecheck', opts)
+endfunction
+
+function! s:GlobalCodeCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction

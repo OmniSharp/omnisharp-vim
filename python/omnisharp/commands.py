@@ -8,7 +8,7 @@ import vim  # pylint: disable=import-error
 from .util import VimUtilCtx
 from .util import find_free_port as util_find_free_port
 from .util import (formatPathForClient, formatPathForServer, getResponse,
-                   quickfixes_from_response)
+                   quickfixes_from_response, doRequest)
 from .vimcmd import vimcmd
 
 logger = logging.getLogger('omnisharp')
@@ -153,6 +153,12 @@ def codeCheck():
     response = getResponse(ctx, '/codecheck', json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 
+@vimcmd
+def globalCodeCheck():
+    parameters = {}
+    # parameters['MaxWidth'] = int(vim.eval('g:OmniSharp_quickFixLength'))
+    response = doRequest(ctx.host, '/codecheck', parameters, json=True)
+    return quickfixes_from_response(ctx, response['QuickFixes'])
 
 @vimcmd
 def signatureHelp():
