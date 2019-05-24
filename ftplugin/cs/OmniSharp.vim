@@ -48,6 +48,7 @@ command! -buffer -bar OmniSharpStopAllServers                      call OmniShar
 command! -buffer -bar OmniSharpStopServer                          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup                          call OmniSharp#TypeLookupWithoutDocumentation()
 command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniSharp#Install(<f-args>)
+command! -buffer -bar OmniSharpGlobalCodeCheck                     call OmniSharp#GlobalCodeCheck()
 
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)
@@ -91,6 +92,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpStopAllServers
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup
+\|  delcommand OmniSharpGlobalCodeCheck
 \
 \|  setlocal omnifunc< errorformat< makeprg<'
 

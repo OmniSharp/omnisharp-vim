@@ -482,6 +482,26 @@ function! s:CBCodeCheck(opts, codecheck) abort
   return b:codecheck
 endfunction
 
+function! OmniSharp#GlobalCodeCheck() abort
+  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
+  " Place the results in the quickfix window, if possible
+  if g:OmniSharp_server_stdio
+    call OmniSharp#stdio#GlobalCodeCheck(function('s:CBGlobalCodeCheck'))
+  else
+    let quickfixes = OmniSharp#py#eval('globalCodeCheck()')
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBGlobalCodeCheck(quickfixes)
+  endif
+endfunction
+
+function! s:CBGlobalCodeCheck(quickfixes) abort
+  if len(a:quickfixes) > 0
+    call s:SetQuickFix(a:quickfixes, 'Code Check Messages')
+  else
+    echo 'No Code Check messages'
+  endif
+endfunction
+
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
   call OmniSharp#TypeLookup(0, a:0 ? a:1 : 0)
 endfunction
