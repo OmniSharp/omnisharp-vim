@@ -257,6 +257,11 @@ Use this option to enable syntastic integration >
 :OmniSharpGetCodeActions
     Fuzzy-serach through available code actions
 
+                                                       *:OmniSharpGlobalCodeCheck*
+:OmniSharpGlobalCodeCheck
+    Get all code issues in the solution and populate the quickfix window
+    with the results
+
                                                                *:OmniSharpRename*
 :OmniSharpRename
     Renames symbol under cursor

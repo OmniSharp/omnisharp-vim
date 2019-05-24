@@ -90,45 +90,38 @@ function! s:Request(command, opts) abort
   call s:RawRequest(body, a:command, a:opts, sep)
 endfunction
 
-" body -> request body dict
-" command -> command string. eg: /codecheck
-" opts -> command arugments dict
-" sep -> line separator. Optional, if not given line ending replacemment is not done
-function! s:RawRequest(...) abort
-  let body = get(a:, 1, 0)
-  let command = get(a:, 2, 0)
-  let opts = get(a:, 3, 0)
-  let sep = get(a:, 4, 0)
+function! s:RawRequest(body, command, opts, ...) abort
+  let sep = a:0 ? a:1 : ''
 
   let job = OmniSharp#GetHost().job
   if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
     return 0
   endif
   let job_id = job.job_id
-  call s:Log(job_id . '  Request: ' . command, 'debug')
+  call s:Log(job_id . '  Request: ' . a:command, 'debug')
 
-  let body['Command'] = command
-  let body['Seq'] = s:nextseq
-  let body['Type'] = 'Request'
-  if has_key(opts, 'Parameters')
-    call extend(body.Arguments, opts.Parameters, 'force')
+  let a:body['Command'] = a:command
+  let a:body['Seq'] = s:nextseq
+  let a:body['Type'] = 'Request'
+  if has_key(a:opts, 'Parameters')
+    call extend(a:body.Arguments, a:opts.Parameters, 'force')
   endif
-  if type(sep) == type('')
-    let l:body = substitute(json_encode(body), sep, '\\r\\n', 'g')
+  if sep !=# ''
+    let encodedBody = substitute(json_encode(a:body), sep, '\\r\\n', 'g')
   else
-    let l:body = json_encode(l:body)
+    let encodedBody = json_encode(a:body)
   endif
 
   let s:requests[s:nextseq] = { 'Seq': s:nextseq }
-  if has_key(opts, 'ResponseHandler')
-    let s:requests[s:nextseq].ResponseHandler = opts.ResponseHandler
+  if has_key(a:opts, 'ResponseHandler')
+    let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call s:Log(l:body, 'debug')
+  call s:Log(encodedBody, 'debug')
   if has('nvim')
-    call chansend(job_id, l:body . "\n")
+    call chansend(job_id, encodedBody . "\n")
   else
-    call ch_sendraw(job_id, l:body . "\n")
+    call ch_sendraw(job_id, encodedBody . "\n")
   endif
   return 1
 endfunction
