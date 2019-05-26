@@ -291,12 +291,9 @@ endfunction
 
 function! OmniSharp#JumpToLocation(location, noautocmds) abort
   if a:location.filename !=# ''
-    if fnamemodify(a:location.filename, ':p') ==# expand('%:p')
-      " Update the ' mark, adding this location to the jumplist. This is not
-      " necessary when the location is in another buffer - :edit performs the
-      " same functionality.
-      normal! m'
-    else
+    " Update the ' mark, adding this location to the jumplist.
+    normal! m'
+    if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
       execute
       \ (a:noautocmds ? 'noautocmd' : '')
       \ (&modified && !&hidden ? 'split' : 'edit')
