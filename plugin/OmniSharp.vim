@@ -1,6 +1,12 @@
 if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
+" When set to a falsey value, metadata is not looked up
+" for compiled types.
+" When set to 'preview', it uses the preview window
+" When set to 'window', metadata is displayed in the current window. 
+let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 'preview')
+
 let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
 
 " When g:OmniSharp_server_stdio_quickload = 1, consider server 'loaded' once

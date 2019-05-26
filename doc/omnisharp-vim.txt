@@ -53,6 +53,20 @@ Default: 0 >
     let g:OmniSharp_server_stdio = 1
 <
 
+                                                     *'g:OmniSharp_lookup_metadata'*
+When using OmniSharpGotoDefinition, fall back to looking up metadata for compiled
+types. This can be set to 'window', 'preview', or a falsey value such as v:false.
+
+If set to 'window' the types are displayed in the current window or a split if 
+there are unsaved changes in the current buffer. This is like the way VSCode or VS
+display metadata.
+If set to 'preview' the types are displayed in the preview window like the 
+OmniSharpDocumentation command.
+If set to a falsey value like v:false or v:null. This feature is disabled.
+Default: 'preview' >
+    let g:OmniSharp_lookup_metadata = 'preview'
+
+<
                                                              *'g:OmniSharp_port'*
                                                                       HTTP only
 Always use this port when starting an OmniSharp HTTP server. Note that this

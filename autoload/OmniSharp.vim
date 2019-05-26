@@ -14,6 +14,7 @@ let s:generated_snippets = {}
 let s:last_completion_dictionary = {}
 let s:alive_cache = []
 let s:initial_server_ports = copy(g:OmniSharp_server_ports)
+let s:temppath = fnamemodify(tempname(), ':p:h')
 
 function! OmniSharp#GetPort(...) abort
   if exists('g:OmniSharp_port')
@@ -231,21 +232,77 @@ function! OmniSharp#GotoDefinition(...) abort
   else
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return 0 | endif
-    return s:CBGotoDefinition(opts, loc)
+    " Mock metadata info for old server based setups
+    return s:CBGotoDefinition(opts, loc, { 'MetadataSource': {}})
   endif
 endfunction
 
-function! s:CBGotoDefinition(opts, location) abort
+function! s:CBGotoDefinition(opts, location, metadata) abort
+  let went_to_metadata = 0
   if type(a:location) != type({}) " Check whether a dict was returned
-    echo 'Not found'
-    let found = 0
+    if type(g:OmniSharp_lookup_metadata) != type('') || type(a:metadata.MetadataSource) != type({})
+      echo 'Not found'
+      let found = 0
+    else
+      let found = OmniSharp#GotoMetadata(a:metadata, a:opts)
+      let went_to_metadata = 1
+    endif
   else
     let found = OmniSharp#JumpToLocation(a:location, 0)
   endif
-  if has_key(a:opts, 'Callback')
+  if has_key(a:opts, 'Callback') && !went_to_metadata
     call a:opts.Callback(found)
   endif
   return found
+endfunction
+
+function! OmniSharp#GotoMetadata(metadata, opts) abort
+  if g:OmniSharp_server_stdio
+    return OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata', [a:opts]), a:metadata)
+  else
+    echom 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
+    return 0
+  endif
+endfunction
+
+function! s:CBGotoMetadata(opts, response, metadata) abort
+  let success = 1
+  let host = OmniSharp#GetHost()
+  let metadata_filename = fnamemodify(a:response.SourceName, ":t")
+  let temp_file = s:temppath.'/'.metadata_filename
+  call writefile(
+  \ map(split(a:response.Source, "\n", 1), {i,v -> substitute(v, '\r', '', 'g')}),
+  \ temp_file,
+  \ 'b'
+  \)
+  let jumped_from_preview = &previewwindow
+  if g:OmniSharp_lookup_metadata == 'preview'
+    execute 'silent pedit'.temp_file
+    if !&previewwindow | silent wincmd p | endif
+  elseif g:OmniSharp_lookup_metadata != 'window'
+    let success = 0
+  endif
+  if success
+    call OmniSharp#JumpToLocation({
+    \  'filename': temp_file,
+    \  'lnum': a:metadata.Line,
+    \  'col': a:metadata.Column
+    \}, 1)
+    let b:OmniSharp_host = host
+    silent edit
+    execute "normal! \<C-o>"
+    let b:OmniSharp_metadata_filename = a:response.SourceName
+    setlocal nomodifiable readonly
+    if g:OmniSharp_lookup_metadata == 'preview' && !jumped_from_preview
+      silent wincmd p
+    endif
+  endif
+
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(success)
+  endif
+
+  return success
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
@@ -764,7 +821,11 @@ endfunction
 function! OmniSharp#CodeFormat(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#CodeFormat(opts)
+    if type(get(b:, 'OmniSharp_metadata_filename')) != type('')
+      call OmniSharp#stdio#CodeFormat(opts)
+    else
+      echom 'CodeFormat is not supported in metadata files'
+    endif
   else
     call OmniSharp#py#eval('codeFormat()')
     call OmniSharp#CheckPyError()
@@ -868,7 +929,8 @@ endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
-
+  " Bail early in this check if the file is a metadata file
+  if type(get(b:, "OmniSharp_metadata_filename", v:null)) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
