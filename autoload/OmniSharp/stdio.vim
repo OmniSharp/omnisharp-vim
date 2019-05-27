@@ -5,34 +5,62 @@ let s:nextseq = 1001
 let s:requests = {}
 
 function! s:ListenToServer(job, res) abort
-  if !a:job.loaded && has_key(a:res, 'Body') && type(a:res.Body) == type({})
-    if g:OmniSharp_server_stdio_quickload
-      " Quick load: Mark server as loaded as soon as configuration is finished
-      let message = get(a:res.Body, 'Message', '')
-      if message ==# 'Configuration finished.'
-        let a:job.loaded = 1
-      endif
-    else
-      " Complete load: Wait for all projects to be loaded before marking server
-      " as loaded
-      if !has_key(a:job, 'loading')
-        let a:job.loading = []
-      endif
-      let name = get(a:res.Body, 'Name', '')
-      let message = get(a:res.Body, 'Message', '')
-      if name ==# 'OmniSharp.MSBuild.ProjectManager'
-        let project = matchstr(message, '''\zs.*\ze''$')
-        if message =~# '^Queue project'
-          call add(a:job.loading, project)
+  if has_key(a:res, 'Body') && type(a:res.Body) == type({})
+    if !a:job.loaded
+
+      " Listen for server-loaded events
+      "-------------------------------------------------------------------------
+      if g:OmniSharp_server_stdio_quickload
+        " Quick load: Mark server as loaded as soon as configuration is finished
+        let message = get(a:res.Body, 'Message', '')
+        if message ==# 'Configuration finished.'
+          let a:job.loaded = 1
         endif
-        if message =~# '^Successfully loaded project'
-          call filter(a:job.loading, {idx,val -> val ==# project})
-          if len(a:job.loading) == 0
-            let a:job.loaded = 1
-            unlet a:job.loading
+      else
+        " Complete load: Wait for all projects to be loaded before marking
+        " server as loaded
+        if !has_key(a:job, 'loading')
+          let a:job.loading = []
+        endif
+        let name = get(a:res.Body, 'Name', '')
+        let message = get(a:res.Body, 'Message', '')
+        if name ==# 'OmniSharp.MSBuild.ProjectManager'
+          let project = matchstr(message, '''\zs.*\ze''$')
+          if message =~# '^Queue project'
+            call add(a:job.loading, project)
+          endif
+          if message =~# '^Successfully loaded project'
+            call filter(a:job.loading, {idx,val -> val ==# project})
+            if len(a:job.loading) == 0
+              let a:job.loaded = 1
+              unlet a:job.loading
+            endif
           endif
         endif
       endif
+
+    else
+
+      " Server is loaded, listen for diagnostics
+      "-------------------------------------------------------------------------
+      if get(a:res, 'Event', '') ==# 'Diagnostic'
+        if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
+          for result in get(a:res.Body, 'Results', [])
+            echom 'in result, ' . len(a:res.Body.Results) . ' total'
+            let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
+            let bufinfo = getbufinfo(fname)
+            if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
+              continue
+            endif
+            let bufnum = bufinfo[0].bufnr
+            call ale#other_source#StartChecking(bufnum, 'OmniSharp')
+            let opts = { 'BufNum': bufnum }
+            let quickfixes = s:LocationsFromResponse(result.QuickFixes)
+            call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
+          endfor
+        endif
+      endif
+
     endif
   endif
 endfunction
