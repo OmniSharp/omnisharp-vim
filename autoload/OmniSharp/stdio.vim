@@ -46,7 +46,6 @@ function! s:ListenToServer(job, res) abort
       if get(a:res, 'Event', '') ==# 'Diagnostic'
         if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
           for result in get(a:res.Body, 'Results', [])
-            echom 'in result, ' . len(a:res.Body.Results) . ' total'
             let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
             let bufinfo = getbufinfo(fname)
             if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
@@ -187,17 +186,25 @@ function! s:MakeChanges(body) abort
   if len(get(a:body, 'Changes', []))
     for change in get(a:body, 'Changes', [])
       let text = join(split(change.NewText, '\r\?\n', 1), "\n")
-      call cursor(change.StartLine, change.StartColumn)
-      if change.StartColumn > len(getline('.'))
+      let start = [change.StartLine, change.StartColumn]
+      let end = [change.EndLine, change.EndColumn]
+      call cursor(start)
+      if change.StartColumn > len(getline('.')) && start != end
         " We can't set a mark after the last character of the line, so add an
         " extra charaqcter which will be immediately deleted again
-        noautocmd normal! aX
+        noautocmd normal! a<
       endif
       call cursor(change.EndLine, max([1, change.EndColumn - 1]))
       if change.StartLine < change.EndLine && change.EndColumn == 1
         " We can't delete before the first character of the line, so add an
         " extra charaqcter which will be immediately deleted again
-        noautocmd normal! iX
+        noautocmd normal! i>
+      elseif start == end
+        " Start and end are the same so insert a character to be replaced
+        if change.StartColumn > 1
+          normal! l
+        endif
+        noautocmd normal! i=
       endif
       call setpos("'[", [0, change.StartLine, change.StartColumn])
       let paste_bak = &paste | set paste
@@ -572,6 +579,9 @@ function! s:PerformChangesRH(response) abort
     \}, 1)
   endif
   call winrestview(winview)
+  if getpos("'`")[1:2] != [1,1]
+    normal! ``
+  endif
   let &hidden = hidden_bak
 endfunction
 
