@@ -1,4 +1,5 @@
 Include: utils/startserver.vader
+Include: utils/async-helper.vader
 
 Given cs():
   using System;
@@ -8,7 +9,8 @@ Given cs():
   }
 
 Execute (run fix usings):
-  OmniSharpFixUsings
+  call OmniSharpTestInitializeBuffer('FixUsings')
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
 Expect cs(should remove unused using):
   public class Test
@@ -17,7 +19,6 @@ Expect cs(should remove unused using):
   }
 
 
-
 Given cs():
   public class Test
   {
@@ -28,10 +29,11 @@ Given cs():
   }
 
 Execute (run fix usings):
-  OmniSharpFixUsings
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
 Expect cs(should remove unused using):
   using System;
+
   public class Test
   {
     public Test()
@@ -39,74 +41,42 @@ Expect cs(should remove unused using):
         Console.WriteLine("test");
     }
   }
-
-
-
-
-Given cs():
-  using System.Collections.Generic;
-  using System;
-  public class Test
-  {
-    public Test()
-    {
-        Console.WriteLine("test");
-        var l = new List<string>();
-    }
-  }
-
-Execute (run fix usings):
-  OmniSharpFixUsings
-
-Expect cs(should sort usings):
-  using System;
-  using System.Collections.Generic;
-  public class Test
-  {
-    public Test()
-    {
-        Console.WriteLine("test");
-        var l = new List<string>();
-    }
-  }
-
-
 
 
 Given cs():
   public class test {
       class1 ns1 = new class1();
   }
-  
+
   namespace ns1
   {
       public class class1{}
   }
-  
+
   namespace ns2
   {
       public class class1{}
   }
 
 Execute (run fix usings):
-  OmniSharpFixUsings
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
 Expect cs(should not add ambiguous using):
   public class test {
       class1 ns1 = new class1();
   }
-  
+
   namespace ns1
   {
       public class class1{}
   }
-  
+
   namespace ns2
   {
       public class class1{}
   }
 
 Execute (should add ambiguous usings to quickfix):
-  call search("i = 0")
-  OmniSharpGotoDefinition
-  AssertEqual line("."), 3 
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
+  cfirst
+  AssertEqual 2, line(".")

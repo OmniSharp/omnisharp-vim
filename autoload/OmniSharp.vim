@@ -177,7 +177,6 @@ function! s:CBFindImplementations(target, opts, locations) abort
       call s:SetQuickFix(a:locations, 'Implementations: ' . a:target)
     endif
   endif
-
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numImplementations)
   endif
@@ -746,20 +745,28 @@ function! OmniSharp#CodeFormat(...) abort
   endif
 endfunction
 
-function! OmniSharp#FixUsings() abort
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with the number of ambiguous usings
+function! OmniSharp#FixUsings(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#FixUsings(function('s:CBFixUsings'))
+    call OmniSharp#stdio#FixUsings(function('s:CBFixUsings', [opts]))
   else
     let locs = OmniSharp#py#eval('fix_usings()')
     if OmniSharp#CheckPyError() | return | endif
-    call s:CBFixUsings(locs)
+    return s:CBFixUsings(opts, locs)
   endif
 endfunction
 
-function! s:CBFixUsings(locations) abort
-  if len(a:locations) > 0
-    call s:SetQuickFix(a:locations, 'Usings')
+function! s:CBFixUsings(opts, locations) abort
+  let numAmbiguous = len(a:locations)
+  if numAmbiguous > 0
+    call s:SetQuickFix(a:locations, 'Ambiguous usings')
   endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(numAmbiguous)
+  endif
+  return numAmbiguous
 endfunction
 
 function! OmniSharp#IsAnyServerRunning() abort

@@ -18,3 +18,4 @@ set cmdheight=3
 let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_selector_ui = ''
 let g:OmniSharp_timeout = 10
+let g:OmniSharp_open_quickfix = 0

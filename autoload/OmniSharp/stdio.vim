@@ -541,7 +541,7 @@ endfunction
 
 function! OmniSharp#stdio#RunCodeAction(action, ...) abort
   let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH', a:0 ? [a:1] : []),
+  \ 'ResponseHandler': function('s:PerformChangesRH', [a:0 ? a:1 : {}]),
   \ 'Parameters': {
   \   'Identifier': a:action.Identifier,
   \   'WantsTextChanges': 1
