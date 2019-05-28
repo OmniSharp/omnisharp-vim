@@ -692,15 +692,21 @@ function! s:Highlight(types, group) abort
   endif
 endfunction
 
-function! OmniSharp#UpdateBuffer() abort
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously)
+function! OmniSharp#UpdateBuffer(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if !OmniSharp#IsServerRunning() | return | endif
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if OmniSharp#BufferHasChanged() == 1
     if g:OmniSharp_server_stdio
-      call OmniSharp#stdio#UpdateBuffer()
+      call OmniSharp#stdio#UpdateBuffer(opts)
     else
       call OmniSharp#py#eval('updateBuffer()')
       call OmniSharp#CheckPyError()
+      if has_key(opts, 'Callback')
+        call opts.Callback()
+      endif
     endif
   endif
 endfunction

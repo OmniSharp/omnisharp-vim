@@ -617,8 +617,17 @@ function! s:TypeLookupRH(Callback, response) abort
   \})
 endfunction
 
-function! OmniSharp#stdio#UpdateBuffer() abort
-  call s:Request('/updatebuffer', {})
+function! OmniSharp#stdio#UpdateBuffer(opts) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:UpdateBufferRH', [a:opts])
+  \}
+  call s:Request('/updatebuffer', opts)
+endfunction
+
+function! s:UpdateBufferRH(opts, response) abort
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback()
+  endif
 endfunction
 
 let &cpoptions = s:save_cpo
