@@ -1,7 +1,7 @@
 Include: utils/startserver.vader
 Include: utils/async-helper.vader
 
-Given (cs):
+Given cs():
   public class Test
   {
     public Test()
@@ -14,7 +14,7 @@ Execute (rename constructor):
   call search("Test()")
   call OmniSharpTestAwait('OmniSharp#RenameTo', ['Renamed'])
 
-Expect (should rename class):
+Expect cs(should rename class):
   public class Renamed
   {
     public Renamed()

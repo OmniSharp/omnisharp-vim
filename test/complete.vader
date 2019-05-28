@@ -5,10 +5,10 @@ Given cs():
 
 Execute ():
   " Need to set a filename for OmniSharp-roslyn
-  file example/TestComplete.cs
+  file example/Complete.cs
 
 Do (invoke omnicomplete on 'usi'):
   A\<c-x>\<c-o>
 
-Expect (should complete word):
+Expect cs(should complete word):
   using

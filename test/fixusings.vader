@@ -10,7 +10,7 @@ Given cs():
 Execute (run fix usings):
   OmniSharpFixUsings
 
-Expect (should remove unused using):
+Expect cs(should remove unused using):
   public class Test
   {
 
@@ -30,7 +30,7 @@ Given cs():
 Execute (run fix usings):
   OmniSharpFixUsings
 
-Expect (should remove unused using):
+Expect cs(should remove unused using):
   using System;
   public class Test
   {
@@ -58,7 +58,7 @@ Given cs():
 Execute (run fix usings):
   OmniSharpFixUsings
 
-Expect (should sort usings):
+Expect cs(should sort usings):
   using System;
   using System.Collections.Generic;
   public class Test
@@ -91,7 +91,7 @@ Given cs():
 Execute (run fix usings):
   OmniSharpFixUsings
 
-Expect (should not add ambiguous using):
+Expect cs(should not add ambiguous using):
   public class test {
       class1 ns1 = new class1();
   }

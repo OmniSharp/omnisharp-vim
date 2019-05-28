@@ -15,9 +15,7 @@ Execute (Test vim jobs):
     let job = OmniSharp#proc#vimJobStart(command)
     while job_info(job.job_id).status != 'dead'
       sleep 10 m
-      echom "Sleeping"
     endwhile
-    echom "Not Sleeping"
     sleep 10 m
     let jobstatus = job_info(job.job_id).exitval
     AssertEqual 133, jobstatus
