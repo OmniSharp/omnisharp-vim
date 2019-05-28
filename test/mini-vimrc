@@ -1,16 +1,20 @@
-set nocompatible
+if &compatible
+  set nocompatible
+endif
+
 filetype off
 
-" Assuming that plugins are installed under ~/.vim/bundle
+" Assuming that plugins are installed in the same folder, e.g. ~/.vim/plugged
+let plugindir = expand("\<sfile>:h:h:h")
 
 " Dependency to vader.vim
-set rtp^=~/.vim/bundle/vader.vim
+let &runtimepath .= ',' . plugindir . '/vader.vim'
+let &runtimepath .= ',' . plugindir . '/omnisharp-vim'
 
-" The plugin under test
-set rtp^=~/.vim/bundle/Omnisharp
-set rtp^=~/.vim/bundle/vim-dispatch
-
-" Enable loading plugins and indent files for specific file types
 filetype plugin indent on
 syntax on
 set cmdheight=3
+
+let g:OmniSharp_server_stdio = 1
+let g:OmniSharp_selector_ui = ''
+let g:OmniSharp_timeout = 10

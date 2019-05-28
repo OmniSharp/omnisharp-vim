@@ -1,10 +1,11 @@
-Execute (set complete function):
-  autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
-
 Include: startserver.vader
 
-Given(cs):
+Given cs():
   usi
+
+Execute ():
+  " Need to set a filename for OmniSharp-roslyn
+  file example/SomeFile.cs
 
 Do (invoke omnicomplete on 'usi'):
   A\<c-x>\<c-o>
