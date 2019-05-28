@@ -224,7 +224,7 @@ function! OmniSharp#NavigateUp() abort
 endfunction
 
 " Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the number of implementations
+" returned (synchronously or asynchronously) with a boolean 'found' result
 function! OmniSharp#GotoDefinition(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio

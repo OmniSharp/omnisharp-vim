@@ -12,12 +12,8 @@ Given cs():
 
   }
 
-After():
-  call OmniSharpTestCleanupBuffer()
-
 Execute (go to definition):
-  call OmniSharpTestInitializeBuffer()
+  call OmniSharpTestInitializeBuffer('GotoDefinition')
   call search("i = 0")
-  call OmniSharpTestAwait('OmniSharp#UpdateBuffer', [])
   call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
   AssertEqual 3, line(".")
