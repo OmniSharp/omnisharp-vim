@@ -1,4 +1,5 @@
 Include: startserver.vader
+Include: async-helper.vader
 
 Given cs():
   public class Test
@@ -11,7 +12,12 @@ Given cs():
 
   }
 
+After():
+  call OmniSharpTestCleanupBuffer()
+
 Execute (go to definition):
+  call OmniSharpTestInitializeBuffer()
   call search("i = 0")
-  OmniSharpGotoDefinition
-  AssertEqual line("."), 3 
+  call OmniSharpTestAwait('OmniSharp#UpdateBuffer', [])
+  call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
+  AssertEqual 3, line(".")

@@ -223,23 +223,31 @@ function! OmniSharp#NavigateUp() abort
   endif
 endfunction
 
-function! OmniSharp#GotoDefinition() abort
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with the number of implementations
+function! OmniSharp#GotoDefinition(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#GotoDefinition(function('s:CBGotoDefinition'))
+    let Callback = function('s:CBGotoDefinition', [opts])
+    call OmniSharp#stdio#GotoDefinition(Callback)
   else
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return 0 | endif
-    return s:CBGotoDefinition(loc)
+    return s:CBGotoDefinition(opts, loc)
   endif
 endfunction
 
-function! s:CBGotoDefinition(location) abort
+function! s:CBGotoDefinition(opts, location) abort
   if type(a:location) != type({}) " Check whether a dict was returned
     echo 'Not found'
-    return 0
+    let found = 0
   else
-    return OmniSharp#JumpToLocation(a:location, 0)
+    let found = OmniSharp#JumpToLocation(a:location, 0)
   endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(found)
+  endif
+  return found
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
@@ -712,8 +720,8 @@ function! OmniSharp#UpdateBuffer(...) abort
 endfunction
 
 function! OmniSharp#BufferHasChanged() abort
-  if b:changedtick != get(b:, 'Omnisharp_UpdateChangeTick', -1)
-    let b:Omnisharp_UpdateChangeTick = b:changedtick
+  if b:changedtick != get(b:, 'OmniSharp_UpdateChangeTick', -1)
+    let b:OmniSharp_UpdateChangeTick = b:changedtick
     return 1
   endif
   return 0
