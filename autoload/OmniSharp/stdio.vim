@@ -528,19 +528,20 @@ function! s:NavigateRH(response) abort
   call cursor(a:response.Body.Line, a:response.Body.Column)
 endfunction
 
-function! OmniSharp#stdio#RenameTo(renameto) abort
+function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH'),
+  \ 'ResponseHandler': function('s:PerformChangesRH', [a:opts]),
   \ 'Parameters': {
-  \   'RenameTo': a:renameto
+  \   'RenameTo': a:renameto,
+  \   'WantsTextChanges': 1
   \ }
   \}
   call s:Request('/rename', opts)
 endfunction
 
-function! OmniSharp#stdio#RunCodeAction(action) abort
+function! OmniSharp#stdio#RunCodeAction(action, ...) abort
   let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH'),
+  \ 'ResponseHandler': function('s:PerformChangesRH', a:0 ? [a:1] : []),
   \ 'Parameters': {
   \   'Identifier': a:action.Identifier,
   \   'WantsTextChanges': 1
@@ -553,36 +554,39 @@ function! OmniSharp#stdio#RunCodeAction(action) abort
   call s:Request('/v2/runcodeaction', opts)
 endfunction
 
-function! s:PerformChangesRH(response) abort
+function! s:PerformChangesRH(opts, response) abort
   if !a:response.Success | return | endif
   let changes = get(a:response.Body, 'Changes', [])
   if len(changes) == 0
     echo 'No action taken'
-    return
-  endif
-  let winview = winsaveview()
-  let bufname = bufname('%')
-  let bufnum = bufnr('%')
-  let hidden_bak = &hidden | set hidden
-  for change in changes
-    call OmniSharp#JumpToLocation({
-    \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
-    \}, 1)
-    call s:MakeChanges(change)
+  else
+    let winview = winsaveview()
+    let bufname = bufname('%')
+    let bufnum = bufnr('%')
+    let hidden_bak = &hidden | set hidden
+    for change in changes
+      call OmniSharp#JumpToLocation({
+      \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
+      \}, 1)
+      call s:MakeChanges(change)
+      if bufnr('%') != bufnum
+        silent write | silent edit
+      endif
+    endfor
     if bufnr('%') != bufnum
-      silent write | silent edit
+      call OmniSharp#JumpToLocation({
+      \ 'filename': bufname
+      \}, 1)
     endif
-  endfor
-  if bufnr('%') != bufnum
-    call OmniSharp#JumpToLocation({
-    \ 'filename': bufname
-    \}, 1)
+    call winrestview(winview)
+    if getpos("'`")[1:2] != [1,1]
+      normal! ``
+    endif
+    let &hidden = hidden_bak
   endif
-  call winrestview(winview)
-  if getpos("'`")[1:2] != [1,1]
-    normal! ``
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback()
   endif
-  let &hidden = hidden_bak
 endfunction
 
 function! OmniSharp#stdio#SignatureHelp(Callback) abort

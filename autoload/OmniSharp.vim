@@ -585,9 +585,10 @@ function! OmniSharp#Rename() abort
   endif
 endfunction
 
-function! OmniSharp#RenameTo(renameto) abort
+function! OmniSharp#RenameTo(renameto, ...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#RenameTo(a:renameto)
+    call OmniSharp#stdio#RenameTo(a:renameto, opts)
   else
     let command = printf('renameTo(%s)', string(a:renameto))
     let changes = OmniSharp#py#eval(command)
@@ -622,6 +623,9 @@ function! OmniSharp#RenameTo(renameto) abort
       silent edit  " reload to apply syntax
       let &lazyredraw = save_lazyredraw
     endtry
+    if has_key(opts, 'Callback')
+      call opts.Callback()
+    endif
   endif
 endfunction
 
