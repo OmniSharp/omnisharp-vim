@@ -1,5 +1,5 @@
 # OmniSharp Installers
-The OmniSharp installers are scripts that omnisharp-vim uses to install the OmniSharp Roslyn server if it is not able to find it when opening a .cs file. There is a shell (.sh) version for Linux, macOS, & Cygwin/WSL and there is a PowerShell (.ps1) version for Windows.
+The OmniSharp installers are scripts that OmniSharp-vim uses to install the OmniSharp Roslyn server if it is not able to find it when opening a .cs file. There is a shell (.sh) version for Linux, macOS, & Cygwin/WSL and there is a PowerShell (.ps1) version for Windows.
 
 ## omnisharp-manager PowerShell script
 
@@ -24,9 +24,9 @@ In PowerShell the following will install the v1.32.1 HTTP version of the OmniSha
 
 
 ## PowerShell Restrictions
-By default PowerShell will prevent scripts being executed through what it terms its *Execution Policy*. But on Windows the `omnisharp-manager.ps1` script needs to execute to install the OmniSharp Roslyn server. In the __Install Omnisharp-Roslyn with PowerShell__ section below there are instructions for changing your PowerShell Execution Policy and getting the latest version of the server installed. Alternatively, if you change your Power Execution Policy to Unrestricted using the first few steps below you can open a .cs file in Vim and omnisharp-vim will offer to do the installation for you.
+By default PowerShell will prevent scripts being executed through what it terms its *Execution Policy*. But on Windows the `omnisharp-manager.ps1` script needs to execute to install the OmniSharp Roslyn server. In the __Install OmniSharp-roslyn with PowerShell__ section below there are instructions for changing your PowerShell Execution Policy and getting the latest version of the server installed. Alternatively, if you change your Power Execution Policy to Unrestricted using the first few steps below you can open a .cs file in Vim and OmniSharp-vim will offer to do the installation for you.
 
-### Install Omnisharp-Roslyn with PowerShell
+### Install OmniSharp-roslyn with PowerShell
 1. Locate PowerShell in the Windows Start Menu
 1. Right-click and choose `Run as administrator`
 1. Use `Get-ExecutionPolicy -List` in PowerShell to verify and record your current settings
@@ -44,4 +44,4 @@ By default PowerShell will prevent scripts being executed through what it terms 
 #### Footnotes [fn \#]
 [1]: Each time a .cs file is opened the OmniSharp-vim plugin checks if OmniSharp Roslyn server is already installed. If not then it runs the `omnisharp-manager.ps1` script. It typically checks the `%USERPROFILE%\.omnisharp\omnisharp-roslyn` directory.
 
-[2]: By default this setting is `Undefined`; which means the restriction may be determined elsewhere but defaults to `Restricted`. Setting to `RemoteSigned` on a typical setup will allow omnisharp-vim to internally run the script in the future.  More at [About Execution Policies | Microsoft Docs](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-6)
+[2]: By default this setting is `Undefined`; which means the restriction may be determined elsewhere but defaults to `Restricted`. Setting to `RemoteSigned` on a typical setup will allow OmniSharp-vim to internally run the script in the future.  More at [About Execution Policies | Microsoft Docs](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-6)

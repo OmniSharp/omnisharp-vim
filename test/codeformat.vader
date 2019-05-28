@@ -1,6 +1,6 @@
 Include: startserver.vader
 
-Given (cs):
+Given cs():
   public class Test {
 
   }
