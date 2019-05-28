@@ -3,8 +3,8 @@ Execute (Test neovim jobs):
   let jobstatus = 0
   if OmniSharp#proc#supportsNeovimJobs()
     let job = OmniSharp#proc#neovimJobStart(command)
-    Assert job > 0, "Could not launch the specified command"
-    let jobstatus = jobwait([job])[0]
+    Assert job.job_id > 0, "Could not launch the specified command"
+    let jobstatus = jobwait([job.job_id])[0]
     AssertEqual 133, jobstatus
   endif
 
@@ -13,13 +13,11 @@ Execute (Test vim jobs):
   let jobstatus = 0
   if OmniSharp#proc#supportsVimJobs()
     let job = OmniSharp#proc#vimJobStart(command)
-    while job_info(job).status != 'dead'
+    while job_info(job.job_id).status != 'dead'
       sleep 10 m
-      echom "Sleeping"
     endwhile
-    echom "Not Sleeping"
     sleep 10 m
-    let jobstatus = job_info(job).exitval
+    let jobstatus = job_info(job.job_id).exitval
     AssertEqual 133, jobstatus
   endif
 

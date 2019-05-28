@@ -1,0 +1,14 @@
+Include: utils/startserver.vader
+
+Given cs():
+  usi
+
+Execute ():
+  " Need to set a filename for OmniSharp-roslyn
+  file example/Complete.cs
+
+Do (invoke omnicomplete on 'usi'):
+  A\<c-x>\<c-o>
+
+Expect cs(should complete word):
+  using

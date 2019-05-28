@@ -1,0 +1,9 @@
+Execute (start server):
+  edit! example/Program.cs
+  let host = OmniSharp#GetHost()
+  let job = OmniSharp#proc#GetJob(host.sln_or_dir)
+  let starttime = reltime()
+  while reltime(starttime)[0] < g:OmniSharp_timeout && !job.loaded
+    sleep 50m
+  endwhile
+  Assert job.loaded, 'Timed out waiting for job to load'

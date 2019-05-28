@@ -46,7 +46,6 @@ function! s:ListenToServer(job, res) abort
       if get(a:res, 'Event', '') ==# 'Diagnostic'
         if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
           for result in get(a:res.Body, 'Results', [])
-            echom 'in result, ' . len(a:res.Body.Results) . ' total'
             let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
             let bufinfo = getbufinfo(fname)
             if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
@@ -115,7 +114,7 @@ function! s:Request(command, opts) abort
   \   'Buffer': buffer
   \ }
   \}
-  call s:RawRequest(body, a:command, a:opts, sep)
+  return s:RawRequest(body, a:command, a:opts, sep)
 endfunction
 
 function! s:RawRequest(body, command, opts, ...) abort
@@ -183,21 +182,49 @@ function! s:LocationsFromResponse(quickfixes) abort
   return locations
 endfunction
 
-function! s:SetBuffer(text) abort
-  if a:text == v:null | return 0 | endif
-  let pos = getpos('.')
-  let lines = split(a:text, '\r\?\n')
-  if len(lines) < line('$')
-    if exists('*deletebufline')
-      call deletebufline('%', len(lines) + 1, '$')
-    else
-      %delete
+function! s:MakeChanges(body) abort
+  if len(get(a:body, 'Changes', []))
+    for change in get(a:body, 'Changes', [])
+      let text = join(split(change.NewText, '\r\?\n', 1), "\n")
+      let start = [change.StartLine, change.StartColumn]
+      let end = [change.EndLine, change.EndColumn]
+      call cursor(start)
+      if change.StartColumn > len(getline('.')) && start != end
+        " We can't set a mark after the last character of the line, so add an
+        " extra charaqcter which will be immediately deleted again
+        noautocmd normal! a<
+      endif
+      call cursor(change.EndLine, max([1, change.EndColumn - 1]))
+      if change.StartLine < change.EndLine && change.EndColumn == 1
+        " We can't delete before the first character of the line, so add an
+        " extra charaqcter which will be immediately deleted again
+        noautocmd normal! i>
+      elseif start == end
+        " Start and end are the same so insert a character to be replaced
+        if change.StartColumn > 1
+          normal! l
+        endif
+        noautocmd normal! i=
+      endif
+      call setpos("'[", [0, change.StartLine, change.StartColumn])
+      let paste_bak = &paste | set paste
+      silent execute "noautocmd keepjumps normal! v`[c\<C-r>=text\<CR>"
+      let &paste = paste_bak
+    endfor
+  elseif get(a:body, 'Buffer', v:null) != v:null
+    let pos = getpos('.')
+    let lines = split(a:body.Buffer, '\r\?\n', 1)
+    if len(lines) < line('$')
+      if exists('*deletebufline')
+        call deletebufline('%', len(lines) + 1, '$')
+      else
+        %delete
+      endif
     endif
+    call setline(1, lines)
+    let pos[1] = min([pos[1], line('$')])
+    call setpos('.', pos)
   endif
-  call setline(1, lines)
-  let pos[1] = min([pos[1], line('$')])
-  call setpos('.', pos)
-  return 1
 endfunction
 
 function! OmniSharp#stdio#GetLogFile() abort
@@ -255,14 +282,21 @@ endfunction
 function! OmniSharp#stdio#CodeFormat(opts) abort
   let opts = {
   \ 'ResponseHandler': function('s:CodeFormatRH', [a:opts]),
-  \ 'ExpandTab': &expandtab
+  \ 'ExpandTab': &expandtab,
+  \ 'Parameters': {
+  \   'WantsTextChanges': 1
+  \ }
   \}
   call s:Request('/codeformat', opts)
 endfunction
 
 function! s:CodeFormatRH(opts, response) abort
   if !a:response.Success | return | endif
-  call s:SetBuffer(a:response.Body.Buffer)
+  normal! m'
+  let winview = winsaveview()
+  call s:MakeChanges(a:response.Body)
+  call winrestview(winview)
+  normal! ``
   if has_key(a:opts, 'Callback')
     call a:opts.Callback()
   endif
@@ -362,14 +396,21 @@ endfunction
 
 function! OmniSharp#stdio#FixUsings(Callback) abort
   let opts = {
-  \ 'ResponseHandler': function('s:FixUsingsRH', [a:Callback])
+  \ 'ResponseHandler': function('s:FixUsingsRH', [a:Callback]),
+  \ 'Parameters': {
+  \   'WantsTextChanges': 1
+  \ }
   \}
   call s:Request('/fixusings', opts)
 endfunction
 
 function! s:FixUsingsRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call s:SetBuffer(a:response.Body.Buffer)
+  normal! m'
+  let winview = winsaveview()
+  call s:MakeChanges(a:response.Body)
+  call winrestview(winview)
+  normal! ``
   let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
   call a:Callback(locations)
 endfunction
@@ -487,21 +528,23 @@ function! s:NavigateRH(response) abort
   call cursor(a:response.Body.Line, a:response.Body.Column)
 endfunction
 
-function! OmniSharp#stdio#RenameTo(renameto) abort
+function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH'),
+  \ 'ResponseHandler': function('s:PerformChangesRH', [a:opts]),
   \ 'Parameters': {
-  \   'RenameTo': a:renameto
+  \   'RenameTo': a:renameto,
+  \   'WantsTextChanges': 1
   \ }
   \}
   call s:Request('/rename', opts)
 endfunction
 
-function! OmniSharp#stdio#RunCodeAction(action) abort
+function! OmniSharp#stdio#RunCodeAction(action, ...) abort
   let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH'),
+  \ 'ResponseHandler': function('s:PerformChangesRH', [a:0 ? a:1 : {}]),
   \ 'Parameters': {
-  \   'Identifier': a:action.Identifier
+  \   'Identifier': a:action.Identifier,
+  \   'WantsTextChanges': 1
   \ },
   \ 'UsePreviousPosition': 1
   \}
@@ -511,36 +554,39 @@ function! OmniSharp#stdio#RunCodeAction(action) abort
   call s:Request('/v2/runcodeaction', opts)
 endfunction
 
-function! s:PerformChangesRH(response) abort
+function! s:PerformChangesRH(opts, response) abort
   if !a:response.Success | return | endif
   let changes = get(a:response.Body, 'Changes', [])
   if len(changes) == 0
     echo 'No action taken'
-    return
-  endif
-  let bufname = bufname('%')
-  let bufnum = bufnr('%')
-  let pos = getpos('.')
-  let hidden_bak = &hidden | set hidden
-  for change in changes
-    call OmniSharp#JumpToLocation({
-    \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
-    \}, 1)
-    if !s:SetBuffer(get(change, 'Buffer', v:null))
-      for filechange in get(change, 'Changes', [])
-        call s:SetBuffer(get(filechange, 'NewText', v:null))
-      endfor
-    endif
+  else
+    let winview = winsaveview()
+    let bufname = bufname('%')
+    let bufnum = bufnr('%')
+    let hidden_bak = &hidden | set hidden
+    for change in changes
+      call OmniSharp#JumpToLocation({
+      \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
+      \}, 1)
+      call s:MakeChanges(change)
+      if bufnr('%') != bufnum
+        silent write | silent edit
+      endif
+    endfor
     if bufnr('%') != bufnum
-      silent write | silent edit
+      call OmniSharp#JumpToLocation({
+      \ 'filename': bufname
+      \}, 1)
     endif
-    call OmniSharp#JumpToLocation({
-    \ 'filename': bufname,
-    \ 'lnum': pos[1],
-    \ 'col': pos[2]
-    \}, 1)
+    call winrestview(winview)
+    if getpos("'`")[1:2] != [1,1]
+      normal! ``
+    endif
     let &hidden = hidden_bak
-  endfor
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback()
+  endif
 endfunction
 
 function! OmniSharp#stdio#SignatureHelp(Callback) abort
@@ -575,8 +621,17 @@ function! s:TypeLookupRH(Callback, response) abort
   \})
 endfunction
 
-function! OmniSharp#stdio#UpdateBuffer() abort
-  call s:Request('/updatebuffer', {})
+function! OmniSharp#stdio#UpdateBuffer(opts) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:UpdateBufferRH', [a:opts])
+  \}
+  call s:Request('/updatebuffer', opts)
+endfunction
+
+function! s:UpdateBufferRH(opts, response) abort
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback()
+  endif
 endfunction
 
 let &cpoptions = s:save_cpo

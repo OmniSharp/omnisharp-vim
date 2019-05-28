@@ -1,6 +1,7 @@
-Include: startserver.vader
+Include: utils/startserver.vader
+Include: utils/async-helper.vader
 
-Given (cs):
+Given cs():
   using System;
   public class Test
   {
@@ -8,17 +9,17 @@ Given (cs):
   }
 
 Execute (run fix usings):
-  OmniSharpFixUsings
+  call OmniSharpTestInitializeBuffer('FixUsings')
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
-Expect (should remove unused using):
+Expect cs(should remove unused using):
   public class Test
   {
 
   }
 
 
-
-Given (cs):
+Given cs():
   public class Test
   {
     public Test()
@@ -28,10 +29,11 @@ Given (cs):
   }
 
 Execute (run fix usings):
-  OmniSharpFixUsings
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
-Expect (should remove unused using):
+Expect cs(should remove unused using):
   using System;
+
   public class Test
   {
     public Test()
@@ -41,72 +43,40 @@ Expect (should remove unused using):
   }
 
 
-
-
-Given (cs):
-  using System.Collections.Generic;
-  using System;
-  public class Test
-  {
-    public Test()
-    {
-        Console.WriteLine("test");
-        var l = new List<string>();
-    }
-  }
-
-Execute (run fix usings):
-  OmniSharpFixUsings
-
-Expect (should sort usings):
-  using System;
-  using System.Collections.Generic;
-  public class Test
-  {
-    public Test()
-    {
-        Console.WriteLine("test");
-        var l = new List<string>();
-    }
-  }
-
-
-
-
-Given (cs):
+Given cs():
   public class test {
       class1 ns1 = new class1();
   }
-  
+
   namespace ns1
   {
       public class class1{}
   }
-  
+
   namespace ns2
   {
       public class class1{}
   }
 
 Execute (run fix usings):
-  OmniSharpFixUsings
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
-Expect (should not add ambiguous using):
+Expect cs(should not add ambiguous using):
   public class test {
       class1 ns1 = new class1();
   }
-  
+
   namespace ns1
   {
       public class class1{}
   }
-  
+
   namespace ns2
   {
       public class class1{}
   }
 
 Execute (should add ambiguous usings to quickfix):
-  call search("i = 0")
-  OmniSharpGotoDefinition
-  AssertEqual line("."), 3 
+  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
+  cfirst
+  AssertEqual 2, line(".")

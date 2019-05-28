@@ -1,18 +1,20 @@
-Include: startserver.vader
+Include: utils/startserver.vader
+Include: utils/async-helper.vader
 
-Given (cs):
-  public class Test
+Given cs():
+  public class TestRenameTo
   {
-    public Test()
+    public TestRenameTo()
     {
     }
   }
 
 Execute (rename constructor):
-  call search("Test()")
-  call OmniSharp#RenameTo("Renamed")
+  call OmniSharpTestInitializeBuffer('RenameTo')
+  call search("TestRenameTo()")
+  call OmniSharpTestAwait('OmniSharp#RenameTo', ['Renamed'])
 
-Expect (should rename class):
+Expect cs(should rename class):
   public class Renamed
   {
     public Renamed()

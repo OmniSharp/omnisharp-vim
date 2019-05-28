@@ -177,7 +177,6 @@ function! s:CBFindImplementations(target, opts, locations) abort
       call s:SetQuickFix(a:locations, 'Implementations: ' . a:target)
     endif
   endif
-
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numImplementations)
   endif
@@ -223,23 +222,31 @@ function! OmniSharp#NavigateUp() abort
   endif
 endfunction
 
-function! OmniSharp#GotoDefinition() abort
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with a boolean 'found' result
+function! OmniSharp#GotoDefinition(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#GotoDefinition(function('s:CBGotoDefinition'))
+    let Callback = function('s:CBGotoDefinition', [opts])
+    call OmniSharp#stdio#GotoDefinition(Callback)
   else
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return 0 | endif
-    return s:CBGotoDefinition(loc)
+    return s:CBGotoDefinition(opts, loc)
   endif
 endfunction
 
-function! s:CBGotoDefinition(location) abort
+function! s:CBGotoDefinition(opts, location) abort
   if type(a:location) != type({}) " Check whether a dict was returned
     echo 'Not found'
-    return 0
+    let found = 0
   else
-    return OmniSharp#JumpToLocation(a:location, 0)
+    let found = OmniSharp#JumpToLocation(a:location, 0)
   endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(found)
+  endif
+  return found
 endfunction
 
 function! OmniSharp#PreviewDefinition() abort
@@ -291,12 +298,9 @@ endfunction
 
 function! OmniSharp#JumpToLocation(location, noautocmds) abort
   if a:location.filename !=# ''
-    if fnamemodify(a:location.filename, ':p') ==# expand('%:p')
-      " Update the ' mark, adding this location to the jumplist. This is not
-      " necessary when the location is in another buffer - :edit performs the
-      " same functionality.
-      normal! m'
-    else
+    " Update the ' mark, adding this location to the jumplist.
+    normal! m'
+    if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
       execute
       \ (a:noautocmds ? 'noautocmd' : '')
       \ (&modified && !&hidden ? 'split' : 'edit')
@@ -580,9 +584,10 @@ function! OmniSharp#Rename() abort
   endif
 endfunction
 
-function! OmniSharp#RenameTo(renameto) abort
+function! OmniSharp#RenameTo(renameto, ...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#RenameTo(a:renameto)
+    call OmniSharp#stdio#RenameTo(a:renameto, opts)
   else
     let command = printf('renameTo(%s)', string(a:renameto))
     let changes = OmniSharp#py#eval(command)
@@ -617,6 +622,9 @@ function! OmniSharp#RenameTo(renameto) abort
       silent edit  " reload to apply syntax
       let &lazyredraw = save_lazyredraw
     endtry
+    if has_key(opts, 'Callback')
+      call opts.Callback()
+    endif
   endif
 endfunction
 
@@ -695,22 +703,28 @@ function! s:Highlight(types, group) abort
   endif
 endfunction
 
-function! OmniSharp#UpdateBuffer() abort
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously)
+function! OmniSharp#UpdateBuffer(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if !OmniSharp#IsServerRunning() | return | endif
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if OmniSharp#BufferHasChanged() == 1
     if g:OmniSharp_server_stdio
-      call OmniSharp#stdio#UpdateBuffer()
+      call OmniSharp#stdio#UpdateBuffer(opts)
     else
       call OmniSharp#py#eval('updateBuffer()')
       call OmniSharp#CheckPyError()
+      if has_key(opts, 'Callback')
+        call opts.Callback()
+      endif
     endif
   endif
 endfunction
 
 function! OmniSharp#BufferHasChanged() abort
-  if b:changedtick != get(b:, 'Omnisharp_UpdateChangeTick', -1)
-    let b:Omnisharp_UpdateChangeTick = b:changedtick
+  if b:changedtick != get(b:, 'OmniSharp_UpdateChangeTick', -1)
+    let b:OmniSharp_UpdateChangeTick = b:changedtick
     return 1
   endif
   return 0
@@ -731,20 +745,28 @@ function! OmniSharp#CodeFormat(...) abort
   endif
 endfunction
 
-function! OmniSharp#FixUsings() abort
+" Accepts a Funcref callback argument, to be called after the response is
+" returned (synchronously or asynchronously) with the number of ambiguous usings
+function! OmniSharp#FixUsings(...) abort
+  let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#FixUsings(function('s:CBFixUsings'))
+    call OmniSharp#stdio#FixUsings(function('s:CBFixUsings', [opts]))
   else
     let locs = OmniSharp#py#eval('fix_usings()')
     if OmniSharp#CheckPyError() | return | endif
-    call s:CBFixUsings(locs)
+    return s:CBFixUsings(opts, locs)
   endif
 endfunction
 
-function! s:CBFixUsings(locations) abort
-  if len(a:locations) > 0
-    call s:SetQuickFix(a:locations, 'Usings')
+function! s:CBFixUsings(opts, locations) abort
+  let numAmbiguous = len(a:locations)
+  if numAmbiguous > 0
+    call s:SetQuickFix(a:locations, 'Ambiguous usings')
   endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(numAmbiguous)
+  endif
+  return numAmbiguous
 endfunction
 
 function! OmniSharp#IsAnyServerRunning() abort
