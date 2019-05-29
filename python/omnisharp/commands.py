@@ -67,20 +67,27 @@ def getCompletions(partialWord):
         bool(int(vim.eval('g:OmniSharp_want_snippet')))
 
     parameters['WantSnippet'] = want_snippet
-    parameters['WantMethodHeader'] = want_snippet
-    parameters['WantReturnType'] = want_snippet
+    parameters['WantMethodHeader'] = True
+    parameters['WantReturnType'] = True
 
     response = getResponse(ctx, '/autocomplete', parameters, json=True)
 
     vim_completions = []
     if response is not None:
-        for completion in response:
+        for cmp in response:
+            if want_snippet:
+                word = cmp['MethodHeader'] or cmp['CompletionText']
+                menu = cmp['ReturnType'] or cmp['DisplayText']
+            else:
+                word = cmp['CompletionText'] or cmp['MethodHeader']
+                menu = cmp['DisplayText'] or cmp['MethodHeader']
+                menu = ' '.join(filter(None, [cmp['ReturnType'], menu]))
+
             vim_completions.append({
-                'snip': completion['Snippet'] or '',
-                'word': (completion['MethodHeader']
-                         or completion['CompletionText']),
-                'menu': completion['ReturnType'] or completion['DisplayText'],
-                'info': ((completion['Description'] or ' ')
+                'snip': cmp['Snippet'] or '',
+                'word': word,
+                'menu': menu,
+                'info': ((cmp['Description'] or ' ')
                          .replace('\r\n', '\n')),
                 'icase': 1,
                 'dup': 1

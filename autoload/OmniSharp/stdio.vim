@@ -478,7 +478,7 @@ function! s:GetCompletionsRH(Callback, response) abort
     else
       let word = cmp.CompletionText != v:null ? cmp.CompletionText : cmp.MethodHeader
       let menu = (cmp.ReturnType != v:null ? cmp.ReturnType . ' ' : '') .
-      \ ' ' . (cmp.DisplayText != v:null ? cmp.DisplayText : cmp.MethodHeader)
+      \ (cmp.DisplayText != v:null ? cmp.DisplayText : cmp.MethodHeader)
     endif
     call add(completions, {
     \ 'snip': get(cmp, 'Snippet', ''),
