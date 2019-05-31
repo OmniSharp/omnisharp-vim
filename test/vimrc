@@ -5,11 +5,12 @@ endif
 filetype off
 
 " Assuming that plugins are installed in the same folder, e.g. ~/.vim/plugged
-let plugindir = expand("\<sfile>:h:h:h")
+let omnisharpdir = expand("\<sfile>:h:h")
+let plugindir = fnamemodify(omnisharpdir, ':h')
 
 " Dependency to vader.vim
 let &runtimepath .= ',' . plugindir . '/vader.vim'
-let &runtimepath .= ',' . plugindir . '/omnisharp-vim'
+let &runtimepath .= ',' . omnisharpdir
 
 filetype plugin indent on
 syntax on
@@ -19,3 +20,4 @@ let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_selector_ui = ''
 let g:OmniSharp_timeout = 10
 let g:OmniSharp_open_quickfix = 0
+let g:OmniSharp_loglevel = 'none'

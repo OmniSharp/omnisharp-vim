@@ -1,14 +1,51 @@
-sudo: false
-language: python
-python:
-  - 2.7
-  - 3.5
-  - 3.6
-# Enable 3.7 without globally enabling sudo and dist: xenial for other build jobs
-matrix:
+jobs:
   include:
-    - python: 3.7
-      dist: xenial
+    - name: python 2.7
+      language: python
+      python: 2.7
+      sudo: false
+      install: pip install tox-travis
+      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      script: tox
+
+    - name: python 3.5
+      language: python
+      python: 3.5
+      sudo: false
+      install: pip install tox-travis
+      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      script: tox
+
+    - name: python 3.6
+      language: python
+      python: 3.6
+      sudo: false
+      install: pip install tox-travis
+      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      script: tox
+
+    - name: python 3.7
+      language: python
+      python: 3.7
       sudo: true
-install: pip install tox-travis
-script: cd ${TRAVIS_BUILD_DIR}/python; tox
+      dist: xenial
+      install: pip install tox-travis
+      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      script: tox
+
+    - name: Vim (vader)
+      language: csharp
+      sudo: true
+      mono: none
+      dotnet: 2.1.502
+      install:
+        - installer/omnisharp-manager.sh -l "$HOME/.omnisharp/omnisharp-roslyn/"
+        - git clone https://github.com/junegunn/vader.vim.git $HOME/build/OmniSharp/vader.vim
+        - git clone https://github.com/vim/vim
+        - pushd vim
+        - ./configure --with-features=huge
+        - make -j4
+        - sudo make install
+        - popd
+      before_script: cd test
+      script: /usr/local/bin/vim -Nu vimrc -c 'Vader! *'

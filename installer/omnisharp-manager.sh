@@ -102,7 +102,7 @@ base_url="https://github.com/OmniSharp/omnisharp-roslyn/releases/download"
 full_url="${base_url}/${version}/${file_name}"
 # echo "$full_url"
 
-rm -r "$location"
+rm -rf "$location"
 mkdir -p "$location"
 
 if [ "$(command -v curl)" ]; then
