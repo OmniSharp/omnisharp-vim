@@ -631,8 +631,12 @@ function! OmniSharp#HighlightBuffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   let opts = { 'BufNum':  bufnr('%') }
   if g:OmniSharp_server_stdio
-    let Callback = function('s:CBHighlightBuffer', [opts])
-    call OmniSharp#stdio#FindHighlightTypes(Callback)
+    if has('textprop')
+      call OmniSharp#stdio#FindTextProperties(opts.BufNum)
+    else
+      let Callback = function('s:CBHighlightBuffer', [opts])
+      call OmniSharp#stdio#FindHighlightTypes(Callback)
+    endif
   else
     if !OmniSharp#IsServerRunning() | return | endif
     let hltypes = OmniSharp#py#eval('findHighlightTypes()')
@@ -699,6 +703,14 @@ function! s:Highlight(types, group) abort
 
   if len(l:types)
     execute 'syntax keyword' a:group join(l:types)
+  endif
+endfunction
+
+function OmniSharp#HighlightEchoKind() abort
+  if !g:OmniSharp_server_stdio || !has('textprop')
+    echo 'Highlight kinds require text properties, in stdio mode'
+  else
+    call OmniSharp#stdio#HighlightEchoKind()
   endif
 endfunction
 

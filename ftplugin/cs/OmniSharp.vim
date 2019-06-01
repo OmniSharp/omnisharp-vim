@@ -31,14 +31,17 @@ command! -buffer -bar -nargs=? OmniSharpFindSymbol                 call OmniShar
 command! -buffer -bar OmniSharpFindUsages                          call OmniSharp#FindUsages()
 command! -buffer -bar OmniSharpFixUsings                           call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions                      call OmniSharp#GetCodeActions('normal')
+command! -buffer -bar OmniSharpGlobalCodeCheck                     call OmniSharp#GlobalCodeCheck()
 command! -buffer -bar OmniSharpGotoDefinition                      call OmniSharp#GotoDefinition()
-command! -buffer -bar OmniSharpPreviewDefinition                   call OmniSharp#PreviewDefinition()
-command! -buffer -bar OmniSharpPreviewImplementation               call OmniSharp#PreviewImplementation()
+command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniSharp#Install(<f-args>)
+command! -buffer -bar OmniSharpHighlightEchoKind                   call OmniSharp#HighlightEchoKind()
 command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp                          call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown                        call OmniSharp#NavigateDown()
 command! -buffer -bar OmniSharpOpenLog                             call OmniSharp#OpenLog()
 command! -buffer -bar OmniSharpOpenPythonLog                       call OmniSharp#OpenPythonLog()
+command! -buffer -bar OmniSharpPreviewDefinition                   call OmniSharp#PreviewDefinition()
+command! -buffer -bar OmniSharpPreviewImplementation               call OmniSharp#PreviewImplementation()
 command! -buffer -bar OmniSharpRename                              call OmniSharp#Rename()
 command! -buffer -bar OmniSharpRestartAllServers                   call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer                       call OmniSharp#RestartServer()
@@ -47,8 +50,6 @@ command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniShar
 command! -buffer -bar OmniSharpStopAllServers                      call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer                          call OmniSharp#StopServer()
 command! -buffer -bar OmniSharpTypeLookup                          call OmniSharp#TypeLookupWithoutDocumentation()
-command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniSharp#Install(<f-args>)
-command! -buffer -bar OmniSharpGlobalCodeCheck                     call OmniSharp#GlobalCodeCheck()
 
 command! -buffer -nargs=1 OmniSharpRenameTo
 \ call OmniSharp#RenameTo(<q-args>)
@@ -75,14 +76,17 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpFindUsages
 \|  delcommand OmniSharpFixUsings
 \|  delcommand OmniSharpGetCodeActions
+\|  delcommand OmniSharpGlobalCodeCheck
 \|  delcommand OmniSharpGotoDefinition
-\|  delcommand OmniSharpPreviewDefinition
+\|  delcommand OmniSharpHighlightEchoKind
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpInstall
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
 \|  delcommand OmniSharpOpenLog
 \|  delcommand OmniSharpOpenPythonLog
+\|  delcommand OmniSharpPreviewDefinition
+\|  delcommand OmniSharpPreviewImplementation
 \|  delcommand OmniSharpRename
 \|  delcommand OmniSharpRenameTo
 \|  delcommand OmniSharpRestartAllServers
@@ -92,7 +96,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpStopAllServers
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup
-\|  delcommand OmniSharpGlobalCodeCheck
 \
 \|  setlocal omnifunc< errorformat< makeprg<'
 
