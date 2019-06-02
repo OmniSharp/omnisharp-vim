@@ -213,6 +213,74 @@ To use the other features, you'll want to create key bindings for them. See the 
 
 See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom configuration examples.
 
+### Symantic Highlighting
+OmniSharp-roslyn can provide highlighting information about every symbol of the document.
+
+To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` files automatically highlighted when entering a buffer or leaving insert mode, add this to your .vimrc:
+
+```vim
+let g:OmniSharp_highlight_types = 2
+```
+
+#### Vim 8.1 text properties
+In (very) recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's symantic highlighting.
+To check whether your Vim supports text properties, look for `+textprop` in the output of `:version`, or run `:echo has('textprop')`.
+
+The default highlight groups used for symantic highlighting, along with the standard Vim highlight groups they are linked to are as follows:
+
+| Highlight group  | Default link |
+|------------------|--------------|
+| csUserIdentifier | Identifier   |
+| csUserInterface  | Include      |
+| csUserMethod     | Function     |
+| csUserType       | Type         |
+
+Highlight groups are mapped to OmniSharp-roslyn keyword "kinds" using variable `g:OmniSharp_highlight_groups`.
+Here is the default mapping dictionary:
+
+```vim
+let g:OmniSharp_highlight_groups = {
+\ 'csUserIdentifier': [
+\   'constant name', 'enum member name', 'field name', 'identifier',
+\   'local name', 'parameter name', 'property name', 'static symbol'],
+\ 'csUserInterface': ['interface name'],
+\ 'csUserMethod': ['extension method name', 'method name'],
+\ 'csUserType': ['class name', 'enum name', 'namespace name', 'struct name']
+\}
+```
+
+However, any highlight groups can be used, and they can be set to highlight any OmniSharp-roslyn "kinds".
+For example, to only highlight `namespace name` and `enum name` using highlight group `Title`, you could add this to your .vimrc:
+
+```vim
+let g:OmniSharp_highlight_groups = {
+\ 'Title': ['enum name', 'namespace name']
+\}
+```
+
+In order to find out what OmniSharp-roslyn calls a particular element, there is a "debugging" option available, `g:OmniSharp_highlight_debug`. When this is set to `1`, text properties are added to **all** symbols of the document. The text properties are not highlighted so this has no visible effect, but when this mode is enabled, command `:OmniSharpHighlightEchoKind` will echo the OmniSharp-rolsyn "kind" of the symbol under the cursor.
+
+**Note:** Text property highlighting is currently only available when using the stdio server, not for HTTP server usage.
+
+#### Older versions
+When text properties are not available, or when using the HTTP server, limited symantic highlighting is still possible by highlighting keywords.
+Note that this is not perfect - a keyword can only match a single highlight group, meaning that interfaces/classes/methods/parameters with the same name will be highlighted the same as each other.
+
+The configuration options are also more limited.
+The same 4 highlight groups are used as described above (`csUserIdentifier`, `csUserInterface`, `csUserMethod` and `csUserType`).
+To change a highlight group's colors, change the `ctermbg`/`guibg` properties, or link it to another highlight group:
+
+```vim
+highlight csUserInterface ctermfg=12 guifg=Blue
+highlight link csUserType Identifier
+```
+
+To disable a group, link it to `Normal`:
+
+```vim
+highlight link csUserMethod Normal
+```
+
 ## Configuration
 
 ### Example vimrc
