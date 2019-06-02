@@ -5,7 +5,7 @@ jobs:
       python: 2.7
       sudo: false
       install: pip install tox-travis
-      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      before_script: cd $TRAVIS_BUILD_DIR/python
       script: tox
 
     - name: python 3.5
@@ -13,7 +13,7 @@ jobs:
       python: 3.5
       sudo: false
       install: pip install tox-travis
-      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      before_script: cd $TRAVIS_BUILD_DIR/python
       script: tox
 
     - name: python 3.6
@@ -21,7 +21,7 @@ jobs:
       python: 3.6
       sudo: false
       install: pip install tox-travis
-      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      before_script: cd $TRAVIS_BUILD_DIR/python
       script: tox
 
     - name: python 3.7
@@ -30,7 +30,7 @@ jobs:
       sudo: true
       dist: xenial
       install: pip install tox-travis
-      before_script: cd ${TRAVIS_BUILD_DIR}/python
+      before_script: cd $TRAVIS_BUILD_DIR/python
       script: tox
 
     - name: Vim (vader)
@@ -39,8 +39,8 @@ jobs:
       mono: none
       dotnet: 2.1.502
       install:
-        - installer/omnisharp-manager.sh -l "$HOME/.omnisharp/omnisharp-roslyn/"
-        - git clone https://github.com/junegunn/vader.vim.git $HOME/build/OmniSharp/vader.vim
+        - installer/omnisharp-manager.sh -l $HOME/.omnisharp/omnisharp-roslyn/
+        - git clone https://github.com/junegunn/vader.vim.git $TRAVIS_BUILD_DIR/../vader.vim
         - git clone https://github.com/vim/vim
         - pushd vim
         - ./configure --with-features=huge
