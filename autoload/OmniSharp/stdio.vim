@@ -172,7 +172,7 @@ function! s:LocationsFromResponse(quickfixes) abort
     \}
     if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
       let location.end_lnum = quickfix.EndLine
-      let location.end_col = quickfix.EndColumn
+      let location.end_col = quickfix.EndColumn - 1
     endif
     let loglevel = get(quickfix, 'LogLevel', '')
     if loglevel !=# ''
