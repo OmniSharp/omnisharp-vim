@@ -383,15 +383,21 @@ function! s:FindSymbolRH(Callback, response) abort
 endfunction
 
 function! OmniSharp#stdio#FindTextProperties(bufnum) abort
-  let bufferLines = getline(1, '$')
+  let buftick = getbufvar(a:bufnum, 'changedtick')
   let opts = {
-  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnum, bufferLines])
+  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnum, buftick])
   \}
   call s:Request('/highlight', opts)
 endfunction
 
-function! s:FindTextPropertiesRH(bufnum, bufferLines, response) abort
+function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
   if !a:response.Success | return | endif
+  if getbufvar(a:bufnum, 'changedtick') != a:buftick
+    " The buffer has changed while fetching highlights - fetch fresh
+    " highlights from the server
+    call OmniSharp#stdio#FindTextProperties(a:bufnum)
+    return
+  endif
   let highlights = get(a:response.Body, 'Highlights', [])
   if !get(s:, 'textPropertiesInitialized', 0)
     let s:groupKinds = get(g:, 'OmniSharp_highlight_groups', {
