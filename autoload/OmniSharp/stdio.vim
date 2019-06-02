@@ -330,8 +330,8 @@ function! s:FindHighlightTypesRH(Callback, bufferLines, response) abort
     endif
     let line = a:bufferLines[lnum]
     call add(types, {
-    \ 'kind': hl['Kind'],
-    \ 'name': line[hl['StartColumn'] - 1 : hl['EndColumn'] - 2]
+    \ 'kind': hl.Kind,
+    \ 'name': line[hl.StartColumn - 1 : hl.EndColumn - 2]
     \})
   endfor
 
@@ -380,6 +380,87 @@ endfunction
 function! s:FindSymbolRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+endfunction
+
+function! OmniSharp#stdio#FindTextProperties(bufnum) abort
+  let buftick = getbufvar(a:bufnum, 'changedtick')
+  let opts = {
+  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnum, buftick])
+  \}
+  call s:Request('/highlight', opts)
+endfunction
+
+function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
+  if !a:response.Success | return | endif
+  if getbufvar(a:bufnum, 'changedtick') != a:buftick
+    " The buffer has changed while fetching highlights - fetch fresh
+    " highlights from the server
+    call OmniSharp#stdio#FindTextProperties(a:bufnum)
+    return
+  endif
+  let highlights = get(a:response.Body, 'Highlights', [])
+  if !get(s:, 'textPropertiesInitialized', 0)
+    let s:groupKinds = get(g:, 'OmniSharp_highlight_groups', {
+    \ 'csUserIdentifier': [
+    \   'constant name', 'enum member name', 'field name', 'identifier',
+    \   'local name', 'parameter name', 'property name', 'static symbol'],
+    \ 'csUserInterface': ['interface name'],
+    \ 'csUserMethod': ['extension method name', 'method name'],
+    \ 'csUserType': ['class name', 'enum name', 'namespace name', 'struct name']
+    \})
+    " Create the inverse dict for fast lookups
+    let s:kindGroups = {}
+    for key in keys(s:groupKinds)
+      call prop_type_add(key, {'highlight': key, 'combine': 1})
+      for kind in s:groupKinds[key]
+        let s:kindGroups[kind] = key
+      endfor
+    endfor
+    let s:textPropertiesInitialized = 1
+  endif
+  let curline = 1
+  for hl in highlights
+    if curline <= hl.StartLine
+      call prop_clear(curline, hl.StartLine, {'bufnr': a:bufnum})
+      let curline = hl.StartLine + 1
+    endif
+    if has_key(s:kindGroups, hl.Kind)
+      call prop_add(hl.StartLine, hl.StartColumn, {
+      \ 'end_lnum': hl.EndLine,
+      \ 'end_col': hl.EndColumn,
+      \ 'type': s:kindGroups[hl.Kind],
+      \ 'bufnr': a:bufnum
+      \})
+    endif
+    if get(g:, 'OmniSharp_highlight_debug', 0)
+      let hlKind = 'cs' . substitute(hl.Kind, ' ', '_', 'g')
+      if !len(prop_type_get(hlKind))
+        call prop_type_add(hlKind, {'highlight': 'Normal'})
+      endif
+      call prop_add(hl.StartLine, hl.StartColumn, {
+      \ 'end_lnum': hl.EndLine,
+      \ 'end_col': hl.EndColumn,
+      \ 'type': hlKind,
+      \ 'bufnr': a:bufnum
+      \})
+    endif
+  endfor
+endfunction
+
+function OmniSharp#stdio#HighlightEchoKind() abort
+  let props = filter(prop_list(line('.')),
+  \ 'v:val.col <= col(".") && v:val.col + v:val.length - 1 >= col(".")')
+  if len(props)
+    for prop in props
+      if has_key(s:groupKinds, prop.type)
+        echon ' (' . prop.type . ')'
+      else
+        echon substitute(props[0].type[2:], '_', ' ', 'g')
+      endif
+    endfor
+  else
+    echo 'No Kind found'
+  endif
 endfunction
 
 function! OmniSharp#stdio#FindUsages(Callback) abort

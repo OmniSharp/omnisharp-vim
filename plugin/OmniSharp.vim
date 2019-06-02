@@ -45,6 +45,10 @@ if g:OmniSharp_highlight_types
   augroup OmniSharp#HighlightTypes
     autocmd!
     autocmd BufEnter *.cs call OmniSharp#HighlightBuffer()
+
+    if g:OmniSharp_highlight_types == 2
+      autocmd InsertLeave *.cs call OmniSharp#HighlightBuffer()
+    endif
   augroup END
 endif
 
