@@ -253,24 +253,14 @@ set previewheight=5
 " Tell ALE to use OmniSharp for linting C# files, and no other linters.
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
-" Fetch semantic type/interface/identifier names on BufEnter and highlight them
-let g:OmniSharp_highlight_types = 1
+" Update symantic highlighting on BufEnter and InsertLeave
+let g:OmniSharp_highlight_types = 2
 
 augroup omnisharp_commands
     autocmd!
 
-    " When Syntastic is available but not ALE, automatic syntax check on events
-    " (TextChanged requires Vim 7.4)
-    " autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
-
     " Show type information automatically when the cursor stops moving
     autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
-
-    " Update the highlighting whenever leaving insert mode
-    autocmd InsertLeave *.cs call OmniSharp#HighlightBuffer()
-
-    " Alternatively, use a mapping to refresh highlighting for the current buffer
-    autocmd FileType cs nnoremap <buffer> <Leader>th :OmniSharpHighlightTypes<CR>
 
     " The following commands are contextual, based on the cursor position.
     autocmd FileType cs nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>

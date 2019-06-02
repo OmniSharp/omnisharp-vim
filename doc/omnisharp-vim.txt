@@ -96,9 +96,12 @@ Default: 0 >
 <
 
                                                   *'g:OmniSharp_highlight_types'*
-Enable semantic type/interface/identifier highlighting on BufEnter.
+Enable automatic semantic type/interface/identifier highlighting.
 Default: 0 >
+    " Highlight on BufEnter
     let g:OmniSharp_highlight_types = 1
+    " Highlight on BufEnter and InsertLeave
+    let g:OmniSharp_highlight_types = 2
 <
 
                                                              *'g:OmniSharp_host'*
