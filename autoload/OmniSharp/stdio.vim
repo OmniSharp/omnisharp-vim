@@ -664,7 +664,8 @@ function! s:PerformChangesRH(opts, response) abort
       \}, 1)
     endif
     call winrestview(winview)
-    if getpos("'`")[1:2] != [1,1]
+    let [line, col] = getpos("'`")[1:2]
+    if line > 1 && col > 1
       normal! ``
     endif
     let &hidden = hidden_bak
