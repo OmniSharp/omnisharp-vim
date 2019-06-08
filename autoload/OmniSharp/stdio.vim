@@ -642,7 +642,7 @@ endfunction
 function! s:PerformChangesRH(opts, response) abort
   if !a:response.Success | return | endif
   let changes = get(a:response.Body, 'Changes', [])
-  if len(changes) == 0
+  if type(changes) != type([]) || len(changes) == 0
     echo 'No action taken'
   else
     let winview = winsaveview()
