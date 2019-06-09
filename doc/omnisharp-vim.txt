@@ -75,6 +75,23 @@ Default: '/home/username/.omnisharp/omnisharp-roslyn/run'
     let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
 
+                                           *'g:OmniSharp_server_display_loading'*
+                                                                     Stdio only
+Echo "Server loaded for ...sln" message when the server is ready.
+Default: 1 >
+    let g:OmniSharp_server_display_loading = 1
+<
+
+                                           *'g:OmniSharp_server_loading_timeout'*
+                                                                     Stdio only
+When the server is started, OmniSharp-vim listens for notifications from the
+server to know when the server is ready for requests. However, these
+notifications may not be correctly sent, in which case the server can be
+considered "loaded" after a timeout period.
+Default: 30 (seconds) >
+    let g:OmniSharp_server_loading_timeout = 30
+<
+
                                                      *'g:OmniSharp_server_ports'*
                                                                       HTTP only
 Mapping of solution files and/or directories to ports. When auto-starting the
