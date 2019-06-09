@@ -4,7 +4,7 @@ set cpoptions&vim
 let s:nextseq = 1001
 let s:requests = {}
 
-function! s:ListenToServer(job, res) abort
+function! s:HandleServerEvent(job, res) abort
   if has_key(a:res, 'Body') && type(a:res.Body) == type({})
     if !a:job.loaded
 
@@ -19,6 +19,13 @@ function! s:ListenToServer(job, res) abort
       else
         " Complete load: Wait for all projects to be loaded before marking
         " server as loaded
+        if !has_key(a:job, 'loading_timeout')
+          " Create a timeout to mark a job as loaded after 30 seconds despite
+          " not receiving the expected server events.
+          let a:job.loading_timeout = timer_start(
+          \ g:OmniSharp_server_loading_timeout * 1000,
+          \ function('s:ServerLoadTimeout', [a:job]))
+        endif
         if !has_key(a:job, 'loading')
           let a:job.loading = []
         endif
@@ -32,8 +39,13 @@ function! s:ListenToServer(job, res) abort
           if message =~# '^Successfully loaded project'
             call filter(a:job.loading, {idx,val -> val ==# project})
             if len(a:job.loading) == 0
+              if g:OmniSharp_server_display_loading
+                echomsg 'Loaded server for ' . a:job.sln_or_dir
+              endif
               let a:job.loaded = 1
               unlet a:job.loading
+              call timer_stop(a:job.loading_timeout)
+              unlet a:job.loading_timeout
             endif
           endif
         endif
@@ -62,6 +74,16 @@ function! s:ListenToServer(job, res) abort
 
     endif
   endif
+endfunction
+
+function! s:ServerLoadTimeout(job, timer) abort
+  if g:OmniSharp_server_display_loading
+    echomsg printf('Server load notification for %s not received after %d seconds - continuing.',
+    \ a:job.sln_or_dir, g:OmniSharp_server_loading_timeout)
+  endif
+  let a:job.loaded = 1
+  unlet a:job.loading
+  unlet a:job.loading_timeout
 endfunction
 
 let s:logfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
@@ -246,7 +268,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
   let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
   call s:Log(a:job.job_id . '  ' . a:message, loglevel)
   if get(res, 'Type', '') ==# 'event'
-    call s:ListenToServer(a:job, res)
+    call s:HandleServerEvent(a:job, res)
     return
   endif
   if !has_key(res, 'Request_seq') || !has_key(s:requests, res.Request_seq)

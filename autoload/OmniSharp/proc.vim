@@ -64,7 +64,6 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   endif
   let job = {
   \ 'job_id': jobstart(a:command, opts),
-  \ 'loaded': 0,
   \ 'partial': ''
   \}
   let s:channels[job.job_id] = job
@@ -105,8 +104,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
     let opts['out_cb'] = 'OmniSharp#proc#vimOutHandler'
   endif
   let job = {
-  \ 'job_id': job_start(a:command, opts),
-  \ 'loaded': 0
+  \ 'job_id': job_start(a:command, opts)
   \}
   let channel_id = job_getchannel(job.job_id)
   let s:channels[channel_id] = job
@@ -165,14 +163,14 @@ function! OmniSharp#proc#Start(command, jobkey) abort
     if job.job_id > 0
       let s:jobs[a:jobkey] = job
     else
-      call OmniSharp#util#EchoErr('command is not executable: ' . a:command[0])
+      call OmniSharp#util#EchoErr('Command is not executable: ' . a:command[0])
     endif
   elseif OmniSharp#proc#supportsVimJobs()
     let job = OmniSharp#proc#vimJobStart(a:command)
     if job_status(job.job_id) ==# 'run'
       let s:jobs[a:jobkey] = job
     else
-      call OmniSharp#util#EchoErr('could not run command: ' . join(a:command, ' '))
+      call OmniSharp#util#EchoErr('Could not run command: ' . join(a:command, ' '))
     endif
   elseif OmniSharp#proc#supportsVimDispatch()
     let req = OmniSharp#proc#dispatchStart(a:command)
@@ -182,6 +180,10 @@ function! OmniSharp#proc#Start(command, jobkey) abort
     let s:jobs[a:jobkey] = proc
   else
     call OmniSharp#util#EchoErr('Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc.vim plugin to use this feature')
+  endif
+  if type(job) == type({})
+    let job.sln_or_dir = a:jobkey
+    let job.loaded = 0
   endif
 endfunction
 
