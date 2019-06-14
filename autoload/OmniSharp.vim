@@ -256,6 +256,52 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
   return found
 endfunction
 
+function! OmniSharp#PreviewDefinition() abort
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBPreviewDefinition')
+    call OmniSharp#stdio#GotoDefinition(Callback)
+  else
+    let loc = OmniSharp#py#eval('gotoDefinition()')
+    if OmniSharp#CheckPyError() | return | endif
+    call s:CBPreviewDefinition(loc)
+  endif
+endfunction
+
+function! s:CBPreviewDefinition(loc, ...) abort
+  if type(a:loc) != type({}) " Check whether a dict was returned
+    echo 'Not found'
+  else
+    call s:OpenLocationInPreview(a:loc)
+    echo fnamemodify(a:loc.filename, ':.')
+  endif
+endfunction
+
+function! OmniSharp#PreviewImplementation() abort
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBPreviewImplementation')
+    call OmniSharp#stdio#FindImplementations(Callback)
+  else
+    let locs = OmniSharp#py#eval('findImplementations()')
+    if OmniSharp#CheckPyError() | return | endif
+    call s:CBPreviewImplementation(locs)
+  endif
+endfunction
+
+function! s:CBPreviewImplementation(locs, ...) abort
+    let numImplementations = len(a:locs)
+    if numImplementations == 0
+      echo 'No implementations found'
+    else
+      call s:OpenLocationInPreview(a:locs[0])
+      let fname = fnamemodify(a:locs[0].filename, ':.')
+      if numImplementations == 1
+        echo fname
+      else
+        echo fname . ': Implementation 1 of ' . numImplementations
+      endif
+    endif
+endfunction
+
 function! OmniSharp#GotoMetadata(metadata, opts) abort
   if g:OmniSharp_server_stdio
     return OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata', [a:opts]), a:metadata)
@@ -303,52 +349,6 @@ function! s:CBGotoMetadata(opts, response, metadata) abort
   endif
 
   return success
-endfunction
-
-function! OmniSharp#PreviewDefinition() abort
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBPreviewDefinition')
-    call OmniSharp#stdio#GotoDefinition(Callback)
-  else
-    let loc = OmniSharp#py#eval('gotoDefinition()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBPreviewDefinition(loc)
-  endif
-endfunction
-
-function! s:CBPreviewDefinition(loc) abort
-  if type(a:loc) != type({}) " Check whether a dict was returned
-    echo 'Not found'
-  else
-    call s:OpenLocationInPreview(a:loc)
-    echo fnamemodify(a:loc.filename, ':.')
-  endif
-endfunction
-
-function! OmniSharp#PreviewImplementation() abort
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBPreviewImplementation')
-    call OmniSharp#stdio#FindImplementations(Callback)
-  else
-    let locs = OmniSharp#py#eval('findImplementations()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBPreviewImplementation(locs)
-  endif
-endfunction
-
-function! s:CBPreviewImplementation(locs) abort
-    let numImplementations = len(a:locs)
-    if numImplementations == 0
-      echo 'No implementations found'
-    else
-      call s:OpenLocationInPreview(a:locs[0])
-      let fname = fnamemodify(a:locs[0].filename, ':.')
-      if numImplementations == 1
-        echo fname
-      else
-        echo fname . ': Implementation 1 of ' . numImplementations
-      endif
-    endif
 endfunction
 
 function! s:OpenLocationInPreview(loc) abort
