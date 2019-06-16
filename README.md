@@ -376,4 +376,8 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 " let g:OmniSharp_want_snippet=1
 ```
 
+## Contributing
+
 Pull requests welcome!
+
+We have slack room as well. [Get yourself invited](https://omnisharp.herokuapp.com/) and make sure to join the `#vim` channel.
