@@ -587,14 +587,20 @@ function! s:GetCompletionsRH(Callback, response) abort
       let menu = (cmp.ReturnType != v:null ? cmp.ReturnType . ' ' : '') .
       \ (cmp.DisplayText != v:null ? cmp.DisplayText : cmp.MethodHeader)
     endif
-    call add(completions, {
+    let completion = {
     \ 'snip': get(cmp, 'Snippet', ''),
     \ 'word': word,
     \ 'menu': menu,
-    \ 'info': substitute(get(cmp, 'Description', ' '), '\r\n', '\n', 'g'),
     \ 'icase': 1,
     \ 'dup': 1
-    \})
+    \}
+    if g:omnicomplete_fetch_full_documentation
+      let completion.info = ' '
+      if has_key(cmp, 'Description') && cmp.Description != v:null
+        let completion.info = cmp.Description
+      endif
+    endif
+    call add(completions, completion)
   endfor
   call a:Callback(completions)
 endfunction
