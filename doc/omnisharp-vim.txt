@@ -54,17 +54,18 @@ Default: 0 >
 <
 
                                                      *'g:OmniSharp_lookup_metadata'*
-When using OmniSharpGotoDefinition, fall back to looking up metadata for compiled
-types. This can be set to 'window', 'preview', or a falsey value such as v:false.
+When using `OmniSharpGotoDefinition` and `OmniSharpPreviewDefinition`,
+fall back to looking up metadata for compiled types.
+This can be set to 1, or 0.
 
-If set to 'window' the types are displayed in the current window or a split if 
-there are unsaved changes in the current buffer. This is like the way VSCode or VS
-display metadata.
-If set to 'preview' the types are displayed in the preview window like the 
-OmniSharpDocumentation command.
-If set to a falsey value like v:false or v:null. This feature is disabled.
-Default: 'preview' >
-    let g:OmniSharp_lookup_metadata = 'preview'
+If set to 1 the `OmniSharpGotoDefinition` command will open the compiled
+metadata if available and the `OmniSharpPreviewDefinition` command will
+load the compiled metadata in the preview window if available.
+
+If set to 0 metadata will not be looked up for the `OmniSharpGotoDefinition`
+and `OmniSharpPreviewDefinition` commands.
+Default: 1 >
+    let g:OmniSharp_lookup_metadata = 1
 
 <
                                                              *'g:OmniSharp_port'*

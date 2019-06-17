@@ -139,12 +139,13 @@ function! s:Request(command, opts) abort
   \   'Filename': filename,
   \   'Line': lnum,
   \   'Column': cnum,
+  \   'Buffer': buffer
   \ }
   \}
 
-  if !is_metadata
-    let body.Arguments.Buffer = buffer
-  endif
+  " if !is_metadata
+  "   let body.Arguments.Buffer = buffer
+  " endif
   return s:RawRequest(body, a:command, a:opts, sep)
 endfunction
 
@@ -646,13 +647,8 @@ function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
 endfunction
 
 function! s:GotoMetadataRH(Callback, metadata, response) abort
-  if !a:response.Success | return 0 | endif
+  if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
   return a:Callback(a:response.Body, a:metadata)
-  " if get(a:response.Body, 'FileName', v:null) != v:null
-  "   call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
-  " else
-  "   call a:Callback(0)
-  " endif
 endfunction
 
 function! OmniSharp#stdio#NavigateDown() abort

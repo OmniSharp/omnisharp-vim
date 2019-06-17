@@ -5,7 +5,7 @@ let g:OmniSharp_loaded = 1
 " for compiled types.
 " When set to 'preview', it uses the preview window
 " When set to 'window', metadata is displayed in the current window. 
-let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 'preview')
+let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
 
 let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
 

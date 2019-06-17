@@ -240,12 +240,12 @@ endfunction
 function! s:CBGotoDefinition(opts, location, metadata) abort
   let went_to_metadata = 0
   if type(a:location) != type({}) " Check whether a dict was returned
-    if type(g:OmniSharp_lookup_metadata) != type('') || type(a:metadata.MetadataSource) != type({})
+    if g:OmniSharp_lookup_metadata && type(a:metadata.MetadataSource) == type({})
+      let found = OmniSharp#GotoMetadata(0, a:metadata, a:opts)
+      let went_to_metadata = 1
+    else
       echo 'Not found'
       let found = 0
-    else
-      let found = OmniSharp#GotoMetadata(a:metadata, a:opts)
-      let went_to_metadata = 1
     endif
   else
     let found = OmniSharp#JumpToLocation(a:location, 0)
@@ -267,9 +267,15 @@ function! OmniSharp#PreviewDefinition() abort
   endif
 endfunction
 
-function! s:CBPreviewDefinition(loc, ...) abort
+function! s:CBPreviewDefinition(loc, metadata) abort
   if type(a:loc) != type({}) " Check whether a dict was returned
-    echo 'Not found'
+    if g:OmniSharp_lookup_metadata && type(a:metadata.MetadataSource) == type({})
+      let found = OmniSharp#GotoMetadata(
+      \ 1,
+      \ a:metadata, {})
+    else
+      echo 'Not found'
+    endif
   else
     call s:OpenLocationInPreview(a:loc)
     echo fnamemodify(a:loc.filename, ':.')
@@ -302,17 +308,17 @@ function! s:CBPreviewImplementation(locs, ...) abort
     endif
 endfunction
 
-function! OmniSharp#GotoMetadata(metadata, opts) abort
+function! OmniSharp#GotoMetadata(open_in_preview, metadata, opts) abort
   if g:OmniSharp_server_stdio
-    return OmniSharp#stdio#GotoMetadata(function('s:CBGotoMetadata', [a:opts]), a:metadata)
+    return OmniSharp#stdio#GotoMetadata(
+    \ function('s:CBGotoMetadata', [a:open_in_preview, a:opts]), a:metadata)
   else
     echom 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
     return 0
   endif
 endfunction
 
-function! s:CBGotoMetadata(opts, response, metadata) abort
-  let success = 1
+function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   let host = OmniSharp#GetHost()
   let metadata_filename = fnamemodify(a:response.SourceName, ":t")
   let temp_file = s:temppath.'/'.metadata_filename
@@ -322,33 +328,29 @@ function! s:CBGotoMetadata(opts, response, metadata) abort
   \ 'b'
   \)
   let jumped_from_preview = &previewwindow
-  if g:OmniSharp_lookup_metadata == 'preview'
+  if a:open_in_preview
     execute 'silent pedit'.temp_file
     if !&previewwindow | silent wincmd p | endif
-  elseif g:OmniSharp_lookup_metadata != 'window'
-    let success = 0
   endif
-  if success
-    call OmniSharp#JumpToLocation({
-    \  'filename': temp_file,
-    \  'lnum': a:metadata.Line,
-    \  'col': a:metadata.Column
-    \}, 1)
-    let b:OmniSharp_host = host
-    silent edit
-    execute "normal! \<C-o>"
-    let b:OmniSharp_metadata_filename = a:response.SourceName
-    setlocal nomodifiable readonly
-    if g:OmniSharp_lookup_metadata == 'preview' && !jumped_from_preview
-      silent wincmd p
-    endif
+  call OmniSharp#JumpToLocation({
+  \  'filename': temp_file,
+  \  'lnum': a:metadata.Line,
+  \  'col': a:metadata.Column
+  \}, 1)
+  let b:OmniSharp_host = host
+  silent edit
+  execute "normal! \<C-o>"
+  let b:OmniSharp_metadata_filename = a:response.SourceName
+  setlocal nomodifiable readonly
+  if a:open_in_preview && !jumped_from_preview
+    silent wincmd p
   endif
 
   if has_key(a:opts, 'Callback')
-    call a:opts.Callback(success)
+    call a:opts.Callback(1)
   endif
 
-  return success
+  return 1
 endfunction
 
 function! s:OpenLocationInPreview(loc) abort
