@@ -10,10 +10,9 @@ Given cs():
   }
 
 Execute (go to metadata preview):
-  let g:OmniSharp_lookup_metadata = 'preview'
   call OmniSharpTestInitializeBuffer('GotoMetadata')
   call search("MemoryStream stream")
-  call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
+  call OmniSharpTestAwait('OmniSharp#PreviewDefinition', [])
   wincmd p
   AssertEqual 'MemoryStream.cs', expand('%:t')
   pclose
@@ -27,7 +26,6 @@ Given cs():
   }
 
 Execute (go to metadata window):
-  let g:OmniSharp_lookup_metadata = 'window'
   call OmniSharpTestInitializeBuffer('GotoMetadata')
   call search("MemoryStream stream")
   call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
