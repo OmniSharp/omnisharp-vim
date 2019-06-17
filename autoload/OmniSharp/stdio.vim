@@ -727,6 +727,7 @@ endfunction
 function! s:TypeLookupRH(Callback, response) abort
   if !a:response.Success
     call a:Callback({ 'type': '', 'doc': '' })
+    return
   endif
   let body = a:response.Body
   call a:Callback({
