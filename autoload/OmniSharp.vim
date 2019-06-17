@@ -256,9 +256,10 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
   return found
 endfunction
 
-function! OmniSharp#PreviewDefinition() abort
+function! OmniSharp#PreviewDefinition(...) abort
+  let opts = a:0 ? {'Callback': a:1} : {}
   if g:OmniSharp_server_stdio
-    let Callback = function('s:CBPreviewDefinition')
+    let Callback = function('s:CBPreviewDefinition', [opts])
     call OmniSharp#stdio#GotoDefinition(Callback)
   else
     let loc = OmniSharp#py#eval('gotoDefinition()')
@@ -267,12 +268,13 @@ function! OmniSharp#PreviewDefinition() abort
   endif
 endfunction
 
-function! s:CBPreviewDefinition(loc, metadata) abort
+function! s:CBPreviewDefinition(opts, loc, metadata) abort
   if type(a:loc) != type({}) " Check whether a dict was returned
     if g:OmniSharp_lookup_metadata && type(a:metadata.MetadataSource) == type({})
       let found = OmniSharp#GotoMetadata(
       \ 1,
-      \ a:metadata, {})
+      \ a:metadata,
+      \ a:opts)
     else
       echo 'Not found'
     endif
