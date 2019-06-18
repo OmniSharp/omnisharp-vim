@@ -14,7 +14,6 @@ let s:generated_snippets = {}
 let s:last_completion_dictionary = {}
 let s:alive_cache = []
 let s:initial_server_ports = copy(g:OmniSharp_server_ports)
-let s:temppath = fnamemodify(tempname(), ':p:h')
 
 function! OmniSharp#GetPort(...) abort
   if exists('g:OmniSharp_port')
@@ -323,7 +322,7 @@ endfunction
 function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   let host = OmniSharp#GetHost()
   let metadata_filename = fnamemodify(a:response.SourceName, ":t")
-  let temp_file = s:temppath.'/'.metadata_filename
+  let temp_file = g:OmniSharp_temp_dir.'/'.metadata_filename
   call writefile(
   \ map(split(a:response.Source, "\n", 1), {i,v -> substitute(v, '\r', '', 'g')}),
   \ temp_file,
