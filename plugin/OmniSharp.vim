@@ -2,7 +2,7 @@ if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
 " Get a global temp path that can be used to store temp files for this instance
-let g:OmniSharp_temp_dir = fnamemodify(tempname(), ':p:h')
+let g:OmniSharp_temp_dir = get(g:, 'OmniSharp_temp_dir', fnamemodify(tempname(), ':p:h'))
 
 " When set to a falsey value, metadata is not looked up
 " for compiled types.
