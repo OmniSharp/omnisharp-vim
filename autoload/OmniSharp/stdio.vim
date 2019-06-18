@@ -139,13 +139,12 @@ function! s:Request(command, opts) abort
   \   'Filename': filename,
   \   'Line': lnum,
   \   'Column': cnum,
-  \   'Buffer': buffer
   \ }
   \}
 
-  " if !is_metadata
-  "   let body.Arguments.Buffer = buffer
-  " endif
+  if !(is_metadata && a:command == '/gotodefinition')
+    let body.Arguments.Buffer = buffer
+  endif
   return s:RawRequest(body, a:command, a:opts, sep)
 endfunction
 
