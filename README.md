@@ -286,7 +286,9 @@ highlight link csUserMethod Normal
 ### Example vimrc
 
 ```vim
-" Use the vim-plug plugin manager
+" Use the vim-plug plugin manager: https://github.com/junegunn/vim-plug
+" Remember to run :PlugInstall when loading this vimrc for the first time, so
+" vim-plug downloads the plugins listed.
 silent! if plug#begin('~/.vim/plugged')
 Plug 'OmniSharp/omnisharp-vim'
 Plug 'w0rp/ale'
@@ -374,4 +376,8 @@ nnoremap <Leader>sp :OmniSharpStopServer<CR>
 " let g:OmniSharp_want_snippet=1
 ```
 
+## Contributing
+
 Pull requests welcome!
+
+We have slack room as well. [Get yourself invited](https://omnisharp.herokuapp.com/) and make sure to join the `#vim` channel.

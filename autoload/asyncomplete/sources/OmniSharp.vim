@@ -2,11 +2,9 @@ function! asyncomplete#sources#OmniSharp#completor(opt, ctx) abort
   let column = a:ctx['col']
   let typed = a:ctx['typed']
 
-  let kw = matchstr(typed, '\w\+$')
+  let kw = matchstr(typed, '\(\w*\W\)*\zs\w\+$')
   let kwlen = len(kw)
-  if kwlen < 1
-    return
-  endif
+
   let startcol = column - kwlen
 
   call OmniSharp#GetCompletions(kw, {results->
