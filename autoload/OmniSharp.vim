@@ -321,7 +321,8 @@ endfunction
 
 function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   let host = OmniSharp#GetHost()
-  let metadata_filename = fnamemodify(a:response.SourceName, ":t")
+  let metadata_filename = fnamemodify(
+  \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
   let temp_file = g:OmniSharp_temp_dir.'/'.metadata_filename
   call writefile(
   \ map(split(a:response.Source, "\n", 1), {i,v -> substitute(v, '\r', '', 'g')}),
@@ -339,9 +340,9 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   \  'col': a:metadata.Column
   \}, 1)
   let b:OmniSharp_host = host
+  let b:OmniSharp_metadata_filename = a:response.SourceName
   silent edit
   execute "normal! \<C-o>"
-  let b:OmniSharp_metadata_filename = a:response.SourceName
   setlocal nomodifiable readonly
   if a:open_in_preview && !jumped_from_preview
     silent wincmd p
