@@ -88,7 +88,6 @@ function! OmniSharp#util#TranslatePathForClient(filename) abort
 
   " Check if the file is a metadatafile. If it is, map it to the
   " correct temp file on disk
-  echom "testing match"
   if filename =~ '\$metadata\$'
     let filename = g:OmniSharp_temp_dir .'/'. fnamemodify(filename, ":t")
   endif
