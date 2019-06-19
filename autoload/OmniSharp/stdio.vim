@@ -117,8 +117,14 @@ function! s:Request(command, opts) abort
   if has_key(a:opts, 'SavePosition')
     let s:lastPosition = [bufnum, lnum, cnum]
   endif
-  let filename = OmniSharp#util#TranslatePathForServer(
-  \ fnamemodify(bufname(bufnum), ':p'))
+  let metadata_filename = get(b:, 'OmniSharp_metadata_filename', v:null)
+  let is_metadata = type(metadata_filename) == type('')
+  if is_metadata
+    let filename = metadata_filename
+  else
+    let filename = OmniSharp#util#TranslatePathForServer(
+    \ fnamemodify(bufname(bufnum), ':p'))
+  endif
   let lines = getbufline(bufnum, 1, '$')
   let tmp = join(lines, '')
   " Unique string separator which must not exist in the buffer
@@ -133,9 +139,12 @@ function! s:Request(command, opts) abort
   \   'Filename': filename,
   \   'Line': lnum,
   \   'Column': cnum,
-  \   'Buffer': buffer
   \ }
   \}
+
+  if !is_metadata
+    let body.Arguments.Buffer = buffer
+  endif
   return s:RawRequest(body, a:command, a:opts, sep)
 endfunction
 
@@ -209,8 +218,11 @@ function! s:LocationsFromResponse(quickfixes) abort
 endfunction
 
 function! s:MakeChanges(body) abort
-  if len(get(a:body, 'Changes', []))
-    for change in get(a:body, 'Changes', [])
+  let changes = get(a:body, 'Changes', [])
+  if type(changes) == type(v:null) | let changes = [] | endif
+
+  if len(changes)
+    for change in changes
       let text = join(split(change.NewText, '\r\?\n', 1), "\n")
       let start = [change.StartLine, change.StartColumn]
       let end = [change.EndLine, change.EndColumn]
@@ -380,7 +392,8 @@ endfunction
 
 function! s:FindImplementationsRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+  let responses = a:response.Body.QuickFixes
+  call a:Callback(type(responses) == type([]) ? s:LocationsFromResponse(responses) : [])
 endfunction
 
 function! OmniSharp#stdio#FindMembers(Callback) abort
@@ -498,7 +511,8 @@ endfunction
 
 function! s:FindUsagesRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+  let usages = a:response.Body.QuickFixes
+  call a:Callback(type(usages) == type([]) ? s:LocationsFromResponse(a:response.Body.QuickFixes) : [])
 endfunction
 
 function! OmniSharp#stdio#FixUsings(Callback) abort
@@ -518,7 +532,11 @@ function! s:FixUsingsRH(Callback, response) abort
   call s:MakeChanges(a:response.Body)
   call winrestview(winview)
   normal! ``
-  let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
+  if type(a:response.Body.AmbiguousResults) == type(v:null)
+    let locations = []
+  else
+    let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
+  endif
   call a:Callback(locations)
 endfunction
 
@@ -606,8 +624,12 @@ function! s:GetCompletionsRH(Callback, response) abort
 endfunction
 
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
+  let parameters = {
+  \ 'WantMetadata': v:true,
+  \}
   let opts = {
-  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback])
+  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback]),
+  \ 'Parameters': parameters
   \}
   call s:Request('/gotodefinition', opts)
 endfunction
@@ -615,10 +637,23 @@ endfunction
 function! s:GotoDefinitionRH(Callback, response) abort
   if !a:response.Success | return | endif
   if get(a:response.Body, 'FileName', v:null) != v:null
-    call a:Callback(s:LocationsFromResponse([a:response.Body])[0])
+    call a:Callback(s:LocationsFromResponse([a:response.Body])[0], a:response.Body)
   else
-    call a:Callback(0)
+    call a:Callback(0, a:response.Body)
   endif
+endfunction
+
+function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
+  \ 'Parameters': a:metadata.MetadataSource
+  \}
+  return s:Request('/metadata', opts)
+endfunction
+
+function! s:GotoMetadataRH(Callback, metadata, response) abort
+  if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
+  return a:Callback(a:response.Body, a:metadata)
 endfunction
 
 function! OmniSharp#stdio#NavigateDown() abort

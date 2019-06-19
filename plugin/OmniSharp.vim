@@ -1,6 +1,11 @@
 if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
+" Get a global temp path that can be used to store temp files for this instance
+let g:OmniSharp_temp_dir = get(g:, 'OmniSharp_temp_dir', fnamemodify(tempname(), ':p:h'))
+
+let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
+
 let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
 
 " When g:OmniSharp_server_stdio_quickload = 1, consider server 'loaded' once

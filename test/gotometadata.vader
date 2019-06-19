@@ -1,0 +1,32 @@
+Include: utils/startserver.vader
+Include: utils/async-helper.vader
+
+Given cs():
+  using System.IO;
+
+  public class Test
+  {
+    MemoryStream stream;
+  }
+
+Execute (go to metadata preview):
+  call OmniSharpTestInitializeBuffer('GotoMetadata')
+  call search("MemoryStream stream")
+  call OmniSharpTestAwait('OmniSharp#PreviewDefinition', [])
+  wincmd p
+  AssertEqual 'MemoryStream.cs', expand('%:t')
+  pclose
+
+Given cs():
+  using System.IO;
+
+  public class Test
+  {
+    MemoryStream stream;
+  }
+
+Execute (go to metadata window):
+  call OmniSharpTestInitializeBuffer('GotoMetadata')
+  call search("MemoryStream stream")
+  call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
+  AssertEqual 'MemoryStream.cs', expand('%:t')

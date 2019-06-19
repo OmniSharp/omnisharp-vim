@@ -53,6 +53,21 @@ Default: 0 >
     let g:OmniSharp_server_stdio = 1
 <
 
+                                                     *'g:OmniSharp_lookup_metadata'*
+When using `OmniSharpGotoDefinition` and `OmniSharpPreviewDefinition`,
+fall back to looking up metadata for compiled types.
+This can be set to 1, or 0.
+
+If set to 1 the `OmniSharpGotoDefinition` command will open the compiled
+metadata if available and the `OmniSharpPreviewDefinition` command will
+load the compiled metadata in the preview window if available.
+
+If set to 0 metadata will not be looked up for the `OmniSharpGotoDefinition`
+and `OmniSharpPreviewDefinition` commands.
+Default: 1 >
+    let g:OmniSharp_lookup_metadata = 1
+
+<
                                                              *'g:OmniSharp_port'*
                                                                       HTTP only
 Always use this port when starting an OmniSharp HTTP server. Note that this
