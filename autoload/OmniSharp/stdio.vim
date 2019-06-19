@@ -142,7 +142,7 @@ function! s:Request(command, opts) abort
   \ }
   \}
 
-  if !(is_metadata && a:command == '/gotodefinition')
+  if !is_metadata
     let body.Arguments.Buffer = buffer
   endif
   return s:RawRequest(body, a:command, a:opts, sep)
