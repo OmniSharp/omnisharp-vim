@@ -1289,6 +1289,7 @@ function! s:SetQuickFix(list, title)
   \ || setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title}) == -1
     call setqflist(a:list)
   endif
+  silent doautocmd <nomodeline> QuickFixCmdPost OmniSharp
   if g:OmniSharp_open_quickfix
     botright cwindow
   endif
