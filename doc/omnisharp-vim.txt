@@ -52,7 +52,6 @@ communication.
 Default: 0 >
     let g:OmniSharp_server_stdio = 1
 <
-
                                                   *'g:OmniSharp_lookup_metadata'*
 When using `OmniSharpGotoDefinition` and `OmniSharpPreviewDefinition`,
 fall back to looking up metadata for compiled types.
@@ -66,7 +65,6 @@ If set to 0 metadata will not be looked up for the `OmniSharpGotoDefinition`
 and `OmniSharpPreviewDefinition` commands.
 Default: 1 >
     let g:OmniSharp_lookup_metadata = 1
-
 <
                                                              *'g:OmniSharp_port'*
                                                                       HTTP only
@@ -75,13 +73,11 @@ means you will be unable to run more than one OmniSharp server at a time.
 Default: None >
     let g:OmniSharp_port = 2000
 <
-
                                                      *'g:OmniSharp_start_server'*
 Use this option to specify whether OmniSharp will start automatically upon
 opening a `*.cs` file. Default: 1 >
     let g:OmniSharp_start_server = 1
 <
-
                                                       *'g:OmniSharp_server_path'*
 Use this option to give the full path to the roslyn omnisharp server
 executable. If not set, the |:OmniSharpInstall| location is used.
@@ -89,14 +85,12 @@ Default: '/home/username/.omnisharp/omnisharp-roslyn/run'
      or: 'C:\Users\username\.omnisharp\omnisharp-roslyn\OmniSharp.exe' >
     let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
-
                                            *'g:OmniSharp_server_display_loading'*
                                                                      Stdio only
 Echo "Server loaded for ...sln" message when the server is ready.
 Default: 1 >
     let g:OmniSharp_server_display_loading = 1
 <
-
                                            *'g:OmniSharp_server_loading_timeout'*
                                                                      Stdio only
 When the server is started, OmniSharp-vim listens for notifications from the
@@ -106,7 +100,6 @@ considered "loaded" after a timeout period.
 Default: 30 (seconds) >
     let g:OmniSharp_server_loading_timeout = 30
 <
-
                                                      *'g:OmniSharp_server_ports'*
                                                                       HTTP only
 Mapping of solution files and/or directories to ports. When auto-starting the
@@ -118,7 +111,6 @@ Default: {} >
       \ 'C:\path\to\other\project': 2004,
       \ }
 <
-
                                                   *'g:OmniSharp_server_use_mono'*
 The roslyn server must be run with mono on Linux and OSX. The roslyn server
 binaries usually come with an embedded mono, but this can be overridden to use
@@ -126,7 +118,6 @@ the installed mono with this option. Note that mono must be in the $PATH.
 Default: 0 >
     let g:OmniSharp_server_use_mono = 1
 <
-
                                                   *'g:OmniSharp_highlight_types'*
 Enable automatic semantic type/interface/identifier highlighting.
 Default: 0 >
@@ -135,7 +126,6 @@ Default: 0 >
     " Highlight on BufEnter and InsertLeave
     let g:OmniSharp_highlight_types = 2
 <
-
                                                  *'g:OmniSharp_highlight_groups'*
 Specify which highlight groups should be used to highlight with
 OmniSharp-roslyn "kinds".
@@ -149,7 +139,6 @@ Default: >
     \ 'csUserType': ['class name', 'enum name', 'namespace name', 'struct name']
     \}
 <
-
                                                              *'g:OmniSharp_host'*
                                                                       HTTP only
 Use this option to specify the host address of the OmniSharp server. Using this
@@ -158,7 +147,6 @@ set g:OmniSharp_start_server = 0
 Default: 'http://localhost:2000' >
     let g:OmniSharp_host = 'http://localhost:2000'
 <
-
                                                          *'g:OmniSharp_loglevel'*
 Sets the log level.
 
@@ -172,7 +160,6 @@ For HTTP, sets the log level for the python code. Possible values are 'debug',
 Default: warning >
     let g:OmniSharp_loglevel = 'warning'
 <
-
                                                     *'g:OmniSharp_open_quickfix'*
 By default, OmniSharp-vim opens the quickfix window when it is populated, e.g.
 after find usages, implementations etc. Set this variable to 0 to prevent the
@@ -180,7 +167,6 @@ quickfix window being opened automatically.
 Default: 1 >
     let g:OmniSharp_open_quickfix = 0
 <
-
                                                       *'g:OmniSharp_selector_ui'*
 Use this option to specify a selector UI for choosing code actions and
 navigating to symbols. When no selector UI plugin is detected, or
@@ -196,14 +182,12 @@ none are. >
     OR
     let g:OmniSharp_selector_ui = ''
 <
-
                                                           *'g:OmniSharp_timeout'*
 Use this option to specify the time (in seconds) to wait for a response from
 the server.
 Default: 1 >
     let g:OmniSharp_timeout = 1
 <
-
                                              *'g:OmniSharp_translate_cygwin_wsl'*
 Use this option when vim is running in a Cygwin or Windows Subsystem for Linux
 environment on Windows, but the omnisharp server is a Windows binary. When set
@@ -212,20 +196,17 @@ and back.
 Default: 0 >
     let g:OmniSharp_translate_cygwin_wsl = 1
 <
-
                                               *'g:OmniSharp_typeLookupInPreview'*
 Use this option to specify whether type lookups display in Vim's Preview
 Window. Type lookups will display in the status line if this is `0`.
 Default: 0 >
     let g:OmniSharp_typeLookupInPreview = 0
 <
-
                                                      *'g:OmniSharp_want_snippet'*
 Use this option to enable snippet completion.
 Default: 0 >
     let g:OmniSharp_want_snippet = 0
 <
-
                                       *'g:omnicomplete_fetch_full_documentation'*
 Use this option to specify whether OmniSharp will fetch full documentation on
 completion suggestions. By default, only type/method signatures are fetched for
@@ -233,106 +214,129 @@ performance reasons. Full documentation can still be fetched when needed using
 the |:OmniSharpDocumentation| command. Default: 0 >
     let g:omnicomplete_fetch_full_documentation = 0
 <
-
                                                       *'g:syntastic_cs_checkers'*
 Use this option to enable syntastic integration >
     let g:syntastic_cs_checkers = ['code_checker']
 <
-
 ===============================================================================
 4. COMMANDS                                                  *omnisharp-commands*
 
+Most of the OmniSharp-vim commands have associated plug mappings defined, for
+convenient user re-mapping. These can be used like so: >
+    autocmd FileType cs nmap <buffer> gd <Plug>(omnisharp_go_to_definition)
+<
                                                        *:OmniSharpGotoDefinition*
+                                             *<Plug>(omnisharp_go_to_definition)*
 :OmniSharpGotoDefinition
     Navigates to the definition of the symbol under the cursor
 
                                                   *:OmniSharpFindImplementations*
+                                         *<Plug>(omnisharp_find_implementations)*
 :OmniSharpFindImplementations
     Fills quicklist with implementations of interface/class under the cursor
     NOTE: Navigates to implementation if only one is found
 
                                                     *:OmniSharpPreviewDefinition*
+                                           *<Plug>(omnisharp_preview_definition)*
 :OmniSharpPreviewDefinition
     Displays the definition of the symbol under the cursor in the preview
     window
 
                                                *:OmniSharpPreviewImplementations*
+                                       *<Plug>(omnisharp_preview_implementation)*
 :OmniSharpPreviewImplementations
     Displays the implementation of the interface/class under the cursor in the
     preview window. If more than one implementation exists, the number of
     implementations is echoed.
 
                                                            *:OmniSharpFindSymbol*
+                                                 *<Plug>(omnisharp_find_symbols)*
 :OmniSharpFindSymbol
     Fuzzy-search through symbols
 
                                                            *:OmniSharpFindUsages*
+                                                  *<Plug>(omnisharp_find_usages)*
 :OmniSharpFindUsages
     Fills quicklist with usages of symbol under the cursor
     NOTE: Navigates to usage if only one is found
 
                                                           *:OmniSharpFindMembers*
+                                                 *<Plug>(omnisharp_find_members)*
 :OmniSharpFindMembers
     Fills quicklist with members in current file
 
                                                             *:OmniSharpFixUsings*
+                                                   *<Plug>(omnisharp_fix_usings)*
 :OmniSharpFixUsings
     Removes unused using directives
 
                                                            *:OmniSharpTypeLookup*
+                                                  *<Plug>(omnisharp_type_lookup)*
 :OmniSharpTypeLookup
     Displays the type name or method signature of the symbol under the cursor
 
                                                         *:OmniSharpDocumentation*
+                                                *<Plug>(omnisharp_documentation)*
 :OmniSharpDocumentation
     Opens the documentation for the symbol under the cursor in the preview
     window
 
                                                         *:OmniSharpSignatureHelp*
+                                               *<Plug>(omnisharp_signature_help)*
 :OmniSharpSignatureHelp
     Opens the documentation for the method argument under the cursor in the
     preview window
 
                                                            *:OmniSharpNavigateUp*
+                                                  *<Plug>(omnisharp_navigate_up)*
 :OmniSharpNavigateUp
     Navigates to previous method or class
 
                                                          *:OmniSharpNavigateDown*
+                                                *<Plug>(omnisharp_navigate_down)*
 :OmniSharpNavigateDown
     Navigates to next method or class
 
                                                               *:OmniSharpOpenLog*
+                                                     *<Plug>(omnisharp_open_log)*
 :OmniSharpOpenLog
     Open the log file
 
                                                        *:OmniSharpGetCodeActions*
+                                                 *<Plug>(omnisharp_code_actions)*
 :OmniSharpGetCodeActions
     Fuzzy-serach through available code actions
 
                                                       *:OmniSharpGlobalCodeCheck*
+                                            *<Plug>(omnisharp_global_code_check)*
 :OmniSharpGlobalCodeCheck
     Get all code issues in the solution and populate the quickfix window
     with the results
 
                                                                *:OmniSharpRename*
+                                                       *<Plug>(omnisharp_rename)*
 :OmniSharpRename
     Renames symbol under cursor
 
                                                            *:OmniSharpCodeFormat*
+                                                  *<Plug>(omnisharp_code_format)*
 :OmniSharpCodeFormat
     Formats code
 
                                                     *:OmniSharpRestartAllServers*
+                                          *<Plug>(omnisharp_restart_all_servers)*
 :OmniSharpRestartAllServers
     Restarts all running OmniSharp servers
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                         *:OmniSharpRestartServer*
+                                               *<Plug>(omnisharp_restart_server)*
 :OmniSharpRestartServer
     Restarts the OmniSharp server
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                           *:OmniSharpStartServer*
+                                                 *<Plug>(omnisharp_start_server)*
 :OmniSharpStartServer {sln-or-dir}
     Starts an OmniSharp server. If no arguments are provided, this command
     will attempt to find a solution file located in a parent directory
@@ -347,16 +351,19 @@ Use this option to enable syntastic integration >
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                        *:OmniSharpStopAllServers*
+                                             *<Plug>(omnisharp_stop_all_servers)*
 :OmniSharpStopAllServers
     Stops all running OmniSharp servers
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                            *:OmniSharpStopServer*
+                                                  *<Plug>(omnisharp_stop_server)*
 :OmniSharpStopServer
     Stops the OmniSharp server
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                        *:OmniSharpHighlightTypes*
+                                              *<Plug>(omnisharp_highlight_types)*
 :OmniSharpHighlightTypes
     Highlight/refresh semantic type/interface/identifier highlighting for the
     current file
