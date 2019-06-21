@@ -569,6 +569,10 @@ function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
     \ }
     \}
     let opts.Parameters = s:codeActionParameters
+  else
+    if exists('s:codeActionParameters')
+      unlet s:codeActionParameters
+    endif
   endif
   call s:Request('/v2/getcodeactions', opts)
 endfunction
