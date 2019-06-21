@@ -17,7 +17,8 @@ CONTENTS                                                     *omnisharp-contents
     2. Usage........................................|omnisharp-usage|
     3. Options......................................|omnisharp-options|
     4. Commands.....................................|omnisharp-commands|
-    5. Integrations.................................|omnisharp-integrations|
+    5. Autocmds.....................................|omnisharp-autocmds|
+    6. Integrations.................................|omnisharp-integrations|
 
 ===============================================================================
 1. DEPENDENCIES                                          *omnisharp-dependencies*
@@ -36,10 +37,9 @@ Optional:~
 2. USAGE                                                        *omnisharp-usage*
 
 Opening a `*.cs` file will automatically start an instance of omnisharp-server
-(if using vim 8.0+, neovim or vim-dispatch). Using omni completion will begin
-the fsautocomplete process.
-
-Suggestion: Install a completer such as NeoComplete or SuperTab
+(if using vim 8.0+, neovim or vim-dispatch). Symantic completions are triggered
+using omni-completion (CTRL-X_CTRL-O in insert mode), or using an
+autocompletion plugin such as asyncomplete or Deoplete.
 
 ===============================================================================
 3. OPTIONS                                                    *omnisharp-options*
@@ -53,7 +53,7 @@ Default: 0 >
     let g:OmniSharp_server_stdio = 1
 <
 
-                                                     *'g:OmniSharp_lookup_metadata'*
+                                                  *'g:OmniSharp_lookup_metadata'*
 When using `OmniSharpGotoDefinition` and `OmniSharpPreviewDefinition`,
 fall back to looking up metadata for compiled types.
 This can be set to 1, or 0.
@@ -137,8 +137,8 @@ Default: 0 >
 <
 
                                                  *'g:OmniSharp_highlight_groups'*
-Specify which highlight groups should be used to highlight with OmniSharp-roslyn
-"kinds".
+Specify which highlight groups should be used to highlight with
+OmniSharp-roslyn "kinds".
 Default: >
     let g:OmniSharp_highlight_groups = {
     \ 'csUserIdentifier': [
@@ -153,8 +153,8 @@ Default: >
                                                              *'g:OmniSharp_host'*
                                                                       HTTP only
 Use this option to specify the host address of the OmniSharp server. Using this
-will not play well with the auto-start functionality, so you should probably set
-g:OmniSharp_start_server = 0
+will not play well with the auto-start functionality, so you should probably
+set g:OmniSharp_start_server = 0
 Default: 'http://localhost:2000' >
     let g:OmniSharp_host = 'http://localhost:2000'
 <
@@ -198,8 +198,9 @@ none are. >
 <
 
                                                           *'g:OmniSharp_timeout'*
-Use this option to specify the time (in seconds) to wait for a response from the
-server. Default: 1 >
+Use this option to specify the time (in seconds) to wait for a response from
+the server.
+Default: 1 >
     let g:OmniSharp_timeout = 1
 <
 
@@ -213,8 +214,9 @@ Default: 0 >
 <
 
                                               *'g:OmniSharp_typeLookupInPreview'*
-Use this option to specify whether type lookups display in Vim's Preview Window.
-Type lookups will display in the status line if this is `0`. Default: 0 >
+Use this option to specify whether type lookups display in Vim's Preview
+Window. Type lookups will display in the status line if this is `0`.
+Default: 0 >
     let g:OmniSharp_typeLookupInPreview = 0
 <
 
@@ -251,7 +253,8 @@ Use this option to enable syntastic integration >
 
                                                     *:OmniSharpPreviewDefinition*
 :OmniSharpPreviewDefinition
-    Displays the definition of the symbol under the cursor in the preview window
+    Displays the definition of the symbol under the cursor in the preview
+    window
 
                                                *:OmniSharpPreviewImplementations*
 :OmniSharpPreviewImplementations
@@ -306,7 +309,7 @@ Use this option to enable syntastic integration >
 :OmniSharpGetCodeActions
     Fuzzy-serach through available code actions
 
-                                                       *:OmniSharpGlobalCodeCheck*
+                                                      *:OmniSharpGlobalCodeCheck*
 :OmniSharpGlobalCodeCheck
     Get all code issues in the solution and populate the quickfix window
     with the results
@@ -365,30 +368,57 @@ Use this option to enable syntastic integration >
     initially, and to upgrade to the latest version at any time.
     Requires "curl" or "wget" to be installed for Linux, macOS, Cygwin and WSL.
 
-================================================================================
-5. INTEGRATIONS                                          *omnisharp-integrations*
+===============================================================================
+5. AUTOCMDS                                                  *omnisharp-autocmds*
 
-5.1 CtrlP, unite.vim, fzf.vim~
+OmniSharp-vim provides several |User| |autocmd|s which can be used to
+customise your environment depending on the server status.
+
+                                                               *OmniSharpStarted*
+OmniSharpStarted
+    Fired as soon as the server is started - it will not immediately be
+    responsive to commands
+
+                                                                 *OmniSharpReady*
+OmniSharpReady
+    Fired when the server is ready to be used.
+
+                                                               *OmniSharpStopped*
+OmniSharpStopped
+    Fired when the server process is stopped.
+
+===============================================================================
+6. INTEGRATIONS                                          *omnisharp-integrations*
+
+6.1 CtrlP, unite.vim, fzf.vim~
 
 If one of these plugins is detected, it will be used as the selection UI. See
 |'g:OmniSharp_selector_ui'| for more.
 
-5.2 ALE~
+6.2 ALE~
 
 If ALE is installed, it will automatically be used to asynchronously check your
 code for errors
 
-5.3 Syntastic~
+6.3 Syntastic~
 
 If you don't have ALE, you can use Syntastic (which is a synchronous code
 checker). The following configuration is required to enable it:
 >
     let g:syntastic_cs_checkers = ['code_checker']
 <
-5.4 Deoplete~
+6.4 Asyncomplete~
 
-An omnisharp source is provided for the Deoplete completion engine. If Deoplete
-is installed, configure it to use the "omnisharp" source:
+A source is provided for the asyncomplete completion plugin - no further
+configuration is required.
+
+Note that completion is asynchronous only when using the stdio server, see
+|'g:OmniSharp_server_stdio'|
+
+6.5 Deoplete~
+
+A source is provided for the Deoplete completion engine. If Deoplete is
+installed, configure it to use the "omnisharp" source:
 >
   call deoplete#custom#option('sources', {
     \ 'cs': ['omnisharp'],

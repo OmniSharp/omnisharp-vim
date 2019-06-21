@@ -184,6 +184,7 @@ function! OmniSharp#proc#Start(command, jobkey) abort
   if type(job) == type({})
     let job.sln_or_dir = a:jobkey
     let job.loaded = 0
+    silent doautocmd <nomodeline> User OmniSharpStarted
   endif
 endfunction
 
@@ -205,6 +206,7 @@ function! OmniSharp#proc#StopJob(jobkey) abort
   if has_key(s:jobs, a:jobkey)
     call remove(s:jobs, a:jobkey)
   endif
+  silent doautocmd <nomodeline> User OmniSharpStopped
 endfunction
 
 function! OmniSharp#proc#ListRunningJobs() abort

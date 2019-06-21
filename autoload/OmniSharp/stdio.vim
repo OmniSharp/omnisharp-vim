@@ -15,6 +15,7 @@ function! s:HandleServerEvent(job, res) abort
         let message = get(a:res.Body, 'Message', '')
         if message ==# 'Configuration finished.'
           let a:job.loaded = 1
+          silent doautocmd <nomodeline> User OmniSharpReady
         endif
       else
         " Complete load: Wait for all projects to be loaded before marking
@@ -43,6 +44,7 @@ function! s:HandleServerEvent(job, res) abort
                 echomsg 'Loaded server for ' . a:job.sln_or_dir
               endif
               let a:job.loaded = 1
+              silent doautocmd <nomodeline> User OmniSharpReady
               unlet a:job.loading
               call timer_stop(a:job.loading_timeout)
               unlet a:job.loading_timeout
