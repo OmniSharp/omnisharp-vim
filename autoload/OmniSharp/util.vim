@@ -32,37 +32,38 @@ function! s:is_wsl() abort
   return s:is_wsl_val
 endfunction
 
-function! OmniSharp#util#CheckCapabilities(...) abort
-  let verbose = a:0 > 0 && a:1 ==? 'verbose'
+function! OmniSharp#util#CheckCapabilities() abort
+  if exists('s:capable') | return s:capable | endif
+
+  let s:capable = 1
 
   if g:OmniSharp_server_stdio
     if has('nvim')
       if !(exists('*jobstart') && has('lambda'))
-        if verbose
-          call OmniSharp#util#EchoErr('Error: A newer version of neovim is required for stdio')
-        endif
-        return 0
+        call OmniSharp#util#EchoErr('Error: A newer version of neovim is required for stdio')
+        let s:capable = 0
       endif
     else
       if !(has('job') && has('channel') && has('lambda'))
-        if verbose
-          call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
-        endif
-        return 0
+        call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
+        let s:capable = 0
       endif
     endif
-
-    return 1
-  endif
-
-  if !(has('python') || has('python3'))
-    if verbose
+  else
+    if !(has('python') || has('python3'))
       call OmniSharp#util#EchoErr('Error: OmniSharp requires Vim compiled with +python or +python3')
+      let s:capable = 0
     endif
-    return 0
   endif
 
-  return 1
+  if !s:capable
+    " Clear BufEnter and InsertLeave autocmds
+    silent! autocmd! OmniSharp#HighlightTypes
+    " Clear plugin integration autocmds
+    silent! autocmd! OmniSharp#Integrations
+  endif
+
+  return s:capable
 endfunction
 
 " :echoerr will throw if inside a try conditional, or function labeled 'abort'
