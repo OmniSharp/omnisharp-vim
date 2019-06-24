@@ -934,7 +934,7 @@ endfunction
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
   " Bail early in this check if the file is a metadata file
-  if type(get(b:, "OmniSharp_metadata_filename", v:null)) == type('') | return | endif
+  if type(get(b:, 'OmniSharp_metadata_filename', v:null)) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
