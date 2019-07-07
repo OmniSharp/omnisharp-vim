@@ -223,10 +223,10 @@ let g:OmniSharp_highlight_types = 2
 ```
 
 #### Vim 8.1 text properties
-In (very) recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's symantic highlighting.
+In (very) recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's semantic highlighting.
 To check whether your Vim supports text properties, look for `+textprop` in the output of `:version`, or run `:echo has('textprop')`.
 
-The default highlight groups used for symantic highlighting, along with the standard Vim highlight groups they are linked to are as follows:
+The default highlight groups used for semantic highlighting, along with the standard Vim highlight groups they are linked to are as follows:
 
 | Highlight group  | Default link |
 |------------------|--------------|
@@ -263,7 +263,7 @@ In order to find out what OmniSharp-roslyn calls a particular element, there is 
 **Note:** Text property highlighting is currently only available when using the stdio server, not for HTTP server usage.
 
 #### Older versions
-When text properties are not available, or when using the HTTP server, limited symantic highlighting is still possible by highlighting keywords.
+When text properties are not available, or when using the HTTP server, limited semantic highlighting is still possible by highlighting keywords.
 Note that this is not perfect - a keyword can only match a single highlight group, meaning that interfaces/classes/methods/parameters with the same name will be highlighted the same as each other.
 
 The configuration options are also more limited.
@@ -323,7 +323,7 @@ set previewheight=5
 " Tell ALE to use OmniSharp for linting C# files, and no other linters.
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
-" Update symantic highlighting on BufEnter and InsertLeave
+" Update semantic highlighting on BufEnter and InsertLeave
 let g:OmniSharp_highlight_types = 2
 
 augroup omnisharp_commands
