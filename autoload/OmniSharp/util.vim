@@ -152,6 +152,9 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     let command = insert(command, 'mono')
   endif
 
+  " Enforce OmniSharp server use utf-8 encoding.
+  let command += [ '-e', 'utf-8' ]
+
   return command
 endfunction
 
