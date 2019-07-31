@@ -366,7 +366,8 @@ endfunction
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
   let bufferLines = getline(1, '$')
   let opts = {
-  \ 'ResponseHandler': function('s:FindHighlightTypesRH', [a:Callback, bufferLines])
+  \ 'ResponseHandler': function('s:FindHighlightTypesRH', [a:Callback, bufferLines]),
+  \ 'ReplayOnLoad': 1
   \}
   call s:Request('/highlight', opts)
 endfunction
