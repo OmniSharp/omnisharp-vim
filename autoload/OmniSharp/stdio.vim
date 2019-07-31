@@ -3,6 +3,7 @@ set cpoptions&vim
 
 let s:nextseq = 1001
 let s:requests = {}
+let s:pendingRequests = {}
 
 function! s:HandleServerEvent(job, res) abort
   if has_key(a:res, 'Body') && type(a:res.Body) == type({})
@@ -16,6 +17,7 @@ function! s:HandleServerEvent(job, res) abort
         if message ==# 'Configuration finished.'
           let a:job.loaded = 1
           silent doautocmd <nomodeline> User OmniSharpReady
+          call s:ReplayRequests()
         endif
       else
         " Complete load: Wait for all projects to be loaded before marking
@@ -33,18 +35,25 @@ function! s:HandleServerEvent(job, res) abort
         let name = get(a:res.Body, 'Name', '')
         let message = get(a:res.Body, 'Message', '')
         if name ==# 'OmniSharp.MSBuild.ProjectManager'
-          let project = matchstr(message, '''\zs.*\ze''$')
+          let project = matchstr(message, '''\zs.*\ze''')
           if message =~# '^Queue project'
             call add(a:job.loading, project)
           endif
           if message =~# '^Successfully loaded project'
-            call filter(a:job.loading, {idx,val -> val ==# project})
+            call filter(a:job.loading, {idx,val -> val !=# project})
             if len(a:job.loading) == 0
               if g:OmniSharp_server_display_loading
                 echomsg 'Loaded server for ' . a:job.sln_or_dir
               endif
               let a:job.loaded = 1
               silent doautocmd <nomodeline> User OmniSharpReady
+
+              " TODO: Remove this delay once we have better information about when the
+              " server is completely initialised:
+              " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
+              call timer_start(1000, function('s:ReplayRequests'))
+              " call s:ReplayRequests()
+
               unlet a:job.loading
               call timer_stop(a:job.loading_timeout)
               unlet a:job.loading_timeout
@@ -155,6 +164,10 @@ function! s:RawRequest(body, command, opts, ...) abort
 
   let job = OmniSharp#GetHost().job
   if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
+    if has_key(a:opts, 'ReplayOnLoad') && !has_key(s:pendingRequests, a:command)
+      " This request should be replayed when the server is fully loaded
+      let s:pendingRequests[a:command] = a:opts
+    endif
     return 0
   endif
   let job_id = job.job_id
@@ -184,6 +197,13 @@ function! s:RawRequest(body, command, opts, ...) abort
     call ch_sendraw(job_id, encodedBody . "\n")
   endif
   return 1
+endfunction
+
+function! s:ReplayRequests(...) abort
+  for key in keys(s:pendingRequests)
+    call s:Request(key, s:pendingRequests[key])
+    unlet s:pendingRequests[key]
+  endfor
 endfunction
 
 function! s:LocationsFromResponse(quickfixes) abort
@@ -296,7 +316,8 @@ endfunction
 
 function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
   let opts = {
-  \ 'ResponseHandler': function('s:CodeCheckRH', [a:Callback])
+  \ 'ResponseHandler': function('s:CodeCheckRH', [a:Callback]),
+  \ 'ReplayOnLoad': 1
   \}
   call extend(opts, a:opts, 'force')
   call s:Request('/codecheck', opts)
@@ -426,7 +447,8 @@ endfunction
 function! OmniSharp#stdio#FindTextProperties(bufnum) abort
   let buftick = getbufvar(a:bufnum, 'changedtick')
   let opts = {
-  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnum, buftick])
+  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnum, buftick]),
+  \ 'ReplayOnLoad': 1
   \}
   call s:Request('/highlight', opts)
 endfunction
@@ -434,8 +456,8 @@ endfunction
 function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
   if !a:response.Success | return | endif
   if getbufvar(a:bufnum, 'changedtick') != a:buftick
-    " The buffer has changed while fetching highlights - fetch fresh
-    " highlights from the server
+    " The buffer has changed while fetching highlights - fetch fresh highlights
+    " from the server
     call OmniSharp#stdio#FindTextProperties(a:bufnum)
     return
   endif

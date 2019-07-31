@@ -998,7 +998,13 @@ function! s:StartServer(sln_or_dir) abort
     return
   endif
 
-  call OmniSharp#proc#Start(command, a:sln_or_dir)
+  let job = OmniSharp#proc#Start(command, a:sln_or_dir)
+  if g:OmniSharp_server_stdio
+    let b:OmniSharp_host = {
+    \ 'job': job,
+    \ 'sln_or_dir': a:sln_or_dir
+    \}
+  endif
 endfunction
 
 function! OmniSharp#StopAllServers() abort

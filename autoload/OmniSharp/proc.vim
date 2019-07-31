@@ -155,9 +155,6 @@ endfunction
 " public functions {{{ "
 
 function! OmniSharp#proc#Start(command, jobkey) abort
-  if OmniSharp#proc#IsJobRunning(a:jobkey)
-    return
-  endif
   if OmniSharp#proc#supportsNeovimJobs()
     let job = OmniSharp#proc#neovimJobStart(a:command)
     if job.job_id > 0
@@ -173,11 +170,11 @@ function! OmniSharp#proc#Start(command, jobkey) abort
       call OmniSharp#util#EchoErr('Could not run command: ' . join(a:command, ' '))
     endif
   elseif OmniSharp#proc#supportsVimDispatch()
-    let req = OmniSharp#proc#dispatchStart(a:command)
-    let s:jobs[a:jobkey] = req
+    let job = OmniSharp#proc#dispatchStart(a:command)
+    let s:jobs[a:jobkey] = job
   elseif OmniSharp#proc#supportsVimProc()
-    let proc = OmniSharp#proc#vimprocStart(a:command)
-    let s:jobs[a:jobkey] = proc
+    let job = OmniSharp#proc#vimprocStart(a:command)
+    let s:jobs[a:jobkey] = job
   else
     call OmniSharp#util#EchoErr('Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc.vim plugin to use this feature')
   endif
@@ -186,6 +183,7 @@ function! OmniSharp#proc#Start(command, jobkey) abort
     let job.loaded = 0
     silent doautocmd <nomodeline> User OmniSharpStarted
   endif
+  return job
 endfunction
 
 function! OmniSharp#proc#StopJob(jobkey) abort
@@ -213,15 +211,15 @@ function! OmniSharp#proc#ListRunningJobs() abort
   return filter(keys(s:jobs), 'OmniSharp#proc#IsJobRunning(v:val)')
 endfunction
 
-function! OmniSharp#proc#IsJobRunning(job) abort
+function! OmniSharp#proc#IsJobRunning(jobkey) abort
   " Either a jobkey (sln_or_dir) or a job may be passed in
-  if type(a:job) == type({})
-    let job = a:job
+  if type(a:jobkey) == type({})
+    let job = a:jobkey
   else
-    if !has_key(s:jobs, a:job)
+    if !has_key(s:jobs, a:jobkey)
       return 0
     endif
-    let job = get(s:jobs, a:job)
+    let job = get(s:jobs, a:jobkey)
   endif
   if OmniSharp#proc#supportsNeovimJobs()
     return 1

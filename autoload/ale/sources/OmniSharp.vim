@@ -1,8 +1,6 @@
 function! ale#sources#OmniSharp#WantResults(buffer) abort
   let g:OmniSharp_ale_diagnostics_requested = 1
   if OmniSharp#FugitiveCheck() | return | endif
-  if !OmniSharp#IsServerRunning({ 'bufnum': a:buffer }) | return | endif
-
   call ale#other_source#StartChecking(a:buffer, 'OmniSharp')
   let opts = { 'BufNum': a:buffer }
   let Callback = function('ale#sources#OmniSharp#ProcessResults', [opts])
