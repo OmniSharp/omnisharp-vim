@@ -47,7 +47,13 @@ function! s:HandleServerEvent(job, res) abort
               endif
               let a:job.loaded = 1
               silent doautocmd <nomodeline> User OmniSharpReady
-              call s:ReplayRequests()
+
+              " TODO: Remove this delay once we have better information about when the
+              " server is completely initialised:
+              " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
+              call timer_start(1000, function('s:ReplayRequests'))
+              " call s:ReplayRequests()
+
               unlet a:job.loading
               call timer_stop(a:job.loading_timeout)
               unlet a:job.loading_timeout
@@ -193,7 +199,7 @@ function! s:RawRequest(body, command, opts, ...) abort
   return 1
 endfunction
 
-function! s:ReplayRequests() abort
+function! s:ReplayRequests(...) abort
   for key in keys(s:pendingRequests)
     call s:Request(key, s:pendingRequests[key])
     unlet s:pendingRequests[key]
