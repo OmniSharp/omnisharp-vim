@@ -227,11 +227,18 @@ function! s:LocationsFromResponse(quickfixes) abort
       let location.end_lnum = quickfix.EndLine
       let location.end_col = quickfix.EndColumn - 1
     endif
-    let loglevel = get(quickfix, 'LogLevel', '')
-    if loglevel !=# ''
-      let location.type = loglevel ==# 'Error' ? 'E' : 'W'
-      if loglevel ==# 'Hidden'
-        let location.subtype = 'style'
+    if has_key(quickfix, 'LogLevel')
+      if quickfix.LogLevel ==# 'Error'
+        let location.type = 'E'
+      elseif quickfix.LogLevel ==# 'Warning'
+        let location.type = 'W'
+      elseif quickfix.LogLevel ==# 'Info'
+        let location.type = 'I'
+      else
+        " diagnostic responses with other LogLevels (i.e. 'hidden') should be
+        " excluded, so as not to be passed on to ALE/syntastic or included in
+        " GlobalCodeCheck results
+        continue
       endif
     endif
     call add(locations, location)

@@ -137,9 +137,14 @@ def quickfixes_from_response(ctx, response):
             'vcol': 0
         }
         if 'LogLevel' in quickfix:
-            item['type'] = 'E' if quickfix['LogLevel'] == 'Error' else 'W'
-            if quickfix['LogLevel'] == 'Hidden':
-                item['subtype'] = 'Style'
+            if quickfix['LogLevel'] == 'Error':
+                item['type'] = 'E'
+            elif quickfix['LogLevel'] == 'Warning':
+                item['type'] = 'W'
+            elif quickfix['LogLevel'] == 'Info':
+                item['type'] = 'I'
+            else:
+                continue
 
         items.append(item)
 
