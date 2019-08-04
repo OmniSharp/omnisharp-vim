@@ -1190,39 +1190,38 @@ function! s:DirectoryContainsFile(directory, file) abort
   return (idx == 0)
 endfunction
 
-let s:extension = has('win32') ? '.ps1' : '.sh'
-let s:script_location = expand('<sfile>:p:h:h') . '/installer/omnisharp-manager' . s:extension
+let s:plugin_root_dir = expand('<sfile>:p:h:h')
+
 function! OmniSharp#Install(...) abort
-  echo 'Installing OmniSharp Roslyn...'
+  echo 'Installing OmniSharp Roslyn, please wait...'
+
   call OmniSharp#StopAllServers()
 
-  let l:http = g:OmniSharp_server_stdio ? '' : ' -H'
-  let l:version = a:000 != [] ? ' -v '.a:000[0] : ''
+  let l:http = g:OmniSharp_server_stdio ? '' : '-H'
+  let l:version = a:0 > 0 ? '-v ' . shellescape(a:1) : ''
 
   if has('win32')
-    if s:CheckValidPowershellSettings()
-      let l:location = expand('$HOME') . '\.omnisharp\omnisharp-roslyn'
-      call system(
-      \ 'powershell "& ""' . s:script_location . '"""' . l:http .
-      \ ' -l "' . l:location . '"' . l:version)
+    let l:script = shellescape(s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
+    let l:location = shellescape(expand('$HOME') . '\.omnisharp\omnisharp-roslyn')
 
-      if v:shell_error
-        echohl ErrorMsg
-        echomsg 'Installation to "' . l:location . '" failed inside PowerShell.'
-        echohl None
-      else
-        echomsg 'OmniSharp installed to: ' . l:location
-      endif
-    else
+    call system('powershell -ExecutionPolicy Bypass -File ' . l:script . ' ' .
+    \ l:http . ' -l ' . l:location . ' ' . l:version)
+
+    if v:shell_error
       echohl ErrorMsg
-      echomsg 'Powershell is running at an ExecutionPolicy level that blocks OmniSharp-vim from installing the Roslyn server'
+      echomsg 'Installation to ' . l:location . ' failed inside PowerShell.'
       echohl None
+    else
+      echomsg 'OmniSharp installed to: ' . l:location
     endif
   else
-    let l:mono = g:OmniSharp_server_use_mono ? ' -M' : ''
-    let l:result = systemlist(
-    \ 'sh "' . s:script_location . '"' . l:http .
-    \ ' -l ' . '"$HOME/.omnisharp/omnisharp-roslyn/"' . l:mono . l:version)
+    let l:script = shellescape(s:plugin_root_dir . '/installer/omnisharp-manager.sh')
+    let l:location = shellescape(expand('$HOME') . '/.omnisharp/omnisharp-roslyn')
+
+    let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
+
+    let l:result = systemlist('/bin/sh ' . l:script . ' ' .
+    \ l:http . ' ' . l:mono . ' -l ' . l:location . ' ' . l:version)
 
     if v:shell_error
       echohl ErrorMsg
@@ -1230,14 +1229,9 @@ function! OmniSharp#Install(...) abort
       echomsg l:result[-1]
       echohl None
     else
-      echomsg 'OmniSharp installed to: ~/.omnisharp/omnisharp-roslyn/'
+      echomsg 'OmniSharp installed to:' l:location
     endif
   endif
-endfunction
-
-function! s:CheckValidPowershellSettings()
-  let l:ps_policy_level = system('powershell Get-ExecutionPolicy')
-  return l:ps_policy_level !~# '^\(Restricted\|AllSigned\)'
 endfunction
 
 function! s:FindSolutionsFiles(bufnum) abort

@@ -9,11 +9,11 @@
 # -H | install the HTTP version of the server
 
 [CmdletBinding()]
-Param(
+param(
     [Parameter()][Alias('v')][string]$version,
-    [Parameter()][Alias('l')][string]$location = "$($env:USERPROFILE)\.omnisharp\",
-    [Parameter()][Alias('u')][switch]$usage,
-    [Parameter()][Alias('H')][switch]$http_check
+    [Parameter()][Alias('l')][string]$location = "$($Env:USERPROFILE)\.omnisharp\",
+    [Parameter()][Alias('u')][Switch]$usage,
+    [Parameter()][Alias('H')][Switch]$http_check
 )
 
 if ($usage) {
@@ -24,8 +24,8 @@ if ($usage) {
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 function get_latest_version() {
-    $tmp = Invoke-RestMethod -Uri "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
-    return $tmp.tag_name
+    $response = Invoke-RestMethod -Uri "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
+    return $response.tag_name
 }
 
 if ([string]::IsNullOrEmpty($version)) {
@@ -50,30 +50,23 @@ $out = "$($location)\omnisharp$($http)-win-$($machine).zip"
 if (Test-Path -Path $location) {
     Remove-Item $location -Force -Recurse
 }
+
 New-Item -ItemType Directory -Force -Path $location | Out-Null
 
-#Run as SilentlyContinue to avoid progress bar that can't be seen
-$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri $url -OutFile $out
 
-#Run Expand-Archive in versions that support it
-if ($PSVersionTable.PSVersion.Major -gt 4)
-{
+# Run Expand-Archive in versions that support it
+if ($PSVersionTable.PSVersion.Major -gt 4) {
     Expand-Archive $out -DestinationPath $location -Force
-}
-else
-{
+} else {
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [System.IO.Compression.ZipFile]::ExtractToDirectory( $out, $location )
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($out, $location)
 }
 
-#Check for file to confirm download and unzip were successful
-if(Test-Path -path "$($location)\OmniSharp.Roslyn.dll")
-{
+# Check for file to confirm download and unzip were successful
+if (Test-Path -Path "$($location)\OmniSharp.Roslyn.dll") {
     Set-Content -Path "$($location)\OmniSharpInstall-version.txt" -Value "OmniSharp $($version)"
     exit 0
-}
-else
-{
+} else {
     exit 1
 }
