@@ -1,21 +1,42 @@
-# OmniSharp Installers
+# OmniSharp-Roslyn server management scripts
 
-The OmniSharp installers are scripts that OmniSharp-vim uses to install the OmniSharp Roslyn server if it is not able to find it when opening a .cs file. There is a shell (.sh) version for Linux, macOS, & Cygwin/WSL and there is a PowerShell (.ps1) version for Windows.
+The OmniSharp installer scripts are used by OmniSharp-vim to automate the installation and updating of the [OmniSharp-Rosyln server](https://github.com/OmniSharp/omnisharp-roslyn). There is a script for [Linux, macOS and Cygwin/WSL](#unix-like-oss), and another for [Microsoft Windows](#microsoft-windows).
 
-## PowerShell
+## Unix-like OSs
+
+_Works on: Linux, Apple macOS, Cygwin and Windows Subsystem for Linux._
 
 ### Usage
 
-```powershell
-.\omnisharp-manager.ps1 [-v \<VersionNumber\>] [-l \<InstallLocation\>] [-u] [-H]
+```
+./omnisharp-manager.sh [-v VERSION] [-l PATH] [-HMuh]
 ```
 
-Flags | Description
------ | -----------
- -v \<VersionNumber\> | version number of server to install (default: the latest version)
- -l \<InstallLocation\> | where to install the server (default: '%USERPROFILE%\\.omnisharp\')
- -u | help / usage info
- -H | install the HTTP version of the server
+| Option       | Description                                                                                 |
+|--------------|---------------------------------------------------------------------------------------------|
+| `-v VERSION` | Version number of the server to install (defaults to the latest verison).                   |
+| `-l PATH`    | Location to install the server to (defaults to `$HOME/.omnisharp/`).                        |
+| `-H`         | Install the HTTP variant of the server (if not given, the stdio variant will be installed). |
+| `-M`         | Use the system Mono installation rather than the one packaged with OmniSharp-Roslyn.        |
+| `-u`         | Display simple usage information.                                                           |
+| `-h`         | Display this help message.                                                                  |
+
+## Microsoft Windows
+
+_Works on: Microsoft Windows._
+
+### Usage
+
+```
+.\omnisharp-manager.ps1 [-v VERSION] [-l PATH] [-Hu]
+```
+
+| Option       | Description                                                                                 |
+|--------------|---------------------------------------------------------------------------------------------|
+| `-v VERSION` | Version number of server to install (defaults to the latest version).                       |
+| `-l PATH`    | Location to install the server to (defaults to `%USERPROFILE%\.omnisharp\`).                |
+| `-H`         | Install the HTTP variant of the server (if not given, the stdio variant will be installed). |
+| `-u`         | Display simple usage information.                                                           |
 
 ### Output
 
@@ -23,15 +44,9 @@ After downloading and installing the server the script will check for the `OmniS
 
 ### Examples
 
-In PowerShell the following will install the v1.32.1 HTTP version of the OmniSharp Roslyn server in `\.omnisharp\omnisharp-roslyn` in the %USERPROFILE% directory:
->`./omnisharp-manager.ps1 -v 'v1.32.1' -H -l "$env:USERPROFILE/.omnisharp/omnisharp-roslyn"`
+In PowerShell, the following will install version 1.32.1 of the HTTP OmniSharp Roslyn server in the `%USERPROFILE%\.omnisharp\omnisharp-roslyn` directory.
 
-*Note:* You must run this from the directory that contains the script to run it. This will vary but is typically `\omnisharp-vim\installer` inside the directory where your vim plugins are located.
-
-> On completion the `omnisharp-manager.ps1` script will check that the `OmniSharp.Roslyn.dll` file is in the expected directory. If it finds the file it will return and exit code of `0`. If it does not find the file it will return `1`. You can check exit codes in PowerShell by running `$LASTEXITCODE` in the console after running the script.
-
----
-
-#### Footnotes [fn \#]
-
-[1]: Each time a .cs file is opened the OmniSharp-vim plugin checks if OmniSharp Roslyn server is already installed. If not then it runs the `omnisharp-manager.ps1` script. It typically checks the `%USERPROFILE%\.omnisharp\omnisharp-roslyn` directory.
+```powershell
+cd "C:\Users\My Name\vimfiles\pack\plugins\opt\omnisharp-vim" # Navigate to the OmniSharp-vim plugin directory
+.\installer\omnisharp-manager.ps1 -v "v1.32.1" -H -l "$Env:USERPROFILE\.omnisharp\omnisharp-roslyn"
+```
