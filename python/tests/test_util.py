@@ -182,11 +182,23 @@ def test_quickfixes_from_response(ctx):
 
     response = [
         {
-            'FileName': 'foo.cs',
             'Text': 'some text',
             'Line': 5,
             'Column': 8,
             'LogLevel': 'Hidden',
+        },
+    ]
+    qf = quickfixes_from_response(ctx, response)
+    expected = []
+    assert qf == expected
+
+    response = [
+        {
+            'FileName': 'foo.cs',
+            'Text': 'some text',
+            'Line': 5,
+            'Column': 8,
+            'LogLevel': 'Warning',
         },
     ]
     qf = quickfixes_from_response(ctx, response)
@@ -198,7 +210,28 @@ def test_quickfixes_from_response(ctx):
             'col': 8,
             'vcol': 0,
             'type': 'W',
-            'subtype': 'Style',
+        },
+    ]
+    assert qf == expected
+
+    response = [
+        {
+            'FileName': 'foo.cs',
+            'Text': 'some text',
+            'Line': 5,
+            'Column': 8,
+            'LogLevel': 'Info',
+        },
+    ]
+    qf = quickfixes_from_response(ctx, response)
+    expected = [
+        {
+            'filename': 'foo.cs',
+            'text': 'some text',
+            'lnum': 5,
+            'col': 8,
+            'vcol': 0,
+            'type': 'I',
         },
     ]
     assert qf == expected
