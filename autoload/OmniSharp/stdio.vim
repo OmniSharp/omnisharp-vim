@@ -496,24 +496,31 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
       let curline = hl.StartLine + 1
     endif
     if has_key(s:kindGroups, hl.Kind)
-      call prop_add(hl.StartLine, hl.StartColumn, {
-      \ 'end_lnum': hl.EndLine,
-      \ 'end_col': hl.EndColumn,
-      \ 'type': s:kindGroups[hl.Kind],
-      \ 'bufnr': a:bufnum
-      \})
+      try
+        call prop_add(hl.StartLine, hl.StartColumn, {
+        \ 'end_lnum': hl.EndLine,
+        \ 'end_col': hl.EndColumn,
+        \ 'type': s:kindGroups[hl.Kind],
+        \ 'bufnr': a:bufnum
+        \})
+      catch /^Vim\%((\a\+)\)\=:E275:/
+        " This response is for a hidden buffer, and 'nohidden' is in use.
+        break
+      endtry
     endif
     if get(g:, 'OmniSharp_highlight_debug', 0)
       let hlKind = 'cs' . substitute(hl.Kind, ' ', '_', 'g')
       if !len(prop_type_get(hlKind))
         call prop_type_add(hlKind, {'highlight': 'Normal'})
       endif
-      call prop_add(hl.StartLine, hl.StartColumn, {
-      \ 'end_lnum': hl.EndLine,
-      \ 'end_col': hl.EndColumn,
-      \ 'type': hlKind,
-      \ 'bufnr': a:bufnum
-      \})
+      try
+        call prop_add(hl.StartLine, hl.StartColumn, {
+        \ 'end_lnum': hl.EndLine,
+        \ 'end_col': hl.EndColumn,
+        \ 'type': hlKind,
+        \ 'bufnr': a:bufnum
+        \})
+      catch | endtry
     endif
   endfor
 endfunction
