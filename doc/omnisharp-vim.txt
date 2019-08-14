@@ -118,6 +118,29 @@ the installed mono with this option. Note that mono must be in the $PATH.
 Default: 0 >
     let g:OmniSharp_server_use_mono = 1
 <
+                                             *'g:OmniSharp_diagnostic_overrides'*
+Override diagnostic severity for linters (i.e. ALE and Syntastic) and
+|:OmniSharpGlobalCodeCheck| results. The variable is a dictionary where keys
+are error/diagnostic IDs, and the values are dictionaries containing a "type"
+property. Valid "type" values are:
+
+    'E': Error
+    'W': Warning
+    'I': Info
+    'None': This diagnostic will be suppressed.
+
+Any other dictionary properties are passed on to linters, so it is possible to
+specify that some diagnostics are "style" issues for ALE, for example, by
+including a {"subtype": "style"} property.
+
+Example: >
+    let g:OmniSharp_diagnostic_overrides = {
+    \ 'IDE0010': {'type': 'I'},
+    \ 'IDE0055': {'type': 'W', 'subtype': 'style'},
+    \ 'CS8019': {'type': 'None'},
+    \ 'RemoveUnnecessaryImportsFixable': {'type': 'None'}
+    \}
+<
                                                   *'g:OmniSharp_highlight_types'*
 Enable automatic semantic type/interface/identifier highlighting.
 Default: 0 >

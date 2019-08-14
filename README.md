@@ -213,7 +213,7 @@ To use the other features, you'll want to create key bindings for them. See the 
 
 See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom configuration examples.
 
-### Symantic Highlighting
+## Semantic Highlighting
 OmniSharp-roslyn can provide highlighting information about every symbol of the document.
 
 To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` files automatically highlighted when entering a buffer or leaving insert mode, add this to your .vimrc:
@@ -222,7 +222,7 @@ To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` f
 let g:OmniSharp_highlight_types = 2
 ```
 
-#### Vim 8.1 text properties
+### Vim 8.1 text properties
 In (very) recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's semantic highlighting.
 To check whether your Vim supports text properties, look for `+textprop` in the output of `:version`, or run `:echo has('textprop')`.
 
@@ -262,7 +262,7 @@ In order to find out what OmniSharp-roslyn calls a particular element, there is 
 
 **Note:** Text property highlighting is currently only available when using the stdio server, not for HTTP server usage.
 
-#### Older versions
+### Older versions
 When text properties are not available, or when using the HTTP server, limited semantic highlighting is still possible by highlighting keywords.
 Note that this is not perfect - a keyword can only match a single highlight group, meaning that interfaces/classes/methods/parameters with the same name will be highlighted the same as each other.
 
@@ -280,6 +280,31 @@ To disable a group, link it to `Normal`:
 ```vim
 highlight link csUserMethod Normal
 ```
+
+## Diagnostic overrides
+
+Diagnostics are returned from OmniSharp-roslyn in various ways - via linting plugins such as ALE or Syntastic, and using the `:OmniSharpGlobalCodeCheck` command.
+These diagnostics come from roslyn and roslyn analyzers, and as such they can be managed at the server level in 2 ways - using [rulesets](https://roslyn-analyzers.readthedocs.io/en/latest/config-analyzer.html), and using an [.editorconfig](https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference?view=vs-2019) file.
+
+However, not all diagnostics can only be managed by an `.editorconfig` file, and rulesets are not always a good solution as they involve modifying `.csproj` files, which might not suit your project policies - not all project users necessarily use the same analyzers.
+
+OmniSharp-vim provides a global override dictionary, where any diagnostic can be marked as having severity `E`rror, `W`arning or `I`nfo, and for ALE users, a `'subtype': 'style'` may be specified.
+Diagnostics may be ignored completely by setting their `'type'` to `'None'`, in which case they will not be passed to linters, and will not be displayed in `:OmniSharpGlobalCodeCheck` results.
+
+```vim
+" IDE0010: Populate switch - display in ALE as `Info`
+" IDE0055: Fix formatting - display in ALE as `Warning` style error
+" CS8019: Duplicate of IDE0005
+" RemoveUnnecessaryImportsFixable: Generic warning that an unused using exists
+let g:OmniSharp_diagnostic_overrides = {
+\ 'IDE0010': {'type': 'I'},
+\ 'IDE0055': {'type': 'W', 'subtype': 'style'},
+\ 'CS8019': {'type': 'None'},
+\ 'RemoveUnnecessaryImportsFixable': {'type': 'None'}
+\}
+```
+
+*Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
 
 ## Configuration
 

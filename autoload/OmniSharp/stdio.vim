@@ -208,6 +208,7 @@ endfunction
 
 function! s:LocationsFromResponse(quickfixes) abort
   let locations = []
+  let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
   for quickfix in a:quickfixes
     let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
     let filename = get(quickfix, 'FileName', '')
@@ -227,18 +228,19 @@ function! s:LocationsFromResponse(quickfixes) abort
       let location.end_lnum = quickfix.EndLine
       let location.end_col = quickfix.EndColumn - 1
     endif
-    if has_key(quickfix, 'LogLevel')
-      if quickfix.LogLevel ==# 'Error'
-        let location.type = 'E'
-      elseif quickfix.LogLevel ==# 'Warning'
-        let location.type = 'W'
-      elseif quickfix.LogLevel ==# 'Info'
-        let location.type = 'I'
+    let loglevel = get(quickfix, 'LogLevel', '')
+    if loglevel !=# ''
+      let diag_id = get(quickfix, 'Id', '-')
+      if index(keys(overrides), diag_id) >= 0
+        if overrides[diag_id].type ==? 'None'
+          continue
+        endif
+        call extend(location, overrides[diag_id])
       else
-        " diagnostic responses with other LogLevels (i.e. 'hidden') should be
-        " excluded, so as not to be passed on to ALE/syntastic or included in
-        " GlobalCodeCheck results
-        continue
+        let location.type = loglevel ==# 'Error' ? 'E' : 'W'
+        if loglevel ==# 'Hidden'
+          let location.subtype = 'style'
+        endif
       endif
     endif
     call add(locations, location)
