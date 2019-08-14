@@ -304,6 +304,8 @@ let g:OmniSharp_diagnostic_overrides = {
 \}
 ```
 
+*Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
+
 ## Configuration
 
 ### Example vimrc
