@@ -65,14 +65,26 @@ Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall
 
 ## Installation
 ### Plugin
-Install the vim plugin using your preferred plugin manager:
+Install the Vim plugin using your preferred plugin manager:
 
 | Plugin Manager                                       | Command                                                                              |
 |------------------------------------------------------|--------------------------------------------------------------------------------------|
 | [Vim-plug](https://github.com/junegunn/vim-plug)     | `Plug 'OmniSharp/omnisharp-vim'`                                                     |
 | [Vundle](https://github.com/gmarik/vundle)           | `Bundle 'OmniSharp/omnisharp-vim'`                                                   |
 | [NeoBundle](https://github.com/Shougo/neobundle.vim) | `NeoBundle 'OmniSharp/omnisharp-vim'`                                                |
-| [Pathogen](https://github.com/tpope/vim-pathogen)    | `git clone git://github.com/OmniSharp/omnisharp-vim.git ~/.vim/bundle/omnisharp-vim` |
+
+... or git:
+
+| ['runtimepath'](http://vimhelp.appspot.com/options.txt.html#%27runtimepath%27) handler | Command                                            |
+|------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [Vim 8.0+ Native packages](http://vimhelp.appspot.com/repeat.txt.html#packages) | `$ git clone git://github.com/OmniSharp/omnisharp-vim ~/.vim/pack/plugins/start/omnisharp-vim` |
+| [Pathogen](https://github.com/tpope/vim-pathogen)    | `$ git clone git://github.com/OmniSharp/omnisharp-vim ~/.vim/bundle/omnisharp-vim`     |
+
+If not using a plugin manager such as Vim-plug (which does this automatically), make sure your .vimrc contains this line:
+
+```vim
+filetype indent plugin on
+```
 
 ### Server
 OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.omnisharp/omnisharp-roslyn`, ready to use. *Note:* Requires [`curl`](https://curl.haxx.se/) or [`wget`](https://www.gnu.org/software/wget/) on Linux, macOS, Cygwin and WSL.
