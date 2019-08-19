@@ -320,6 +320,7 @@ Plug 'w0rp/ale'
 call plug#end()
 endif
 
+" Note: this is required for the plugin to work
 filetype indent plugin on
 
 " Use the stdio OmniSharp-roslyn server
