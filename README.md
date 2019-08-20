@@ -93,7 +93,7 @@ Running the command `:OmniSharpInstall` in vim will also install/upgrade to the 
 To install a particular release, including pre-releases, specify the version number like this:
 
 ```vim
-:OmniSharpInstall 'v1.32.13'
+:OmniSharpInstall v1.34.2
 ```
 
 *Note:* These methods depend on the `g:OmniSharp_server_stdio` variable to decide which OmniSharp-roslyn server to download. If you are unsure, try using the new stdio option first, and only fall back to HTTP if you have problems.
