@@ -27,14 +27,22 @@ function! OmniSharp#proc#neovimOutHandler(job_id, data, event) dict abort
     endif
 
     for message in messages
+      if message =~# "^\uFEFF"
+        " Strip BOM
+        let message = substitute(message, "^\uFEFF", '', '')
+      endif
       call OmniSharp#stdio#HandleResponse(job, message)
     endfor
   endif
 endfunction
 
 function! OmniSharp#proc#neovimErrHandler(job_id, data, event) dict abort
-  let l:message = printf('%s: %s', a:event, string(a:data))
-  call OmniSharp#util#EchoErr(l:message)
+  if type(a:data) == type([]) && len(a:data) && a:data[0] =~# "^\uFEFF$"
+    " Ignore BOM
+    return
+  endif
+  let message = printf('%s: %s', a:event, string(a:data))
+  call OmniSharp#util#EchoErr(message)
 endfunction
 
 function! OmniSharp#proc#neovimExitHandler(job_id, data, event) dict abort
@@ -88,8 +96,8 @@ function! OmniSharp#proc#vimOutHandler(channel, message) abort
 endfunction
 
 function! OmniSharp#proc#vimErrHandler(channel, message) abort
-  let l:message = printf('%s: %s', string(a:channel), string(a:message))
-  call OmniSharp#util#EchoErr(l:message)
+  let message = printf('%s: %s', string(a:channel), string(a:message))
+  call OmniSharp#util#EchoErr(message)
 endfunction
 
 function! OmniSharp#proc#vimJobStart(command) abort
@@ -136,9 +144,9 @@ endfunction
 
 function! OmniSharp#proc#supportsVimProc() abort
   if g:OmniSharp_server_stdio | return 0 | endif
-  let l:is_vimproc = 0
-  silent! let l:is_vimproc = vimproc#version()
-  return l:is_vimproc
+  let is_vimproc = 0
+  silent! let is_vimproc = vimproc#version()
+  return is_vimproc
 endfunction
 
 function! OmniSharp#proc#vimprocStart(command) abort
