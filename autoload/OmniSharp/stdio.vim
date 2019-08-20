@@ -505,7 +505,7 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
         \ 'type': s:kindGroups[hl.Kind],
         \ 'bufnr': a:bufnum
         \})
-      catch /^Vim\%((\a\+)\)\=:E275:/
+      catch /^Vim\%((\a\+)\)\=:\%(E275\|E964\):/
         " This response is for a hidden buffer, and 'nohidden' is in use.
         break
       endtry
