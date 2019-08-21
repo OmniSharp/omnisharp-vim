@@ -131,12 +131,12 @@ property. Valid "type" values are:
 
 Any other dictionary properties are passed on to linters, so it is possible to
 specify that some diagnostics are "style" issues for ALE, for example, by
-including a {"subtype": "style"} property.
+including a {"subtype": "Style"} property.
 
 Example: >
     let g:OmniSharp_diagnostic_overrides = {
     \ 'IDE0010': {'type': 'I'},
-    \ 'IDE0055': {'type': 'W', 'subtype': 'style'},
+    \ 'IDE0055': {'type': 'W', 'subtype': 'Style'},
     \ 'CS8019': {'type': 'None'},
     \ 'RemoveUnnecessaryImportsFixable': {'type': 'None'}
     \}

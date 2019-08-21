@@ -300,7 +300,7 @@ These diagnostics come from roslyn and roslyn analyzers, and as such they can be
 
 However, not all diagnostics can only be managed by an `.editorconfig` file, and rulesets are not always a good solution as they involve modifying `.csproj` files, which might not suit your project policies - not all project users necessarily use the same analyzers.
 
-OmniSharp-vim provides a global override dictionary, where any diagnostic can be marked as having severity `E`rror, `W`arning or `I`nfo, and for ALE users, a `'subtype': 'style'` may be specified.
+OmniSharp-vim provides a global override dictionary, where any diagnostic can be marked as having severity `E`rror, `W`arning or `I`nfo, and for ALE/Syntastic users, a `'subtype': 'Style'` may be specified.
 Diagnostics may be ignored completely by setting their `'type'` to `'None'`, in which case they will not be passed to linters, and will not be displayed in `:OmniSharpGlobalCodeCheck` results.
 
 ```vim
@@ -310,7 +310,7 @@ Diagnostics may be ignored completely by setting their `'type'` to `'None'`, in 
 " RemoveUnnecessaryImportsFixable: Generic warning that an unused using exists
 let g:OmniSharp_diagnostic_overrides = {
 \ 'IDE0010': {'type': 'I'},
-\ 'IDE0055': {'type': 'W', 'subtype': 'style'},
+\ 'IDE0055': {'type': 'W', 'subtype': 'Style'},
 \ 'CS8019': {'type': 'None'},
 \ 'RemoveUnnecessaryImportsFixable': {'type': 'None'}
 \}

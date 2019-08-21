@@ -239,7 +239,7 @@ function! s:LocationsFromResponse(quickfixes) abort
       else
         let location.type = loglevel ==# 'Error' ? 'E' : 'W'
         if loglevel ==# 'Hidden'
-          let location.subtype = 'style'
+          let location.subtype = 'Style'
         endif
       endif
     endif

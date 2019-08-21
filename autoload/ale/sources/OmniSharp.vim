@@ -10,7 +10,8 @@ endfunction
 function! ale#sources#OmniSharp#ProcessResults(opts, locations) abort
   let locations = a:locations
   for location in locations
-    if get(location, 'subtype', '') ==# 'style'
+    " Use case-insensitive comparison ==?
+    if get(location, 'subtype', '') ==? 'style'
       let location['sub_type'] = 'style'
     endif
   endfor
