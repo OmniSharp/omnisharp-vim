@@ -51,13 +51,13 @@ let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)
 if g:OmniSharp_highlight_types
   augroup OmniSharp#HighlightTypes
     autocmd!
-    autocmd BufEnter *.cs
+    autocmd BufEnter *.cs,*.csx
     \ if OmniSharp#util#CheckCapabilities() |
     \   call OmniSharp#HighlightBuffer() |
     \ endif
 
     if g:OmniSharp_highlight_types == 2
-      autocmd InsertLeave *.cs
+      autocmd InsertLeave *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
       \   call OmniSharp#HighlightBuffer() |
       \ endif
