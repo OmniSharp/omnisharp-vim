@@ -961,7 +961,8 @@ function! OmniSharp#StartServer(...) abort
   else
     let sln_or_dir = OmniSharp#FindSolutionOrDir()
     if empty(sln_or_dir)
-      if expand('%:e') ==# 'csx'
+      if expand('%:e') ==? 'csx' || expand('%:e') ==? 'cake'
+        " .csx and .cake files do not require solutions or projects
         let sln_or_dir = expand('%:p:h')
       else
         call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
