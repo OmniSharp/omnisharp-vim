@@ -1203,7 +1203,7 @@ function! OmniSharp#Install(...) abort
 
   if has('win32')
     let l:script = shellescape(s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
-    let l:location = shellescape(expand('$HOME') . '\.omnisharp\omnisharp-roslyn')
+    let l:location = g:OmniSharp_server_install
 
     call system('powershell -ExecutionPolicy Bypass -File ' . l:script . ' ' .
     \ l:http . ' -l ' . l:location . ' ' . l:version)
@@ -1217,7 +1217,7 @@ function! OmniSharp#Install(...) abort
     endif
   else
     let l:script = shellescape(s:plugin_root_dir . '/installer/omnisharp-manager.sh')
-    let l:location = shellescape(expand('$HOME') . '/.omnisharp/omnisharp-roslyn')
+    let l:location = g:OmniSharp_server_install
 
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
 
