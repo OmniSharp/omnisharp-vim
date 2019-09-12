@@ -133,7 +133,6 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     endif
     let s:server_path = join(parts, s:dir_separator)
     if !executable(s:server_path)
-      echo s:server_path
       if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No", 2) == 1
         call OmniSharp#Install()
       else
