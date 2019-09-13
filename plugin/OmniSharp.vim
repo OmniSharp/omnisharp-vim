@@ -28,7 +28,7 @@ if !exists('g:OmniSharp_server_install')
   let install_parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
   let prior_install = join(install_parts, dir_separator)
 
-  if isdirectory(prior_install) || !has('nvim')
+  if isdirectory(prior_install)
     let g:OmniSharp_server_install = prior_install
   else
     " Neovim uses the XDG directory specification, so we should, too
