@@ -18,6 +18,30 @@ let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeo
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 
+if exists('g:OmniSharp_server_path')
+  let g:OmniSharp_server_install = fnamemodify(g:OmniSharp_server_path, ':p:h')
+endif
+
+if !exists('g:OmniSharp_server_install')
+  " We should start by seeing if someone already has an install
+  let dir_separator = fnamemodify('.', ':p')[-1 :]
+  let install_parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
+  let prior_install = join(install_parts, dir_separator)
+
+  if isdirectory(prior_install)
+    let g:OmniSharp_server_install = prior_install
+  else
+    " Neovim uses the XDG directory specification, so we should, too
+    if has('win32')
+      let cache_home_default = expand('$LOCALAPPDATA')
+    else
+      let cache_home_default = join([expand('$HOME'), '.cache'], dir_separator)
+    endif
+    let cache_home = exists('$XDG_CACHE_HOME') ? expand('$XDG_CACHE_HOME') : cache_home_default
+    let g:OmniSharp_server_install = join([cache_home, 'omnisharp-vim', 'omnisharp-roslyn'], dir_separator) 
+  endif
+endif
+
 let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
 
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)

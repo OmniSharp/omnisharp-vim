@@ -78,11 +78,22 @@ Use this option to specify whether OmniSharp will start automatically upon
 opening a `*.cs` file. Default: 1 >
     let g:OmniSharp_start_server = 1
 <
+                                                   *'g:OmniSharp_server_install'*
+Use this to specify where the roslyn omnisharp server should be run from
+and downloaded to.  If not set, will calculate a default value, using
+'$HOME/.omnisharp/omnisharp-roslyn' if found for compatibility.
+
+Note: If |:OmniSharpInstall| is run, this folder will be deleted and
+recreated with the downloaded omnisharp version.
+Default: '/home/username/.cache/omnisharp-vim/omnisharp-roslyn/run'
+     or: 'C:\Users\username\AppData\Local\omnisharp-vim\omnisharp-roslyn\OmniSharp.exe' >
+    let g:OmniSharp_server_install = '/home/username/omnisharp/server/'
+<
                                                       *'g:OmniSharp_server_path'*
 Use this option to give the full path to the roslyn omnisharp server
-executable. If not set, the |:OmniSharpInstall| location is used.
-Default: '/home/username/.omnisharp/omnisharp-roslyn/run'
-     or: 'C:\Users\username\.omnisharp\omnisharp-roslyn\OmniSharp.exe' >
+executable. Will set g:OmniSharp_server_install to the home directory
+of the server.
+Default: None
     let g:OmniSharp_server_path = '/home/username/omnisharp/omnisharp.http-linux-x64/omnisharp/OmniSharp.exe'
 <
                                            *'g:OmniSharp_server_display_loading'*
@@ -394,7 +405,7 @@ convenient user re-mapping. These can be used like so: >
                                                               *:OmniSharpInstall*
 :OmniSharpInstall
     Download the latest OmniSharp-roslyn binaries and extract them into
-    ~/.omnisharp/omnisharp-roslyn. This can be used to install OmniSharp-roslyn
+    g:OmniSharp_server_install. This can be used to install OmniSharp-roslyn
     initially, and to upgrade to the latest version at any time.
     Requires "curl" or "wget" to be installed for Linux, macOS, Cygwin and WSL.
 

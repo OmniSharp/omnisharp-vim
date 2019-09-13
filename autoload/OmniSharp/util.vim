@@ -125,7 +125,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
   if exists('g:OmniSharp_server_path')
     let s:server_path = g:OmniSharp_server_path
   else
-    let parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
+    let parts = [g:OmniSharp_server_install]
     if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
     else
