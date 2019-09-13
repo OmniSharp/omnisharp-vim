@@ -1194,6 +1194,12 @@ endfunction
 let s:plugin_root_dir = expand('<sfile>:p:h:h')
 
 function! OmniSharp#Install(...) abort
+  if exists('g:OmniSharp_server_path')
+    echohl WarningMsg
+    echomsg 'Installation not attempted, g:OmniSharp_server_path defined.'
+    echohl None
+    return
+  endif
   echo 'Installing OmniSharp Roslyn, please wait...'
 
   call OmniSharp#StopAllServers()
