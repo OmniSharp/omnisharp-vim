@@ -106,9 +106,21 @@ augroup OmniSharp#Integrations
   \ 'completor': function('asyncomplete#sources#OmniSharp#completor')
   \})
 
+  autocmd User Ncm2Plugin call ncm2#register_source({
+  \ 'name': 'OmniSharp-vim',
+  \ 'priority': 9,
+  \ 'scope': ['cs'],
+  \ 'mark': 'OS',
+  \ 'subscope_enable': 1,
+  \ 'complete_length': 3,
+  \ 'complete_pattern': ['\.'],
+  \ 'on_complete': function('ncm2#sources#OmniSharp#on_complete')
+  \})
+
   " Listen for ALE requests
   autocmd User ALEWantResults call s:ALEWantResults()
 augroup END
+
 
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(
