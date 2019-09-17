@@ -27,6 +27,10 @@ Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall
 
 * Contextual code completion
   * Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
+  * Completion Sources are provided for:
+    * [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim)
+    * [coc.nvim](https://github.com/neoclide/coc.nvim)
+    * [ncm2](https://github.com/ncm2/ncm2)
   * Completion snippets are supported. e.g. Console.WriteLine(TAB) (ENTER) will complete to Console.WriteLine(string value) and expand a dynamic snippet, this will place you in SELECT mode and the first method argument will be selected. 
     * Requires [UltiSnips](https://github.com/SirVer/ultisnips) and supports standard C-x C-o completion as well as completion/autocompletion plugins such as [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim), [Supertab](https://github.com/ervandew/supertab), [Neocomplete](https://github.com/Shougo/neocomplete.vim) etc.
     * Requires `set completeopt-=preview` when using [Neocomplete](https://github.com/Shougo/neocomplete.vim) because of a compatibility issue with [UltiSnips](https://github.com/SirVer/ultisnips). 
