@@ -1,7 +1,7 @@
 #!/bin/sh
 # OmniSharp-Roslyn Installer
 #
-# Works on: Linux, macOS & Cygwin/WSL
+# Works on: Linux, macOS & Cygwin/WSL & MinGW
 
 usage() {
     printf "usage: %s [-HMuh] [-v version] [-l location]\\n" "$0"
@@ -83,6 +83,15 @@ case "$(uname -s)" in
                 ext="zip"
             else
                 echo "Error: the installer requires 'unzip' to work on Cygwin"
+                exit 1
+            fi
+        elif [ "$(uname -o)" = "Msys" ]; then
+            os="win-${machine}"
+
+            if [ "$(command -v unzip)" ]; then
+                ext="zip"
+            else
+                echo "Error: the installer requires 'unzip' to work on MinGW"
                 exit 1
             fi
         else
