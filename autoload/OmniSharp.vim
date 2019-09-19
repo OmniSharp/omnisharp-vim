@@ -338,11 +338,9 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   \  'filename': temp_file,
   \  'lnum': a:metadata.Line,
   \  'col': a:metadata.Column
-  \}, 1)
+  \}, 0)
   let b:OmniSharp_host = host
   let b:OmniSharp_metadata_filename = a:response.SourceName
-  silent edit
-  execute "normal! \<C-o>"
   setlocal nomodifiable readonly
   if a:open_in_preview && !jumped_from_preview
     silent wincmd p
