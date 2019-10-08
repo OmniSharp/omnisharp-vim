@@ -811,10 +811,11 @@ endfunction
 
 function! s:GotoDefinitionRH(Callback, response) abort
   if !a:response.Success | return | endif
-  if get(a:response.Body, 'FileName', v:null) != v:null
-    call a:Callback(s:LocationsFromResponse([a:response.Body])[0], a:response.Body)
+  let body = a:response.Body
+  if type(body) == type({}) && get(body, 'FileName', v:null) != v:null
+    call a:Callback(s:LocationsFromResponse([body])[0], body)
   else
-    call a:Callback(0, a:response.Body)
+    call a:Callback(0, body)
   endif
 endfunction
 

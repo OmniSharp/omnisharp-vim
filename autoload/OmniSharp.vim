@@ -38,7 +38,6 @@ function! OmniSharp#GetPort(...) abort
   return port
 endfunction
 
-" Called from python
 function! OmniSharp#GetHost(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
 
@@ -240,7 +239,9 @@ endfunction
 function! s:CBGotoDefinition(opts, location, metadata) abort
   let went_to_metadata = 0
   if type(a:location) != type({}) " Check whether a dict was returned
-    if g:OmniSharp_lookup_metadata && type(a:metadata.MetadataSource) == type({})
+    if g:OmniSharp_lookup_metadata
+    \ && type(a:metadata) == type({})
+    \ && type(a:metadata.MetadataSource) == type({})
       let found = OmniSharp#GotoMetadata(0, a:metadata, a:opts)
       let went_to_metadata = 1
     else
@@ -268,9 +269,11 @@ function! OmniSharp#PreviewDefinition(...) abort
   endif
 endfunction
 
-function! s:CBPreviewDefinition(opts, loc, metadata) abort
-  if type(a:loc) != type({}) " Check whether a dict was returned
-    if g:OmniSharp_lookup_metadata && type(a:metadata.MetadataSource) == type({})
+function! s:CBPreviewDefinition(opts, location, metadata) abort
+  if type(a:location) != type({}) " Check whether a dict was returned
+    if g:OmniSharp_lookup_metadata
+    \ && type(a:metadata) == type({})
+    \ && type(a:metadata.MetadataSource) == type({})
       let found = OmniSharp#GotoMetadata(
       \ 1,
       \ a:metadata,
@@ -279,8 +282,8 @@ function! s:CBPreviewDefinition(opts, loc, metadata) abort
       echo 'Not found'
     endif
   else
-    call s:OpenLocationInPreview(a:loc)
-    echo fnamemodify(a:loc.filename, ':.')
+    call s:PreviewLocation(a:location)
+    echo fnamemodify(a:location.filename, ':.')
   endif
 endfunction
 
@@ -300,7 +303,7 @@ function! s:CBPreviewImplementation(locs, ...) abort
     if numImplementations == 0
       echo 'No implementations found'
     else
-      call s:OpenLocationInPreview(a:locs[0])
+      call s:PreviewLocation(a:locs[0])
       let fname = fnamemodify(a:locs[0].filename, ':.')
       if numImplementations == 1
         echo fname
@@ -330,23 +333,25 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   \ temp_file,
   \ 'b'
   \)
+  let bufnr = bufadd(temp_file)
+  call setbufvar(bufnr, 'OmniSharp_host', host)
+  call setbufvar(bufnr, 'OmniSharp_metadata_filename', a:response.SourceName)
   let jumped_from_preview = &previewwindow
   if a:open_in_preview
-    execute 'silent pedit' temp_file
-    if !&previewwindow | silent wincmd p | endif
+    call s:PreviewLocation({
+    \  'filename': temp_file,
+    \  'lnum': a:metadata.Line,
+    \  'col': a:metadata.Column
+    \})
+  else
+    call OmniSharp#JumpToLocation({
+    \  'filename': temp_file,
+    \  'lnum': a:metadata.Line,
+    \  'col': a:metadata.Column
+    \}, 0)
+    setlocal nomodifiable readonly
   endif
-  " Call JumpToLocation with noautocmds=1, then ...
-  call OmniSharp#JumpToLocation({
-  \  'filename': temp_file,
-  \  'lnum': a:metadata.Line,
-  \  'col': a:metadata.Column
-  \}, 1)
-  let b:OmniSharp_host = host
-  let b:OmniSharp_metadata_filename = a:response.SourceName
-  " ... edit the file _after_ setting the metadata variables
-  edit %
-  setlocal nomodifiable readonly
-  if a:open_in_preview && !jumped_from_preview
+  if a:open_in_preview && !jumped_from_preview && &previewwindow
     silent wincmd p
   endif
 
@@ -357,23 +362,28 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   return 1
 endfunction
 
-function! s:OpenLocationInPreview(loc) abort
-  let lazyredraw_bak = &lazyredraw
-  let &lazyredraw = 1
-  " Due to cursor jumping bug, opening preview at current file is not as
-  " simple as `pedit %`:
-  " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
-  let winview = winsaveview()
-
-  execute 'silent pedit' a:loc.filename
-  wincmd P
-  call cursor(a:loc.lnum, a:loc.col)
-  normal! zt
-  wincmd p
-
-  " Jump cursor back to symbol.
-  call winrestview(winview)
-  let &lazyredraw = lazyredraw_bak
+function! s:PreviewLocation(location) abort
+  if s:PreferPopups()
+    call OmniSharp#popup#Buffer(bufadd(a:location.filename), a:location.lnum)
+  else
+    let lazyredraw_bak = &lazyredraw
+    let &lazyredraw = 1
+    " Due to cursor jumping bug, opening preview at current file is not as
+    " simple as `pedit %`:
+    " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
+    let winview = winsaveview()
+    let l:winnr = winnr()
+    execute 'silent pedit' a:location.filename
+    wincmd P
+    call cursor(a:location.lnum, a:location.col)
+    normal! zt
+    if winnr() != l:winnr
+      wincmd p
+      " Jump cursor back to symbol.
+      call winrestview(winview)
+    endif
+    let &lazyredraw = lazyredraw_bak
+  endif
 endfunction
 
 function! OmniSharp#JumpToLocation(location, noautocmds) abort
@@ -685,10 +695,14 @@ endfunction
 
 function! s:CBTypeLookup(opts, response) abort
   if a:opts.Doc
+    let content = a:response.type
     if len(a:response.doc) > 0
-      call s:WriteToPreview(a:response.type . "\n\n" . a:response.doc)
+      let content .= "\n\n" . a:response.doc
+    endif
+    if s:PreferPopups()
+      call OmniSharp#popup#Display(content)
     else
-      call s:WriteToPreview(a:response.type)
+      call s:WriteToPreview(content)
     endif
   else
     echo a:response.type[0 : &columns * &cmdheight - 2]
@@ -727,7 +741,11 @@ function! s:CBSignatureHelp(response) abort
       endif
     endif
   endif
-  call s:WriteToPreview(output)
+  if s:PreferPopups()
+    call OmniSharp#popup#Display(output)
+  else
+    call s:WriteToPreview(output)
+  endif
 endfunction
 
 function! OmniSharp#Rename() abort
@@ -948,7 +966,7 @@ function! OmniSharp#IsServerRunning(...) abort
     let sln_or_dir = opts.sln_or_dir
   else
     let bufnr = get(opts, 'bufnum', bufnr('%'))
-    let sln_or_dir = OmniSharp#FindSolutionOrDir(bufnr)
+    let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
   endif
   if empty(sln_or_dir)
     return 0
@@ -1388,6 +1406,11 @@ function! s:BustAliveCache(...) abort
   if idx != -1
     call remove(s:alive_cache, idx)
   endif
+endfunction
+
+function! s:PreferPopups() abort
+  " TODO: Check version of vim
+  return get(g:, 'OmniSharp_prefer_popups', 0)
 endfunction
 
 function! s:SetQuickFix(list, title)
