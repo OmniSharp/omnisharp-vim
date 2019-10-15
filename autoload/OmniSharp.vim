@@ -10,10 +10,11 @@ if !g:OmniSharp_server_stdio
 endif
 
 " Setup variable defaults
-let s:generated_snippets = {}
-let s:last_completion_dictionary = {}
-let s:alive_cache = []
-let s:initial_server_ports = copy(g:OmniSharp_server_ports)
+let s:generated_snippets = get(s:, 'generated_snippets', {})
+let s:last_completion_dictionary = get(s:, 'last_completion_dictionary', {})
+let s:alive_cache = get(s:, 'alive_cache', [])
+let s:initial_server_ports = get(s:, 'initial_server_ports',
+\ copy(g:OmniSharp_server_ports))
 
 function! OmniSharp#GetPort(...) abort
   if exists('g:OmniSharp_port')

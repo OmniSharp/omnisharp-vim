@@ -1,9 +1,9 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:nextseq = 1001
-let s:requests = {}
-let s:pendingRequests = {}
+let s:nextseq = get(s:, 'nextseq', 1001)
+let s:requests = get(s:, 'requests', {})
+let s:pendingRequests = get(s:, 'pendingRequests', {})
 
 function! s:HandleServerEvent(job, res) abort
   if has_key(a:res, 'Body') && type(a:res.Body) == type({})
