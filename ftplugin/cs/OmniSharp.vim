@@ -45,6 +45,8 @@ command! -buffer -bar OmniSharpRename                              call OmniShar
 command! -buffer -nargs=1 OmniSharpRenameTo                        call OmniSharp#RenameTo(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers                   call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer                       call OmniSharp#RestartServer()
+command! -buffer -bar OmniSharpRunTest                             call OmniSharp#RunTest()
+command! -buffer -bar OmniSharpRunTestsInClass                     call OmniSharp#RunTestsInClass()
 command! -buffer -bar OmniSharpSignatureHelp                       call OmniSharp#SignatureHelp()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers                      call OmniSharp#StopAllServers()
@@ -71,6 +73,8 @@ nnoremap <buffer> <Plug>(omnisharp_preview_implementation) :OmniSharpPreviewImpl
 nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_server) :OmniSharpRestartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) OmniSharpRestartAllServers<CR>
+nnoremap <buffer> <Plug>(omnisharp_runtest) :OmniSharpRunTest<CR>
+nnoremap <buffer> <Plug>(omnisharp_runtestsinclass) :OmniSharpRunTestsInClass<CR>
 nnoremap <buffer> <Plug>(omnisharp_signature_help) :OmniSharpSignatureHelp<CR>
 inoremap <buffer> <Plug>(omnisharp_signature_help) <C-\><C-o>:OmniSharpSignatureHelp<CR>
 nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
@@ -115,6 +119,8 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpRenameTo
 \|  delcommand OmniSharpRestartAllServers
 \|  delcommand OmniSharpRestartServer
+\|  delcommand OmniSharpRunTest
+\|  delcommand OmniSharpRunTestsInClass
 \|  delcommand OmniSharpSignatureHelp
 \|  delcommand OmniSharpStartServer
 \|  delcommand OmniSharpStopAllServers

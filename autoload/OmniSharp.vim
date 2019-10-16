@@ -583,6 +583,59 @@ function! s:CBGlobalCodeCheck(quickfixes) abort
   endif
 endfunction
 
+function! OmniSharp#RunTestsInClass() abort
+  if !s:GuardStdio() | return | endif
+  if g:OmniSharp_translate_cygwin_wsl
+    echohl WarningMsg
+    echom 'Tests do not work in WSL unfortunately'
+    echohl None
+    return
+  endif
+  call OmniSharp#stdio#RunTestsInClass(function('s:CBRunTestsInClass'))
+endfunction
+
+function! s:CBRunTestsInClass(summary) abort
+  if a:summary.pass
+    let title = 'All tests passed'
+    echohl Title
+  else
+    let passed = 0
+    for location in a:summary.locations
+      if !has_key(location, 'type')
+        let passed += 1
+      endif
+    endfor
+    let title = passed . ' of ' . len(a:summary.locations) . ' tests passed'
+    echohl WarningMsg
+  endif
+  echom title
+  echohl None
+  call s:SetQuickFix(a:summary.locations, title)
+endfunction
+
+function! OmniSharp#RunTest() abort
+  if !s:GuardStdio() | return | endif
+  if g:OmniSharp_translate_cygwin_wsl
+    echohl WarningMsg
+    echom 'Tests do not work in WSL unfortunately'
+    echohl None
+    return
+  endif
+  call OmniSharp#stdio#RunTest(function('s:CBRunTest'))
+endfunction
+
+function! s:CBRunTest(summary) abort
+  if a:summary.pass
+    echohl Title
+    echom a:summary.locations[0].name . ': passed'
+    echohl None
+  else
+    echom a:summary.locations[0].name . ': failed'
+    let title = 'Test failure: ' . a:summary.locations[0].name
+    call s:SetQuickFix(a:summary.locations, title)
+  endif
+endfunction
+
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
   call OmniSharp#TypeLookup(0, a:0 ? a:1 : 0)
 endfunction
@@ -1272,6 +1325,14 @@ function! s:FindSolutionsFiles(bufnum) abort
   endif
 
   return solution_files
+endfunction
+
+function! s:GuardStdio() abort
+  if !g:OmniSharp_server_stdio
+    echohl WarningMsg | echom 'stdio only, sorry' | echohl None
+    return 0
+  endif
+  return 1
 endfunction
 
 function! s:IsServerPortHardcoded(sln_or_dir) abort
