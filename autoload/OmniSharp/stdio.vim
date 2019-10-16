@@ -951,7 +951,7 @@ endfunction
 
 function! s:RunTestsRH(Callback, tests, response, request) abort
   if !a:response.Success | return | endif
-  if !type(a:response.Body.Results) == type([])
+  if type(a:response.Body.Results) != type([])
     echohl WarningMsg
     echom 'Error: "'  . a:response.Body.Failure .
     \ '"   - this may indicate a failed build'
