@@ -899,7 +899,6 @@ function! s:RunTestsInClass(Callback, codeElements) abort
     endif
   endfor
   let project = OmniSharp#GetHost().project
-  " TODO: handle different test frameworks
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
   \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, tests]),
@@ -933,7 +932,6 @@ function! s:RunTest(Callback, codeElements) abort
     return
   endif
   let project = OmniSharp#GetHost().project
-  " TODO: handle different test frameworks
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
   \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, tests]),

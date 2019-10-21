@@ -50,6 +50,7 @@ Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall
   * Displays documentation for an entity when using preview window
 * Code error checking
 * Code formatter
+* Run unit tests and navigate to failing assertions
 
 ## Screenshots
 #### Auto Complete

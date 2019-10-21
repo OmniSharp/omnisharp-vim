@@ -331,6 +331,19 @@ convenient user re-mapping. These can be used like so: >
 :OmniSharpNavigateDown
     Navigates to next method or class
 
+                                                              *:OmniSharpRunTest*
+                                                     *<Plug>(omnisharp_run_test)*
+:OmniSharpRunTest
+    Run the current unit test. The cursor can be anywhere in the test method.
+    If the test fails, the failure message and location will be displayed in
+    the quickfix list.
+
+                                                      *:OmniSharpRunTestsInClass*
+                                           *<Plug>(omnisharp_run_tests_in_class)*
+:OmniSharpRunTestsInClass
+    Run all unit tests in the current file. The quickfix list will be
+    populated with the test results of all tests.
+
                                                               *:OmniSharpOpenLog*
                                                      *<Plug>(omnisharp_open_log)*
 :OmniSharpOpenLog
