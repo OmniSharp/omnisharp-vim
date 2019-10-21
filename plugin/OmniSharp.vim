@@ -80,8 +80,15 @@ if g:OmniSharp_highlight_types
     \   call OmniSharp#HighlightBuffer() |
     \ endif
 
-    if g:OmniSharp_highlight_types == 2
+    if g:OmniSharp_highlight_types >= 2
       autocmd InsertLeave *.cs,*.csx
+      \ if OmniSharp#util#CheckCapabilities() |
+      \   call OmniSharp#HighlightBuffer() |
+      \ endif
+    endif
+
+    if g:OmniSharp_highlight_types >= 3
+      autocmd TextChanged,TextChangedI,TextChangedP *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
       \   call OmniSharp#HighlightBuffer() |
       \ endif

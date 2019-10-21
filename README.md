@@ -233,11 +233,13 @@ See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom 
 ## Semantic Highlighting
 OmniSharp-roslyn can provide highlighting information about every symbol of the document.
 
-To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` files automatically highlighted when entering a buffer or leaving insert mode, add this to your .vimrc:
+To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` files automatically highlighted after all text changes, add this to your .vimrc:
 
 ```vim
-let g:OmniSharp_highlight_types = 2
+let g:OmniSharp_highlight_types = 3
 ```
+
+This is a lot of highlighting - especially when running synchronously (not using stdio). To only update highlighting when entering a buffer or leaving insert mode, use `g:OmniSharp_highlight_types = 2` instead.
 
 ### Vim 8.1 text properties
 In (very) recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's semantic highlighting.
@@ -366,8 +368,10 @@ set previewheight=5
 " Tell ALE to use OmniSharp for linting C# files, and no other linters.
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
+" Update semantic highlighting after all text changes
+let g:OmniSharp_highlight_types = 3
 " Update semantic highlighting on BufEnter and InsertLeave
-let g:OmniSharp_highlight_types = 2
+" let g:OmniSharp_highlight_types = 2
 
 augroup omnisharp_commands
     autocmd!
