@@ -26,6 +26,9 @@ class Source(Base):
         self.rank = 500
         self.is_volatile = True
         self.filetypes = ['cs']
+        self.input_pattern = (r'[^. \t0-9]\.\w*|'
+                              r'[^. \t0-9]->\w*|'
+                              r'[a-zA-Z_]\w*::\w*')
         self._ctx = None
         self._setup_logging()
         self._log = logging.getLogger('omnisharp.deoplete')
