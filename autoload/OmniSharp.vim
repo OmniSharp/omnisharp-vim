@@ -602,7 +602,7 @@ function! OmniSharp#TypeLookup(includeDocumentation, ...) abort
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
     let response = OmniSharp#py#eval(pycmd)
     if OmniSharp#CheckPyError() | return | endif
-    return s:CBCodeCheck(opts, response)
+    return s:CBTypeLookup(opts, response)
   endif
 endfunction
 
