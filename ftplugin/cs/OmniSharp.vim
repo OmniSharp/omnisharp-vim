@@ -22,36 +22,36 @@ if get(g:, 'OmniSharp_start_server', 0) == 1
   call OmniSharp#StartServerIfNotRunning()
 endif
 
-command! -buffer -bar OmniSharpCodeFormat                          call OmniSharp#CodeFormat()
-command! -buffer -bar OmniSharpDocumentation                       call OmniSharp#TypeLookupWithDocumentation()
-command! -buffer -bar OmniSharpFindImplementations                 call OmniSharp#FindImplementations()
-command! -buffer -bar OmniSharpFindMembers                         call OmniSharp#FindMembers()
-command! -buffer -bar -nargs=? OmniSharpFindSymbol                 call OmniSharp#FindSymbol(<q-args>)
-command! -buffer -bar OmniSharpFindUsages                          call OmniSharp#FindUsages()
-command! -buffer -bar OmniSharpFixUsings                           call OmniSharp#FixUsings()
-command! -buffer -bar OmniSharpGetCodeActions                      call OmniSharp#GetCodeActions('normal')
-command! -buffer -bar OmniSharpGlobalCodeCheck                     call OmniSharp#GlobalCodeCheck()
-command! -buffer -bar OmniSharpGotoDefinition                      call OmniSharp#GotoDefinition()
-command! -buffer -bar -nargs=? OmniSharpInstall                    call OmniSharp#Install(<f-args>)
-command! -buffer -bar OmniSharpHighlightEchoKind                   call OmniSharp#HighlightEchoKind()
-command! -buffer -bar OmniSharpHighlightTypes                      call OmniSharp#HighlightBuffer()
-command! -buffer -bar OmniSharpNavigateUp                          call OmniSharp#NavigateUp()
-command! -buffer -bar OmniSharpNavigateDown                        call OmniSharp#NavigateDown()
-command! -buffer -bar OmniSharpOpenLog                             call OmniSharp#OpenLog()
-command! -buffer -bar OmniSharpOpenPythonLog                       call OmniSharp#OpenPythonLog()
-command! -buffer -bar OmniSharpPreviewDefinition                   call OmniSharp#PreviewDefinition()
-command! -buffer -bar OmniSharpPreviewImplementation               call OmniSharp#PreviewImplementation()
-command! -buffer -bar OmniSharpRename                              call OmniSharp#Rename()
-command! -buffer -nargs=1 OmniSharpRenameTo                        call OmniSharp#RenameTo(<q-args>)
-command! -buffer -bar OmniSharpRestartAllServers                   call OmniSharp#RestartAllServers()
-command! -buffer -bar OmniSharpRestartServer                       call OmniSharp#RestartServer()
-command! -buffer -bar OmniSharpRunTest                             call OmniSharp#RunTest()
-command! -buffer -bar OmniSharpRunTestsInClass                     call OmniSharp#RunTestsInClass()
-command! -buffer -bar OmniSharpSignatureHelp                       call OmniSharp#SignatureHelp()
+command! -buffer -bar OmniSharpCodeFormat call OmniSharp#CodeFormat()
+command! -buffer -bar OmniSharpDocumentation call OmniSharp#TypeLookupWithDocumentation()
+command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
+command! -buffer -bar OmniSharpFindMembers call OmniSharp#FindMembers()
+command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
+command! -buffer -bar OmniSharpFindUsages call OmniSharp#FindUsages()
+command! -buffer -bar OmniSharpFixUsings call OmniSharp#FixUsings()
+command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
+command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#GlobalCodeCheck()
+command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#GotoDefinition()
+command! -buffer -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
+command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#HighlightEchoKind()
+command! -buffer -bar OmniSharpHighlightTypes call OmniSharp#HighlightBuffer()
+command! -buffer -bar OmniSharpNavigateUp call OmniSharp#NavigateUp()
+command! -buffer -bar OmniSharpNavigateDown call OmniSharp#NavigateDown()
+command! -buffer -bar OmniSharpOpenLog call OmniSharp#OpenLog()
+command! -buffer -bar OmniSharpOpenPythonLog call OmniSharp#OpenPythonLog()
+command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#PreviewDefinition()
+command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#PreviewImplementation()
+command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
+command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#RenameTo(<q-args>)
+command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
+command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
+command! -buffer -bar OmniSharpRunTest call OmniSharp#RunTest()
+command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#RunTestsInFile(<f-args>)
+command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#SignatureHelp()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
-command! -buffer -bar OmniSharpStopAllServers                      call OmniSharp#StopAllServers()
-command! -buffer -bar OmniSharpStopServer                          call OmniSharp#StopServer()
-command! -buffer -bar OmniSharpTypeLookup                          call OmniSharp#TypeLookupWithoutDocumentation()
+command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
+command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
+command! -buffer -bar OmniSharpTypeLookup call OmniSharp#TypeLookupWithoutDocumentation()
 
 nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
 nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
@@ -74,7 +74,7 @@ nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_server) :OmniSharpRestartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) OmniSharpRestartAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_run_test) :OmniSharpRunTest<CR>
-nnoremap <buffer> <Plug>(omnisharp_run_tests_in_class) :OmniSharpRunTestsInClass<CR>
+nnoremap <buffer> <Plug>(omnisharp_run_tests_in_file) :OmniSharpRunTestsInFile<CR>
 nnoremap <buffer> <Plug>(omnisharp_signature_help) :OmniSharpSignatureHelp<CR>
 inoremap <buffer> <Plug>(omnisharp_signature_help) <C-\><C-o>:OmniSharpSignatureHelp<CR>
 nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
@@ -120,7 +120,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpRestartAllServers
 \|  delcommand OmniSharpRestartServer
 \|  delcommand OmniSharpRunTest
-\|  delcommand OmniSharpRunTestsInClass
+\|  delcommand OmniSharpRunTestsInFile
 \|  delcommand OmniSharpSignatureHelp
 \|  delcommand OmniSharpStartServer
 \|  delcommand OmniSharpStopAllServers

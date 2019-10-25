@@ -340,9 +340,9 @@ convenient user re-mapping. These can be used like so: >
     If the test fails, the failure message and location will be displayed in
     the quickfix list.
 
-                                                      *:OmniSharpRunTestsInClass*
-                                           *<Plug>(omnisharp_run_tests_in_class)*
-:OmniSharpRunTestsInClass
+                                                       *:OmniSharpRunTestsInFile*
+                                            *<Plug>(omnisharp_run_tests_in_file)*
+:OmniSharpRunTestsInFile
     Run all unit tests in the current file. The quickfix list will be
     populated with the test results of all tests.
 

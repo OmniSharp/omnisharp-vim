@@ -40,10 +40,10 @@ endfunction
 
 " Called from python
 function! OmniSharp#GetHost(...) abort
-  let bufnum = a:0 ? a:1 : bufnr('%')
+  let bufnr = a:0 ? a:1 : bufnr('%')
 
-  if empty(getbufvar(bufnum, 'OmniSharp_host'))
-    let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnum)
+  if empty(getbufvar(bufnr, 'OmniSharp_host'))
+    let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
     if g:OmniSharp_server_stdio
       let host = {
       \ 'job': OmniSharp#proc#GetJob(sln_or_dir),
@@ -56,15 +56,15 @@ function! OmniSharp#GetHost(...) abort
       endif
       let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
     endif
-    call setbufvar(bufnum, 'OmniSharp_host', host)
+    call setbufvar(bufnr, 'OmniSharp_host', host)
   endif
   if g:OmniSharp_server_stdio
-    let host = getbufvar(bufnum, 'OmniSharp_host')
+    let host = getbufvar(bufnr, 'OmniSharp_host')
     if !OmniSharp#proc#IsJobRunning(host.job)
       let host.job = OmniSharp#proc#GetJob(host.sln_or_dir)
     endif
   endif
-  return getbufvar(bufnum, 'OmniSharp_host')
+  return getbufvar(bufnr, 'OmniSharp_host')
 endfunction
 
 function! OmniSharp#GetCompletions(partial, ...) abort
@@ -583,7 +583,7 @@ function! s:CBGlobalCodeCheck(quickfixes) abort
   endif
 endfunction
 
-function! OmniSharp#RunTestsInClass() abort
+function! OmniSharp#RunTestsInFile(...) abort
   if !s:GuardStdio() | return | endif
   if g:OmniSharp_translate_cygwin_wsl
     echohl WarningMsg
@@ -591,26 +591,42 @@ function! OmniSharp#RunTestsInClass() abort
     echohl None
     return
   endif
-  call OmniSharp#stdio#RunTestsInClass(function('s:CBRunTestsInClass'))
+  if a:0 == 0
+    let files = [expand('%:p')]
+  elseif type(a:1) == type([])
+    let files = a:1
+  elseif type(a:1) == type('')
+    let files = a:000
+  endif
+  let files = map(copy(files), {i,f -> fnamemodify(f, ':p')})
+  call OmniSharp#stdio#RunTestsInFile(files, function('s:CBRunTestsInFile'))
 endfunction
 
-function! s:CBRunTestsInClass(summary) abort
-  if a:summary.pass
-    let title = 'All tests passed'
+function! s:CBRunTestsInFile(summary) abort
+  let pass = 1
+  let locations = []
+  for summary in a:summary
+    call extend(locations, summary.locations)
+    if !summary.pass
+      let pass = 0
+    endif
+  endfor
+  if pass
+    let title = len(locations) . ' tests passed'
     echohl Title
   else
     let passed = 0
-    for location in a:summary.locations
+    for location in locations
       if !has_key(location, 'type')
         let passed += 1
       endif
     endfor
-    let title = passed . ' of ' . len(a:summary.locations) . ' tests passed'
+    let title = passed . ' of ' . len(locations) . ' tests passed'
     echohl WarningMsg
   endif
-  echom title
+  echomsg title
   echohl None
-  call s:SetQuickFix(a:summary.locations, title)
+  call s:SetQuickFix(locations, title)
 endfunction
 
 function! OmniSharp#RunTest() abort
@@ -621,7 +637,7 @@ function! OmniSharp#RunTest() abort
     echohl None
     return
   endif
-  call OmniSharp#stdio#RunTest(function('s:CBRunTest'))
+  call OmniSharp#stdio#RunTest(bufnr('%'), function('s:CBRunTest'))
 endfunction
 
 function! s:CBRunTest(summary) abort
@@ -924,8 +940,8 @@ function! OmniSharp#IsServerRunning(...) abort
   if has_key(opts, 'sln_or_dir')
     let sln_or_dir = opts.sln_or_dir
   else
-    let bufnum = get(opts, 'bufnum', bufnr('%'))
-    let sln_or_dir = OmniSharp#FindSolutionOrDir(bufnum)
+    let bufnr = get(opts, 'bufnum', bufnr('%'))
+    let sln_or_dir = OmniSharp#FindSolutionOrDir(bufnr)
   endif
   if empty(sln_or_dir)
     return 0
@@ -965,22 +981,22 @@ endfunction
 " Find the solution or directory for this file.
 function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
-  let bufnum = a:0 > 1 ? a:2 : bufnr('%')
-  if empty(getbufvar(bufnum, 'OmniSharp_buf_server'))
-    let dir = s:FindServerRunningOnParentDirectory(bufnum)
+  let bufnr = a:0 > 1 ? a:2 : bufnr('%')
+  if empty(getbufvar(bufnr, 'OmniSharp_buf_server'))
+    let dir = s:FindServerRunningOnParentDirectory(bufnr)
     if !empty(dir)
-      call setbufvar(bufnum, 'OmniSharp_buf_server', dir)
+      call setbufvar(bufnr, 'OmniSharp_buf_server', dir)
     else
       try
-        let sln = s:FindSolution(interactive, bufnum)
-        call setbufvar(bufnum, 'OmniSharp_buf_server', sln)
+        let sln = s:FindSolution(interactive, bufnr)
+        call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
       catch e
         return ''
       endtry
     endif
   endif
 
-  return getbufvar(bufnum, 'OmniSharp_buf_server')
+  return getbufvar(bufnr, 'OmniSharp_buf_server')
 endfunction
 
 function! OmniSharp#StartServerIfNotRunning(...) abort
@@ -1176,8 +1192,8 @@ function! OmniSharp#CheckPyError(...)
   return 0
 endfunction
 
-function! s:FindSolution(interactive, bufnum) abort
-  let solution_files = s:FindSolutionsFiles(a:bufnum)
+function! s:FindSolution(interactive, bufnr) abort
+  let solution_files = s:FindSolutionsFiles(a:bufnr)
   if empty(solution_files)
     return ''
   endif
@@ -1220,8 +1236,8 @@ function! s:FindSolution(interactive, bufnum) abort
   endif
 endfunction
 
-function! s:FindServerRunningOnParentDirectory(bufnum) abort
-  let filename = expand('#' . a:bufnum . ':p')
+function! s:FindServerRunningOnParentDirectory(bufnr) abort
+  let filename = expand('#' . a:bufnr . ':p')
   let longest_dir_match = ''
   let longest_dir_length = 0
   let running_jobs = OmniSharp#proc#ListRunningJobs()
@@ -1293,9 +1309,9 @@ function! OmniSharp#Install(...) abort
   endif
 endfunction
 
-function! s:FindSolutionsFiles(bufnum) abort
+function! s:FindSolutionsFiles(bufnr) abort
   "get the path for the current buffer
-  let dir = expand('#' . a:bufnum . ':p:h')
+  let dir = expand('#' . a:bufnr . ':p:h')
   let lastfolder = ''
   let solution_files = []
 
