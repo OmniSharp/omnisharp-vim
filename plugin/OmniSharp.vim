@@ -50,11 +50,7 @@ let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl',
 
 let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0)
 
-let g:OmniSharp_BufWritePreSyntaxCheck = get(g:, 'OmniSharp_BufWritePreSyntaxCheck', 1)
-let g:OmniSharp_CursorHoldSyntaxCheck = get(g:, 'OmniSharp_CursorHoldSyntaxCheck', 0)
-
 let g:OmniSharp_sln_list_index = get(g:, 'OmniSharp_sln_list_index', -1)
-let g:OmniSharp_sln_list_name = get(g:, 'OmniSharp_sln_list_name', '')
 
 let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing_sln', 1)
 let g:OmniSharp_prefer_global_sln = get(g:, 'OmniSharp_prefer_global_sln', 0)
@@ -69,6 +65,9 @@ let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 " Default map of solution files and directories to ports.
 " Preserve backwards compatibility with older version "g:OmniSharp_sln_ports
 let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', get(g:, 'OmniSharp_sln_ports', {}))
+
+let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
+let g:OmniSharp_runtests_echooutput = get(g:, 'OmniSharp_runtests_echooutput', 1)
 
 " Initialise automatic type and interface highlighting
 let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)

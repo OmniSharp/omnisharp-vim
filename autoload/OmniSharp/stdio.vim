@@ -87,7 +87,7 @@ function! s:HandleServerEvent(job, res) abort
         for line in lines
           if get(a:res.Body, 'MessageLevel', '') ==# 'error'
             echohl WarningMsg | echomsg line | echohl None
-          else
+          elseif g:OmniSharp_runtests_echooutput
             echomsg line
           endif
         endfor
@@ -220,7 +220,7 @@ endfunction
 
 " Call a list of async functions in parallel, and wait for them all to complete
 " before calling the OnAllComplete function.
-function! s:Await(Funcs, OnAllComplete) abort
+function! s:AwaitParallel(Funcs, OnAllComplete) abort
   let state = {
   \ 'count': 0,
   \ 'target': len(a:Funcs),
@@ -232,6 +232,25 @@ function! s:Await(Funcs, OnAllComplete) abort
   endfor
 endfunction
 
+" Call a list of async functions in sequence, and wait for them all to complete
+" before calling the OnAllComplete function.
+function! s:AwaitSequence(Funcs, OnAllComplete, ...) abort
+  if a:0
+    let state = a:1
+  else
+    let state = {
+    \ 'count': 0,
+    \ 'target': len(a:Funcs),
+    \ 'results': [],
+    \ 'OnAllComplete': a:OnAllComplete
+    \}
+  endif
+
+  let Func = remove(a:Funcs, 0)
+  let state.OnComplete = function('s:AwaitSequence', [a:Funcs, a:OnAllComplete])
+  call Func(function('s:AwaitFuncComplete', [state]))
+endfunction
+
 function! s:AwaitFuncComplete(state, ...) abort
   if a:0 == 1
     call add(a:state.results, a:1)
@@ -241,6 +260,8 @@ function! s:AwaitFuncComplete(state, ...) abort
   let a:state.count += 1
   if a:state.count == a:state.target
     call a:state.OnAllComplete(a:state.results)
+  elseif has_key(a:state, 'OnComplete')
+    call a:state.OnComplete(a:state)
   endif
 endfunction
 
@@ -927,40 +948,46 @@ function! OmniSharp#stdio#RunTestsInFile(files, Callback) abort
     return
   endif
   let s:runningTest = 1
-  call s:Await(
+  call s:AwaitParallel(
   \ map(copy(buffers), {i,b -> function('OmniSharp#stdio#Project', [b])}),
   \ function('s:FindTestsInFiles', [a:Callback, buffers]))
 endfunction
 
 function! s:FindTestsInFiles(Callback, buffers, ...) abort
-  call s:Await(
+  call s:AwaitParallel(
   \ map(copy(a:buffers), {i,b -> function('OmniSharp#stdio#CodeStructure', [b])}),
   \ function('s:RunTestsInFiles', [a:Callback]))
 endfunction
 
 function! s:RunTestsInFiles(Callback, bufferCodeStructures) abort
-  let bufferTests = []
+  let Requests = []
   for bcs in a:bufferCodeStructures
     let bufnr = bcs[0]
     let codeElements = bcs[1]
     let tests = s:FindTests(codeElements)
     if len(tests)
-      call add(bufferTests, [bufnr, tests])
+      call add(Requests, function('s:RunTestsInFile', [bufnr, tests]))
     endif
   endfor
-  if len(bufferTests) == 0
+  if len(Requests) == 0
     echohl WarningMsg | echom 'No tests found' | echohl None
     let s:runningTest = 0
     return
   endif
-  echomsg 'Running tests'
-  call s:Await(
-  \ map(bufferTests, {_,btests ->
-  \   function('s:RunTestsInFile', [btests[0], btests[1]])}),
-  \ a:Callback)
+  if g:OmniSharp_runtests_parallel
+    if g:OmniSharp_runtests_echooutput
+      echomsg '---- Running tests ----'
+    endif
+    call s:AwaitParallel(Requests, a:Callback)
+  else
+    call s:AwaitSequence(Requests, a:Callback)
+  endif
 endfunction
 
 function! s:RunTestsInFile(bufnr, tests, Callback) abort
+  if !g:OmniSharp_runtests_parallel && g:OmniSharp_runtests_echooutput
+    echomsg '---- Running tests: ' . bufname(a:bufnr) . ' ----'
+  endif
   let project = OmniSharp#GetHost(a:bufnr).project
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
