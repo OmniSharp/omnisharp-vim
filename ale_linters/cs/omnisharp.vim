@@ -9,7 +9,7 @@ let s:delimiter = '@@@'
 function! ale_linters#cs#omnisharp#ProcessOutput(buffer, lines) abort
   let list = []
   for line in a:lines
-    let [filename, lnum, col, type, subtype, text] = split(line, s:delimiter)
+    let [filename, lnum, col, type, subtype, text] = split(line, s:delimiter, 1)
     let item = {
           \ 'filename': filename,
           \ 'lnum': lnum,
