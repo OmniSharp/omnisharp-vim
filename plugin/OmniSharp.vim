@@ -23,7 +23,7 @@ if exists('g:OmniSharp_server_path')
 endif
 
 if !exists('g:OmniSharp_server_install')
-  " We should start by seeing if someone already has an install
+  " Check for existing server
   let dir_separator = fnamemodify('.', ':p')[-1 :]
   let install_parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
   let prior_install = join(install_parts, dir_separator)
@@ -31,7 +31,6 @@ if !exists('g:OmniSharp_server_install')
   if isdirectory(prior_install)
     let g:OmniSharp_server_install = prior_install
   else
-    " Neovim uses the XDG directory specification, so we should, too
     if has('win32')
       let cache_home_default = expand('$LOCALAPPDATA')
     else
@@ -67,7 +66,7 @@ let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', get(g:, 'OmniSharp_sln_ports', {}))
 
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
-let g:OmniSharp_runtests_echooutput = get(g:, 'OmniSharp_runtests_echooutput', 1)
+let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 1)
 
 " Initialise automatic type and interface highlighting
 let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)

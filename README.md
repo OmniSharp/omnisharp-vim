@@ -11,6 +11,23 @@ OmniSharp works on Windows, and on Linux and OS X with Mono.
 
 The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code, Emacs, Atom and others.
 
+## New! Run unit tests
+
+Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
+
+```vim
+" Run the current unit test (the cursor should be inside the test method)
+:OmniSharpRunTest
+
+" Run all unit tests in the current file
+:OmniSharpRunTestsInFile
+
+" Run all unit tests in the current file, and file `tests/test1.cs`
+:OmniSharpRunTestsInFile % tests/test1.cs
+```
+
+Note that this unfortunately does _not_ work in translated WSL, due to the way OmniSharp-roslyn runs the tests.
+
 ## New! Asynchronous server interactions
 
 For vim8 and neovim, OmniSharp-vim can now use the OmniSharp-roslyn stdio server instead of the HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.

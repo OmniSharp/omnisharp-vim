@@ -87,7 +87,7 @@ function! s:HandleServerEvent(job, res) abort
         for line in lines
           if get(a:res.Body, 'MessageLevel', '') ==# 'error'
             echohl WarningMsg | echomsg line | echohl None
-          elseif g:OmniSharp_runtests_echooutput
+          elseif g:OmniSharp_runtests_echo_output
             echomsg line
           endif
         endfor
@@ -975,7 +975,7 @@ function! s:RunTestsInFiles(Callback, bufferCodeStructures) abort
     return
   endif
   if g:OmniSharp_runtests_parallel
-    if g:OmniSharp_runtests_echooutput
+    if g:OmniSharp_runtests_echo_output
       echomsg '---- Running tests ----'
     endif
     call s:AwaitParallel(Requests, a:Callback)
@@ -985,7 +985,7 @@ function! s:RunTestsInFiles(Callback, bufferCodeStructures) abort
 endfunction
 
 function! s:RunTestsInFile(bufnr, tests, Callback) abort
-  if !g:OmniSharp_runtests_parallel && g:OmniSharp_runtests_echooutput
+  if !g:OmniSharp_runtests_parallel && g:OmniSharp_runtests_echo_output
     echomsg '---- Running tests: ' . bufname(a:bufnr) . ' ----'
   endif
   let project = OmniSharp#GetHost(a:bufnr).project
