@@ -153,12 +153,14 @@ Example: >
     \}
 <
                                                   *'g:OmniSharp_highlight_types'*
-Enable automatic semantic type/interface/identifier highlighting.
+Enable automatic semantic highlighting.
 Default: 0 >
     " Highlight on BufEnter
     let g:OmniSharp_highlight_types = 1
     " Highlight on BufEnter and InsertLeave
     let g:OmniSharp_highlight_types = 2
+    " Highlight after all text changes (TextChanged,TextChangedI,TextChangedP)
+    let g:OmniSharp_highlight_types = 3
 <
                                                  *'g:OmniSharp_highlight_groups'*
 Specify which highlight groups should be used to highlight with
@@ -201,6 +203,22 @@ quickfix window being opened automatically.
 Default: 1 >
     let g:OmniSharp_open_quickfix = 0
 <
+                                             *'g:OmniSharp_runtests_echo_output'*
+When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|,
+echo all test runner output to the |message-history|, so it can be viewed with
+|:messages|.
+Default: 1
+
+                                                *'g:OmniSharp_runtests_parallel'*
+When running multiple unit test files with |:OmniSharpRunTestsInFile|, run
+tests in all files simultaneously - this is the fastest way to run multiple
+test files. The disadvantage is that when |g:OmniSharp_runtests_echo_output|
+is set to 1, tests from multiple files will be interspersed, and therefore
+difficult to read. Set |g:OmniSharp_runtests_parallel| to 0 in order to run
+test files in sequence instead, resulting in readable output in the
+|message-history|.
+Default: 1
+
                                                       *'g:OmniSharp_selector_ui'*
 Use this option to specify a selector UI for choosing code actions and
 navigating to symbols. When no selector UI plugin is detected, or
@@ -330,6 +348,27 @@ convenient user re-mapping. These can be used like so: >
                                                 *<Plug>(omnisharp_navigate_down)*
 :OmniSharpNavigateDown
     Navigates to next method or class
+
+                                                              *:OmniSharpRunTest*
+                                                     *<Plug>(omnisharp_run_test)*
+:OmniSharpRunTest
+    Run the current unit test. The cursor can be anywhere in the test method.
+    If the test fails, the failure message and location will be displayed in
+    the quickfix list.
+
+                                                       *:OmniSharpRunTestsInFile*
+                                            *<Plug>(omnisharp_run_tests_in_file)*
+:OmniSharpRunTestsInFile
+    Run all unit tests in the current file. The quickfix list will be
+    populated with the test results of all tests.
+    Optionally accepts one or more filenames of files to run tests for.
+>
+    " Run all unit tests in the current file
+    :OmniSharpRunTestsInFile
+
+    " Run all unit tests in the current file, and file `tests/test1.cs`
+    :OmniSharpRunTestsInFile % tests/test1.cs
+<
 
                                                               *:OmniSharpOpenLog*
                                                      *<Plug>(omnisharp_open_log)*

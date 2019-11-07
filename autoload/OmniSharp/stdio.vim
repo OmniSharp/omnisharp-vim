@@ -1,9 +1,9 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:nextseq = 1001
-let s:requests = {}
-let s:pendingRequests = {}
+let s:nextseq = get(s:, 'nextseq', 1001)
+let s:requests = get(s:, 'requests', {})
+let s:pendingRequests = get(s:, 'pendingRequests', {})
 
 function! s:HandleServerEvent(job, res) abort
   if has_key(a:res, 'Body') && type(a:res.Body) == type({})
@@ -81,6 +81,16 @@ function! s:HandleServerEvent(job, res) abort
             call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
           endfor
         endif
+      elseif get(a:res, 'Event', '') ==# 'TestMessage'
+        " Diagnostics received while running tests
+        let lines = split(a:res.Body.Message, '\n')
+        for line in lines
+          if get(a:res.Body, 'MessageLevel', '') ==# 'error'
+            echohl WarningMsg | echomsg line | echohl None
+          elseif g:OmniSharp_runtests_echo_output
+            echomsg line
+          endif
+        endfor
       endif
 
     endif
@@ -132,9 +142,11 @@ function! s:Request(command, opts) abort
   let is_metadata = type(metadata_filename) == type('')
   if is_metadata
     let filename = metadata_filename
+    let send_buffer = 0
   else
     let filename = OmniSharp#util#TranslatePathForServer(
     \ fnamemodify(bufname(bufnum), ':p'))
+    let send_buffer = get(a:opts, 'SendBuffer', 1)
   endif
   let lines = getbufline(bufnum, 1, '$')
   let tmp = join(lines, '')
@@ -147,13 +159,13 @@ function! s:Request(command, opts) abort
 
   let body = {
   \ 'Arguments': {
-  \   'Filename': filename,
+  \   'FileName': filename,
   \   'Line': lnum,
   \   'Column': cnum,
   \ }
   \}
 
-  if !is_metadata
+  if send_buffer
     let body.Arguments.Buffer = buffer
   endif
   return s:RawRequest(body, a:command, a:opts, sep)
@@ -175,7 +187,7 @@ function! s:RawRequest(body, command, opts, ...) abort
 
   let a:body['Command'] = a:command
   let a:body['Seq'] = s:nextseq
-  let a:body['Type'] = 'Request'
+  let a:body['Type'] = 'request'
   if has_key(a:opts, 'Parameters')
     call extend(a:body.Arguments, a:opts.Parameters, 'force')
   endif
@@ -204,6 +216,53 @@ function! s:ReplayRequests(...) abort
     call s:Request(key, s:pendingRequests[key])
     unlet s:pendingRequests[key]
   endfor
+endfunction
+
+" Call a list of async functions in parallel, and wait for them all to complete
+" before calling the OnAllComplete function.
+function! s:AwaitParallel(Funcs, OnAllComplete) abort
+  let state = {
+  \ 'count': 0,
+  \ 'target': len(a:Funcs),
+  \ 'results': [],
+  \ 'OnAllComplete': a:OnAllComplete
+  \}
+  for Func in a:Funcs
+    call Func(function('s:AwaitFuncComplete', [state]))
+  endfor
+endfunction
+
+" Call a list of async functions in sequence, and wait for them all to complete
+" before calling the OnAllComplete function.
+function! s:AwaitSequence(Funcs, OnAllComplete, ...) abort
+  if a:0
+    let state = a:1
+  else
+    let state = {
+    \ 'count': 0,
+    \ 'target': len(a:Funcs),
+    \ 'results': [],
+    \ 'OnAllComplete': a:OnAllComplete
+    \}
+  endif
+
+  let Func = remove(a:Funcs, 0)
+  let state.OnComplete = function('s:AwaitSequence', [a:Funcs, a:OnAllComplete])
+  call Func(function('s:AwaitFuncComplete', [state]))
+endfunction
+
+function! s:AwaitFuncComplete(state, ...) abort
+  if a:0 == 1
+    call add(a:state.results, a:1)
+  elseif a:0 > 1
+    call add(a:state.results, a:000)
+  endif
+  let a:state.count += 1
+  if a:state.count == a:state.target
+    call a:state.OnAllComplete(a:state.results)
+  elseif has_key(a:state, 'OnComplete')
+    call a:state.OnComplete(a:state)
+  endif
 endfunction
 
 function! s:LocationsFromResponse(quickfixes) abort
@@ -319,9 +378,14 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
   endif
   let req = remove(s:requests, res.Request_seq)
   if has_key(req, 'ResponseHandler')
-    call req.ResponseHandler(res)
+    if has_key(req, 'Request')
+      call req.ResponseHandler(res, req.Request)
+    else
+      call req.ResponseHandler(res)
+    endif
   endif
 endfunction
+
 
 function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
   let opts = {
@@ -337,6 +401,7 @@ function! s:CodeCheckRH(Callback, response) abort
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
 
+
 function! OmniSharp#stdio#GlobalCodeCheck(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:GlobalCodeCheckRH', [a:Callback])
@@ -348,6 +413,7 @@ function! s:GlobalCodeCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
+
 
 function! OmniSharp#stdio#CodeFormat(opts) abort
   let opts = {
@@ -370,6 +436,32 @@ function! s:CodeFormatRH(opts, response) abort
   if has_key(a:opts, 'Callback')
     call a:opts.Callback()
   endif
+endfunction
+
+
+function! OmniSharp#stdio#CodeStructure(bufnr, Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:CodeStructureRH', [a:bufnr, a:Callback]),
+  \ 'BufNum': a:bufnr,
+  \ 'SendBuffer': 0
+  \}
+  call s:Request('/v2/codestructure', opts)
+endfunction
+
+function! s:CodeStructureRH(bufnr, Callback, response) abort
+  if !a:response.Success | return | endif
+  call a:Callback(a:bufnr, a:response.Body.Elements)
+endfunction
+
+
+function! OmniSharp#stdio#FixUsings(Callback) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:FixUsingsRH', [a:Callback]),
+  \ 'Parameters': {
+  \   'WantsTextChanges': 1
+  \ }
+  \}
+  call s:Request('/fixusings', opts)
 endfunction
 
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
@@ -416,6 +508,7 @@ function! s:FindHighlightTypesRH(Callback, bufferLines, response) abort
   call a:Callback(hltypes)
 endfunction
 
+
 function! OmniSharp#stdio#FindImplementations(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindImplementationsRH', [a:Callback])
@@ -429,6 +522,7 @@ function! s:FindImplementationsRH(Callback, response) abort
   call a:Callback(type(responses) == type([]) ? s:LocationsFromResponse(responses) : [])
 endfunction
 
+
 function! OmniSharp#stdio#FindMembers(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindMembersRH', [a:Callback])
@@ -440,6 +534,7 @@ function! s:FindMembersRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body))
 endfunction
+
 
 function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
   let opts = {
@@ -453,6 +548,7 @@ function! s:FindSymbolRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
 endfunction
+
 
 function! OmniSharp#stdio#FindTextProperties(bufnum) abort
   let buftick = getbufvar(a:bufnum, 'changedtick')
@@ -543,6 +639,7 @@ function OmniSharp#stdio#HighlightEchoKind() abort
   endif
 endfunction
 
+
 function! OmniSharp#stdio#FindUsages(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindUsagesRH', [a:Callback])
@@ -555,6 +652,7 @@ function! s:FindUsagesRH(Callback, response) abort
   let usages = a:response.Body.QuickFixes
   call a:Callback(type(usages) == type([]) ? s:LocationsFromResponse(a:response.Body.QuickFixes) : [])
 endfunction
+
 
 function! OmniSharp#stdio#FixUsings(Callback) abort
   let opts = {
@@ -580,6 +678,7 @@ function! s:FixUsingsRH(Callback, response) abort
   endif
   call a:Callback(locations)
 endfunction
+
 
 function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
   let opts = {
@@ -620,6 +719,7 @@ function! s:GetCodeActionsRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(a:response.Body.CodeActions)
 endfunction
+
 
 function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
   let want_doc = g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
@@ -668,6 +768,7 @@ function! s:GetCompletionsRH(Callback, response) abort
   call a:Callback(completions)
 endfunction
 
+
 function! OmniSharp#stdio#GotoDefinition(Callback) abort
   let parameters = {
   \ 'WantMetadata': v:true,
@@ -688,6 +789,7 @@ function! s:GotoDefinitionRH(Callback, response) abort
   endif
 endfunction
 
+
 function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
   let opts = {
   \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
@@ -700,6 +802,7 @@ function! s:GotoMetadataRH(Callback, metadata, response) abort
   if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
   return a:Callback(a:response.Body, a:metadata)
 endfunction
+
 
 function! OmniSharp#stdio#NavigateDown() abort
   let opts = {
@@ -721,6 +824,7 @@ function! s:NavigateRH(response) abort
   call cursor(a:response.Body.Line, a:response.Body.Column)
 endfunction
 
+
 function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
   \ 'ResponseHandler': function('s:PerformChangesRH', [a:opts]),
@@ -731,6 +835,7 @@ function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   \}
   call s:Request('/rename', opts)
 endfunction
+
 
 function! OmniSharp#stdio#RunCodeAction(action, ...) abort
   let opts = {
@@ -783,6 +888,7 @@ function! s:PerformChangesRH(opts, response) abort
   endif
 endfunction
 
+
 function! OmniSharp#stdio#SignatureHelp(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:SignatureHelpRH', [a:Callback])
@@ -794,6 +900,231 @@ function! s:SignatureHelpRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(a:response.Body)
 endfunction
+
+
+function! OmniSharp#stdio#Project(bufnr, Callback) abort
+  if has_key(OmniSharp#GetHost(a:bufnr), 'project')
+    call a:Callback()
+    return
+  endif
+  let opts = {
+  \ 'ResponseHandler': function('s:ProjectRH', [a:Callback, a:bufnr]),
+  \ 'BufNum': a:bufnr,
+  \ 'SendBuffer': 0
+  \}
+  call s:Request('/project', opts)
+endfunction
+
+function! s:ProjectRH(Callback, bufnr, response) abort
+  if !a:response.Success | return | endif
+  let host = OmniSharp#GetHost(a:bufnr)
+  let host.project = a:response.Body
+  call a:Callback()
+endfunction
+
+
+let s:runningTest = 0
+
+function! OmniSharp#stdio#RunTestsInFile(files, Callback) abort
+  if s:runningTest
+    echohl WarningMsg | echomsg 'A test is already running' | echohl None
+    return
+  endif
+  let buffers = []
+  for l:file in a:files
+    let l:file = OmniSharp#util#TranslatePathForServer(l:file)
+    let nr = bufnr(l:file)
+    if nr == -1
+      if filereadable(l:file)
+        let nr = bufadd(l:file)
+      else
+        echohl WarningMsg | echomsg 'File not found: ' . l:file | echohl None
+        continue
+      endif
+    endif
+    call add(buffers, nr)
+  endfor
+  if len(buffers) == 0
+    return
+  endif
+  let s:runningTest = 1
+  call s:AwaitParallel(
+  \ map(copy(buffers), {i,b -> function('OmniSharp#stdio#Project', [b])}),
+  \ function('s:FindTestsInFiles', [a:Callback, buffers]))
+endfunction
+
+function! s:FindTestsInFiles(Callback, buffers, ...) abort
+  call s:AwaitParallel(
+  \ map(copy(a:buffers), {i,b -> function('OmniSharp#stdio#CodeStructure', [b])}),
+  \ function('s:RunTestsInFiles', [a:Callback]))
+endfunction
+
+function! s:RunTestsInFiles(Callback, bufferCodeStructures) abort
+  let Requests = []
+  for bcs in a:bufferCodeStructures
+    let bufnr = bcs[0]
+    let codeElements = bcs[1]
+    let tests = s:FindTests(codeElements)
+    if len(tests)
+      call add(Requests, function('s:RunTestsInFile', [bufnr, tests]))
+    endif
+  endfor
+  if len(Requests) == 0
+    echohl WarningMsg | echom 'No tests found' | echohl None
+    let s:runningTest = 0
+    return
+  endif
+  if g:OmniSharp_runtests_parallel
+    if g:OmniSharp_runtests_echo_output
+      echomsg '---- Running tests ----'
+    endif
+    call s:AwaitParallel(Requests, a:Callback)
+  else
+    call s:AwaitSequence(Requests, a:Callback)
+  endif
+endfunction
+
+function! s:RunTestsInFile(bufnr, tests, Callback) abort
+  if !g:OmniSharp_runtests_parallel && g:OmniSharp_runtests_echo_output
+    echomsg '---- Running tests: ' . bufname(a:bufnr) . ' ----'
+  endif
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let targetFramework = project.MsBuildProject.TargetFramework
+  let opts = {
+  \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, a:bufnr, a:tests]),
+  \ 'BufNum': a:bufnr,
+  \ 'Parameters': {
+  \   'MethodNames': map(copy(a:tests), {i,t -> t.name}),
+  \   'TestFrameworkName': a:tests[0].framework,
+  \   'TargetFrameworkVersion': targetFramework
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  call s:Request('/v2/runtestsinclass', opts)
+endfunction
+
+function! OmniSharp#stdio#RunTest(bufnr, Callback) abort
+  if s:runningTest
+    echohl WarningMsg | echomsg 'A test is already running' | echohl None
+    return
+  endif
+  if !has_key(OmniSharp#GetHost(a:bufnr), 'project')
+    " Initialize the test by fetching the project for the buffer - then call
+    " this function again in the callback
+    call OmniSharp#stdio#Project(a:bufnr,
+    \ function('OmniSharp#stdio#RunTest', [a:bufnr, a:Callback]))
+    return
+  endif
+  let s:runningTest = 1
+  call OmniSharp#stdio#CodeStructure(a:bufnr,
+  \ function('s:RunTest', [a:Callback]))
+endfunction
+
+function! s:RunTest(Callback, bufnr, codeElements) abort
+  let tests = s:FindTests(a:codeElements)
+  let currentTest = s:FindTest(tests)
+  if type(currentTest) != type({})
+    echohl WarningMsg | echom 'No test found' | echohl None
+    let s:runningTest = 0
+    return
+  endif
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let targetFramework = project.MsBuildProject.TargetFramework
+  let opts = {
+  \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, a:bufnr, tests]),
+  \ 'Parameters': {
+  \   'MethodName': currentTest.name,
+  \   'TestFrameworkName': currentTest.framework,
+  \   'TargetFrameworkVersion': targetFramework
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  echomsg 'Running test ' . currentTest.name
+  call s:Request('/v2/runtest', opts)
+endfunction
+
+function! s:RunTestsRH(Callback, bufnr, tests, response) abort
+  let s:runningTest = 0
+  if !a:response.Success | return | endif
+  if type(a:response.Body.Results) != type([])
+    echohl WarningMsg
+    echom 'Error: "'  . a:response.Body.Failure .
+    \ '"   - this may indicate a failed build'
+    echohl None
+    return
+  endif
+  let summary = {
+  \ 'pass': a:response.Body.Pass,
+  \ 'locations': []
+  \}
+  for result in a:response.Body.Results
+    " Strip namespace and classname from test method name
+    let location = {
+    \ 'filename': bufname(a:bufnr),
+    \ 'name': substitute(result.MethodName, '^.*\.', '', '')
+    \}
+    if result.Outcome =~? 'failed'
+      let location.type = 'E'
+      let location.text = location.name . ': ' . result.ErrorMessage
+      let parsed = matchlist(result.ErrorStackTrace, ' in \(.\+\):line \(\d\+\)')
+      if len(parsed) == 0
+        echohl WarningMsg
+        echom 'Could not create quickfix from test failure'
+        echohl None
+        echom location.text
+        echom result.ErrorStackTrace
+        continue
+      endif
+      let location.lnum = parsed[2]
+    else
+      let location.text = location.name . ': ' . result.Outcome
+      let test = s:FindTest(a:tests, result.MethodName)
+      if type(test) == type({})
+        let location.lnum = test.nameRange.Start.Line
+        let location.col = test.nameRange.Start.Column
+        let location.vcol = 0
+      endif
+    endif
+    call add(summary.locations, location)
+  endfor
+  call a:Callback(summary)
+endfunction
+
+function! s:FindTest(tests, ...) abort
+  for test in a:tests
+    if a:0
+      if test.name ==# a:1
+        return test
+      endif
+    else
+      if line('.') >= test.range.Start.Line && line('.') <= test.range.End.Line
+        return test
+      endif
+    endif
+  endfor
+  return 0
+endfunction
+
+function! s:FindTests(codeElements) abort
+  if type(a:codeElements) != type([]) | return [] | endif
+  let tests = []
+  for element in a:codeElements
+    if has_key(element, 'Properties')
+    \ && type(element.Properties) == type({})
+    \ && has_key(element.Properties, 'testMethodName')
+    \ && has_key(element.Properties, 'testFramework')
+      call add(tests, {
+      \ 'name': element.Properties.testMethodName,
+      \ 'framework': element.Properties.testFramework,
+      \ 'range': element.Ranges.full,
+      \ 'nameRange': element.Ranges.name,
+      \})
+    endif
+    call extend(tests, s:FindTests(get(element, 'Children', [])))
+  endfor
+  return tests
+endfunction
+
 
 function! OmniSharp#stdio#TypeLookup(includeDocumentation, Callback) abort
   let includeDocumentation = a:includeDocumentation ? 'true' : 'false'
@@ -815,6 +1146,7 @@ function! s:TypeLookupRH(Callback, response) abort
   \ 'doc': body.Documentation != v:null ? body.Documentation : ''
   \})
 endfunction
+
 
 function! OmniSharp#stdio#UpdateBuffer(opts) abort
   let opts = {

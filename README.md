@@ -11,6 +11,23 @@ OmniSharp works on Windows, and on Linux and OS X with Mono.
 
 The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code, Emacs, Atom and others.
 
+## New! Run unit tests
+
+Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
+
+```vim
+" Run the current unit test (the cursor should be inside the test method)
+:OmniSharpRunTest
+
+" Run all unit tests in the current file
+:OmniSharpRunTestsInFile
+
+" Run all unit tests in the current file, and file `tests/test1.cs`
+:OmniSharpRunTestsInFile % tests/test1.cs
+```
+
+Note that this unfortunately does _not_ work in translated WSL, due to the way OmniSharp-roslyn runs the tests.
+
 ## New! Asynchronous server interactions
 
 For vim8 and neovim, OmniSharp-vim can now use the OmniSharp-roslyn stdio server instead of the HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
@@ -50,6 +67,7 @@ Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall
   * Displays documentation for an entity when using preview window
 * Code error checking
 * Code formatter
+* Run unit tests and navigate to failing assertions
 
 ## Screenshots
 #### Auto Complete
@@ -232,11 +250,13 @@ See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom 
 ## Semantic Highlighting
 OmniSharp-roslyn can provide highlighting information about every symbol of the document.
 
-To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` files automatically highlighted when entering a buffer or leaving insert mode, add this to your .vimrc:
+To highlight a document, use command `:OmniSharpHighlightTypes`. To have `.cs` files automatically highlighted after all text changes, add this to your .vimrc:
 
 ```vim
-let g:OmniSharp_highlight_types = 2
+let g:OmniSharp_highlight_types = 3
 ```
+
+This is a lot of highlighting - especially when running synchronously (not using stdio). To only update highlighting when entering a buffer or leaving insert mode, use `g:OmniSharp_highlight_types = 2` instead.
 
 ### Vim 8.1 text properties
 In (very) recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's semantic highlighting.
@@ -365,8 +385,10 @@ set previewheight=5
 " Tell ALE to use OmniSharp for linting C# files, and no other linters.
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
+" Update semantic highlighting after all text changes
+let g:OmniSharp_highlight_types = 3
 " Update semantic highlighting on BufEnter and InsertLeave
-let g:OmniSharp_highlight_types = 2
+" let g:OmniSharp_highlight_types = 2
 
 augroup omnisharp_commands
     autocmd!
