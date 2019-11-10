@@ -609,7 +609,7 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
     if get(g:, 'OmniSharp_highlight_debug', 0)
       let hlKind = 'cs' . substitute(hl.Kind, ' ', '_', 'g')
       if !len(prop_type_get(hlKind))
-        call prop_type_add(hlKind, {'highlight': 'Normal'})
+        call prop_type_add(hlKind, {'combine': 1})
       endif
       try
         call prop_add(hl.StartLine, hl.StartColumn, {
