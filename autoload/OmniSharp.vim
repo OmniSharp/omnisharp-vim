@@ -324,7 +324,7 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   let host = OmniSharp#GetHost()
   let metadata_filename = fnamemodify(
   \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
-  let temp_file = g:OmniSharp_temp_dir.'/'.metadata_filename
+  let temp_file = g:OmniSharp_temp_dir . '/' . metadata_filename
   call writefile(
   \ map(split(a:response.Source, "\n", 1), {i,v -> substitute(v, '\r', '', 'g')}),
   \ temp_file,
@@ -332,16 +332,19 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   \)
   let jumped_from_preview = &previewwindow
   if a:open_in_preview
-    execute 'silent pedit'.temp_file
+    execute 'silent pedit' temp_file
     if !&previewwindow | silent wincmd p | endif
   endif
+  " Call JumpToLocation with noautocmds=1, then ...
   call OmniSharp#JumpToLocation({
   \  'filename': temp_file,
   \  'lnum': a:metadata.Line,
   \  'col': a:metadata.Column
-  \}, 0)
+  \}, 1)
   let b:OmniSharp_host = host
   let b:OmniSharp_metadata_filename = a:response.SourceName
+  " ... edit the file _after_ setting the metadata variables
+  edit %
   setlocal nomodifiable readonly
   if a:open_in_preview && !jumped_from_preview
     silent wincmd p
