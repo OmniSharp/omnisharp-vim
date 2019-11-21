@@ -645,9 +645,13 @@ endfunction
 
 function! s:CBRunTest(summary) abort
   if a:summary.pass
-    echohl Title
-    echom a:summary.locations[0].name . ': passed'
-    echohl None
+    if len(a:summary.locations) == 0
+      echom 'No tests were run'
+    else
+      echohl Title
+      echom a:summary.locations[0].name . ': passed'
+      echohl None
+    endif
   else
     echom a:summary.locations[0].name . ': failed'
     let title = 'Test failure: ' . a:summary.locations[0].name
