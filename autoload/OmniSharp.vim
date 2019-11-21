@@ -38,6 +38,7 @@ function! OmniSharp#GetPort(...) abort
   return port
 endfunction
 
+
 function! OmniSharp#GetHost(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
 
@@ -65,6 +66,7 @@ function! OmniSharp#GetHost(...) abort
   endif
   return getbufvar(bufnr, 'OmniSharp_host')
 endfunction
+
 
 function! OmniSharp#GetCompletions(partial, ...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
@@ -122,6 +124,7 @@ function! OmniSharp#Complete(findstart, base) abort
   endif
 endfunction
 
+
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of usages
 function! OmniSharp#FindUsages(...) abort
@@ -149,6 +152,7 @@ function! s:CBFindUsages(target, opts, locations) abort
   endif
   return numUsages
 endfunction
+
 
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of implementations
@@ -182,6 +186,7 @@ function! s:CBFindImplementations(target, opts, locations) abort
   return numImplementations
 endfunction
 
+
 function! OmniSharp#FindMembers(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
@@ -203,6 +208,7 @@ function! s:CBFindMembers(opts, locations) abort
   endif
 endfunction
 
+
 function! OmniSharp#NavigateDown() abort
   if g:OmniSharp_server_stdio
     call OmniSharp#stdio#NavigateDown()
@@ -220,6 +226,7 @@ function! OmniSharp#NavigateUp() abort
     call OmniSharp#CheckPyError()
   endif
 endfunction
+
 
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with a boolean 'found' result
@@ -256,6 +263,7 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
   endif
   return found
 endfunction
+
 
 function! OmniSharp#PreviewDefinition(...) abort
   let opts = a:0 ? {'Callback': a:1} : {}
@@ -312,6 +320,7 @@ function! s:CBPreviewImplementation(locs, ...) abort
       endif
     endif
 endfunction
+
 
 function! OmniSharp#GotoMetadata(open_in_preview, metadata, opts) abort
   if g:OmniSharp_server_stdio
@@ -404,6 +413,7 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
   endif
 endfunction
 
+
 function! OmniSharp#FindSymbol(...) abort
   let filter = a:0 ? a:1 : ''
   if !OmniSharp#IsServerRunning() | return | endif
@@ -434,6 +444,7 @@ function! s:CBFindSymbol(filter, locations) abort
     call s:SetQuickFix(a:locations, title)
   endif
 endfunction
+
 
 " This function returns a count of the currently available code actions. It also
 " uses the code actions to pre-populate the code actions for
@@ -551,6 +562,7 @@ function! s:CBGetCodeActions(mode, actions) abort
   endif
 endfunction
 
+
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the results
 function! OmniSharp#CodeCheck(...) abort
@@ -595,6 +607,7 @@ function! s:CBGlobalCodeCheck(quickfixes) abort
     echo 'No Code Check messages'
   endif
 endfunction
+
 
 function! OmniSharp#RunTestsInFile(...) abort
   if !s:GuardStdio() | return | endif
@@ -669,6 +682,7 @@ function! s:CBRunTest(summary) abort
   endif
 endfunction
 
+
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
   call OmniSharp#TypeLookup(0, a:0 ? a:1 : 0)
 endfunction
@@ -694,21 +708,48 @@ function! OmniSharp#TypeLookup(includeDocumentation, ...) abort
 endfunction
 
 function! s:CBTypeLookup(opts, response) abort
+  let l:type = a:response.Type != v:null ? a:response.Type : ''
   if a:opts.Doc
-    let content = a:response.type
-    if len(a:response.doc) > 0
-      let content .= "\n\n" . a:response.doc
+    let content = l:type
+
+    if has_key(a:response, 'StructuredDocumentation')
+    \ && type(a:response.StructuredDocumentation) == type({})
+      let doc = a:response.StructuredDocumentation
+      for text in ['Summary', 'Returns', 'Remarks', 'Example', 'Value']
+        if get(doc, text . 'Text', '') !=# ''
+          if text ==# 'Summary'
+            let content .= "\n\n" . doc[text . 'Text']
+          else
+            let content .= "\n\n## " . text . "\n" . doc[text . 'Text']
+          endif
+        endif
+      endfor
+      if len(doc.ParamElements)
+        let content .= "\n\n## Parameters"
+      endif
+      for param in doc.ParamElements
+        let content .= "\n`" . param.Name . "`\n" . param.Documentation
+      endfor
+      if len(doc.Exception)
+        let content .= "\n\n## Exceptions"
+      endif
+      for exc in doc.Exception
+        let content .= "\n`" . exc.Name . "`\n" . exc.Documentation
+      endfor
+    elseif a:response.Documentation != v:null
+      let content .= "\n\n" . a:response.Documentation
     endif
+
     if s:PreferPopups()
-      call OmniSharp#popup#Display(content)
+      let winid = OmniSharp#popup#Documentation(content)
     else
-      call s:WriteToPreview(content)
+      let winid = s:PreviewDocumentation(content, 'Documentation')
     endif
   else
-    echo a:response.type[0 : &columns * &cmdheight - 2]
+    echo l:type[0 : &columns * &cmdheight - 2]
   endif
   if has_key(a:opts, 'Callback')
-    call a:opts.Callback(a:response.type)
+    call a:opts.Callback(l:type)
   endif
 endfunction
 
@@ -742,11 +783,28 @@ function! s:CBSignatureHelp(response) abort
     endif
   endif
   if s:PreferPopups()
-    call OmniSharp#popup#Display(output)
+    call OmniSharp#popup#Documentation(output)
   else
-    call s:WriteToPreview(output)
+    call s:PreviewDocumentation(output, 'SignatureHelp')
   endif
 endfunction
+
+function! s:PreviewDocumentation(content, title)
+  execute 'silent pedit' a:title
+  silent wincmd P
+  setlocal modifiable noreadonly
+  setlocal nobuflisted buftype=nofile bufhidden=wipe
+  0,$d
+  silent put =a:content
+  0d_
+  setfiletype omnisharpdoc
+  setlocal conceallevel=3
+  setlocal nomodifiable readonly
+  let winid = winnr()
+  silent wincmd p
+  return winid
+endfunction
+
 
 function! OmniSharp#Rename() abort
   let renameto = inputdialog('Rename to: ', expand('<cword>'))
@@ -798,6 +856,7 @@ function! OmniSharp#RenameTo(renameto, ...) abort
     endif
   endif
 endfunction
+
 
 function! OmniSharp#HighlightBuffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
@@ -886,6 +945,7 @@ function OmniSharp#HighlightEchoKind() abort
   endif
 endfunction
 
+
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously)
 function! OmniSharp#UpdateBuffer(...) abort
@@ -913,6 +973,7 @@ function! OmniSharp#BufferHasChanged() abort
   return 0
 endfunction
 
+
 " Optionally accepts a callback function. This can be used to write after
 " formatting, for example.
 function! OmniSharp#CodeFormat(...) abort
@@ -931,6 +992,7 @@ function! OmniSharp#CodeFormat(...) abort
     endif
   endif
 endfunction
+
 
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of ambiguous usings
@@ -955,6 +1017,7 @@ function! s:CBFixUsings(opts, locations) abort
   endif
   return numAmbiguous
 endfunction
+
 
 function! OmniSharp#IsAnyServerRunning() abort
   return !empty(OmniSharp#proc#ListRunningJobs())
@@ -1139,6 +1202,7 @@ function! OmniSharp#RestartAllServers() abort
   endfor
 endfunction
 
+
 function! OmniSharp#AppendCtrlPExtensions() abort
   " Don't override settings made elsewhere
   if !exists('g:ctrlp_extensions')
@@ -1149,6 +1213,7 @@ function! OmniSharp#AppendCtrlPExtensions() abort
     let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
   endif
 endfunction
+
 
 function! OmniSharp#ExpandAutoCompleteSnippet()
   if !g:OmniSharp_want_snippet
@@ -1185,6 +1250,7 @@ function! OmniSharp#ExpandAutoCompleteSnippet()
   endif
 endfunction
 
+
 function! OmniSharp#OpenLog() abort
   if g:OmniSharp_server_stdio
     let logfile = OmniSharp#stdio#GetLogFile()
@@ -1201,6 +1267,7 @@ function! OmniSharp#OpenPythonLog() abort
   exec 'edit ' . logfile
 endfunction
 
+
 function! OmniSharp#CheckPyError(...)
   let should_print = a:0 ? a:1 : 1
   if !empty(g:OmniSharp_py_err)
@@ -1216,6 +1283,7 @@ function! OmniSharp#CheckPyError(...)
   endif
   return 0
 endfunction
+
 
 function! s:FindSolution(interactive, bufnr) abort
   let solution_files = s:FindSolutionsFiles(a:bufnr)
@@ -1293,6 +1361,7 @@ function! s:DirectoryContainsFile(directory, file) abort
   return (idx == 0)
 endfunction
 
+
 let s:plugin_root_dir = expand('<sfile>:p:h:h')
 
 function! OmniSharp#Install(...) abort
@@ -1349,6 +1418,7 @@ function! OmniSharp#Install(...) abort
     echomsg 'OmniSharp installed to: ' . l:location
   endif
 endfunction
+
 
 function! s:FindSolutionsFiles(bufnr) abort
   "get the path for the current buffer
@@ -1422,20 +1492,6 @@ function! s:SetQuickFix(list, title)
   if g:OmniSharp_open_quickfix
     botright cwindow
   endif
-endfunction
-
-" Manually write content to the preview window.
-" Opens a preview window to a scratch buffer named '__OmniSharpScratch__'
-function! s:WriteToPreview(content)
-  silent pedit __OmniSharpScratch__
-  silent wincmd P
-  setlocal modifiable noreadonly
-  setlocal nobuflisted buftype=nofile bufhidden=wipe
-  0,$d
-  silent put =a:content
-  0d_
-  setlocal nomodifiable readonly
-  silent wincmd p
 endfunction
 
 if has('patch-7.4.279')

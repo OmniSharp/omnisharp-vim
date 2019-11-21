@@ -178,8 +178,8 @@ def typeLookup(include_documentation):
     }
     response = getResponse(ctx, '/typelookup', parameters, json=True)
     return {
-        'type': response.get('Type', '') or '',
-        'doc': response.get('Documentation', '') or '',
+        'Type': response.get('Type', '') or '',
+        'Documentation': response.get('Documentation', '') or ''
     }
 
 
@@ -194,7 +194,7 @@ def renameTo(name):
     for change in changes:
         ret.append({
             'FileName': formatPathForClient(ctx, change['FileName']),
-            'Buffer': change['Buffer'],
+            'Buffer': change['Buffer']
         })
     return ret
 

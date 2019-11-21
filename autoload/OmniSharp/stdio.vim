@@ -80,9 +80,9 @@ function! s:HandleServerEvent(job, res) abort
             if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
               continue
             endif
-            let bufnum = bufinfo[0].bufnr
-            call ale#other_source#StartChecking(bufnum, 'OmniSharp')
-            let opts = { 'BufNum': bufnum }
+            let bufnr = bufinfo[0].bufnr
+            call ale#other_source#StartChecking(bufnr, 'OmniSharp')
+            let opts = { 'BufNum': bufnr }
             let quickfixes = s:LocationsFromResponse(result.QuickFixes)
             call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
           endfor
@@ -131,18 +131,18 @@ endfunction
 
 function! s:Request(command, opts) abort
   if has_key(a:opts, 'UsePreviousPosition')
-    let [bufnum, lnum, cnum] = s:lastPosition
+    let [bufnr, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
-    let bufnum = a:opts.BufNum
+    let bufnr = a:opts.BufNum
     let lnum = 1
     let cnum = 1
   else
-    let bufnum = bufnr('%')
+    let bufnr = bufnr('%')
     let lnum = line('.')
     let cnum = col('.')
   endif
   if has_key(a:opts, 'SavePosition')
-    let s:lastPosition = [bufnum, lnum, cnum]
+    let s:lastPosition = [bufnr, lnum, cnum]
   endif
   let metadata_filename = get(b:, 'OmniSharp_metadata_filename', v:null)
   let is_metadata = type(metadata_filename) == type('')
@@ -151,10 +151,10 @@ function! s:Request(command, opts) abort
     let send_buffer = 0
   else
     let filename = OmniSharp#util#TranslatePathForServer(
-    \ fnamemodify(bufname(bufnum), ':p'))
+    \ fnamemodify(bufname(bufnr), ':p'))
     let send_buffer = get(a:opts, 'SendBuffer', 1)
   endif
-  let lines = getbufline(bufnum, 1, '$')
+  let lines = getbufline(bufnr, 1, '$')
   let tmp = join(lines, '')
   " Unique string separator which must not exist in the buffer
   let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
@@ -564,21 +564,21 @@ function! s:FindSymbolRH(Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#FindTextProperties(bufnum) abort
-  let buftick = getbufvar(a:bufnum, 'changedtick')
+function! OmniSharp#stdio#FindTextProperties(bufnr) abort
+  let buftick = getbufvar(a:bufnr, 'changedtick')
   let opts = {
-  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnum, buftick]),
+  \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnr, buftick]),
   \ 'ReplayOnLoad': 1
   \}
   call s:Request('/highlight', opts)
 endfunction
 
-function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
+function! s:FindTextPropertiesRH(bufnr, buftick, response) abort
   if !a:response.Success | return | endif
-  if getbufvar(a:bufnum, 'changedtick') != a:buftick
+  if getbufvar(a:bufnr, 'changedtick') != a:buftick
     " The buffer has changed while fetching highlights - fetch fresh highlights
     " from the server
-    call OmniSharp#stdio#FindTextProperties(a:bufnum)
+    call OmniSharp#stdio#FindTextProperties(a:bufnr)
     return
   endif
   let highlights = get(a:response.Body, 'Highlights', [])
@@ -604,18 +604,18 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
   let curline = 1
   for hl in highlights
     if curline <= hl.EndLine
-      call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnum})
+      call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnr})
       let curline = hl.EndLine + 1
     endif
     if has_key(s:kindGroups, hl.Kind)
       try
-        let start_col = s:TranslateVirtColToCol(a:bufnum, hl.StartLine, hl.StartColumn)
-        let end_col = s:TranslateVirtColToCol(a:bufnum, hl.EndLine, hl.EndColumn)
+        let start_col = s:TranslateVirtColToCol(a:bufnr, hl.StartLine, hl.StartColumn)
+        let end_col = s:TranslateVirtColToCol(a:bufnr, hl.EndLine, hl.EndColumn)
         call prop_add(hl.StartLine, start_col, {
         \ 'end_lnum': hl.EndLine,
         \ 'end_col': end_col,
         \ 'type': s:kindGroups[hl.Kind],
-        \ 'bufnr': a:bufnum
+        \ 'bufnr': a:bufnr
         \})
       catch /^Vim\%((\a\+)\)\=:\%(E275\|E964\):/
         " This response is for a hidden buffer, and 'nohidden' is in use.
@@ -632,7 +632,7 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
         \ 'end_lnum': hl.EndLine,
         \ 'end_col': hl.EndColumn,
         \ 'type': hlKind,
-        \ 'bufnr': a:bufnum
+        \ 'bufnr': a:bufnr
         \})
       catch | endtry
     endif
@@ -642,8 +642,8 @@ endfunction
 " the vim prop_add api expects the column to be the byte offset and not
 " the character. so for multibyte characters this function returns the
 " byte offset for a given character
-function s:TranslateVirtColToCol(bufnum, lnum, vcol)
-  let buf_line = getbufline(a:bufnum, a:lnum)[0] . "\n"
+function s:TranslateVirtColToCol(bufnr, lnum, vcol)
+  let buf_line = getbufline(a:bufnr, a:lnum)[0] . "\n"
   let col = byteidx(buf_line, a:vcol)
   " fallack if for some reason the translation did not work
   if col < 0
@@ -890,18 +890,18 @@ function! s:PerformChangesRH(opts, response) abort
   else
     let winview = winsaveview()
     let bufname = bufname('%')
-    let bufnum = bufnr('%')
+    let bufnr = bufnr('%')
     let hidden_bak = &hidden | set hidden
     for change in changes
       call OmniSharp#JumpToLocation({
       \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
       \}, 1)
       call s:MakeChanges(change)
-      if bufnr('%') != bufnum
+      if bufnr('%') != bufnr
         silent write | silent edit
       endif
     endfor
-    if bufnr('%') != bufnum
+    if bufnr('%') != bufnr
       call OmniSharp#JumpToLocation({
       \ 'filename': bufname
       \}, 1)
@@ -1167,14 +1167,10 @@ endfunction
 
 function! s:TypeLookupRH(Callback, response) abort
   if !a:response.Success
-    call a:Callback({ 'type': '', 'doc': '' })
+    call a:Callback({ 'Type': '', 'Documentation': '' })
     return
   endif
-  let body = a:response.Body
-  call a:Callback({
-  \ 'type': body.Type != v:null ? body.Type : '',
-  \ 'doc': body.Documentation != v:null ? body.Documentation : ''
-  \})
+  call a:Callback(a:response.Body)
 endfunction
 
 
