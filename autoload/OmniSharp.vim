@@ -710,36 +710,7 @@ endfunction
 function! s:CBTypeLookup(opts, response) abort
   let l:type = a:response.Type != v:null ? a:response.Type : ''
   if a:opts.Doc
-    let content = l:type
-
-    if has_key(a:response, 'StructuredDocumentation')
-    \ && type(a:response.StructuredDocumentation) == type({})
-      let doc = a:response.StructuredDocumentation
-      for text in ['Summary', 'Returns', 'Remarks', 'Example', 'Value']
-        if get(doc, text . 'Text', '') !=# ''
-          if text ==# 'Summary'
-            let content .= "\n\n" . doc[text . 'Text']
-          else
-            let content .= "\n\n## " . text . "\n" . doc[text . 'Text']
-          endif
-        endif
-      endfor
-      if len(doc.ParamElements)
-        let content .= "\n\n## Parameters"
-      endif
-      for param in doc.ParamElements
-        let content .= "\n`" . param.Name . "`\n" . param.Documentation
-      endfor
-      if len(doc.Exception)
-        let content .= "\n\n## Exceptions"
-      endif
-      for exc in doc.Exception
-        let content .= "\n`" . exc.Name . "`\n" . exc.Documentation
-      endfor
-    elseif a:response.Documentation != v:null
-      let content .= "\n\n" . a:response.Documentation
-    endif
-
+    let content = trim(l:type . s:FormatDocumentation(a:response, 1))
     if s:PreferPopups()
       let winid = OmniSharp#popup#Documentation(content)
     else
@@ -764,29 +735,89 @@ function! OmniSharp#SignatureHelp() abort
 endfunction
 
 function! s:CBSignatureHelp(response) abort
+  let emphasis = {}
   if type(a:response) != type({})
     echo 'No signature help found'
     " Clear existing preview content
-    let output = ''
+    let content = ''
   else
     if a:response.ActiveSignature == -1
       " No signature matches - display all options
-      let output = join(map(a:response.Signatures, 'v:val.Label'), "\n")
+      let content = join(map(a:response.Signatures, 'v:val.Label'), "\n")
     else
-      let signature = a:response.Signatures[a:response.ActiveSignature]
-      if len(signature.Parameters) == 0
-        let output = signature.Label
-      else
-        let parameter = signature.Parameters[a:response.ActiveParameter]
-        let output = join([parameter.Label, parameter.Documentation], "\n")
+      let sig = a:response.Signatures[a:response.ActiveSignature]
+      let content = sig.Label
+      if len(a:response.Signatures) > 1
+        let content .= printf("\n (overload %d of %d)",
+        \ a:response.ActiveSignature + 1,
+        \ len(a:response.Signatures))
       endif
+
+      if len(sig.Parameters) && a:response.ActiveParameter < len(sig.Parameters)
+        let parameter = sig.Parameters[a:response.ActiveParameter]
+        let content .= printf("\n\n`%s`: %s",
+        \ parameter.Name, parameter.Documentation)
+        let pos = matchstrpos(sig.Label, parameter.Label)
+        if pos[1] >= 0 && pos[2] > pos[1]
+          let emphasis = { 'start': pos[1] + 1, 'length': len(parameter.Label) }
+        endif
+      endif
+
+      let content .= s:FormatDocumentation(sig, 0)
     endif
   endif
   if s:PreferPopups()
-    call OmniSharp#popup#Documentation(output)
+    let winid = OmniSharp#popup#Documentation(content)
   else
-    call s:PreviewDocumentation(output, 'SignatureHelp')
+    let winid = s:PreviewDocumentation(content, 'SignatureHelp')
   endif
+  if has_key(emphasis, 'start')
+    " TODO: Make highlight customisable
+    highlight OSEmphasisedParam cterm=bold,italic,underline gui=bold,italic,underline
+    call prop_type_add('OSEmphasisedParam', {
+    \ 'bufnr': winbufnr(winid),
+    \ 'highlight': 'OSEmphasisedParam'
+    \})
+    call prop_add(1, emphasis.start, {
+    \ 'length': emphasis.length,
+    \ 'bufnr': winbufnr(winid),
+    \ 'type': 'OSEmphasisedParam'
+    \})
+  endif
+endfunction
+
+function! s:FormatDocumentation(doc, paramsAndExceptions) abort
+  let content = ''
+  if has_key(a:doc, 'StructuredDocumentation')
+  \ && type(a:doc.StructuredDocumentation) == type({})
+    let doc = a:doc.StructuredDocumentation
+    for text in ['Summary', 'Returns', 'Remarks', 'Example', 'Value']
+      if get(doc, text . 'Text', '') !=# ''
+        if text ==# 'Summary'
+          let content .= "\n\n" . doc[text . 'Text']
+        else
+          let content .= "\n\n## " . text . "\n" . doc[text . 'Text']
+        endif
+      endif
+    endfor
+    if a:paramsAndExceptions
+      if len(doc.ParamElements)
+        let content .= "\n\n## Parameters"
+      endif
+      for param in doc.ParamElements
+        let content .= "\n`" . param.Name . "`\n" . param.Documentation
+      endfor
+      if len(doc.Exception)
+        let content .= "\n\n## Exceptions"
+      endif
+      for exc in doc.Exception
+        let content .= "\n`" . exc.Name . "`\n" . exc.Documentation
+      endfor
+    endif
+  elseif doc.Documentation != v:null
+    let content .= "\n\n" . doc.Documentation
+  endif
+  return content
 endfunction
 
 function! s:PreviewDocumentation(content, title)

@@ -10,7 +10,7 @@ syn region osdcs start="^\%1l" keepend end="\%1l$" contains=@cs
 
 syn match osdSection "^##.\+" contains=osdHash
 syn match osdHash contained "#" conceal
-syn match osdParam "^`[^`]\+`$" contains=osdTick
+syn match osdParam "^`[^`]\+`" contains=osdTick
 syn match osdTick contained "`" conceal
 
 hi def link osdSection Statement

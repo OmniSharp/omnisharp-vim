@@ -18,7 +18,8 @@ endfunction
 function! OmniSharp#popup#Documentation(content) abort
   let content = map(split(a:content, "\n", 1),
   \ {i,v -> substitute(v, '\r', '', 'g')})
-  let s:lastwinid = popup_atcursor(content, g:OmniSharp_popup_opts)
+  let popup_opts = copy(g:OmniSharp_popup_opts)
+  let s:lastwinid = popup_atcursor(content, popup_opts)
   call setbufvar(winbufnr(s:lastwinid), '&filetype', 'omnisharpdoc')
   call setwinvar(s:lastwinid, '&conceallevel', 3)
   return s:lastwinid
