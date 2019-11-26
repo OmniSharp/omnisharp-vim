@@ -372,8 +372,8 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
 endfunction
 
 function! s:PreviewLocation(location) abort
-  if s:PreferPopups()
-    call OmniSharp#popup#Buffer(bufadd(a:location.filename), a:location.lnum)
+  if OmniSharp#PreferPopups()
+    call OmniSharp#popup#Buffer(bufadd(a:location.filename), a:location.lnum, {})
   else
     let lazyredraw_bak = &lazyredraw
     let &lazyredraw = 1
@@ -456,7 +456,7 @@ endfunction
 " callback function can be used to clear the flag.
 "
 " If a dict is passed in, the dict may contain one or both of 'CallbackCleanup'
-" and 'CallbackCount' funcrefs. 'CallbackCleanup' is the single callback
+" and 'CallbackCount' Funcrefs. 'CallbackCleanup' is the single callback
 " function mentioned above. 'CallbackCount' is called after a response with the
 " number of actions available.
 "
@@ -684,156 +684,24 @@ endfunction
 
 
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
-  call OmniSharp#TypeLookup(0, a:0 ? a:1 : 0)
+  echohl WarningMsg
+  echom 'This function is obsolete; use OmniSharp#actions#documentation#TypeLookup() instead'
+  echohl None
+  call OmniSharp#actions#documentation#TypeLookup(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation(...) abort
-  call OmniSharp#TypeLookup(1, a:0 ? a:1 : 0)
-endfunction
-
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the type (not the
-" documentation)
-function! OmniSharp#TypeLookup(includeDocumentation, ...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
-  let opts.Doc = g:OmniSharp_typeLookupInPreview || a:includeDocumentation
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#TypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
-  else
-    let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
-    let response = OmniSharp#py#eval(pycmd)
-    if OmniSharp#CheckPyError() | return | endif
-    return s:CBTypeLookup(opts, response)
-  endif
-endfunction
-
-function! s:CBTypeLookup(opts, response) abort
-  let l:type = a:response.Type != v:null ? a:response.Type : ''
-  if a:opts.Doc
-    let content = trim(l:type . s:FormatDocumentation(a:response, 1))
-    if s:PreferPopups()
-      let winid = OmniSharp#popup#Documentation(content)
-    else
-      let winid = s:PreviewDocumentation(content, 'Documentation')
-    endif
-  else
-    echo l:type[0 : &columns * &cmdheight - 2]
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(l:type)
-  endif
+  echohl WarningMsg
+  echom 'This function is obsolete; use OmniSharp#actions#documentation#Documentation() instead'
+  echohl None
+  call OmniSharp#actions#documentation#Documentation(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#SignatureHelp() abort
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#SignatureHelp(function('s:CBSignatureHelp'))
-  else
-    let response = OmniSharp#py#eval('signatureHelp()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBSignatureHelp(response)
-  endif
-endfunction
-
-function! s:CBSignatureHelp(response) abort
-  let emphasis = {}
-  if type(a:response) != type({})
-    echo 'No signature help found'
-    " Clear existing preview content
-    let content = ''
-  else
-    if a:response.ActiveSignature == -1
-      " No signature matches - display all options
-      let content = join(map(a:response.Signatures, 'v:val.Label'), "\n")
-    else
-      let sig = a:response.Signatures[a:response.ActiveSignature]
-      let content = sig.Label
-      if len(a:response.Signatures) > 1
-        let content .= printf("\n (overload %d of %d)",
-        \ a:response.ActiveSignature + 1,
-        \ len(a:response.Signatures))
-      endif
-
-      if len(sig.Parameters) && a:response.ActiveParameter < len(sig.Parameters)
-        let parameter = sig.Parameters[a:response.ActiveParameter]
-        let content .= printf("\n\n`%s`: %s",
-        \ parameter.Name, parameter.Documentation)
-        let pos = matchstrpos(sig.Label, parameter.Label)
-        if pos[1] >= 0 && pos[2] > pos[1]
-          let emphasis = { 'start': pos[1] + 1, 'length': len(parameter.Label) }
-        endif
-      endif
-
-      let content .= s:FormatDocumentation(sig, 0)
-    endif
-  endif
-  if s:PreferPopups()
-    let winid = OmniSharp#popup#Documentation(content)
-  else
-    let winid = s:PreviewDocumentation(content, 'SignatureHelp')
-  endif
-  if has_key(emphasis, 'start')
-    " TODO: Make highlight customisable
-    highlight OSEmphasisedParam cterm=bold,italic,underline gui=bold,italic,underline
-    call prop_type_add('OSEmphasisedParam', {
-    \ 'bufnr': winbufnr(winid),
-    \ 'highlight': 'OSEmphasisedParam'
-    \})
-    call prop_add(1, emphasis.start, {
-    \ 'length': emphasis.length,
-    \ 'bufnr': winbufnr(winid),
-    \ 'type': 'OSEmphasisedParam'
-    \})
-  endif
-endfunction
-
-function! s:FormatDocumentation(doc, paramsAndExceptions) abort
-  let content = ''
-  if has_key(a:doc, 'StructuredDocumentation')
-  \ && type(a:doc.StructuredDocumentation) == type({})
-    let doc = a:doc.StructuredDocumentation
-    for text in ['Summary', 'Returns', 'Remarks', 'Example', 'Value']
-      if get(doc, text . 'Text', '') !=# ''
-        if text ==# 'Summary'
-          let content .= "\n\n" . doc[text . 'Text']
-        else
-          let content .= "\n\n## " . text . "\n" . doc[text . 'Text']
-        endif
-      endif
-    endfor
-    if a:paramsAndExceptions
-      if len(doc.ParamElements)
-        let content .= "\n\n## Parameters"
-      endif
-      for param in doc.ParamElements
-        let content .= "\n`" . param.Name . "`\n" . param.Documentation
-      endfor
-      if len(doc.Exception)
-        let content .= "\n\n## Exceptions"
-      endif
-      for exc in doc.Exception
-        let content .= "\n`" . exc.Name . "`\n" . exc.Documentation
-      endfor
-    endif
-  elseif doc.Documentation != v:null
-    let content .= "\n\n" . doc.Documentation
-  endif
-  return content
-endfunction
-
-function! s:PreviewDocumentation(content, title)
-  execute 'silent pedit' a:title
-  silent wincmd P
-  setlocal modifiable noreadonly
-  setlocal nobuflisted buftype=nofile bufhidden=wipe
-  0,$d
-  silent put =a:content
-  0d_
-  setfiletype omnisharpdoc
-  setlocal conceallevel=3
-  setlocal nomodifiable readonly
-  let winid = winnr()
-  silent wincmd p
-  return winid
+  echohl WarningMsg
+  echom 'This function is obsolete; use OmniSharp#actions#documentation#SignatureHelp() instead'
+  echohl None
+  call OmniSharp#actions#documentation#SignatureHelp()
 endfunction
 
 
@@ -1509,7 +1377,7 @@ function! s:BustAliveCache(...) abort
   endif
 endfunction
 
-function! s:PreferPopups() abort
+function! OmniSharp#PreferPopups() abort
   " TODO: Check version of vim
   return get(g:, 'OmniSharp_prefer_popups', 0)
 endfunction

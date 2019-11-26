@@ -23,7 +23,6 @@ if get(g:, 'OmniSharp_start_server', 0) == 1
 endif
 
 command! -buffer -bar OmniSharpCodeFormat call OmniSharp#CodeFormat()
-command! -buffer -bar OmniSharpDocumentation call OmniSharp#TypeLookupWithDocumentation()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
 command! -buffer -bar OmniSharpFindMembers call OmniSharp#FindMembers()
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
@@ -47,11 +46,13 @@ command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServer
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar OmniSharpRunTest call OmniSharp#RunTest()
 command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#RunTestsInFile(<f-args>)
-command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#SignatureHelp()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
-command! -buffer -bar OmniSharpTypeLookup call OmniSharp#TypeLookupWithoutDocumentation()
+
+command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
+command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#documentation#SignatureHelp()
+command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
 nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
 nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
@@ -81,11 +82,6 @@ nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_all_servers) :OmniSharpStopAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_server) :OmniSharpStopServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_type_lookup) :OmniSharpTypeLookup<CR>
-
-highlight default link csUserIdentifier Identifier
-highlight default link csUserInterface Include
-highlight default link csUserMethod Function
-highlight default link csUserType Type
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
