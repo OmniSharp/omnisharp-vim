@@ -1,23 +1,11 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-
 function! OmniSharp#actions#documentation#TypeLookup(...) abort
-  call s:TypeLookup(0, a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#actions#documentation#Documentation(...) abort
-  call s:TypeLookup(1, a:0 ? a:1 : 0)
-endfunction
-
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the type (not the
-" documentation)
-function! s:TypeLookup(includeDocumentation, ...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
-  let opts.Doc = g:OmniSharp_typeLookupInPreview || a:includeDocumentation
+  let opts = a:0 && a:1 isnot 0 ? { 'CallbackType': a:1 } : {}
+  let opts.Doc = g:OmniSharp_typeLookupInPreview
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#TypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
+    call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
     let response = OmniSharp#py#eval(pycmd)
@@ -26,111 +14,56 @@ function! s:TypeLookup(includeDocumentation, ...) abort
   endif
 endfunction
 
+function! OmniSharp#actions#documentation#Documentation(...) abort
+  let opts = a:0 ? a:1 : {}
+  let opts.Doc = 1
+  if g:OmniSharp_server_stdio
+    call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
+  else
+    let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
+    let response = OmniSharp#py#eval(pycmd)
+    if OmniSharp#CheckPyError() | return | endif
+    return s:CBTypeLookup(opts, response)
+  endif
+endfunction
+
+function! s:StdioTypeLookup(includeDocumentation, Callback) abort
+  let includeDocumentation = a:includeDocumentation ? 'true' : 'false'
+  let opts = {
+  \ 'ResponseHandler': function('s:StdioTypeLookupRH', [a:Callback]),
+  \ 'Parameters': { 'IncludeDocumentation': includeDocumentation}
+  \}
+  call OmniSharp#stdio#Request('/typelookup', opts)
+endfunction
+
+function! s:StdioTypeLookupRH(Callback, response) abort
+  if !a:response.Success
+    call a:Callback({ 'Type': '', 'Documentation': '' })
+    return
+  endif
+  call a:Callback(a:response.Body)
+endfunction
+
 function! s:CBTypeLookup(opts, response) abort
   let l:type = a:response.Type != v:null ? a:response.Type : ''
   if a:opts.Doc
-    let content = trim(l:type . s:FormatDocumentation(a:response, 1))
+    let content = trim(l:type . OmniSharp#actions#documentation#Format(a:response, {}))
     if OmniSharp#PreferPopups()
-      let winid = OmniSharp#popup#Display(content, {})
+      let winid = OmniSharp#popup#Display(content, a:opts)
       call setbufvar(winbufnr(winid), '&filetype', 'omnisharpdoc')
       call setwinvar(winid, '&conceallevel', 3)
     else
-      let winid = s:PreviewDocumentation(content, 'Documentation')
+      let winid = OmniSharp#preview#Display(content, 'Documentation')
     endif
   else
     echo l:type[0 : &columns * &cmdheight - 2]
   endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(l:type)
+  if has_key(a:opts, 'CallbackType')
+    call a:opts.CallbackType(l:type)
   endif
 endfunction
 
-
-function! OmniSharp#actions#documentation#SignatureHelp() abort
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#SignatureHelp(function('s:CBSignatureHelp'))
-  else
-    let response = OmniSharp#py#eval('signatureHelp()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBSignatureHelp(response)
-  endif
-endfunction
-
-function! s:CBSignatureHelp(response) abort
-  if type(a:response) != type({})
-    echo 'No signature help found'
-    if !OmniSharp#PreferPopups()
-      " Clear existing preview content
-      call s:PreviewDocumentation('', 'SignatureHelp')
-    endif
-    return
-  endif
-
-  let s:last = {
-  \ 'Signatures': a:response.Signatures,
-  \ 'SigIndex': a:response.ActiveSignature,
-  \ 'ParamIndex': a:response.ActiveParameter
-  \}
-  call s:DisplaySignature(0, 0)
-endfunction
-
-
-function! s:DisplaySignature(deltaSig, deltaParam) abort
-  let isig = s:last.SigIndex + a:deltaSig
-  let isig =
-  \ isig < 0 ? len(s:last.Signatures) - 1 :
-  \ isig >= len(s:last.Signatures) ? 0 : isig
-  let s:last.SigIndex = isig
-  let signature = s:last.Signatures[isig]
-
-  let content = signature.Label
-  if len(s:last.Signatures) > 1
-    let content .= printf("\n (overload %d of %d)",
-    \ isig + 1, len(s:last.Signatures))
-  endif
-
-  let emphasis = {}
-  if len(signature.Parameters)
-    let iparam = s:last.ParamIndex + a:deltaParam
-    let iparam =
-    \ iparam < 0 ? 0 :
-    \ iparam >= len(signature.Parameters) ? len(signature.Parameters) - 1 : iparam
-    let s:last.ParamIndex = iparam
-    let parameter = signature.Parameters[iparam]
-
-    let content .= printf("\n\n`%s`: %s",
-    \ parameter.Name, parameter.Documentation)
-    let pos = matchstrpos(signature.Label, parameter.Label)
-    if pos[1] >= 0 && pos[2] > pos[1]
-      let emphasis = { 'start': pos[1] + 1, 'length': len(parameter.Label) }
-    endif
-  endif
-
-  let content .= s:FormatDocumentation(signature, 0)
-
-  if OmniSharp#PreferPopups()
-    let winid = OmniSharp#popup#Display(content, {
-    \ 'filter': function('s:PopupFilterSignature')
-    \})
-    call setbufvar(winbufnr(winid), '&filetype', 'omnisharpdoc')
-    call setwinvar(winid, '&conceallevel', 3)
-  else
-    let winid = s:PreviewDocumentation(content, 'SignatureHelp')
-  endif
-  if has_key(emphasis, 'start') && has('textprop')
-    call prop_type_add('OmniSharpActiveParameter', {
-    \ 'bufnr': winbufnr(winid),
-    \ 'highlight': 'OmniSharpActiveParameter'
-    \})
-    call prop_add(1, emphasis.start, {
-    \ 'length': emphasis.length,
-    \ 'bufnr': winbufnr(winid),
-    \ 'type': 'OmniSharpActiveParameter'
-    \})
-  endif
-endfunction
-
-function! s:FormatDocumentation(doc, paramsAndExceptions) abort
+function! OmniSharp#actions#documentation#Format(doc, opts) abort
   let content = ''
   if has_key(a:doc, 'StructuredDocumentation')
   \ && type(a:doc.StructuredDocumentation) == type({})
@@ -144,7 +77,7 @@ function! s:FormatDocumentation(doc, paramsAndExceptions) abort
         endif
       endif
     endfor
-    if a:paramsAndExceptions
+    if get(a:opts, 'paramsAndExceptions', 1)
       if len(doc.ParamElements)
         let content .= "\n\n## Parameters"
       endif
@@ -162,39 +95,6 @@ function! s:FormatDocumentation(doc, paramsAndExceptions) abort
     let content .= "\n\n" . a:doc.Documentation
   endif
   return content
-endfunction
-
-function s:PopupFilterSignature(winid, key) abort
-  " TODO: All of these filter keys should be be customisable
-  if a:key ==# "\<C-n>"
-    call s:DisplaySignature(1, 0)
-  elseif a:key ==# "\<C-p>"
-    call s:DisplaySignature(-1, 0)
-  elseif a:key ==# "\<C-l>"
-    call s:DisplaySignature(0, 1)
-  elseif a:key ==# "\<C-h>"
-    call s:DisplaySignature(0, -1)
-  else
-    return OmniSharp#popup#FilterStandard(a:winid, a:key)
-  endif
-  return v:true
-endfunction
-
-
-function! s:PreviewDocumentation(content, title)
-  execute 'silent pedit' a:title
-  silent wincmd P
-  setlocal modifiable noreadonly
-  setlocal nobuflisted buftype=nofile bufhidden=wipe
-  0,$d
-  silent put =a:content
-  0d_
-  setfiletype omnisharpdoc
-  setlocal conceallevel=3
-  setlocal nomodifiable readonly
-  let winid = winnr()
-  silent wincmd p
-  return winid
 endfunction
 
 let &cpoptions = s:save_cpo

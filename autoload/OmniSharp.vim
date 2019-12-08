@@ -68,47 +68,6 @@ function! OmniSharp#GetHost(...) abort
 endfunction
 
 
-function! OmniSharp#GetCompletions(partial, ...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if !OmniSharp#IsServerRunning()
-    return []
-  endif
-  if g:OmniSharp_server_stdio
-    let s:complete_pending = 1
-    let Callback = function('s:CBGetCompletions', [opts])
-    call OmniSharp#stdio#GetCompletions(a:partial, Callback)
-    if !has_key(opts, 'Callback')
-      " No callback has been passed in, so this function should return
-      " synchronously, so it can be used as an omnifunc
-      let starttime = reltime()
-      while s:complete_pending && reltime(starttime)[0] < g:OmniSharp_timeout
-        sleep 50m
-      endwhile
-      if s:complete_pending | return [] | endif
-      return s:last_completions
-    endif
-    return []
-  endif
-  let completions = OmniSharp#py#eval(
-  \ printf('getCompletions(%s)', string(a:partial)))
-  if OmniSharp#CheckPyError() | let completions = [] | endif
-  return s:CBGetCompletions(opts, completions)
-endfunction
-
-function! s:CBGetCompletions(opts, completions) abort
-  let s:last_completions = a:completions
-  let s:complete_pending = 0
-  let s:last_completion_dictionary = {}
-  for completion in a:completions
-    let s:last_completion_dictionary[get(completion, 'word')] = completion
-  endfor
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(a:completions)
-  else
-    return a:completions
-  endif
-endfunction
-
 function! OmniSharp#Complete(findstart, base) abort
   if a:findstart
     "locate the start of the word
@@ -120,7 +79,7 @@ function! OmniSharp#Complete(findstart, base) abort
 
     return start
   else
-    return OmniSharp#GetCompletions(a:base)
+    return OmniSharp#actions#complete#Get(a:base)
   endif
 endfunction
 
@@ -375,23 +334,7 @@ function! s:PreviewLocation(location) abort
   if OmniSharp#PreferPopups()
     call OmniSharp#popup#Buffer(bufadd(a:location.filename), a:location.lnum, {})
   else
-    let lazyredraw_bak = &lazyredraw
-    let &lazyredraw = 1
-    " Due to cursor jumping bug, opening preview at current file is not as
-    " simple as `pedit %`:
-    " http://vim.1045645.n5.nabble.com/BUG-BufReadPre-autocmd-changes-cursor-position-on-pedit-td1206965.html
-    let winview = winsaveview()
-    let l:winnr = winnr()
-    execute 'silent pedit' a:location.filename
-    wincmd P
-    call cursor(a:location.lnum, a:location.col)
-    normal! zt
-    if winnr() != l:winnr
-      wincmd p
-      " Jump cursor back to symbol.
-      call winrestview(winview)
-    endif
-    let &lazyredraw = lazyredraw_bak
+    call OmniSharp#preview#File(a:location.filename, a:location.lnum, a:location.col)
   endif
 endfunction
 
@@ -699,9 +642,9 @@ endfunction
 
 function! OmniSharp#SignatureHelp() abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#documentation#SignatureHelp() instead'
+  echom 'This function is obsolete; use OmniSharp#actions#signature#SignatureHelp() instead'
   echohl None
-  call OmniSharp#actions#documentation#SignatureHelp()
+  call OmniSharp#actions#signature#SignatureHelp()
 endfunction
 
 

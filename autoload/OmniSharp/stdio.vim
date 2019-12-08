@@ -129,7 +129,7 @@ function! s:Log(message, loglevel) abort
   endif
 endfunction
 
-function! s:Request(command, opts) abort
+function! OmniSharp#stdio#Request(command, opts) abort
   if has_key(a:opts, 'UsePreviousPosition')
     let [bufnr, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
@@ -155,6 +155,10 @@ function! s:Request(command, opts) abort
     let send_buffer = get(a:opts, 'SendBuffer', 1)
   endif
   let lines = getbufline(bufnr, 1, '$')
+  if has_key(a:opts, 'OverrideBuffer')
+    let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
+    let cnum = a:opts.OverrideBuffer.Col
+  endif
   let tmp = join(lines, '')
   " Unique string separator which must not exist in the buffer
   let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
@@ -219,7 +223,7 @@ endfunction
 
 function! s:ReplayRequests(...) abort
   for key in keys(s:pendingRequests)
-    call s:Request(key, s:pendingRequests[key])
+    call OmniSharp#stdio#Request(key, s:pendingRequests[key])
     unlet s:pendingRequests[key]
   endfor
 endfunction
@@ -407,7 +411,7 @@ function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
   \ 'ReplayOnLoad': 1
   \}
   call extend(opts, a:opts, 'force')
-  call s:Request('/codecheck', opts)
+  call OmniSharp#stdio#Request('/codecheck', opts)
 endfunction
 
 function! s:CodeCheckRH(Callback, response) abort
@@ -437,7 +441,7 @@ function! OmniSharp#stdio#CodeFormat(opts) abort
   \   'WantsTextChanges': 1
   \ }
   \}
-  call s:Request('/codeformat', opts)
+  call OmniSharp#stdio#Request('/codeformat', opts)
 endfunction
 
 function! s:CodeFormatRH(opts, response) abort
@@ -459,7 +463,7 @@ function! OmniSharp#stdio#CodeStructure(bufnr, Callback) abort
   \ 'BufNum': a:bufnr,
   \ 'SendBuffer': 0
   \}
-  call s:Request('/v2/codestructure', opts)
+  call OmniSharp#stdio#Request('/v2/codestructure', opts)
 endfunction
 
 function! s:CodeStructureRH(bufnr, Callback, response) abort
@@ -475,7 +479,7 @@ function! OmniSharp#stdio#FixUsings(Callback) abort
   \   'WantsTextChanges': 1
   \ }
   \}
-  call s:Request('/fixusings', opts)
+  call OmniSharp#stdio#Request('/fixusings', opts)
 endfunction
 
 function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
@@ -484,7 +488,7 @@ function! OmniSharp#stdio#FindHighlightTypes(Callback) abort
   \ 'ResponseHandler': function('s:FindHighlightTypesRH', [a:Callback, bufferLines]),
   \ 'ReplayOnLoad': 1
   \}
-  call s:Request('/highlight', opts)
+  call OmniSharp#stdio#Request('/highlight', opts)
 endfunction
 
 function! s:FindHighlightTypesRH(Callback, bufferLines, response) abort
@@ -527,7 +531,7 @@ function! OmniSharp#stdio#FindImplementations(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindImplementationsRH', [a:Callback])
   \}
-  call s:Request('/findimplementations', opts)
+  call OmniSharp#stdio#Request('/findimplementations', opts)
 endfunction
 
 function! s:FindImplementationsRH(Callback, response) abort
@@ -541,7 +545,7 @@ function! OmniSharp#stdio#FindMembers(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindMembersRH', [a:Callback])
   \}
-  call s:Request('/currentfilemembersasflat', opts)
+  call OmniSharp#stdio#Request('/currentfilemembersasflat', opts)
 endfunction
 
 function! s:FindMembersRH(Callback, response) abort
@@ -555,7 +559,7 @@ function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
   \ 'ResponseHandler': function('s:FindSymbolRH', [a:Callback]),
   \ 'Parameters': { 'Filter': a:filter }
   \}
-  call s:Request('/findsymbols', opts)
+  call OmniSharp#stdio#Request('/findsymbols', opts)
 endfunction
 
 function! s:FindSymbolRH(Callback, response) abort
@@ -570,7 +574,7 @@ function! OmniSharp#stdio#FindTextProperties(bufnr) abort
   \ 'ResponseHandler': function('s:FindTextPropertiesRH', [a:bufnr, buftick]),
   \ 'ReplayOnLoad': 1
   \}
-  call s:Request('/highlight', opts)
+  call OmniSharp#stdio#Request('/highlight', opts)
 endfunction
 
 function! s:FindTextPropertiesRH(bufnr, buftick, response) abort
@@ -673,7 +677,7 @@ function! OmniSharp#stdio#FindUsages(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindUsagesRH', [a:Callback])
   \}
-  call s:Request('/findusages', opts)
+  call OmniSharp#stdio#Request('/findusages', opts)
 endfunction
 
 function! s:FindUsagesRH(Callback, response) abort
@@ -690,7 +694,7 @@ function! OmniSharp#stdio#FixUsings(Callback) abort
   \   'WantsTextChanges': 1
   \ }
   \}
-  call s:Request('/fixusings', opts)
+  call OmniSharp#stdio#Request('/fixusings', opts)
 endfunction
 
 function! s:FixUsingsRH(Callback, response) abort
@@ -741,60 +745,12 @@ function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
       unlet s:codeActionParameters
     endif
   endif
-  call s:Request('/v2/getcodeactions', opts)
+  call OmniSharp#stdio#Request('/v2/getcodeactions', opts)
 endfunction
 
 function! s:GetCodeActionsRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(a:response.Body.CodeActions)
-endfunction
-
-
-function! OmniSharp#stdio#GetCompletions(partial, Callback) abort
-  let want_doc = g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
-  let want_snippet = g:OmniSharp_want_snippet ? 'true' : 'false'
-  let parameters = {
-  \ 'WordToComplete': a:partial,
-  \ 'WantDocumentationForEveryCompletionResult': want_doc,
-  \ 'WantSnippet': want_snippet,
-  \ 'WantMethodHeader': 'true',
-  \ 'WantReturnType': 'true'
-  \}
-  let opts = {
-  \ 'ResponseHandler': function('s:GetCompletionsRH', [a:Callback]),
-  \ 'Parameters': parameters
-  \}
-  call s:Request('/autocomplete', opts)
-endfunction
-
-function! s:GetCompletionsRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  let completions = []
-  for cmp in a:response.Body
-    if g:OmniSharp_want_snippet
-      let word = cmp.MethodHeader != v:null ? cmp.MethodHeader : cmp.CompletionText
-      let menu = cmp.ReturnType != v:null ? cmp.ReturnType : cmp.DisplayText
-    else
-      let word = cmp.CompletionText != v:null ? cmp.CompletionText : cmp.MethodHeader
-      let menu = (cmp.ReturnType != v:null ? cmp.ReturnType . ' ' : '') .
-      \ (cmp.DisplayText != v:null ? cmp.DisplayText : cmp.MethodHeader)
-    endif
-    let completion = {
-    \ 'snip': get(cmp, 'Snippet', ''),
-    \ 'word': word,
-    \ 'menu': menu,
-    \ 'icase': 1,
-    \ 'dup': 1
-    \}
-    if g:omnicomplete_fetch_full_documentation
-      let completion.info = ' '
-      if has_key(cmp, 'Description') && cmp.Description != v:null
-        let completion.info = cmp.Description
-      endif
-    endif
-    call add(completions, completion)
-  endfor
-  call a:Callback(completions)
 endfunction
 
 
@@ -806,7 +762,7 @@ function! OmniSharp#stdio#GotoDefinition(Callback) abort
   \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback]),
   \ 'Parameters': parameters
   \}
-  call s:Request('/gotodefinition', opts)
+  call OmniSharp#stdio#Request('/gotodefinition', opts)
 endfunction
 
 function! s:GotoDefinitionRH(Callback, response) abort
@@ -825,7 +781,7 @@ function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
   \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
   \ 'Parameters': a:metadata.MetadataSource
   \}
-  return s:Request('/metadata', opts)
+  return OmniSharp#stdio#Request('/metadata', opts)
 endfunction
 
 function! s:GotoMetadataRH(Callback, metadata, response) abort
@@ -838,14 +794,14 @@ function! OmniSharp#stdio#NavigateDown() abort
   let opts = {
   \ 'ResponseHandler': function('s:NavigateRH')
   \}
-  call s:Request('/navigatedown', opts)
+  call OmniSharp#stdio#Request('/navigatedown', opts)
 endfunction
 
 function! OmniSharp#stdio#NavigateUp() abort
   let opts = {
   \ 'ResponseHandler': function('s:NavigateRH')
   \}
-  call s:Request('/navigateup', opts)
+  call OmniSharp#stdio#Request('/navigateup', opts)
 endfunction
 
 function! s:NavigateRH(response) abort
@@ -863,7 +819,7 @@ function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   \   'WantsTextChanges': 1
   \ }
   \}
-  call s:Request('/rename', opts)
+  call OmniSharp#stdio#Request('/rename', opts)
 endfunction
 
 
@@ -879,7 +835,7 @@ function! OmniSharp#stdio#RunCodeAction(action, ...) abort
   if exists('s:codeActionParameters')
     call extend(opts.Parameters, s:codeActionParameters, 'force')
   endif
-  call s:Request('/v2/runcodeaction', opts)
+  call OmniSharp#stdio#Request('/v2/runcodeaction', opts)
 endfunction
 
 function! s:PerformChangesRH(opts, response) abort
@@ -919,19 +875,6 @@ function! s:PerformChangesRH(opts, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#SignatureHelp(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:SignatureHelpRH', [a:Callback])
-  \}
-  call s:Request('/signaturehelp', opts)
-endfunction
-
-function! s:SignatureHelpRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  call a:Callback(a:response.Body)
-endfunction
-
-
 function! OmniSharp#stdio#Project(bufnr, Callback) abort
   if has_key(OmniSharp#GetHost(a:bufnr), 'project')
     call a:Callback()
@@ -942,7 +885,7 @@ function! OmniSharp#stdio#Project(bufnr, Callback) abort
   \ 'BufNum': a:bufnr,
   \ 'SendBuffer': 0
   \}
-  call s:Request('/project', opts)
+  call OmniSharp#stdio#Request('/project', opts)
 endfunction
 
 function! s:ProjectRH(Callback, bufnr, response) abort
@@ -1030,7 +973,7 @@ function! s:RunTestsInFile(bufnr, tests, Callback) abort
   \ },
   \ 'SendBuffer': 0
   \}
-  call s:Request('/v2/runtestsinclass', opts)
+  call OmniSharp#stdio#Request('/v2/runtestsinclass', opts)
 endfunction
 
 function! OmniSharp#stdio#RunTest(bufnr, Callback) abort
@@ -1070,7 +1013,7 @@ function! s:RunTest(Callback, bufnr, codeElements) abort
   \ 'SendBuffer': 0
   \}
   echomsg 'Running test ' . currentTest.name
-  call s:Request('/v2/runtest', opts)
+  call OmniSharp#stdio#Request('/v2/runtest', opts)
 endfunction
 
 function! s:RunTestsRH(Callback, bufnr, tests, response) abort
@@ -1156,29 +1099,11 @@ function! s:FindTests(codeElements) abort
 endfunction
 
 
-function! OmniSharp#stdio#TypeLookup(includeDocumentation, Callback) abort
-  let includeDocumentation = a:includeDocumentation ? 'true' : 'false'
-  let opts = {
-  \ 'ResponseHandler': function('s:TypeLookupRH', [a:Callback]),
-  \ 'Parameters': { 'IncludeDocumentation': includeDocumentation}
-  \}
-  call s:Request('/typelookup', opts)
-endfunction
-
-function! s:TypeLookupRH(Callback, response) abort
-  if !a:response.Success
-    call a:Callback({ 'Type': '', 'Documentation': '' })
-    return
-  endif
-  call a:Callback(a:response.Body)
-endfunction
-
-
 function! OmniSharp#stdio#UpdateBuffer(opts) abort
   let opts = {
   \ 'ResponseHandler': function('s:UpdateBufferRH', [a:opts])
   \}
-  call s:Request('/updatebuffer', opts)
+  call OmniSharp#stdio#Request('/updatebuffer', opts)
 endfunction
 
 function! s:UpdateBufferRH(opts, response) abort

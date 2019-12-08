@@ -2,10 +2,11 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 let g:OmniSharp_popup_opts = get(g:, 'OmniSharp_popup_opts', {
+\ 'highlight': 'PMenu',
 \ 'padding': [0,1,1,1],
 \ 'border': [1,0,0,0],
 \ 'borderchars': [' '],
-\ 'mapping': v:false,
+\ 'mapping': v:true,
 \ 'scrollbar': v:true,
 \ 'filter': function('OmniSharp#popup#FilterStandard')
 \})
@@ -40,7 +41,18 @@ endfunction
 function! OmniSharp#popup#Display(content, opts) abort
   let content = map(split(a:content, "\n", 1),
   \ {i,v -> substitute(v, '\r', '', 'g')})
-  return s:Open(content, a:opts)
+  if has_key(a:opts, 'winid')
+    let popup_opts = s:GetOptions(a:opts)
+    if has_key(popup_opts, 'filter')
+      unlet popup_opts.filter
+    endif
+    call popup_setoptions(a:opts.winid, popup_opts)
+    call popup_settext(a:opts.winid, split(a:content, "\n"))
+    call popup_show(a:opts.winid)
+    return a:opts.winid
+  else
+    return s:Open(content, a:opts)
+  endif
 endfunction
 
 
@@ -51,13 +63,17 @@ function s:CloseLast() abort
   endif
 endfunction
 
-function s:Open(what, opts) abort
-  call s:CloseLast()
+function s:GetOptions(opts) abort
   let popup_opts = copy(g:OmniSharp_popup_opts)
   if len(keys(a:opts))
     call extend(popup_opts, a:opts)
   endif
-  let s:lastwinid = popup_atcursor(a:what, popup_opts)
+  return popup_opts
+endfunction
+
+function s:Open(what, opts) abort
+  call s:CloseLast()
+  let s:lastwinid = popup_atcursor(a:what, s:GetOptions(a:opts))
   return s:lastwinid
 endfunction
 

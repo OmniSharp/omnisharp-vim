@@ -375,14 +375,19 @@ let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_timeout = 5
 
 " Don't autoselect first omnicomplete option, show options even if there is only
-" one (so the preview documentation is accessible). Remove 'preview' if you
-" don't want to see any documentation whatsoever.
-set completeopt=longest,menuone,preview
+" one (so the preview documentation is accessible). Remove 'preview', 'popup'
+" and 'popuphidden' if you don't want to see any documentation whatsoever.
+set completeopt=longest,menuone,popuphidden
+
+" Highlight the completion documentation popup background/foreground the same as
+" the completion menu itself, for better readability with highlighted
+" documentation.
+set completepopup=highlight:Pmenu,border:off
 
 " Fetch full documentation during omnicomplete requests.
 " By default, only Type/Method signatures are fetched. Full documentation can
 " still be fetched when you need it with the :OmniSharpDocumentation command.
-"let g:omnicomplete_fetch_full_documentation = 1
+let g:omnicomplete_fetch_full_documentation = 1
 
 " Set desired preview window height for viewing documentation.
 " You might also want to look at the echodoc plugin.

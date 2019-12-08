@@ -51,7 +51,7 @@ command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
 
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
-command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#documentation#SignatureHelp()
+command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
 nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
