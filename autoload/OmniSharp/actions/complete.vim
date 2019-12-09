@@ -104,6 +104,7 @@ endfunction
 
 function! s:GetDocumentation() abort
   if !has_key(v:event.completed_item, 'info')
+  \ || len(v:event.completed_item.info) == 0
     return
   endif
   let method = split(v:event.completed_item.info, "\n")[0]

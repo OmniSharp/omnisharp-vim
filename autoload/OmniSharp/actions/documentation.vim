@@ -77,7 +77,7 @@ function! OmniSharp#actions#documentation#Format(doc, opts) abort
         endif
       endif
     endfor
-    if get(a:opts, 'paramsAndExceptions', 1)
+    if get(a:opts, 'ParamsAndExceptions', 1)
       if len(doc.ParamElements)
         let content .= "\n\n## Parameters"
       endif

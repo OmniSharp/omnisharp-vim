@@ -67,22 +67,25 @@ function! s:CBSignatureHelp(opts, response) abort
     endif
     return
   endif
-  let activeSignature = a:response.ActiveSignature
+  let s:last = {
+  \ 'Signatures': a:response.Signatures,
+  \ 'SigIndex': a:response.ActiveSignature,
+  \ 'ParamIndex': a:response.ActiveParameter,
+  \ 'EmphasizeActiveParam': 1,
+  \ 'ParamsAndExceptions': 0
+  \}
   if has_key(a:opts, 'ForPopupMethod')
+    let s:last.EmphasizeActiveParam = 0
+    let s:last.ParamsAndExceptions = 1
     let idx = 0
     for signature in a:response.Signatures
       if stridx(signature.Label, a:opts.ForPopupMethod) >= 0
-        let activeSignature = idx
+        let s:last.SigIndex = idx
         break
       endif
       let idx += 1
     endfor
   endif
-  let s:last = {
-  \ 'Signatures': a:response.Signatures,
-  \ 'SigIndex': activeSignature,
-  \ 'ParamIndex': a:response.ActiveParameter
-  \}
   if has_key(a:opts, 'winid')
     let s:last.winid = a:opts.winid
   endif
@@ -98,13 +101,13 @@ function! s:DisplaySignature(deltaSig, deltaParam) abort
   let signature = s:last.Signatures[isig]
 
   let content = signature.Label
-  if len(s:last.Signatures) > 1
+  if s:last.EmphasizeActiveParam && len(s:last.Signatures) > 1
     let content .= printf("\n (overload %d of %d)",
     \ isig + 1, len(s:last.Signatures))
   endif
 
   let emphasis = {}
-  if len(signature.Parameters)
+  if s:last.EmphasizeActiveParam &&  len(signature.Parameters)
     let iparam = s:last.ParamIndex + a:deltaParam
     let iparam =
     \ iparam < 0 ? 0 :
@@ -121,7 +124,7 @@ function! s:DisplaySignature(deltaSig, deltaParam) abort
   endif
 
   let content .= OmniSharp#actions#documentation#Format(signature, {
-  \ 'paramsAndExceptions': 0
+  \ 'ParamsAndExceptions': s:last.ParamsAndExceptions
   \})
 
   if OmniSharp#PreferPopups()
