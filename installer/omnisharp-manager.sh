@@ -23,7 +23,7 @@ EOF
 
 get_latest_version() {
     if [ "$(command -v curl)" ]; then
-        curl --silent "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
+        curl --user-agent "curl" --silent "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
     elif [ "$(command -v wget)" ]; then
         wget -qO- "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
     fi | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
