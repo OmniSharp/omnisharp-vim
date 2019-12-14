@@ -1275,44 +1275,51 @@ function! OmniSharp#Install(...) abort
     echohl None
     return
   endif
+
   echo 'Installing OmniSharp Roslyn, please wait...'
 
   call OmniSharp#StopAllServers()
 
   let l:http = g:OmniSharp_server_stdio ? '' : '-H'
   let l:version = a:0 > 0 ? '-v ' . shellescape(a:1) : ''
+  let l:location = shellescape(g:OmniSharp_server_install)
 
   if has('win32')
+    let l:logfile = s:plugin_root_dir . '\log\install.log'
     let l:script = shellescape(s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
-    let l:location = g:OmniSharp_server_install
 
-    call system('powershell -ExecutionPolicy Bypass -File ' . l:script . ' ' .
-    \ l:http . ' -l ' . l:location . ' ' . l:version)
-
-    if v:shell_error
-      echohl ErrorMsg
-      echomsg 'Installation to ' . l:location . ' failed inside PowerShell.'
-      echohl None
-    else
-      echomsg 'OmniSharp installed to: ' . l:location
-    endif
+    let l:command = 'powershell -ExecutionPolicy Bypass -File ' . l:script . ' ' .
+    \ l:http . ' -l ' . l:location . ' ' . l:version
   else
+    let l:logfile = s:plugin_root_dir . '/log/install.log'
     let l:script = shellescape(s:plugin_root_dir . '/installer/omnisharp-manager.sh')
-    let l:location = g:OmniSharp_server_install
-
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
 
-    let l:result = systemlist('/bin/sh ' . l:script . ' ' .
-    \ l:http . ' ' . l:mono . ' -l ' . l:location . ' ' . l:version)
+    let l:command = '/bin/sh ' . l:script . ' ' .
+    \ l:http . ' ' . l:mono . ' -l ' . l:location . ' ' . l:version
+  endif
 
-    if v:shell_error
-      echohl ErrorMsg
-      echomsg 'Failed to install the OmniSharp-Roslyn server'
-      echomsg l:result[-1]
-      echohl None
-    else
-      echomsg 'OmniSharp installed to:' l:location
+  " Begin server installation
+  let l:error_msgs = systemlist(l:command)
+
+  if v:shell_error
+    " Log executed command and full error log
+    call writefile(['> ' . l:command, repeat('=', 80)], l:logfile)
+    call writefile(l:error_msgs, l:logfile, "a")
+
+    echohl ErrorMsg
+    echomsg 'Failed to install the OmniSharp-Roslyn server'
+
+    " Display extra error information for Unix users
+    if !has('win32')
+      echomsg l:error_msgs[-1]
     endif
+
+    echohl WarningMsg
+    echomsg 'The full error log can be found in the file: ' l:logfile
+    echohl None
+  else
+    echomsg 'OmniSharp installed to: ' . l:location
   endif
 endfunction
 
