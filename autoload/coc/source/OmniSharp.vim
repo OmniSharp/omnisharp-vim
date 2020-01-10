@@ -1,7 +1,8 @@
 function! coc#source#OmniSharp#init() abort
   return {
   \ 'shortcut': 'OS',
-  \ 'filetypes': ['cs']
+  \ 'filetypes': ['cs'],
+  \ 'triggerCharacters': ['.']
   \ }
 endfunction
 
