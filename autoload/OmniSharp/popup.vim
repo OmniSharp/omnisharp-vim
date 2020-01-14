@@ -48,7 +48,9 @@ function! OmniSharp#popup#Display(content, opts) abort
     endif
     call popup_setoptions(a:opts.winid, popup_opts)
     call popup_settext(a:opts.winid, split(a:content, "\n"))
-    call popup_show(a:opts.winid)
+    if !popup_getpos(a:opts.winid).visible
+      call popup_show(a:opts.winid)
+    endif
     return a:opts.winid
   else
     return s:Open(content, a:opts)
@@ -80,20 +82,20 @@ endfunction
 
 " Popup scrolling functions by @bfrg from https://github.com/vim/vim/issues/5170
 function! s:ScrollLine(winid, step) abort
-    let line = popup_getoptions(a:winid).firstline
-    if a:step < 0
-        let newline = (line + a:step) > 0 ? (line + a:step) : 1
-    else
-        let nlines = line('$', a:winid)
-        let newline = (line + a:step) <= nlines ? (line + a:step) : nlines
-    endif
-    call popup_setoptions(a:winid, {'firstline': newline})
+  let line = popup_getoptions(a:winid).firstline
+  if a:step < 0
+    let newline = (line + a:step) > 0 ? (line + a:step) : 1
+  else
+    let nlines = line('$', a:winid)
+    let newline = (line + a:step) <= nlines ? (line + a:step) : nlines
+  endif
+  call popup_setoptions(a:winid, {'firstline': newline})
 endfunction
 
 function! s:ScrollPage(winid, size) abort
-    let height = popup_getpos(a:winid).core_height
-    let step = float2nr(height * a:size)
-    call s:ScrollLine(a:winid, step)
+  let height = popup_getpos(a:winid).core_height
+  let step = float2nr(height * a:size)
+  call s:ScrollLine(a:winid, step)
 endfunction
 
 

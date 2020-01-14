@@ -20,7 +20,7 @@ function! s:StdioSignatureHelp(Callback, opts) abort
   \ 'ResponseHandler': function('s:StdioSignatureHelpRH',
   \   [a:Callback, s:seq, a:opts])
   \}
-  if has_key(a:opts, 'ForPopupMethod')
+  if has_key(a:opts, 'ForCompleteMethod')
     " Awkward hack required:
     " We are requesting signatureHelp from a completion popup. This means our
     " line currently looks something like this:
@@ -48,7 +48,7 @@ function! s:StdioSignatureHelpRH(Callback, seq, opts, response) abort
     " wait for the latest response to complete
     return
   endif
-  if has_key(a:opts, 'ForPopupMethod')
+  if has_key(a:opts, 'ForCompleteMethod')
     " Because of our 'falsified' request with an extra '(', re-synchronise the
     " server's version of the buffer with the actual buffer contents.
     call OmniSharp#UpdateBuffer()
@@ -58,7 +58,7 @@ endfunction
 
 function! s:CBSignatureHelp(opts, response) abort
   if type(a:response) != type({})
-    if !has_key(a:opts, 'ForPopupMethod')
+    if !has_key(a:opts, 'ForCompleteMethod')
       echo 'No signature help found'
     endif
     if !OmniSharp#PreferPopups()
@@ -74,12 +74,14 @@ function! s:CBSignatureHelp(opts, response) abort
   \ 'EmphasizeActiveParam': 1,
   \ 'ParamsAndExceptions': 0
   \}
-  if has_key(a:opts, 'ForPopupMethod')
+  if has_key(a:opts, 'ForCompleteMethod')
+    " If the popupmenu has already closed, exit early
+    if !pumvisible() | return | endif
     let s:last.EmphasizeActiveParam = 0
     let s:last.ParamsAndExceptions = 1
     let idx = 0
     for signature in a:response.Signatures
-      if stridx(signature.Label, a:opts.ForPopupMethod) >= 0
+      if stridx(signature.Label, a:opts.ForCompleteMethod) >= 0
         let s:last.SigIndex = idx
         break
       endif

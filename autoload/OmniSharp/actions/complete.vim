@@ -113,7 +113,7 @@ function! s:GetDocumentation() abort
     if method =~# '('
       call OmniSharp#actions#signature#SignatureHelp({
       \ 'winid': id,
-      \ 'ForPopupMethod': method
+      \ 'ForCompleteMethod': method
       \})
     else
       call OmniSharp#actions#documentation#Documentation({ 'winid': id })
