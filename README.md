@@ -340,6 +340,12 @@ let g:OmniSharp_diagnostic_overrides = {
 \}
 ```
 
+To find the relevent diagnostic ID, it can be included in diagnostic descriptions (ALE/Syntastic messages and `:OmniSharpGlobalCodeCheck` results) by setting `g:OmniSharp_diagnostic_showid` to 1 - either in your .vimrc, or temporarily via the Vim command line:
+
+```vim
+let g:OmniSharp_diagnostic_showid = 1
+```
+
 *Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
 
 ## Configuration

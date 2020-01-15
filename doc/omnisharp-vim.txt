@@ -129,6 +129,12 @@ the installed mono with this option. Note that mono must be in the $PATH.
 Default: 0 >
     let g:OmniSharp_server_use_mono = 1
 <
+                                                *'g:OmniSharp_diagnostic_showid'*
+When set to 1, include the ID in diagnostic outputs, e.g. ALE linting issues
+and |:OmniSharpGlobalCodeCheck| quickfix results.
+Default: 0 >
+    let g:OmniSharp_diagnostic_showid = 1
+<
                                              *'g:OmniSharp_diagnostic_overrides'*
 Override diagnostic severity for linters (i.e. ALE and Syntastic) and
 |:OmniSharpGlobalCodeCheck| results. The variable is a dictionary where keys
