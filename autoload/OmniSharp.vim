@@ -1212,14 +1212,22 @@ function! s:FindSolution(interactive, bufnr) abort
     return solution_files[g:OmniSharp_sln_list_index]
   else
     if g:OmniSharp_autoselect_existing_sln
-      let running_slns = []
-      for solutionfile in solution_files
-        if has_key(g:OmniSharp_server_ports, solutionfile)
-          call add(running_slns, solutionfile)
+      if len(g:OmniSharp_server_ports)
+        " g:OmniSharp_server_ports has been set, auto-select one of the
+        " specified servers
+        let running_slns = []
+        for solutionfile in solution_files
+          if has_key(g:OmniSharp_server_ports, solutionfile)
+            call add(running_slns, solutionfile)
+          endif
+        endfor
+        if len(running_slns) == 1
+          return running_slns[0]
         endif
-      endfor
-      if len(running_slns) == 1
-        return running_slns[0]
+      endif
+      if exists('s:selected_sln')
+        " Return the previously selected solution
+        return s:selected_sln
       endif
     endif
 
@@ -1239,7 +1247,8 @@ function! s:FindSolution(interactive, bufnr) abort
     if choice <= 0 || choice > len(solution_files)
       throw 'No solution selected'
     endif
-    return solution_files[choice - 1]
+    let s:selected_sln = solution_files[choice - 1]
+    return s:selected_sln
   endif
 endfunction
 
@@ -1305,7 +1314,7 @@ function! OmniSharp#Install(...) abort
   if v:shell_error
     " Log executed command and full error log
     call writefile(['> ' . l:command, repeat('=', 80)], l:logfile)
-    call writefile(l:error_msgs, l:logfile, "a")
+    call writefile(l:error_msgs, l:logfile, 'a')
 
     echohl ErrorMsg
     echomsg 'Failed to install the OmniSharp-Roslyn server'

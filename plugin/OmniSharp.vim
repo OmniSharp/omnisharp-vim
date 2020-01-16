@@ -51,7 +51,7 @@ let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0
 
 let g:OmniSharp_sln_list_index = get(g:, 'OmniSharp_sln_list_index', -1)
 
-let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing_sln', 1)
+let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing_sln', 0)
 let g:OmniSharp_prefer_global_sln = get(g:, 'OmniSharp_prefer_global_sln', 0)
 let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
 
