@@ -57,7 +57,7 @@ Invoke-WebRequest -Uri $url -OutFile $out
 
 # Run Expand-Archive in versions that support it
 if ($PSVersionTable.PSVersion.Major -gt 4) {
-    Expand-Archive $out -DestinationPath $location -Force
+    Expand-Archive $out $location -Force
 } else {
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::ExtractToDirectory($out, $location)
