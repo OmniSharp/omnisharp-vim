@@ -86,10 +86,17 @@ if g:OmniSharp_highlight_types
     endif
 
     if g:OmniSharp_highlight_types >= 3
-      autocmd TextChanged,TextChangedI,TextChangedP *.cs,*.csx
+      autocmd TextChanged,TextChangedI *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
       \   call OmniSharp#HighlightBuffer() |
       \ endif
+
+      if exists('##TextChangedP')
+        autocmd TextChangedP *.cs,*.csx
+        \ if OmniSharp#util#CheckCapabilities() |
+        \   call OmniSharp#HighlightBuffer() |
+        \ endif
+      endif
     endif
   augroup END
 endif
