@@ -13,7 +13,7 @@ let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
 " that all projects have been loaded.
 let g:OmniSharp_server_stdio_quickload = get(g:, 'OmniSharp_server_stdio_quickload', 0)
 let g:OmniSharp_server_display_loading = get(g:, 'OmniSharp_server_display_loading', 1)
-let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 30)
+let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 20)
 
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
@@ -53,7 +53,7 @@ let g:OmniSharp_sln_list_index = get(g:, 'OmniSharp_sln_list_index', -1)
 
 let g:OmniSharp_autoselect_existing_sln = get(g:, 'OmniSharp_autoselect_existing_sln', 0)
 let g:OmniSharp_prefer_global_sln = get(g:, 'OmniSharp_prefer_global_sln', 0)
-let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 0)
+let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 1)
 
 " Automatically start server
 let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
