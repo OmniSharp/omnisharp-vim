@@ -10,6 +10,7 @@ function! s:is_msys() abort
     return s:is_msys_val
   endif
   let s:is_msys_val = strlen(system('grep MSYS_NT /proc/version')) > 0
+  \ || strlen(system('grep MINGW /proc/version')) > 0
   let s:is_msys_checked = 1
   return s:is_msys_val
 endfunction
