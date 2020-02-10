@@ -90,7 +90,7 @@ function! s:CBGet(opts, completions, ...) abort
   endfor
   if a:0 && a:1
     " wantDocPopup
-    augroup OmniSharp#CompletePopup
+    augroup OmniSharp_CompletePopup
       autocmd!
       autocmd CompleteChanged <buffer> call s:GetDocumentation()
     augroup END

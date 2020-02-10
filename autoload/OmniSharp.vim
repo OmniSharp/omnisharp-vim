@@ -433,7 +433,7 @@ function! s:CBCountCodeActions(opts, actions) abort
   endif
   let s:Cleanup = function('s:CleanupCodeActions', [a:opts])
 
-  augroup OmniSharp#CountCodeActions
+  augroup OmniSharp_CountCodeActions
     autocmd!
     autocmd CursorMoved <buffer> call s:Cleanup()
     autocmd CursorMovedI <buffer> call s:Cleanup()
@@ -449,7 +449,7 @@ function! s:CleanupCodeActions(opts) abort
   if has_key(a:opts, 'CallbackCleanup')
     call a:opts.CallbackCleanup()
   endif
-  autocmd! OmniSharp#CountCodeActions
+  autocmd! OmniSharp_CountCodeActions
 endfunction
 
 function! OmniSharp#GetCodeActions(mode) range abort

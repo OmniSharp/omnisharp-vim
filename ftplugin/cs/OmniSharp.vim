@@ -3,7 +3,7 @@ if !OmniSharp#util#CheckCapabilities() | finish | endif
 if get(b:, 'OmniSharp_ftplugin_loaded', 0) | finish | endif
 let b:OmniSharp_ftplugin_loaded = 1
 
-augroup OmniSharp#FileType
+augroup OmniSharp_FileType
   autocmd! * <buffer>
 
   autocmd BufLeave <buffer>
@@ -89,7 +89,7 @@ else
   let b:undo_ftplugin = ''
 endif
 let b:undo_ftplugin .= '
-\ execute "autocmd! OmniSharp#FileType * <buffer>"
+\ execute "autocmd! OmniSharp_FileType * <buffer>"
 \
 \|  unlet b:OmniSharp_ftplugin_loaded
 \|  delcommand OmniSharpCodeFormat

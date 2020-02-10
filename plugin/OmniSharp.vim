@@ -71,7 +71,7 @@ let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output',
 " Initialise automatic type and interface highlighting
 let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)
 if g:OmniSharp_highlight_types
-  augroup OmniSharp#HighlightTypes
+  augroup OmniSharp_HighlightTypes
     autocmd!
     autocmd BufEnter *.cs,*.csx
     \ if OmniSharp#util#CheckCapabilities() |
@@ -115,7 +115,7 @@ function! s:ALEWantResults() abort
   endif
 endfunction
 
-augroup OmniSharp#Integrations
+augroup OmniSharp_Integrations
   autocmd!
 
   " Initialize OmniSharp as an asyncomplete source
