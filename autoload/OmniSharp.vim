@@ -264,7 +264,7 @@ function! OmniSharp#PreviewDefinition(...) abort
   else
     let loc = OmniSharp#py#eval('gotoDefinition()')
     if OmniSharp#CheckPyError() | return | endif
-    call s:CBPreviewDefinition(loc)
+    call s:CBPreviewDefinition({}, loc, {})
   endif
 endfunction
 
