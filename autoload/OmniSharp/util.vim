@@ -138,7 +138,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
         call OmniSharp#Install()
       else
         redraw
-        return
+        return []
       endif
     endif
   endif
