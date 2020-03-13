@@ -67,6 +67,26 @@ function! OmniSharp#util#CheckCapabilities() abort
   return s:capable
 endfunction
 
+function! OmniSharp#util#SupportsPopups() abort
+  if exists('s:supports_popups') | return s:supports_popups | endif
+
+  let s:supports_popups = 1
+
+  if has('nvim')
+    if !exists('*nvim_open_win')
+      call OmniSharp#util#EchoErr('Error: A newer version of neovim is required to support floating windows')
+      let s:supports_popups = 0
+    endif
+  else
+    if !has('patch-8.1.1963')
+      call OmniSharp#util#EchoErr('Error: A newer version of Vim is required to support popup windows')
+      let s:supports_popups = 0
+    endif
+  endif
+
+  return s:supports_popups
+endfunction
+
 " :echoerr will throw if inside a try conditional, or function labeled 'abort'
 " This function will do the same thing without throwing
 function! OmniSharp#util#EchoErr(msg)

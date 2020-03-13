@@ -16,17 +16,17 @@ function OmniSharp#popup#FilterStandard(winid, key) abort
   if a:key ==# "\<Esc>"
     call popup_close(a:winid)
   elseif a:key ==# "\<C-e>" " Scroll line down
-    call s:ScrollLine(a:winid, 1)
+    call s:VimPopupScrollLine(a:winid, 1)
   elseif a:key ==# "\<C-y>" " Scroll line up
-    call s:ScrollLine(a:winid, -1)
+    call s:VimPopupScrollLine(a:winid, -1)
   elseif a:key ==# "\<C-d>" " Scroll half-page down
-    call s:ScrollPage(a:winid, 0.5)
+    call s:VimPopupScrollPage(a:winid, 0.5)
   elseif a:key ==# "\<C-u>" " Scroll half-page up
-    call s:ScrollPage(a:winid, -0.5)
+    call s:VimPopupScrollPage(a:winid, -0.5)
   elseif a:key ==# "\<C-f>" " Scroll page down
-    call s:ScrollPage(a:winid, 1)
+    call s:VimPopupScrollPage(a:winid, 1)
   elseif a:key ==# "\<C-b>" " Scroll page up
-    call s:ScrollPage(a:winid, -1)
+    call s:VimPopupScrollPage(a:winid, -1)
   else
     return v:false
   endif
@@ -42,7 +42,7 @@ function! OmniSharp#popup#Display(content, opts) abort
   let content = map(split(a:content, "\n", 1),
   \ {i,v -> substitute(v, '\r', '', 'g')})
   if has_key(a:opts, 'winid')
-    let popup_opts = s:GetOptions(a:opts)
+    let popup_opts = s:GetVimOptions(a:opts)
     if has_key(popup_opts, 'filter')
       unlet popup_opts.filter
     endif
@@ -60,12 +60,43 @@ endfunction
 
 function s:CloseLast() abort
   if exists('s:lastwinid')
-    call popup_close(s:lastwinid)
+    if has('nvim')
+      call nvim_win_close(s:lastwinid, v:true)
+      if exists('#OmniSharp_nvim_popup')
+        autocmd! OmniSharp_nvim_popup
+      endif
+      if exists('s:mapped_esc')
+        nunmap <buffer> <Esc>
+        unlet s:mapped_esc
+      endif
+    else
+      call popup_close(s:lastwinid)
+    endif
     unlet s:lastwinid
   endif
 endfunction
 
-function s:GetOptions(opts) abort
+" Mimic Vim behaviour in neovim: close the window when the cursor is moved to a
+" different line
+function s:CloseLastNvimOnMove() abort
+  if line('.') != s:lastwinpos[0]
+    call s:CloseLast()
+  endif
+endfunction
+
+function s:GetNvimOptions(opts) abort
+  return {
+  \ 'relative': 'cursor',
+  \ 'width': max([&columns / 2, 80]),
+  \ 'height': max([&lines / 2, 10]),
+  \ 'row': 1,
+  \ 'col': 1,
+  \ 'focusable': v:false,
+  \ 'style': 'minimal'
+  \}
+endfunction
+
+function s:GetVimOptions(opts) abort
   let popup_opts = copy(g:OmniSharp_popup_opts)
   if len(keys(a:opts))
     call extend(popup_opts, a:opts)
@@ -75,13 +106,41 @@ endfunction
 
 function s:Open(what, opts) abort
   call s:CloseLast()
-  let s:lastwinid = popup_atcursor(a:what, s:GetOptions(a:opts))
+  let s:lastwinpos = [line('.'), col('.')]
+  if has('nvim')
+    if type(a:what) == v:t_number
+      let bufnr = a:what
+    else
+      let bufnr = nvim_create_buf(v:false, v:true)
+      call setbufline(bufnr, 1, a:what)
+    endif
+    let s:lastwinid = nvim_open_win(bufnr, v:false, s:GetNvimOptions(a:opts))
+    let winnr = win_getid(winnr())
+    if has_key(a:opts, 'firstline')
+      call nvim_set_current_win(s:lastwinid)
+      execute 'normal!' a:opts.firstline . 'G'
+      normal! zt
+      call nvim_set_current_win(winnr)
+    endif
+    call nvim_win_set_option(s:lastwinid, 'wrap', v:true)
+    if maparg('<Esc>', 'n') ==# ''
+      let s:mapped_esc = 1
+      nnoremap <silent> <buffer> <Esc> :call <SID>CloseLast()<CR>
+    endif
+    augroup OmniSharp_nvim_popup
+      autocmd CursorMoved <buffer> call s:CloseLastNvimOnMove()
+      autocmd CursorMovedI <buffer> call s:CloseLastNvimOnMove()
+    augroup END
+  else
+    let s:lastwinid = popup_atcursor(a:what, s:GetVimOptions(a:opts))
+  endif
+  call s:CreatePopupMappings()
   return s:lastwinid
 endfunction
 
 
 " Popup scrolling functions by @bfrg from https://github.com/vim/vim/issues/5170
-function! s:ScrollLine(winid, step) abort
+function! s:VimPopupScrollLine(winid, step) abort
   let line = popup_getoptions(a:winid).firstline
   if a:step < 0
     let newline = (line + a:step) > 0 ? (line + a:step) : 1
@@ -92,10 +151,10 @@ function! s:ScrollLine(winid, step) abort
   call popup_setoptions(a:winid, {'firstline': newline})
 endfunction
 
-function! s:ScrollPage(winid, size) abort
+function! s:VimPopupScrollPage(winid, size) abort
   let height = popup_getpos(a:winid).core_height
   let step = float2nr(height * a:size)
-  call s:ScrollLine(a:winid, step)
+  call s:VimPopupScrollLine(a:winid, step)
 endfunction
 
 

@@ -332,7 +332,10 @@ endfunction
 
 function! s:PreviewLocation(location) abort
   if OmniSharp#PreferPopups()
-    call OmniSharp#popup#Buffer(bufadd(a:location.filename), a:location.lnum, {})
+    let bufnr = bufadd(a:location.filename)
+    " neovim requires that the buffer be explicitly loaded
+    call bufload(bufnr)
+    call OmniSharp#popup#Buffer(bufnr, a:location.lnum, {})
   else
     call OmniSharp#preview#File(a:location.filename, a:location.lnum, a:location.col)
   endif
@@ -1323,8 +1326,8 @@ function! s:BustAliveCache(...) abort
 endfunction
 
 function! OmniSharp#PreferPopups() abort
-  " TODO: Check version of vim
   return get(g:, 'OmniSharp_prefer_popups', 0)
+  \ && OmniSharp#util#SupportsPopups()
 endfunction
 
 function! s:SetQuickFix(list, title)
