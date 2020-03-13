@@ -1269,12 +1269,10 @@ function! s:FindSolutionsFiles(bufnr) abort
   let solution_files = []
 
   while dir !=# lastfolder
-    if empty(solution_files)
-      let solution_files += s:globpath(dir, '*.sln')
-      let solution_files += s:globpath(dir, 'project.json')
+    let solution_files += s:globpath(dir, '*.sln')
+    let solution_files += s:globpath(dir, 'project.json')
 
-      call filter(solution_files, 'filereadable(v:val)')
-    endif
+    call filter(solution_files, 'filereadable(v:val)')
 
     if g:OmniSharp_prefer_global_sln
       let global_solution_files = s:globpath(dir, 'global.json')
@@ -1283,6 +1281,10 @@ function! s:FindSolutionsFiles(bufnr) abort
         let solution_files = [dir]
         break
       endif
+    endif
+
+    if !empty(solution_files)
+      return solution_files
     endif
 
     let lastfolder = dir
