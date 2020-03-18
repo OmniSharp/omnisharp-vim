@@ -20,11 +20,12 @@ function! OmniSharp#actions#complete#Get(partial, ...) abort
       return s:last_completions
     endif
     return []
+  else
+    let completions = OmniSharp#py#eval(
+    \ printf('getCompletions(%s)', string(a:partial)))
+    if OmniSharp#CheckPyError() | let completions = [] | endif
+    return s:CBGet(opts, completions)
   endif
-  let completions = OmniSharp#py#eval(
-  \ printf('getCompletions(%s)', string(a:partial)))
-  if OmniSharp#CheckPyError() | let completions = [] | endif
-  return s:CBGet(opts, completions)
 endfunction
 
 function! s:StdioGetCompletions(partial, Callback) abort
@@ -92,7 +93,7 @@ function! s:CBGet(opts, completions, ...) abort
     " wantDocPopup
     augroup OmniSharp_CompletePopup
       autocmd!
-      autocmd CompleteChanged <buffer> call s:GetDocumentation()
+      autocmd CompleteChanged <buffer> call s:GetDocumentationDelayed()
     augroup END
   endif
   if has_key(a:opts, 'Callback')
@@ -102,12 +103,22 @@ function! s:CBGet(opts, completions, ...) abort
   endif
 endfunction
 
-function! s:GetDocumentation() abort
+function! s:GetDocumentationDelayed() abort
+  " Debounce documentation requests, preventing Vim from slowing down while
+  " CTRL-N'ing through completion results
+  if exists('s:docTimer')
+    call timer_stop(s:docTimer)
+  endif
   if !has_key(v:event.completed_item, 'info')
   \ || len(v:event.completed_item.info) == 0
     return
   endif
-  let method = split(v:event.completed_item.info, "\n")[0]
+  let s:docTimer = timer_start(get(g:, 'OmniSharpCompletionDocDebounce', 500),
+  \ function('s:GetDocumentation', [v:event.completed_item]))
+endfunction
+
+function! s:GetDocumentation(completed_item, timer) abort
+  let method = split(a:completed_item.info, "\n")[0]
   let id = popup_findinfo()
   if id
     if method =~# '('
