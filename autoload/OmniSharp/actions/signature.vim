@@ -72,11 +72,13 @@ function! s:CBSignatureHelp(opts, response) abort
   \ 'SigIndex': a:response.ActiveSignature,
   \ 'ParamIndex': a:response.ActiveParameter,
   \ 'EmphasizeActiveParam': 1,
-  \ 'ParamsAndExceptions': 0
+  \ 'ParamsAndExceptions': 0,
+  \ 'mode': mode()
   \}
   if has_key(a:opts, 'ForCompleteMethod')
     " If the popupmenu has already closed, exit early
     if !pumvisible() | return | endif
+    let s:last.PopupMaps = 0
     let s:last.EmphasizeActiveParam = 0
     let s:last.ParamsAndExceptions = 1
     let idx = 0
@@ -91,10 +93,10 @@ function! s:CBSignatureHelp(opts, response) abort
   if has_key(a:opts, 'winid')
     let s:last.winid = a:opts.winid
   endif
-  call s:DisplaySignature(0, 0)
+  call OmniSharp#actions#signature#Display(0, 0)
 endfunction
 
-function! s:DisplaySignature(deltaSig, deltaParam) abort
+function! OmniSharp#actions#signature#Display(deltaSig, deltaParam) abort
   let isig = s:last.SigIndex + a:deltaSig
   let isig =
   \ isig < 0 ? len(s:last.Signatures) - 1 :
@@ -109,7 +111,7 @@ function! s:DisplaySignature(deltaSig, deltaParam) abort
   endif
 
   let emphasis = {}
-  if s:last.EmphasizeActiveParam &&  len(signature.Parameters)
+  if s:last.EmphasizeActiveParam && len(signature.Parameters)
     let iparam = s:last.ParamIndex + a:deltaParam
     let iparam =
     \ iparam < 0 ? 0 :
@@ -130,15 +132,23 @@ function! s:DisplaySignature(deltaSig, deltaParam) abort
   \})
 
   if OmniSharp#PreferPopups()
-    let opts = {
-    \ 'filter': function('s:PopupFilterSignature')
-    \}
+    let opts = {}
     if has_key(s:last, 'winid')
       let opts.winid = s:last.winid
+    endif
+    if has_key(s:last, 'mode')
+      let opts.mode = s:last.mode
     endif
     let winid = OmniSharp#popup#Display(content, opts)
     call setbufvar(winbufnr(winid), '&filetype', 'omnisharpdoc')
     call setwinvar(winid, '&conceallevel', 3)
+    if get(s:last, 'PopupMaps', 1)
+      " TODO: All of these filter keys should be be customisable
+      call OmniSharp#popup#Map(s:last.mode, '<C-j>', 'OmniSharp#actions#signature#Display(1, 0)')
+      call OmniSharp#popup#Map(s:last.mode, '<C-k>', 'OmniSharp#actions#signature#Display(-1, 0)')
+      call OmniSharp#popup#Map(s:last.mode, '<C-l>', 'OmniSharp#actions#signature#Display(0, 1)')
+      call OmniSharp#popup#Map(s:last.mode, '<C-h>', 'OmniSharp#actions#signature#Display(0, -1)')
+    endif
   else
     let winid = OmniSharp#preview#Display(content, 'SignatureHelp')
   endif
@@ -156,22 +166,7 @@ function! s:DisplaySignature(deltaSig, deltaParam) abort
     \ 'type': 'OmniSharpActiveParameter'
     \})
   endif
-endfunction
-
-function s:PopupFilterSignature(winid, key) abort
-  " TODO: All of these filter keys should be be customisable
-  if a:key ==# "\<C-n>"
-    call s:DisplaySignature(1, 0)
-  elseif a:key ==# "\<C-p>"
-    call s:DisplaySignature(-1, 0)
-  elseif a:key ==# "\<C-l>"
-    call s:DisplaySignature(0, 1)
-  elseif a:key ==# "\<C-h>"
-    call s:DisplaySignature(0, -1)
-  else
-    return OmniSharp#popup#FilterStandard(a:winid, a:key)
-  endif
-  return v:true
+  redraw
 endfunction
 
 let &cpoptions = s:save_cpo
