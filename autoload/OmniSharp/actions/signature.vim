@@ -152,19 +152,26 @@ function! OmniSharp#actions#signature#Display(deltaSig, deltaParam) abort
   else
     let winid = OmniSharp#preview#Display(content, 'SignatureHelp')
   endif
-  if has_key(emphasis, 'start') && has('textprop')
-    let propTypes = prop_type_list({'bufnr': winbufnr(winid)})
-    if index(propTypes, 'OmniSharpActiveParameter') < 0
-      call prop_type_add('OmniSharpActiveParameter', {
+  if has_key(emphasis, 'start')
+    if !has('nvim') && has('textprop')
+      let propTypes = prop_type_list({'bufnr': winbufnr(winid)})
+      if index(propTypes, 'OmniSharpActiveParameter') < 0
+        call prop_type_add('OmniSharpActiveParameter', {
+        \ 'bufnr': winbufnr(winid),
+        \ 'highlight': 'OmniSharpActiveParameter'
+        \})
+      endif
+      call prop_add(1, emphasis.start, {
+      \ 'length': emphasis.length,
       \ 'bufnr': winbufnr(winid),
-      \ 'highlight': 'OmniSharpActiveParameter'
+      \ 'type': 'OmniSharpActiveParameter'
       \})
+    elseif has('nvim') && exists('*nvim_create_namespace')
+      let nsid = nvim_create_namespace('OmniSharp_signature_emphasis')
+      call nvim_buf_add_highlight(winbufnr(winid), nsid,
+      \ 'OmniSharpActiveParameter',
+      \ 0, emphasis.start - 1, emphasis.start + emphasis.length - 1)
     endif
-    call prop_add(1, emphasis.start, {
-    \ 'length': emphasis.length,
-    \ 'bufnr': winbufnr(winid),
-    \ 'type': 'OmniSharpActiveParameter'
-    \})
   endif
   redraw
 endfunction

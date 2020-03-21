@@ -106,7 +106,7 @@ highlight default link csUserInterface Include
 highlight default link csUserMethod Function
 highlight default link csUserType Type
 
-highlight OmniSharpActiveParameter cterm=bold,italic,underline gui=bold,italic,underline
+highlight default OmniSharpActiveParameter cterm=bold,italic,underline gui=bold,italic,underline
 
 function! s:ALEWantResults() abort
   if !g:OmniSharp_server_stdio | return | endif
