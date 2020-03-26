@@ -1326,8 +1326,15 @@ function! s:BustAliveCache(...) abort
 endfunction
 
 function! OmniSharp#PreferPopups() abort
-  return get(g:, 'OmniSharp_prefer_popups', 0)
-  \ && OmniSharp#util#SupportsPopups()
+  let g:OmniSharp.popup = get(g:OmniSharp, 'popup', {})
+  if (type(g:OmniSharp.popup) == type(0) && g:OmniSharp.popup == 0)
+  \ || !OmniSharp#util#SupportsPopups()
+    return 0
+  endif
+  if type(g:OmniSharp.popup) != type({})
+    let g:OmniSharp.popup = {}
+  endif
+  return 1
 endfunction
 
 function! s:SetQuickFix(list, title)

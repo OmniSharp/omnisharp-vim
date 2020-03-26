@@ -143,11 +143,14 @@ function! OmniSharp#actions#signature#Display(deltaSig, deltaParam) abort
     call setbufvar(winbufnr(winid), '&filetype', 'omnisharpdoc')
     call setwinvar(winid, '&conceallevel', 3)
     if get(s:last, 'PopupMaps', 1)
-      " TODO: All of these filter keys should be be customisable
-      call OmniSharp#popup#Map(s:last.mode, '<C-j>', 'OmniSharp#actions#signature#Display(1, 0)')
-      call OmniSharp#popup#Map(s:last.mode, '<C-k>', 'OmniSharp#actions#signature#Display(-1, 0)')
-      call OmniSharp#popup#Map(s:last.mode, '<C-l>', 'OmniSharp#actions#signature#Display(0, 1)')
-      call OmniSharp#popup#Map(s:last.mode, '<C-h>', 'OmniSharp#actions#signature#Display(0, -1)')
+      call OmniSharp#popup#Map(s:last.mode, 'sigNext',      '<C-j>',
+      \ 'OmniSharp#actions#signature#Display(1, 0)')
+      call OmniSharp#popup#Map(s:last.mode, 'sigPrev',      '<C-k>',
+      \ 'OmniSharp#actions#signature#Display(-1, 0)')
+      call OmniSharp#popup#Map(s:last.mode, 'sigParamNext', '<C-l>',
+      \ 'OmniSharp#actions#signature#Display(0, 1)')
+      call OmniSharp#popup#Map(s:last.mode, 'sigParamPrev', '<C-h>',
+      \ 'OmniSharp#actions#signature#Display(0, -1)')
     endif
   else
     let winid = OmniSharp#preview#Display(content, 'SignatureHelp')
