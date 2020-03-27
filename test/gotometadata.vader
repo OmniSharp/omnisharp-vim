@@ -10,6 +10,7 @@ Given cs():
   }
 
 Execute (go to metadata preview):
+  let g:OmniSharp = { 'popup': 0 }
   call OmniSharpTestInitializeBuffer('GotoMetadata')
   call search("MemoryStream stream")
   call OmniSharpTestAwait('OmniSharp#PreviewDefinition', [])
