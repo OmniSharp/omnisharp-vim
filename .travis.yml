@@ -48,4 +48,4 @@ jobs:
         - sudo make install
         - popd
       before_script: cd test
-      script: /usr/local/bin/vim -Nu vimrc -c 'Vader! *'
+      script: /usr/local/bin/vim -esNu vimrc -c 'Vader! *'
