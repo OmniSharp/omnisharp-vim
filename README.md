@@ -11,6 +11,10 @@ OmniSharp works on Windows, and on Linux and OS X with Mono.
 
 The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code, Emacs, Atom and others.
 
+## New! Popups
+
+Use Vim's popup windows and neovim's floating windows to display code/documentation without disrupting your window layouts: see [Popups](#popups) section for details and configuration options.
+
 ## New! Run unit tests
 
 Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
@@ -348,6 +352,61 @@ let g:OmniSharp_diagnostic_showid = 1
 
 *Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
 
+## Popups
+
+When a recent enough Vim or neovim is used, OmniSharp-vim will use Vim's popup windows or neovim's floating windows in certain situations:
+
+* `:OmniSharpDocumentation`
+* `:OmniSharpSignatureHelp`
+* `:OmniSharpPreviewDefinition` (including metadata)
+* `:OmniSharpPreviewImplementation`
+* completion documentation
+
+OmniSharp-vim will use popups by default for Vims/neovims which support them.
+To disable popups completely, set `g:OmniSharp.popup` to `0`:
+
+```vim
+let g:OmniSharp = { 'popup': 0 }
+```
+
+Apart from the insert-completion documentation window, all popups are closeable/scrollable using these mappings:
+
+| Action name    | Default mapping |
+|----------------|-----------------|
+| `close`        | `<Esc>`         |
+| `lineDown`     | `<C-e>`         |
+| `lineUp`       | `<C-y>`         |
+| `halfPageDown` | `<C-d>`         |
+| `halfPageUp`   | `<C-u>`         |
+| `pageDown`     | `<C-f>`         |
+| `pageUp`       | `<C-b>`         |
+
+Additionally, the signature-help popup window provides the following mappings for navigating through method signatures and selected parameters:
+
+| Action name    | Default mapping |
+|----------------|-----------------|
+| `sigNext`      | `<C-j>`         |
+| `sigPrev`      | `<C-k>`         |
+| `sigParamNext` | `<C-l>`         |
+| `sigParamPrev` | `<C-h>`         |
+
+These mappings are all configurable, and you can configure more than one mapping for an action, so to use e.g. `CTRL-N` and `CTRL-P` to navigate between signatures instead of `CTRL-J` and `CTRL-K` and to use either `CTRL-E`/`CTRL-Y` or `j`/`k` for single line scrolling, use `g:OmniSharp.popup.mappings` like this:
+
+```vim
+let g:OmniSharp = {
+\ 'popup': {
+\   'mappings': {
+\     'sigNext': '<C-n>',
+\     'sigPrev': '<C-p>',
+\     'lineDown': ['<C-e>', 'j'],
+\     'lineUp': ['<C-y>', 'k']
+\   }
+\ }
+\}
+```
+
+Popups can be closed by using the `close` action mapping (`<Esc>` by default), and also by simply navigating to another line.
+
 ## Configuration
 
 ### Example vimrc
@@ -377,7 +436,9 @@ let g:OmniSharp_timeout = 5
 " Don't autoselect first omnicomplete option, show options even if there is only
 " one (so the preview documentation is accessible). Remove 'preview', 'popup'
 " and 'popuphidden' if you don't want to see any documentation whatsoever.
-set completeopt=longest,menuone,popuphidden
+" Note that neovim does not support `popuphidden` or `popup` yet: 
+" https://github.com/neovim/neovim/issues/10996
+set completeopt=longest,menuone,preview,popuphidden
 
 " Highlight the completion documentation popup background/foreground the same as
 " the completion menu itself, for better readability with highlighted
