@@ -39,7 +39,10 @@ function! s:HandleServerEvent(job, res) abort
           if message =~# '^Queue project'
             call add(a:job.loading, project)
           endif
-          if message =~# '^Successfully loaded project'
+          if message =~# '^Successfully loaded project' || message =~# '^Failed to load project'
+            if message[0] == 'F'
+              echom 'Failed to load project: ' . project
+            endif
             call filter(a:job.loading, {idx,val -> val !=# project})
             if len(a:job.loading) == 0
               if g:OmniSharp_server_display_loading
