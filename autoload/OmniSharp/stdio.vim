@@ -302,7 +302,13 @@ function! s:LocationsFromResponse(quickfixes) abort
         endif
         call extend(location, overrides[diag_id])
       else
-        let location.type = loglevel ==# 'Error' ? 'E' : 'W'
+        if loglevel ==# 'Error'
+          let location.type = 'E'
+        elseif loglevel ==# 'Info'
+          let location.type = 'I'
+        else
+          let location.type = 'W'
+        endif
         if loglevel ==# 'Hidden'
           let location.subtype = 'Style'
         endif
