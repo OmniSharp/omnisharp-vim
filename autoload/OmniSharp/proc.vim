@@ -112,6 +112,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
     let opts['out_cb'] = 'OmniSharp#proc#vimOutHandler'
   endif
   let job = {
+  \ 'start_time': reltime(),
   \ 'job_id': job_start(a:command, opts)
   \}
   let channel_id = job_getchannel(job.job_id)
