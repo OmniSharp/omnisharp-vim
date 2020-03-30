@@ -31,7 +31,7 @@ Given cs():
 Execute (run fix usings):
   call OmniSharpTestAwait('OmniSharp#FixUsings', [])
 
-Expect cs(should remove unused using):
+Expect cs(should add required using):
   using System;
 
   public class Test
@@ -79,4 +79,4 @@ Expect cs(should not add ambiguous using):
 Execute (should add ambiguous usings to quickfix):
   call OmniSharpTestAwait('OmniSharp#FixUsings', [])
   cfirst
-  AssertEqual 2, line(".")
+  AssertEqual line('.'), 2

@@ -17,7 +17,12 @@ syntax on
 set cmdheight=3
 
 let g:OmniSharp_server_stdio = 1
+let g:OmniSharp_highlight_types = 3
 let g:OmniSharp_selector_ui = ''
-let g:OmniSharp_timeout = 10
 let g:OmniSharp_open_quickfix = 0
 let g:OmniSharp_loglevel = 'none'
+
+let g:OmniSharp = {
+\ 'popup': 0,
+\ 'test': { 'timeout': 10 }
+\}

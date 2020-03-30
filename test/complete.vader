@@ -1,11 +1,14 @@
 Include: utils/startserver.vader
+Include: utils/async-helper.vader
 
 Given cs():
   usi
 
 Execute ():
   " Need to set a filename for OmniSharp-roslyn
-  file example/Complete.cs
+  call OmniSharpTestInitializeBuffer('Complete')
+  " Warm up completions
+  call OmniSharpTestAwait('OmniSharp#actions#complete#Get', ['usi'])
 
 Do (invoke omnicomplete on 'usi'):
   A\<c-x>\<c-o>
