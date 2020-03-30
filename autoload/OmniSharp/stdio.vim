@@ -39,21 +39,23 @@ function! s:HandleServerEvent(job, res) abort
           if message =~# '^Queue project'
             call add(a:job.loading, project)
           endif
-          if message =~# '^Successfully loaded project' || message =~# '^Failed to load project'
-            if message[0] == 'F'
+          if message =~# '^Successfully loaded project'
+          \ || message =~# '^Failed to load project'
+            if message[0] ==# 'F'
               echom 'Failed to load project: ' . project
             endif
             call filter(a:job.loading, {idx,val -> val !=# project})
             if len(a:job.loading) == 0
               if g:OmniSharp_server_display_loading
-                let elapsed = reltimestr(reltime(a:job.start_time))
-                echomsg 'Loaded server for ' . a:job.sln_or_dir . ' in: ' . elapsed . 'ms'
+                let elapsed = reltimefloat(reltime(a:job.start_time))
+                echomsg printf('Loaded server for %s in %.1fs',
+                \ a:job.sln_or_dir, elapsed)
               endif
               let a:job.loaded = 1
               silent doautocmd <nomodeline> User OmniSharpReady
 
-              " TODO: Remove this delay once we have better information about when the
-              " server is completely initialised:
+              " TODO: Remove this delay once we have better information about
+              " when the server is completely initialised:
               " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
               call timer_start(1000, function('s:ReplayRequests'))
               " call s:ReplayRequests()
