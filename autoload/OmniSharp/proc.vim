@@ -71,6 +71,7 @@ function! OmniSharp#proc#neovimJobStart(command) abort
     let opts['on_stdout'] = 'OmniSharp#proc#neovimOutHandler'
   endif
   let job = {
+  \ 'start_time': reltime(),
   \ 'job_id': jobstart(a:command, opts),
   \ 'partial': ''
   \}
