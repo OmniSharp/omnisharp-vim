@@ -58,7 +58,7 @@ nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
 nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_implementations) :OmniSharpFindImplementations<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_members) :OmniSharpFindMembers<CR>
-nnoremap <buffer> <Plug>(omnisharp_find_symbols) :OmniSharpFindSymbol<CR>
+nnoremap <buffer> <Plug>(omnisharp_find_symbol) :OmniSharpFindSymbol<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_usages) :OmniSharpFindUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_fix_usings) :OmniSharpFixUsings<CR>
 nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
