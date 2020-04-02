@@ -1,14 +1,16 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let g:OmniSharp_popup_opts = get(g:, 'OmniSharp_popup_opts', {
+let g:OmniSharp.popup = get(g:OmniSharp, 'popup', {})
+
+let s:popupDefaultOpts = {
 \ 'highlight': 'PMenu',
 \ 'padding': [0,1,1,1],
 \ 'border': [1,0,0,0],
 \ 'borderchars': [' '],
 \ 'mapping': v:true,
 \ 'scrollbar': v:true
-\})
+\}
 
 function! OmniSharp#popup#Buffer(bufnr, lnum, opts) abort
   let a:opts.firstline = a:lnum
@@ -29,6 +31,33 @@ function! OmniSharp#popup#Display(content, opts) abort
   else
     return s:Open(content, a:opts)
   endif
+endfunction
+
+function! OmniSharp#popup#Enabled() abort
+  if type(g:OmniSharp.popup) == type(0) && g:OmniSharp.popup == 0
+    return 0
+  endif
+  if !exists('s:supports_popups')
+    let s:supports_popups = 1
+    if has('nvim')
+      if !exists('*nvim_open_win')
+        call OmniSharp#util#EchoErr('Error: A newer version of neovim is required to support floating windows')
+        let s:supports_popups = 0
+      endif
+    else
+      if !has('patch-8.1.1963')
+        call OmniSharp#util#EchoErr('Error: A newer version of Vim is required to support popup windows')
+        let s:supports_popups = 0
+      endif
+    endif
+  endif
+  if !s:supports_popups
+    return 0
+  endif
+  if type(g:OmniSharp.popup) != type({})
+    let g:OmniSharp.popup = {}
+  endif
+  return 1
 endfunction
 
 " Create temporary, buffer-local mappings if buffer-local lhs(s) do not
@@ -96,7 +125,8 @@ function s:GetNvimOptions(opts) abort
 endfunction
 
 function s:GetVimOptions(opts) abort
-  let popupOpts = copy(g:OmniSharp_popup_opts)
+  let g:OmniSharp.popup.opts = get(g:OmniSharp.popup, 'opts', s:popupDefaultOpts)
+  let popupOpts = copy(g:OmniSharp.popup.opts)
   if len(keys(a:opts))
     call extend(popupOpts, a:opts)
   endif

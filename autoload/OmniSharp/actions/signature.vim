@@ -61,7 +61,7 @@ function! s:CBSignatureHelp(opts, response) abort
     if !has_key(a:opts, 'ForCompleteMethod')
       echo 'No signature help found'
     endif
-    if !OmniSharp#PreferPopups()
+    if !OmniSharp#popup#Enabled()
       " Clear existing preview content
       call OmniSharp#preview#Display('', 'SignatureHelp')
     endif
@@ -131,7 +131,7 @@ function! OmniSharp#actions#signature#Display(deltaSig, deltaParam) abort
   \ 'ParamsAndExceptions': s:last.ParamsAndExceptions
   \})
 
-  if OmniSharp#PreferPopups()
+  if OmniSharp#popup#Enabled()
     let opts = {}
     if has_key(s:last, 'winid')
       let opts.winid = s:last.winid

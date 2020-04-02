@@ -30,7 +30,7 @@ endfunction
 
 function! s:StdioGetCompletions(partial, Callback) abort
   " TODO: Specific option to disable rich documentation in popups
-  let wantDocPopup = OmniSharp#PreferPopups()
+  let wantDocPopup = OmniSharp#popup#Enabled()
   \ && g:omnicomplete_fetch_full_documentation
   \ && &completeopt =~# 'popup'
   let wantDoc = wantDocPopup ? 'false'

@@ -48,7 +48,7 @@ function! s:CBTypeLookup(opts, response) abort
   let l:type = a:response.Type != v:null ? a:response.Type : ''
   if a:opts.Doc
     let content = trim(l:type . OmniSharp#actions#documentation#Format(a:response, {}))
-    if OmniSharp#PreferPopups()
+    if OmniSharp#popup#Enabled()
       let winid = OmniSharp#popup#Display(content, a:opts)
       call setbufvar(winbufnr(winid), '&filetype', 'omnisharpdoc')
       call setwinvar(winid, '&conceallevel', 3)

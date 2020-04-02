@@ -331,7 +331,7 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
 endfunction
 
 function! s:PreviewLocation(location) abort
-  if OmniSharp#PreferPopups()
+  if OmniSharp#popup#Enabled()
     let bufnr = bufadd(a:location.filename)
     " neovim requires that the buffer be explicitly loaded
     call bufload(bufnr)
@@ -1323,18 +1323,6 @@ function! s:BustAliveCache(...) abort
   if idx != -1
     call remove(s:alive_cache, idx)
   endif
-endfunction
-
-function! OmniSharp#PreferPopups() abort
-  let g:OmniSharp.popup = get(g:OmniSharp, 'popup', {})
-  if (type(g:OmniSharp.popup) == type(0) && g:OmniSharp.popup == 0)
-  \ || !OmniSharp#util#SupportsPopups()
-    return 0
-  endif
-  if type(g:OmniSharp.popup) != type({})
-    let g:OmniSharp.popup = {}
-  endif
-  return 1
 endfunction
 
 function! s:SetQuickFix(list, title)
