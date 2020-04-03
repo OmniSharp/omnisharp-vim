@@ -118,16 +118,19 @@ function! s:GetDocumentationDelayed() abort
 endfunction
 
 function! s:GetDocumentation(completed_item, timer) abort
-  let method = split(a:completed_item.info, "\n")[0]
+  let info = split(a:completed_item.info, "\n")[0]
   let id = popup_findinfo()
   if id
-    if method =~# '('
+    if info =~# '('
       call OmniSharp#actions#signature#SignatureHelp({
       \ 'winid': id,
-      \ 'ForCompleteMethod': method
+      \ 'ForCompleteMethod': info
       \})
     else
-      call OmniSharp#actions#documentation#Documentation({ 'winid': id })
+      call OmniSharp#actions#documentation#Documentation({
+      \ 'winid': id,
+      \ 'ForCompletion': info
+      \})
     endif
   endif
 endfunction

@@ -49,6 +49,10 @@ function! s:CBTypeLookup(opts, response) abort
   if a:opts.Doc
     let content = trim(l:type . OmniSharp#actions#documentation#Format(a:response, {}))
     if OmniSharp#popup#Enabled()
+      if has_key(a:opts, 'ForCompletion')
+        " If the popupmenu has already closed, exit early
+        if !pumvisible() | return | endif
+      endif
       let winid = OmniSharp#popup#Display(content, a:opts)
       call setbufvar(winbufnr(winid), '&filetype', 'omnisharpdoc')
       call setwinvar(winid, '&conceallevel', 3)
