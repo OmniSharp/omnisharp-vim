@@ -3,15 +3,6 @@ set cpoptions&vim
 
 let g:OmniSharp.popup = get(g:OmniSharp, 'popup', {})
 
-let s:popupDefaultOpts = {
-\ 'highlight': 'PMenu',
-\ 'padding': [0,1,1,1],
-\ 'border': [1,0,0,0],
-\ 'borderchars': [' '],
-\ 'mapping': v:true,
-\ 'scrollbar': v:true
-\}
-
 function! OmniSharp#popup#Buffer(bufnr, lnum, opts) abort
   let a:opts.firstline = a:lnum
   return s:Open(a:bufnr, a:opts)
@@ -21,7 +12,10 @@ function! OmniSharp#popup#Display(content, opts) abort
   let content = map(split(a:content, "\n", 1),
   \ {i,v -> substitute(v, '\r', '', 'g')})
   if has_key(a:opts, 'winid')
-    let popupOpts = s:GetVimOptions(a:opts)
+    " a:opts.winid is currently only set when using SignatureHelp for completion
+    " method documentation. This is Vim only, until neovim implements
+    " completeopt+=popup (or we write our own version).
+    let popupOpts = s:VimGetOptions(a:opts)
     call popup_setoptions(a:opts.winid, popupOpts)
     call popup_settext(a:opts.winid, split(a:content, "\n"))
     if !popup_getpos(a:opts.winid).visible
@@ -41,12 +35,14 @@ function! OmniSharp#popup#Enabled() abort
     let s:supports_popups = 1
     if has('nvim')
       if !exists('*nvim_open_win')
-        call OmniSharp#util#EchoErr('Error: A newer version of neovim is required to support floating windows')
+        call OmniSharp#util#EchoErr(
+        \ 'A newer version of neovim is required to support floating windows')
         let s:supports_popups = 0
       endif
     else
       if !has('patch-8.1.1963')
-        call OmniSharp#util#EchoErr('Error: A newer version of Vim is required to support popup windows')
+        call OmniSharp#util#EchoErr(
+        \ 'A newer version of Vim is required to support popup windows')
         let s:supports_popups = 0
       endif
     endif
@@ -112,50 +108,13 @@ function s:CloseLastNvimOnMove() abort
   endif
 endfunction
 
-function s:GetNvimOptions(opts) abort
-  return {
-  \ 'relative': 'cursor',
-  \ 'width': max([&columns / 2, 80]),
-  \ 'height': max([&lines / 2, 10]),
-  \ 'row': 1,
-  \ 'col': 1,
-  \ 'focusable': v:false,
-  \ 'style': 'minimal'
-  \}
-endfunction
-
-function s:GetVimOptions(opts) abort
-  let g:OmniSharp.popup.opts = get(g:OmniSharp.popup, 'opts', s:popupDefaultOpts)
-  let popupOpts = copy(g:OmniSharp.popup.opts)
-  if len(keys(a:opts))
-    call extend(popupOpts, a:opts)
-  endif
-  return popupOpts
-endfunction
-
 function s:Open(what, opts) abort
   call s:CloseLast(0)
   let s:popupMaps = []
   let s:lastwinpos = [line('.'), col('.')]
   let mode = get(a:opts, 'mode', mode())
   if has('nvim')
-    if type(a:what) == v:t_number
-      let bufnr = a:what
-    else
-      let bufnr = nvim_create_buf(v:false, v:true)
-      call setbufline(bufnr, 1, a:what)
-      " call nvim_buf_set_lines(bufnr, 1, 1, 0, a:what)
-    endif
-    let s:lastwinid = nvim_open_win(bufnr, v:false, s:GetNvimOptions(a:opts))
-    let s:parentwinid = win_getid(winnr())
-    if has_key(a:opts, 'firstline')
-      call s:NvimPopupNormal(a:opts.firstline . 'Gzt', 0)
-    endif
-    call nvim_win_set_option(s:lastwinid, 'wrap', v:true)
-    augroup OmniSharp_nvim_popup
-      autocmd CursorMoved <buffer> call s:CloseLastNvimOnMove()
-      autocmd CursorMovedI <buffer> call s:CloseLastNvimOnMove()
-    augroup END
+    let s:lastwinid = s:NvimOpen(a:what, a:opts)
     call OmniSharp#popup#Map(mode, 'lineDown',     '<C-e>', "<SID>NvimPopupNormal('e', 1)")
     call OmniSharp#popup#Map(mode, 'lineUp',       '<C-y>', "<SID>NvimPopupNormal('y', 1)")
     call OmniSharp#popup#Map(mode, 'halfPageDown', '<C-d>', "<SID>NvimPopupNormal('d', 1)")
@@ -163,9 +122,7 @@ function s:Open(what, opts) abort
     call OmniSharp#popup#Map(mode, 'pageDown',     '<C-f>', "<SID>NvimPopupNormal('f', 1)")
     call OmniSharp#popup#Map(mode, 'pageUp',       '<C-b>', "<SID>NvimPopupNormal('b', 1)")
   else
-    let popupOpts = s:GetVimOptions(a:opts)
-    let popupOpts.callback = function('s:Unmap')
-    let s:lastwinid = popup_atcursor(a:what, popupOpts)
+    let s:lastwinid = s:VimOpen(a:what, a:opts)
     call OmniSharp#popup#Map(mode, 'lineDown',     '<C-e>', '<SID>VimPopupScrollLine(1)')
     call OmniSharp#popup#Map(mode, 'lineUp',       '<C-y>', '<SID>VimPopupScrollLine(-1)')
     call OmniSharp#popup#Map(mode, 'halfPageDown', '<C-d>', '<SID>VimPopupScrollPage(0.5)')
@@ -180,13 +137,49 @@ function s:Open(what, opts) abort
   return s:lastwinid
 endfunction
 
-" Editing buffers is not allowed from <expr> mappings. The popup mappings are
-" all <expr> mappings so they can be used consistently across modes, so instead
-" of running the functions directly, they are run in an immediately executed
-" timer callback.
-function! s:PopupMapWrapper(funcall) abort
-  execute printf('call timer_start(0, {-> %s})', a:funcall)
-  return "\<Ignore>"
+function s:NvimGetOptions() abort
+  if !exists('s:initialised')
+    let defaultOptions = {
+    \ 'wrap': v:true
+    \}
+    let g:OmniSharp.popup.options = get(g:OmniSharp.popup, 'options', {})
+    call extend(g:OmniSharp.popup.options, defaultOptions, 'keep')
+    let s:initialised = 1
+  endif
+  return g:OmniSharp.popup.options
+endfunction
+
+function! s:NvimOpen(what, opts) abort
+  if type(a:what) == v:t_number
+    let bufnr = a:what
+  else
+    let bufnr = nvim_create_buf(v:false, v:true)
+    call setbufline(bufnr, 1, a:what)
+  endif
+  " TODO: Open in different positions: atcursor, as a 'peek', 'centered'
+  let config = {
+  \ 'relative': 'cursor',
+  \ 'width': max([&columns / 2, 80]),
+  \ 'height': max([&lines / 2, 10]),
+  \ 'row': 1,
+  \ 'col': 1,
+  \ 'focusable': v:false,
+  \ 'style': 'minimal'
+  \}
+  let s:parentwinid = win_getid(winnr())
+  let winid = nvim_open_win(bufnr, v:false, config)
+  let options = s:NvimGetOptions()
+  for opt in keys(options)
+    call nvim_win_set_option(winid, opt, options[opt])
+  endfor
+  if has_key(a:opts, 'firstline')
+    call s:NvimPopupNormal(a:opts.firstline . 'Gzt', 0)
+  endif
+  augroup OmniSharp_nvim_popup
+    autocmd CursorMoved <buffer> call s:CloseLastNvimOnMove()
+    autocmd CursorMovedI <buffer> call s:CloseLastNvimOnMove()
+  augroup END
+  return winid
 endfunction
 
 " Neovim scrolling works by giving focus to the popup and running normal-mode
@@ -199,6 +192,38 @@ function! s:NvimPopupNormal(commands, wrapWithCtrl)
     execute 'normal!' a:commands
   endif
   call nvim_set_current_win(s:parentwinid)
+endfunction
+
+" Editing buffers is not allowed from <expr> mappings. The popup mappings are
+" all <expr> mappings so they can be used consistently across modes, so instead
+" of running the functions directly, they are run in an immediately executed
+" timer callback.
+function! s:PopupMapWrapper(funcall) abort
+  execute printf('call timer_start(0, {-> %s})', a:funcall)
+  return "\<Ignore>"
+endfunction
+
+function s:VimGetOptions(opts) abort
+  if !exists('s:initialised')
+    let defaultOptions = {
+    \ 'mapping': v:true,
+    \ 'scrollbar': v:true
+    \}
+    let g:OmniSharp.popup.options = get(g:OmniSharp.popup, 'options', {})
+    call extend(g:OmniSharp.popup.options, defaultOptions, 'keep')
+    let s:initialised = 1
+  endif
+  return extend(copy(g:OmniSharp.popup.options), a:opts)
+endfunction
+
+function! s:VimOpen(what, opts) abort
+  let popupOpts = s:VimGetOptions(a:opts)
+  let popupOpts.callback = function('s:Unmap')
+
+  " TODO: Open in different positions: atcursor, as a 'peek', 'centered'
+  let winid = popup_atcursor(a:what, popupOpts)
+
+  return winid
 endfunction
 
 " Popup scrolling functions by @bfrg from https://github.com/vim/vim/issues/5170

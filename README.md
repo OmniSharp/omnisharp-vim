@@ -360,7 +360,7 @@ When a recent enough Vim or neovim is used, OmniSharp-vim will use Vim's popup w
 * `:OmniSharpSignatureHelp`
 * `:OmniSharpPreviewDefinition` (including metadata)
 * `:OmniSharpPreviewImplementation`
-* completion documentation
+* completion documentation (Vim only)
 
 OmniSharp-vim will use popups by default for Vims/neovims which support them.
 To disable popups completely, set `g:OmniSharp.popup` to `0`:
@@ -368,6 +368,8 @@ To disable popups completely, set `g:OmniSharp.popup` to `0`:
 ```vim
 let g:OmniSharp = { 'popup': 0 }
 ```
+
+### Popup mappings
 
 Apart from the insert-completion documentation window, all popups are closeable/scrollable using these mappings:
 
@@ -406,6 +408,38 @@ let g:OmniSharp = {
 ```
 
 Popups can be closed by using the `close` action mapping (`<Esc>` by default), and also by simply navigating to another line.
+
+### Popup styling
+
+Vim and neovim have different options for styling popups.
+
+#### Popup styling for Vim
+
+The popup options from [:help popup_create-arguments](http://vimhelp.appspot.com/popup.txt.html#popup_create-arguments) can be used to style Vim popups.
+By default, Vim uses the `Pmenu` highlight group, with no border or padding.
+Add a border and padding, and use the `Normal` highlight group like this:
+
+```vim
+let g:OmniSharp.popup.options = {
+\ 'highlight': 'Normal',
+\ 'padding': [1],
+\ 'border': [1]
+\}
+```
+
+See the `:help` link above for options for border characters, border highlight groups etc.
+
+#### Popup styling for neovim
+
+The `g:OmniSharp.popup.options` dictionary is a set of window options which can be set for the popup.
+Enable pseudo-transparency and change the highlight group from the default `NormalFloat` to `Normal` like this:
+
+```vim
+let g:OmniSharp.popup.options = {
+\ 'winblend': 30,
+\ 'winhl': 'Normal:Normal'
+\}
+```
 
 ## Configuration
 
