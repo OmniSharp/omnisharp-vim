@@ -115,12 +115,12 @@ function s:Open(what, opts) abort
   let mode = get(a:opts, 'mode', mode())
   if has('nvim')
     let s:lastwinid = s:NvimOpen(a:what, a:opts)
-    call OmniSharp#popup#Map(mode, 'lineDown',     '<C-e>', "<SID>NvimPopupNormal('e', 1)")
-    call OmniSharp#popup#Map(mode, 'lineUp',       '<C-y>', "<SID>NvimPopupNormal('y', 1)")
-    call OmniSharp#popup#Map(mode, 'halfPageDown', '<C-d>', "<SID>NvimPopupNormal('d', 1)")
-    call OmniSharp#popup#Map(mode, 'halfPageUp',   '<C-u>', "<SID>NvimPopupNormal('u', 1)")
-    call OmniSharp#popup#Map(mode, 'pageDown',     '<C-f>', "<SID>NvimPopupNormal('f', 1)")
-    call OmniSharp#popup#Map(mode, 'pageUp',       '<C-b>', "<SID>NvimPopupNormal('b', 1)")
+    call OmniSharp#popup#Map(mode, 'lineDown',     '<C-e>', "<SID>NvimPopupNormal('e')")
+    call OmniSharp#popup#Map(mode, 'lineUp',       '<C-y>', "<SID>NvimPopupNormal('y')")
+    call OmniSharp#popup#Map(mode, 'halfPageDown', '<C-d>', "<SID>NvimPopupNormal('d')")
+    call OmniSharp#popup#Map(mode, 'halfPageUp',   '<C-u>', "<SID>NvimPopupNormal('u')")
+    call OmniSharp#popup#Map(mode, 'pageDown',     '<C-f>', "<SID>NvimPopupNormal('f')")
+    call OmniSharp#popup#Map(mode, 'pageUp',       '<C-b>', "<SID>NvimPopupNormal('b')")
   else
     let s:lastwinid = s:VimOpen(a:what, a:opts)
     call OmniSharp#popup#Map(mode, 'lineDown',     '<C-e>', '<SID>VimPopupScrollLine(1)')
@@ -152,15 +152,25 @@ endfunction
 function! s:NvimOpen(what, opts) abort
   if type(a:what) == v:t_number
     let bufnr = a:what
+    let lines = getbufline(bufnr, 1, '$')
   else
     let bufnr = nvim_create_buf(v:false, v:true)
     call setbufline(bufnr, 1, a:what)
+    let lines = a:what
   endif
-  " TODO: Open in different positions: atcursor, as a 'peek', 'centered'
+  " TODO: Open 'peekable' popups (buffers, not documentation) in different
+  " positions: atcursor, as a 'peek', 'centered'
+  let content_height = len(lines)
+  " Initial height: full screen height, so window height (including wrapped
+  " lines) can be calculated below
+  let height = &lines
+  let content_width = max(map(lines, 'len(v:val)'))
+  let available = &columns - screencol()
+  let width = max([50, min([available, content_width])])
   let config = {
   \ 'relative': 'cursor',
-  \ 'width': max([&columns / 2, 80]),
-  \ 'height': max([&lines / 2, 10]),
+  \ 'width': width,
+  \ 'height': height,
   \ 'row': 1,
   \ 'col': 1,
   \ 'focusable': v:false,
@@ -172,9 +182,17 @@ function! s:NvimOpen(what, opts) abort
   for opt in keys(options)
     call nvim_win_set_option(winid, opt, options[opt])
   endfor
+  call nvim_set_current_win(winid)
+  " Go to bottom of popup and use winline() to find the actual window height
+  normal! G$
+  let height = max([winline(), content_height])
+  call nvim_win_set_config(winid, { 'height': height })
   if has_key(a:opts, 'firstline')
-    call s:NvimPopupNormal(a:opts.firstline . 'Gzt', 0)
+    execute 'normal!' a:opts.firstline . 'Gzt'
+  else
+    normal! G
   endif
+  call nvim_set_current_win(s:parentwinid)
   augroup OmniSharp_nvim_popup
     autocmd CursorMoved <buffer> call s:CloseLastNvimOnMove()
     autocmd CursorMovedI <buffer> call s:CloseLastNvimOnMove()
@@ -184,13 +202,9 @@ endfunction
 
 " Neovim scrolling works by giving focus to the popup and running normal-mode
 " commands
-function! s:NvimPopupNormal(commands, wrapWithCtrl)
+function! s:NvimPopupNormal(commands)
   call nvim_set_current_win(s:lastwinid)
-  if a:wrapWithCtrl
-    execute 'normal!' eval(printf('"\<C-%s>"', a:commands))
-  else
-    execute 'normal!' a:commands
-  endif
+  execute 'normal!' eval(printf('"\<C-%s>"', a:commands))
   call nvim_set_current_win(s:parentwinid)
 endfunction
 
@@ -219,10 +233,9 @@ endfunction
 function! s:VimOpen(what, opts) abort
   let popupOpts = s:VimGetOptions(a:opts)
   let popupOpts.callback = function('s:Unmap')
-
-  " TODO: Open in different positions: atcursor, as a 'peek', 'centered'
+  " TODO: Open 'peekable' popups (buffers, not documentation) in different
+  " positions: atcursor, as a 'peek', 'centered'
   let winid = popup_atcursor(a:what, popupOpts)
-
   return winid
 endfunction
 
