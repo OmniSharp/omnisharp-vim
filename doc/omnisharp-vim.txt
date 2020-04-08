@@ -92,6 +92,30 @@ Apply multiple mappings by providing a list of mappings instead of a string: >
 Disable individual mappings by assigning an empty array: >
     let g:OmniSharp.popup.mappings.sigNext = []
 <
+                                                    *'g:OmniSharp.popup.options'*
+Dictionary of popup display options. Note that these are different in Vim and
+Neovim.
+
+Vim: |g:OmniSharp.popup.options| are used as |popup_create-arguments| when
+creating popups.
+Example: open popups with the |hl-Normal| highlight group (instead of the
+default |hl-Pmenu|), a border and padding: >
+    let g:OmniSharp.popup.options = {
+    \ 'highlight': 'Normal',
+    \ 'padding': [1],
+    \ 'border': [1]
+    \}
+<
+Neovim: |g:OmniSharp.popup.options| is a dictionary of window options which
+are to be set for popup windows.
+Example: disable 'wrap', enable pseudo-transparency with 'winblend' and change
+the highlight group from the default |hl-NormalFloat| to |hl-Normal| like this: >
+    let g:OmniSharp.popup.options = {
+    \ 'wrap': v:false,
+    \ 'winblend': 30,
+    \ 'winhl': 'Normal:Normal'
+    \}
+<
                                                      *'g:OmniSharp_server_stdio'*
 Use the stdio version of OmniSharp-roslyn. When the stdio version is used,
 OmniSharp-vim interacts asynchronously with it, with no other dependencies.
