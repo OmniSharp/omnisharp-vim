@@ -190,7 +190,7 @@ function! s:NvimOpen(what, opts) abort
   if has_key(a:opts, 'firstline')
     execute 'normal!' a:opts.firstline . 'Gzt'
   else
-    normal! G
+    normal! G0
   endif
   call nvim_set_current_win(s:parentwinid)
   augroup OmniSharp_nvim_popup
