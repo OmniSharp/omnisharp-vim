@@ -54,19 +54,22 @@ function! fzf#OmniSharp#GetCodeActions(mode, actions) abort
   let s:match_on_prefix = 0
   let s:actions = a:actions
 
-  " Check whether any actions contain non-ascii characters. These are not
-  " reliably passed to FZF and back, so rather than matching on the action name,
-  " an index will be prefixed and the selected action will be selected by prefix
-  " instead.
-  for action in s:actions
-    if action.Name =~# '[^\x00-\x7F]'
-      let s:match_on_prefix = 1
-      break
+  if has('win32')
+    " Check whether any actions contain non-ascii characters. These are not
+    " reliably passed to FZF and back, so rather than matching on the action name,
+    " an index will be prefixed and the selected action will be selected by prefix
+    " instead.
+    for action in s:actions
+      if action.Name =~# '[^\x00-\x7F]'
+        let s:match_on_prefix = 1
+        break
+      endif
+    endfor
+    if s:match_on_prefix
+      call map(s:actions, {i,v -> extend(v, {'Name': i . ': ' . v.Name})})
     endif
-  endfor
-  if s:match_on_prefix
-    call map(s:actions, {i,v -> extend(v, {'Name': i . ': ' . v.Name})})
   endif
+
   let s:mode = a:mode
   let actionNames = map(copy(s:actions), 'v:val.Name')
 
