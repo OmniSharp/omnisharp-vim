@@ -409,7 +409,7 @@ let g:OmniSharp = {
 
 Popups can be closed by using the `close` action mapping (`<Esc>` by default), and also by simply navigating to another line.
 
-### Popup styling
+### Popup options
 
 Vim and neovim have different options for styling popups.
 
@@ -440,6 +440,16 @@ let g:OmniSharp.popup.options = {
 \ 'winhl': 'Normal:Normal'
 \}
 ```
+
+### Popup position
+
+The "documentation" popups (including signature help) are always opened as close as possible to the cursor.
+However "buffer" popups (previewing definitions and implementations) may be configured to open in different ways, using the `g:OmniSharp.popup.position` value:
+
+- `atcursor`: (default) Next to the cursor. Height expands to display as much as possible, so this may result in a very high window.
+- `peek`: Opens below or above the cursor, with the full width of the current window. Looks like a split, without altering window layout.
+- `center`: Centered in the Vim window, filling the entire workspace.
+
 
 ## Configuration
 

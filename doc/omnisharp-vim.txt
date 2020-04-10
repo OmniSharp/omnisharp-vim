@@ -116,6 +116,23 @@ the highlight group from the default |hl-NormalFloat| to |hl-Normal| like this: 
     \ 'winhl': 'Normal:Normal'
     \}
 <
+                                                   *'g:OmniSharp.popup.position'*
+How popups displaying file buffers (definition, implementation and metadata)
+should be positioned. Note that this does not include documentation and
+signature-help popups, which display text but not file buffers.
+
+           atcursor Position the popup next the cursor where possible.
+
+           peek     Show the popup as if it were in a horizontal split below
+                    or above the cursor. The window height is 1/3rd the height
+                    of the parent window.
+
+           center   The popup is positioned in the center of the Vim window,
+                    filling the entire Vim view, ignoring splits.
+
+Default: atcursor >
+    let g:OmniSharp.popup.position = 'peek'
+<
                                                      *'g:OmniSharp_server_stdio'*
 Use the stdio version of OmniSharp-roslyn. When the stdio version is used,
 OmniSharp-vim interacts asynchronously with it, with no other dependencies.
@@ -258,19 +275,19 @@ Default: >
 Use this option to specify the host address of the OmniSharp server. Using this
 will not play well with the auto-start functionality, so you should probably
 set g:OmniSharp_start_server = 0
-Default: 'http://localhost:2000' >
+Default: http://localhost:2000 >
     let g:OmniSharp_host = 'http://localhost:2000'
 <
                                                          *'g:OmniSharp_loglevel'*
 Sets the log level.
 
 For stdio (when |g:OmniSharp_server_stdio| is 1), the possible values are
-'debug', 'info' and 'none'. 'info' means log messages received from the
-server, and 'debug' means also log the raw JSON request and response bodies.
+"debug", "info" and "none". "info" means log messages received from the
+server, and "debug" means also log the raw JSON request and response bodies.
 Default: info
 
-For HTTP, sets the log level for the python code. Possible values are 'debug',
-'info', 'warning', 'error', and 'critical'.
+For HTTP, sets the log level for the python code. Possible values are "debug",
+"info", "warning", "error", and "critical".
 Default: warning >
     let g:OmniSharp_loglevel = 'warning'
 <

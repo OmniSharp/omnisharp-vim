@@ -108,6 +108,14 @@ function s:CloseLastNvimOnMove() abort
   endif
 endfunction
 
+function s:InitialiseOptions(defaultOptions) abort
+  if !exists('s:initialised')
+    let g:OmniSharp.popup.options = get(g:OmniSharp.popup, 'options', {})
+    call extend(g:OmniSharp.popup.options, a:defaultOptions, 'keep')
+    let s:initialised = 1
+  endif
+endfunction
+
 function s:Open(what, opts) abort
   call s:CloseLast(0)
   let s:popupMaps = []
@@ -138,14 +146,7 @@ function s:Open(what, opts) abort
 endfunction
 
 function s:NvimGetOptions() abort
-  if !exists('s:initialised')
-    let defaultOptions = {
-    \ 'wrap': v:true
-    \}
-    let g:OmniSharp.popup.options = get(g:OmniSharp.popup, 'options', {})
-    call extend(g:OmniSharp.popup.options, defaultOptions, 'keep')
-    let s:initialised = 1
-  endif
+  call s:InitialiseOptions({})
   return g:OmniSharp.popup.options
 endfunction
 
@@ -158,24 +159,38 @@ function! s:NvimOpen(what, opts) abort
     call setbufline(bufnr, 1, a:what)
     let lines = a:what
   endif
-  " TODO: Open 'peekable' popups (buffers, not documentation) in different
-  " positions: atcursor, as a 'peek', 'centered'
   let content_height = len(lines)
-  " Initial height: full screen height, so window height (including wrapped
-  " lines) can be calculated below
-  let height = &lines
-  let content_width = max(map(lines, 'len(v:val)'))
-  let available = &columns - screencol()
-  let width = max([50, min([available, content_width])])
+  let position = get(g:OmniSharp.popup, 'position', 'atcursor')
   let config = {
-  \ 'relative': 'cursor',
-  \ 'width': width,
-  \ 'height': height,
-  \ 'row': 1,
-  \ 'col': 1,
   \ 'focusable': v:false,
   \ 'style': 'minimal'
   \}
+  " Positions 'peek' and 'full' only apply to file buffers, not documentation
+  " buffers
+  if type(a:what) == v:t_number && position ==? 'peek'
+    let config.relative = 'cursor'
+    let config.row = 1
+    let config.col = 0 - wincol() + 2
+    let config.height = max([5, winheight('.') / 3])
+    let config.width = winwidth('.') - 1
+  elseif type(a:what) == v:t_number && position ==? 'center'
+    let config.relative = 'editor'
+    let config.row = 2
+    let config.col = 2
+    let config.height = &lines - 4
+    let config.width = &columns - 4
+  else
+    let config.relative = 'cursor'
+    let config.row = 1
+    let config.col = 1
+    " Initial height: full screen height, so window height (including wrapped
+    " lines) can be calculated below
+    let calculatingHeight = 1
+    let config.height = &lines
+    let content_width = max(map(lines, 'len(v:val)'))
+    let available = &columns - screencol()
+    let config.width = max([50, min([available, content_width])])
+  endif
   let s:parentwinid = win_getid(winnr())
   let winid = nvim_open_win(bufnr, v:false, config)
   let options = s:NvimGetOptions()
@@ -183,10 +198,12 @@ function! s:NvimOpen(what, opts) abort
     call nvim_win_set_option(winid, opt, options[opt])
   endfor
   call nvim_set_current_win(winid)
-  " Go to bottom of popup and use winline() to find the actual window height
-  normal! G$
-  let height = max([winline(), content_height])
-  call nvim_win_set_config(winid, { 'height': height })
+  if exists('calculatingHeight')
+    " Go to bottom of popup and use winline() to find the actual window height
+    normal! G$
+    let config.height = max([winline(), content_height])
+    call nvim_win_set_config(winid, { 'height': config.height })
+  endif
   if has_key(a:opts, 'firstline')
     execute 'normal!' a:opts.firstline . 'Gzt'
   else
@@ -217,25 +234,65 @@ function! s:PopupMapWrapper(funcall) abort
   return "\<Ignore>"
 endfunction
 
+function s:Unmap(...) abort
+  for popupmap in get(s:, 'popupMaps', [])
+    try
+      execute popupmap[0] . 'unmap <buffer>' popupmap[1]
+    catch | endtry
+  endfor
+  let s:popupMaps = []
+endfunction
+
 function s:VimGetOptions(opts) abort
-  if !exists('s:initialised')
-    let defaultOptions = {
-    \ 'mapping': v:true,
-    \ 'scrollbar': v:true
-    \}
-    let g:OmniSharp.popup.options = get(g:OmniSharp.popup, 'options', {})
-    call extend(g:OmniSharp.popup.options, defaultOptions, 'keep')
-    let s:initialised = 1
-  endif
+  call s:InitialiseOptions({
+  \ 'mapping': v:true,
+  \ 'scrollbar': v:true
+  \})
   return extend(copy(g:OmniSharp.popup.options), a:opts)
 endfunction
 
 function! s:VimOpen(what, opts) abort
   let popupOpts = s:VimGetOptions(a:opts)
   let popupOpts.callback = function('s:Unmap')
-  " TODO: Open 'peekable' popups (buffers, not documentation) in different
-  " positions: atcursor, as a 'peek', 'centered'
-  let winid = popup_atcursor(a:what, popupOpts)
+  let position = get(g:OmniSharp.popup, 'position', 'atcursor')
+  " Positions 'peek' and 'full' only apply to file buffers, not documentation
+  " buffers
+  if type(a:what) == v:t_number && position ==? 'peek'
+    let height = max([5, winheight('.') / 3])
+    let popupOpts.line = 'cursor+1'
+    let popupOpts.col = win_screenpos('.')[1]
+    let popupOpts.maxheight = height
+    let popupOpts.minheight = popupOpts.maxheight
+    let popupOpts.maxwidth = winwidth('.') - 1
+    let popupOpts.minwidth = popupOpts.maxwidth
+    let popupOpts.border = get(popupOpts, 'border', [1, 0, 1, 0])
+    if len(popupOpts.border) == 1
+      let b = popupOpts.border[0]
+      let popupOpts.border = [b, b, b, b]
+    endif
+    if popupOpts.border[1] | let popupOpts.border[1] = 0 | endif
+    if popupOpts.border[3] | let popupOpts.border[3] = 0 | endif
+    let popupOpts.padding = get(popupOpts, 'padding', [1, 0, 1, 0])
+    if len(popupOpts.padding) == 1
+      let b = popupOpts.padding[0]
+      let popupOpts.padding = [b, b, b, b]
+    endif
+    if popupOpts.padding[1] | let popupOpts.padding[1] = 0 | endif
+    if popupOpts.padding[3] | let popupOpts.padding[3] = 0 | endif
+    if !has_key(popupOpts, 'wrap') | let popupOpts.wrap = v:false | endif
+    let popupOpts.moved = 'any'
+    let winid = popup_create(a:what, popupOpts)
+  elseif type(a:what) == v:t_number && position ==? 'center'
+    let popupOpts.pos = 'center'
+    let popupOpts.maxheight = &lines - 6
+    let popupOpts.minheight = popupOpts.maxheight
+    let popupOpts.maxwidth = &columns - 6
+    let popupOpts.minwidth = popupOpts.maxwidth
+    let popupOpts.moved = 'any'
+    let winid = popup_create(a:what, popupOpts)
+  else
+    let winid = popup_atcursor(a:what, popupOpts)
+  endif
   return winid
 endfunction
 
@@ -255,15 +312,6 @@ function! s:VimPopupScrollPage(size) abort
   let height = popup_getpos(s:lastwinid).core_height
   let step = float2nr(height * a:size)
   call s:VimPopupScrollLine(step)
-endfunction
-
-function s:Unmap(...) abort
-  for popupmap in get(s:, 'popupMaps', [])
-    try
-      execute popupmap[0] . 'unmap <buffer>' popupmap[1]
-    catch | endtry
-  endfor
-  let s:popupMaps = []
 endfunction
 
 
