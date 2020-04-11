@@ -11,6 +11,10 @@ OmniSharp works on Windows, and on Linux and OS X with Mono.
 
 The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code, Emacs, Atom and others.
 
+## New! Popups
+
+Use Vim's popup windows and neovim's floating windows to display code/documentation without disrupting your window layouts: see [Popups](#popups) section for details and configuration options.
+
 ## New! Run unit tests
 
 Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
@@ -348,6 +352,105 @@ let g:OmniSharp_diagnostic_showid = 1
 
 *Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
 
+## Popups
+
+When a recent enough Vim or neovim is used, OmniSharp-vim will use Vim's popup windows or neovim's floating windows in certain situations:
+
+* `:OmniSharpDocumentation`
+* `:OmniSharpSignatureHelp`
+* `:OmniSharpPreviewDefinition` (including metadata)
+* `:OmniSharpPreviewImplementation`
+* completion documentation (Vim only)
+
+OmniSharp-vim will use popups by default for Vims/neovims which support them.
+To disable popups completely, set `g:OmniSharp.popup` to `0`:
+
+```vim
+let g:OmniSharp = { 'popup': 0 }
+```
+
+### Popup mappings
+
+Apart from the insert-completion documentation window, all popups are closeable/scrollable using these mappings:
+
+| Action name    | Default mapping |
+|----------------|-----------------|
+| `close`        | `<Esc>`         |
+| `lineDown`     | `<C-e>`         |
+| `lineUp`       | `<C-y>`         |
+| `halfPageDown` | `<C-d>`         |
+| `halfPageUp`   | `<C-u>`         |
+| `pageDown`     | `<C-f>`         |
+| `pageUp`       | `<C-b>`         |
+
+Additionally, the signature-help popup window provides the following mappings for navigating through method signatures and selected parameters:
+
+| Action name    | Default mapping |
+|----------------|-----------------|
+| `sigNext`      | `<C-j>`         |
+| `sigPrev`      | `<C-k>`         |
+| `sigParamNext` | `<C-l>`         |
+| `sigParamPrev` | `<C-h>`         |
+
+These mappings are all configurable, and you can configure more than one mapping for an action, so to use e.g. `CTRL-N` and `CTRL-P` to navigate between signatures instead of `CTRL-J` and `CTRL-K` and to use either `CTRL-E`/`CTRL-Y` or `j`/`k` for single line scrolling, use `g:OmniSharp.popup.mappings` like this:
+
+```vim
+let g:OmniSharp = {
+\ 'popup': {
+\   'mappings': {
+\     'sigNext': '<C-n>',
+\     'sigPrev': '<C-p>',
+\     'lineDown': ['<C-e>', 'j'],
+\     'lineUp': ['<C-y>', 'k']
+\   }
+\ }
+\}
+```
+
+Popups can be closed by using the `close` action mapping (`<Esc>` by default), and also by simply navigating to another line.
+
+### Popup options
+
+Vim and neovim have different options for styling popups.
+
+#### Popup styling for Vim
+
+The popup options from [:help popup_create-arguments](http://vimhelp.appspot.com/popup.txt.html#popup_create-arguments) can be used to style Vim popups.
+By default, Vim uses the `Pmenu` highlight group, with no border or padding.
+Add a border and padding, and use the `Normal` highlight group like this:
+
+```vim
+let g:OmniSharp.popup.options = {
+\ 'highlight': 'Normal',
+\ 'padding': [1],
+\ 'border': [1]
+\}
+```
+
+See the `:help` link above for options for border characters, border highlight groups etc.
+
+#### Popup styling for neovim
+
+The `g:OmniSharp.popup.options` dictionary is a set of window options which can be set for the popup.
+Enable pseudo-transparency and change the highlight group from the default `NormalFloat` to `Normal` like this:
+
+```vim
+let g:OmniSharp.popup.options = {
+\ 'winblend': 30,
+\ 'winhl': 'Normal:Normal'
+\}
+```
+
+### Popup position
+
+The "documentation" popups (including signature help) are always opened as close as possible to the cursor.
+However "buffer" popups (previewing definitions and implementations) may be configured to open in different ways, using the `g:OmniSharp.popup.position` value:
+
+- `atcursor`: (default) Next to the cursor. Height expands to display as much as possible, so this may result in a very high window.
+- `peek`: Opens below or above the cursor, with the full width of the current window. Looks like a split, without altering window layout.
+- `center`: Centered in the Vim window, filling the entire workspace.
+
+
 ## Configuration
 
 ### Example vimrc
@@ -375,14 +478,21 @@ let g:OmniSharp_server_stdio = 1
 let g:OmniSharp_timeout = 5
 
 " Don't autoselect first omnicomplete option, show options even if there is only
-" one (so the preview documentation is accessible). Remove 'preview' if you
-" don't want to see any documentation whatsoever.
-set completeopt=longest,menuone,preview
+" one (so the preview documentation is accessible). Remove 'preview', 'popup'
+" and 'popuphidden' if you don't want to see any documentation whatsoever.
+" Note that neovim does not support `popuphidden` or `popup` yet: 
+" https://github.com/neovim/neovim/issues/10996
+set completeopt=longest,menuone,preview,popuphidden
+
+" Highlight the completion documentation popup background/foreground the same as
+" the completion menu itself, for better readability with highlighted
+" documentation.
+set completepopup=highlight:Pmenu,border:off
 
 " Fetch full documentation during omnicomplete requests.
 " By default, only Type/Method signatures are fetched. Full documentation can
 " still be fetched when you need it with the :OmniSharpDocumentation command.
-"let g:omnicomplete_fetch_full_documentation = 1
+let g:omnicomplete_fetch_full_documentation = 1
 
 " Set desired preview window height for viewing documentation.
 " You might also want to look at the echodoc plugin.

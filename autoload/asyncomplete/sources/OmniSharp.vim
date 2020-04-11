@@ -7,7 +7,7 @@ function! asyncomplete#sources#OmniSharp#completor(opt, ctx) abort
 
   let startcol = column - kwlen
 
-  call OmniSharp#GetCompletions(kw, {results->
+  call OmniSharp#actions#complete#Get(kw, {results->
   \ asyncomplete#complete(a:opt['name'], a:ctx, startcol, results)})
 endfunction
 

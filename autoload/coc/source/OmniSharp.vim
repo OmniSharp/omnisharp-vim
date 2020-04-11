@@ -7,7 +7,7 @@ function! coc#source#OmniSharp#init() abort
 endfunction
 
 function! coc#source#OmniSharp#complete(options, callback) abort
-  call OmniSharp#GetCompletions(a:options.input, a:callback)
+  call OmniSharp#actions#complete#Get(a:options.input, a:callback)
 endfunction
 
 " vim:et:sw=2:sts=2

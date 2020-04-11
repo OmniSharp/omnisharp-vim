@@ -3,7 +3,7 @@ if !OmniSharp#util#CheckCapabilities() | finish | endif
 if get(b:, 'OmniSharp_ftplugin_loaded', 0) | finish | endif
 let b:OmniSharp_ftplugin_loaded = 1
 
-augroup OmniSharp#FileType
+augroup OmniSharp_FileType
   autocmd! * <buffer>
 
   autocmd BufLeave <buffer>
@@ -23,7 +23,6 @@ if get(g:, 'OmniSharp_start_server', 0) == 1
 endif
 
 command! -buffer -bar OmniSharpCodeFormat call OmniSharp#CodeFormat()
-command! -buffer -bar OmniSharpDocumentation call OmniSharp#TypeLookupWithDocumentation()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
 command! -buffer -bar OmniSharpFindMembers call OmniSharp#FindMembers()
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
@@ -47,17 +46,19 @@ command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServer
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar OmniSharpRunTest call OmniSharp#RunTest()
 command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#RunTestsInFile(<f-args>)
-command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#SignatureHelp()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
-command! -buffer -bar OmniSharpTypeLookup call OmniSharp#TypeLookupWithoutDocumentation()
+
+command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
+command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
+command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
 nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
 nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_implementations) :OmniSharpFindImplementations<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_members) :OmniSharpFindMembers<CR>
-nnoremap <buffer> <Plug>(omnisharp_find_symbols) :OmniSharpFindSymbol<CR>
+nnoremap <buffer> <Plug>(omnisharp_find_symbol) :OmniSharpFindSymbol<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_usages) :OmniSharpFindUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_fix_usings) :OmniSharpFixUsings<CR>
 nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
@@ -76,16 +77,11 @@ nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) OmniSharpRestartAllServe
 nnoremap <buffer> <Plug>(omnisharp_run_test) :OmniSharpRunTest<CR>
 nnoremap <buffer> <Plug>(omnisharp_run_tests_in_file) :OmniSharpRunTestsInFile<CR>
 nnoremap <buffer> <Plug>(omnisharp_signature_help) :OmniSharpSignatureHelp<CR>
-inoremap <buffer> <Plug>(omnisharp_signature_help) <C-\><C-o>:OmniSharpSignatureHelp<CR>
+inoremap <buffer> <Plug>(omnisharp_signature_help) <C-o>:OmniSharpSignatureHelp<CR>
 nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_all_servers) :OmniSharpStopAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_server) :OmniSharpStopServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_type_lookup) :OmniSharpTypeLookup<CR>
-
-highlight default link csUserIdentifier Identifier
-highlight default link csUserInterface Include
-highlight default link csUserMethod Function
-highlight default link csUserType Type
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
@@ -93,7 +89,7 @@ else
   let b:undo_ftplugin = ''
 endif
 let b:undo_ftplugin .= '
-\ execute "autocmd! OmniSharp#FileType * <buffer>"
+\ execute "autocmd! OmniSharp_FileType * <buffer>"
 \
 \|  unlet b:OmniSharp_ftplugin_loaded
 \|  delcommand OmniSharpCodeFormat

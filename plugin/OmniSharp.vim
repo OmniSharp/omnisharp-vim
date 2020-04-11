@@ -1,6 +1,10 @@
 if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
+" Single global config variable, to (eventually) replace all individual
+" global variables
+let g:OmniSharp = get(g:, 'OmniSharp', {})
+
 " Get a global temp path that can be used to store temp files for this instance
 let g:OmniSharp_temp_dir = get(g:, 'OmniSharp_temp_dir', fnamemodify(tempname(), ':p:h'))
 
@@ -71,7 +75,7 @@ let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output',
 " Initialise automatic type and interface highlighting
 let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)
 if g:OmniSharp_highlight_types
-  augroup OmniSharp#HighlightTypes
+  augroup OmniSharp_HighlightTypes
     autocmd!
     autocmd BufEnter *.cs,*.csx
     \ if OmniSharp#util#CheckCapabilities() |
@@ -101,6 +105,13 @@ if g:OmniSharp_highlight_types
   augroup END
 endif
 
+highlight default link csUserIdentifier Identifier
+highlight default link csUserInterface Include
+highlight default link csUserMethod Function
+highlight default link csUserType Type
+
+highlight default OmniSharpActiveParameter cterm=bold,italic,underline gui=bold,italic,underline
+
 function! s:ALEWantResults() abort
   if !g:OmniSharp_server_stdio | return | endif
   if getbufvar(g:ale_want_results_buffer, '&filetype') ==# 'cs'
@@ -108,7 +119,7 @@ function! s:ALEWantResults() abort
   endif
 endfunction
 
-augroup OmniSharp#Integrations
+augroup OmniSharp_Integrations
   autocmd!
 
   " Initialize OmniSharp as an asyncomplete source
