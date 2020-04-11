@@ -609,9 +609,11 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
     endif
     if has_key(s:kindGroups, hl.Kind)
       try
-        call prop_add(hl.StartLine, hl.StartColumn, {
+        let start_col = s:TranslateVirtColToCol(a:bufnum, hl.StartLine, hl.StartColumn)
+        let end_col = s:TranslateVirtColToCol(a:bufnum, hl.EndLine, hl.EndColumn)
+        call prop_add(hl.StartLine, start_col, {
         \ 'end_lnum': hl.EndLine,
-        \ 'end_col': hl.EndColumn,
+        \ 'end_col': end_col,
         \ 'type': s:kindGroups[hl.Kind],
         \ 'bufnr': a:bufnum
         \})
@@ -635,6 +637,19 @@ function! s:FindTextPropertiesRH(bufnum, buftick, response) abort
       catch | endtry
     endif
   endfor
+endfunction
+
+" the vim prop_add api expects the column to be the byte offset and not
+" the character. so for multibyte characters this function returns the
+" byte offset for a given character
+function s:TranslateVirtColToCol(bufnum, lnum, vcol)
+  let buf_line = getbufline(a:bufnum, a:lnum)[0] . "\n"
+  let col = byteidx(buf_line, a:vcol)
+  " fallack if for some reason the translation did not work
+  if col < 0
+    let col = a:lnum
+  endif
+  return col
 endfunction
 
 function OmniSharp#stdio#HighlightEchoKind() abort
