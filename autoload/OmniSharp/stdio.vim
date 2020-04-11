@@ -643,10 +643,10 @@ function! s:FindTextPropertiesRH(bufnr, buftick, response) abort
   endfor
 endfunction
 
-" the vim prop_add api expects the column to be the byte offset and not
-" the character. so for multibyte characters this function returns the
-" byte offset for a given character
-function s:TranslateVirtColToCol(bufnr, lnum, vcol)
+" The vim prop_add api expects the column to be the byte offset and not
+" the character. So for multibyte characters this function returns the
+" byte offset for a given character.
+function! s:TranslateVirtColToCol(bufnr, lnum, vcol) abort
   let buf_line = getbufline(a:bufnr, a:lnum)[0] . "\n"
   let col = byteidx(buf_line, a:vcol)
   " fallack if for some reason the translation did not work
