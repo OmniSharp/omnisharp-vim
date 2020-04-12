@@ -15,6 +15,8 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 
 Use Vim's popup windows and neovim's floating windows to display code/documentation without disrupting your window layouts: see [Popups](#popups) section for details and configuration options.
 
+![popups-screenshot-01](https://user-images.githubusercontent.com/5274565/79057535-8e35bd00-7cb6-11ea-97a7-ac653fdcee29.png)
+
 ## New! Run unit tests
 
 Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
