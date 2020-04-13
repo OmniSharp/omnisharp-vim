@@ -65,7 +65,7 @@ if ($PSVersionTable.PSVersion.Major -gt 4) {
 
 # Check for file to confirm download and unzip were successful
 if (Test-Path -Path "$($location)\OmniSharp.Roslyn.dll") {
-    Set-Content -Path "$($location)\OmniSharpInstall-version.txt" -Value "OmniSharp $($version)"
+    Set-Content -Path "$($location)\OmniSharpInstall-version.txt" -Value "$($version)"
     exit 0
 } else {
     exit 1

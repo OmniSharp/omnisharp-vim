@@ -31,7 +31,6 @@ command! -buffer -bar OmniSharpFixUsings call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#GlobalCodeCheck()
 command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#GotoDefinition()
-command! -buffer -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#HighlightEchoKind()
 command! -buffer -bar OmniSharpHighlightTypes call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp call OmniSharp#NavigateUp()
@@ -104,7 +103,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpGotoDefinition
 \|  delcommand OmniSharpHighlightEchoKind
 \|  delcommand OmniSharpHighlightTypes
-\|  delcommand OmniSharpInstall
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
 \|  delcommand OmniSharpOpenLog

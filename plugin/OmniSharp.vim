@@ -44,6 +44,7 @@ if !exists('g:OmniSharp_server_install')
     let g:OmniSharp_server_install = join([cache_home, 'omnisharp-vim', 'omnisharp-roslyn'], dir_separator) 
   endif
 endif
+command! -buffer -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 
 let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
 

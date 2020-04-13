@@ -1228,6 +1228,7 @@ function! OmniSharp#Install(...) abort
   if has('win32')
     let l:logfile = s:plugin_root_dir . '\log\install.log'
     let l:script = shellescape(s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
+    let l:version_file_location = l:location . '\OmniSharpInstall-version.txt'
 
     let l:command = 'powershell -ExecutionPolicy Bypass -File ' . l:script . ' ' .
     \ l:http . ' -l ' . l:location . ' ' . l:version
@@ -1235,6 +1236,7 @@ function! OmniSharp#Install(...) abort
     let l:logfile = s:plugin_root_dir . '/log/install.log'
     let l:script = shellescape(s:plugin_root_dir . '/installer/omnisharp-manager.sh')
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
+    let l:version_file_location = l:location . '/OmniSharpInstall-version.txt'
 
     let l:command = '/bin/sh ' . l:script . ' ' .
     \ l:http . ' ' . l:mono . ' -l ' . l:location . ' ' . l:version
@@ -1260,7 +1262,14 @@ function! OmniSharp#Install(...) abort
     echomsg 'The full error log can be found in the file: ' l:logfile
     echohl None
   else
-    echomsg 'OmniSharp installed to: ' . l:location
+    let l:version = ''
+    try
+      let l:command = has('win32') ? 'type ' : 'cat '
+      let l:version = trim(system(l:command . l:version_file_location)) . ' '
+    catch | endtry
+    echohl Title
+    echomsg printf('OmniSharp-Roslyn %sinstalled to %s', l:version, l:location)
+    echohl None
   endif
 endfunction
 
