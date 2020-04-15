@@ -252,9 +252,10 @@ Enable automatic semantic highlighting.
 Default: 0 >
     " Highlight on BufEnter
     let g:OmniSharp_highlight_types = 1
-    " Highlight on BufEnter and InsertLeave
+    " Highlight on BufEnter, InsertLeave and TextChanged
     let g:OmniSharp_highlight_types = 2
-    " Highlight after all text changes (TextChanged,TextChangedI,TextChangedP)
+    " Highlight after all text changes (all of the above, plus TextChangedI and
+    " TextChangedP)
     let g:OmniSharp_highlight_types = 3
 <
                                                  *'g:OmniSharp_highlight_groups'*

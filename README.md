@@ -503,10 +503,8 @@ set previewheight=5
 " Tell ALE to use OmniSharp for linting C# files, and no other linters.
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
-" Update semantic highlighting after all text changes
-let g:OmniSharp_highlight_types = 3
-" Update semantic highlighting on BufEnter and InsertLeave
-" let g:OmniSharp_highlight_types = 2
+" Update semantic highlighting on BufEnter, InsertLeave and TextChanged
+let g:OmniSharp_highlight_types = 2
 
 augroup omnisharp_commands
     autocmd!
