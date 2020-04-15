@@ -21,22 +21,35 @@ function! s:StdioSignatureHelp(Callback, opts) abort
   \   [a:Callback, s:seq, a:opts])
   \}
   if has_key(a:opts, 'ForCompleteMethod')
-    " Awkward hack required:
-    " We are requesting signatureHelp from a completion popup. This means our
-    " line currently looks something like this:
-    "   Console.Write|
-    " However, OmniSharp-roslyn will only provide signatureHelp when the cursor
-    " follows a full method name with opening parenthesis, like this:
-    "   Console.Write(|
-    " We therefore need to add a '(' to the request and move the cursor
-    " position.
-    let line = getline('.')
-    let col = col('.')
-    let opts.OverrideBuffer = {
-    \ 'Line': line[0 : col - 2] . '(' . line[col - 1 :],
-    \ 'LineNr': line('.'),
-    \ 'Col': col + 1
-    \}
+    " Awkward hacks required:
+    if !g:OmniSharp_want_snippet
+      " We are requesting signatureHelp from a completion popup. This means our
+      " line currently looks something like this:
+      "   Console.Write|
+      " However, OmniSharp-roslyn will only provide signatureHelp when the cursor
+      " follows a full method name with opening parenthesis, like this:
+      "   Console.Write(|
+      " We therefore need to add a '(' to the request and move the cursor
+      " position.
+      let line = getline('.')
+      let col = col('.')
+      let opts.OverrideBuffer = {
+      \ 'Line': line[0 : col - 2] . '(' . line[col - 1 :],
+      \ 'LineNr': line('.'),
+      \ 'Col': col + 1
+      \}
+    else
+      " When g:OmniSharp_want_snippet == 1, the line returned from
+      " OmniSharp-roslyn is different, and currently looks like this:
+      "   Console.Write(.....)|
+      " We don't need to modify this line, but we _do_ need to place the cursor
+      " inside the parentheses.
+      let opts.OverrideBuffer = {
+      \ 'Line': getline('.'),
+      \ 'LineNr': line('.'),
+      \ 'Col': col('.') - 1
+      \}
+    endif
   endif
   call OmniSharp#stdio#Request('/signaturehelp', opts)
 endfunction
@@ -48,7 +61,7 @@ function! s:StdioSignatureHelpRH(Callback, seq, opts, response) abort
     " wait for the latest response to complete
     return
   endif
-  if has_key(a:opts, 'ForCompleteMethod')
+  if has_key(a:opts, 'ForCompleteMethod') && !g:OmniSharp_want_snippet
     " Because of our 'falsified' request with an extra '(', re-synchronise the
     " server's version of the buffer with the actual buffer contents.
     call OmniSharp#UpdateBuffer()
