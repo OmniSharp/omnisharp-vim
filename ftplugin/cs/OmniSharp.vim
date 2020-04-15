@@ -11,7 +11,7 @@ augroup OmniSharp_FileType
   \|    call OmniSharp#UpdateBuffer()
   \|  endif
 
-  autocmd CompleteDone <buffer> call OmniSharp#ExpandAutoCompleteSnippet()
+  autocmd CompleteDone <buffer> call OmniSharp#actions#complete#ExpandSnippet()
 augroup END
 
 setlocal omnifunc=OmniSharp#Complete

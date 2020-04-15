@@ -9,9 +9,6 @@ if !g:OmniSharp_server_stdio
   let g:OmniSharp_py_err = {}
 endif
 
-" Setup variable defaults
-let s:generated_snippets = get(s:, 'generated_snippets', {})
-let s:last_completion_dictionary = get(s:, 'last_completion_dictionary', {})
 let s:alive_cache = get(s:, 'alive_cache', [])
 let s:initial_server_ports = get(s:, 'initial_server_ports',
 \ copy(g:OmniSharp_server_ports))
@@ -1056,42 +1053,6 @@ function! OmniSharp#AppendCtrlPExtensions() abort
   if !exists('g:OmniSharp_ctrlp_extensions_added')
     let g:OmniSharp_ctrlp_extensions_added = 1
     let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
-  endif
-endfunction
-
-
-function! OmniSharp#ExpandAutoCompleteSnippet()
-  if !g:OmniSharp_want_snippet
-    return
-  endif
-
-  if empty(globpath(&runtimepath, 'plugin/UltiSnips.vim'))
-    call OmniSharp#util#EchoErr('g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed.')
-    return
-  endif
-
-  let line = strpart(getline('.'), 0, col('.')-1)
-  let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
-
-  let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
-  let completion = substitute(completion, remove_whitespace_regex, '\1', '')
-
-  let should_expand_completion = len(completion) != 0
-
-  if should_expand_completion
-    let completion = split(completion, '\.')[-1]
-    let completion = split(completion, 'new ')[-1]
-    let completion = split(completion, '= ')[-1]
-
-    if has_key(s:last_completion_dictionary, completion)
-      let snippet = get(get(s:last_completion_dictionary, completion, ''), 'snip','')
-      if !has_key(s:generated_snippets, completion)
-        call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
-        let s:generated_snippets[completion] = snippet
-      endif
-      call UltiSnips#CursorMoved()
-      call UltiSnips#ExpandSnippetOrJump()
-    endif
   endif
 endfunction
 

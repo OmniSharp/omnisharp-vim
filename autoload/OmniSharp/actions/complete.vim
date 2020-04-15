@@ -1,6 +1,9 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+let s:generated_snippets = get(s:, 'generated_snippets', {})
+let s:last_completion_dictionary = get(s:, 'last_completion_dictionary', {})
+
 function! OmniSharp#actions#complete#Get(partial, ...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if !OmniSharp#IsServerRunning()
@@ -27,6 +30,42 @@ function! OmniSharp#actions#complete#Get(partial, ...) abort
     return s:CBGet(opts, completions)
   endif
 endfunction
+
+function! OmniSharp#actions#complete#ExpandSnippet()
+  if !g:OmniSharp_want_snippet
+    return
+  endif
+
+  if empty(globpath(&runtimepath, 'plugin/UltiSnips.vim'))
+    call OmniSharp#util#EchoErr('g:OmniSharp_want_snippet is enabled but this requires the UltiSnips plugin and it is not installed.')
+    return
+  endif
+
+  let line = strpart(getline('.'), 0, col('.')-1)
+  let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
+
+  let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
+  let completion = substitute(completion, remove_whitespace_regex, '\1', '')
+
+  let should_expand_completion = len(completion) != 0
+
+  if should_expand_completion
+    let completion = split(completion, '\.')[-1]
+    let completion = split(completion, 'new ')[-1]
+    let completion = split(completion, '= ')[-1]
+
+    if has_key(s:last_completion_dictionary, completion)
+      let snippet = get(get(s:last_completion_dictionary, completion, ''), 'snip','')
+      if !has_key(s:generated_snippets, completion)
+        call UltiSnips#AddSnippetWithPriority(completion, snippet, completion, 'iw', 'cs', 1)
+        let s:generated_snippets[completion] = snippet
+      endif
+      call UltiSnips#CursorMoved()
+      call UltiSnips#ExpandSnippetOrJump()
+    endif
+  endif
+endfunction
+
 
 function! s:StdioGetCompletions(partial, Callback) abort
   let wantDocPopup = OmniSharp#popup#Enabled()
