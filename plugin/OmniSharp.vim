@@ -85,26 +85,26 @@ if g:OmniSharp_highlight_types
     autocmd!
     autocmd BufEnter *.cs,*.csx
     \ if OmniSharp#util#CheckCapabilities() |
-    \   call OmniSharp#HighlightBuffer() |
+    \   call OmniSharp#actions#highlight#Buffer() |
     \ endif
 
     if g:OmniSharp_highlight_types >= 2
       autocmd InsertLeave,TextChanged *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
-      \   call OmniSharp#HighlightBuffer() |
+      \   call OmniSharp#actions#highlight#Buffer() |
       \ endif
     endif
 
     if g:OmniSharp_highlight_types >= 3
       autocmd TextChangedI *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
-      \   call OmniSharp#HighlightBuffer() |
+      \   call OmniSharp#actions#highlight#Buffer() |
       \ endif
 
       if exists('##TextChangedP')
         autocmd TextChangedP *.cs,*.csx
         \ if OmniSharp#util#CheckCapabilities() |
-        \   call OmniSharp#HighlightBuffer() |
+        \   call OmniSharp#actions#highlight#Buffer() |
         \ endif
       endif
     endif

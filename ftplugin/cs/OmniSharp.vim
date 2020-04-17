@@ -31,8 +31,6 @@ command! -buffer -bar OmniSharpFixUsings call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#GlobalCodeCheck()
 command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#GotoDefinition()
-command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#HighlightEchoKind()
-command! -buffer -bar OmniSharpHighlightTypes call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown call OmniSharp#NavigateDown()
 command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#PreviewDefinition()
@@ -48,6 +46,8 @@ command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
 
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
+command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
+command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#actions#highlight#EchoKind()
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
@@ -62,7 +62,7 @@ nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
 xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#GetCodeActions('visual')<CR>
 nnoremap <buffer> <Plug>(omnisharp_global_code_check) :OmniSharpGlobalCodeCheck<CR>
 nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR>
-nnoremap <buffer> <Plug>(omnisharp_highlight_types) :OmniSharpHighlightTypes<CR>
+nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_up) :OmniSharpNavigateUp<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_down) :OmniSharpNavigateDown<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_definition) :OmniSharpPreviewDefinition<CR>
@@ -78,6 +78,11 @@ nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_all_servers) :OmniSharpStopAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_server) :OmniSharpStopServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_type_lookup) :OmniSharpTypeLookup<CR>
+
+" The following commands and mappings have been renamed, but the old versions
+" are kept here for backwards compatibility
+command! -buffer -bar OmniSharpHighlightTypes call OmniSharp#actions#highlight#Buffer()
+nnoremap <buffer> <Plug>(omnisharp_highlight_types) :OmniSharpHighlightTypes<CR>
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
@@ -98,6 +103,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpGetCodeActions
 \|  delcommand OmniSharpGlobalCodeCheck
 \|  delcommand OmniSharpGotoDefinition
+\|  delcommand OmniSharpHighlight
 \|  delcommand OmniSharpHighlightEchoKind
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpNavigateUp

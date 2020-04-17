@@ -523,11 +523,10 @@ convenient user re-mapping. These can be used like so: >
     Stops the OmniSharp server
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
-                                                       *:OmniSharpHighlightTypes*
-                                              *<Plug>(omnisharp_highlight_types)*
-:OmniSharpHighlightTypes
-    Highlight/refresh semantic type/interface/identifier highlighting for the
-    current file
+                                                            *:OmniSharpHighlight*
+                                                    *<Plug>(omnisharp_highlight)*
+:OmniSharpHighlight
+    Add/refresh semantic highlighting for the current file
 
                                                               *:OmniSharpInstall*
 :OmniSharpInstall

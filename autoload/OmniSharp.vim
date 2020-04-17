@@ -708,90 +708,17 @@ endfunction
 
 
 function! OmniSharp#HighlightBuffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  let opts = { 'BufNum':  bufnr('%') }
-  if g:OmniSharp_server_stdio
-    if has('textprop')
-      call OmniSharp#stdio#FindTextProperties(opts.BufNum)
-    else
-      let Callback = function('s:CBHighlightBuffer', [opts])
-      call OmniSharp#stdio#FindHighlightTypes(Callback)
-    endif
-  else
-    if !OmniSharp#IsServerRunning() | return | endif
-    let hltypes = OmniSharp#py#eval('findHighlightTypes()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBHighlightBuffer(opts, hltypes)
-  endif
-endfunction
-
-function! s:CBHighlightBuffer(opts, hltypes) abort
-  if has_key(a:hltypes, 'error')
-    echohl WarningMsg | echom a:hltypes.error | echohl None
-    return
-  endif
-  if bufnr('%') != a:opts.BufNum | return | endif
-
-  let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
-
-  " Clear any matches - highlights with :syn keyword {option} names which cannot
-  " be created with :syn keyword
-  for l:matchid in b:OmniSharp_hl_matches
-    try
-      call matchdelete(l:matchid)
-    catch | endtry
-  endfor
-  let b:OmniSharp_hl_matches = []
-
-  call s:Highlight(a:hltypes.identifiers, 'csUserIdentifier')
-  call s:Highlight(a:hltypes.interfaces, 'csUserInterface')
-  call s:Highlight(a:hltypes.methods, 'csUserMethod')
-  call s:Highlight(a:hltypes.types, 'csUserType')
-
-  silent call s:ClearHighlight('csNewType')
-  syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
-  \ contains=csNew,csUserType,csUserIdentifier
-endfunction
-
-function! s:ClearHighlight(groupname)
-  try
-    execute 'syntax clear' a:groupname
-  catch | endtry
-endfunction
-
-function! s:Highlight(types, group) abort
-  silent call s:ClearHighlight(a:group)
-  if empty(a:types)
-    return
-  endif
-  let l:types = uniq(sort(a:types))
-
-  " Cannot use vim syntax options as keywords, so remove types with these
-  " names. See :h :syn-keyword /Note
-  let l:opts = split('cchar conceal concealends contained containedin ' .
-  \ 'contains display extend fold nextgroup oneline skipempty skipnl ' .
-  \ 'skipwhite transparent')
-
-  " Create a :syn-match for each type with an option name.
-  let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
-  for l:ill in l:illegal
-    let matchid = matchadd(a:group, '\<' . l:ill . '\>')
-    call add(b:OmniSharp_hl_matches, matchid)
-  endfor
-
-  call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
-
-  if len(l:types)
-    execute 'syntax keyword' a:group join(l:types)
-  endif
+  echohl WarningMsg
+  echom 'This function is obsolete; use OmniSharp#actions#highlight#Buffer() instead'
+  echohl None
+  call OmniSharp#actions#highlight#Buffer()
 endfunction
 
 function OmniSharp#HighlightEchoKind() abort
-  if !g:OmniSharp_server_stdio || !has('textprop')
-    echo 'Highlight kinds require text properties, in stdio mode'
-  else
-    call OmniSharp#stdio#HighlightEchoKind()
-  endif
+  echohl WarningMsg
+  echom 'This function is obsolete; use OmniSharp#actions#highlight#EchoKind() instead'
+  echohl None
+  call OmniSharp#actions#highlight#EchoKind()
 endfunction
 
 
