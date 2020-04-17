@@ -608,7 +608,9 @@ function! s:FindTextPropertiesRH(bufnr, buftick, response) abort
   let curline = 1
   for hl in highlights
     if curline <= hl.EndLine
-      call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnr})
+      try
+        call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnr})
+      catch | endtry
       let curline = hl.EndLine + 1
     endif
     if has_key(s:kindGroups, hl.Kind)
