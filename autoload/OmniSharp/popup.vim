@@ -239,7 +239,8 @@ endfunction
 function s:VimGetOptions(opts) abort
   call s:InitialiseOptions({
   \ 'mapping': v:true,
-  \ 'scrollbar': v:true
+  \ 'scrollbar': v:true,
+  \ 'moved': [0, 999]
   \})
   return extend(copy(g:OmniSharp_popup_options), a:opts)
 endfunction
