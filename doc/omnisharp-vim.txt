@@ -92,10 +92,10 @@ default |hl-Pmenu|), a border and padding: >
 <
 Neovim: |g:OmniSharp_popup_options| is a dictionary of window options which
 are to be set for popup windows.
-Example: disable 'wrap', enable pseudo-transparency with 'winblend' and change
+Example: enable 'wrap', enable pseudo-transparency with 'winblend' and change
 the highlight group from the default |hl-NormalFloat| to |hl-Normal| like this: >
     let g:OmniSharp_popup_options = {
-    \ 'wrap': v:false,
+    \ 'wrap': v:true,
     \ 'winblend': 30,
     \ 'winhl': 'Normal:Normal'
     \}
