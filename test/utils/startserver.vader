@@ -1,11 +1,9 @@
 Execute (start server):
-  let g:OmniSharp = get(g:, 'OmniSharp', {})
-  let g:OmniSharp.test = get(g:OmniSharp, 'test', {})
-  let g:OmniSharp.test.timeout = get(g:OmniSharp.test, 'timeout', 10)
+  let g:OmniSharp_test_timeout = get(g:, 'OmniSharp_test_timeout', 10)
   edit! example/Program.cs
   let host = OmniSharp#GetHost()
   let job = OmniSharp#proc#GetJob(host.sln_or_dir)
-  while reltime(job.start_time)[0] < g:OmniSharp.test.timeout && !job.loaded
+  while reltime(job.start_time)[0] < g:OmniSharp_test_timeout && !job.loaded
     sleep 50m
   endwhile
   Assert job.loaded, 'Timed out waiting for job to load'

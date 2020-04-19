@@ -1,10 +1,6 @@
 if exists('g:OmniSharp_loaded') | finish | endif
 let g:OmniSharp_loaded = 1
 
-" Single global config variable, to (eventually) replace all individual
-" global variables
-let g:OmniSharp = get(g:, 'OmniSharp', {})
-
 " Get a global temp path that can be used to store temp files for this instance
 let g:OmniSharp_temp_dir = get(g:, 'OmniSharp_temp_dir', fnamemodify(tempname(), ':p:h'))
 

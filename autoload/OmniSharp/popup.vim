@@ -1,8 +1,6 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let g:OmniSharp.popup = get(g:OmniSharp, 'popup', {})
-
 function! OmniSharp#popup#Buffer(bufnr, lnum, opts) abort
   let a:opts.firstline = a:lnum
   return s:Open(a:bufnr, a:opts)
@@ -28,9 +26,7 @@ function! OmniSharp#popup#Display(content, opts) abort
 endfunction
 
 function! OmniSharp#popup#Enabled() abort
-  if type(g:OmniSharp.popup) == type(0) && g:OmniSharp.popup == 0
-    return 0
-  endif
+  if get(g:, 'OmniSharp_popup', 1) == 0 | return 0 | endif
   if !exists('s:supports_popups')
     let s:supports_popups = 1
     if has('nvim')
@@ -50,9 +46,6 @@ function! OmniSharp#popup#Enabled() abort
   if !s:supports_popups
     return 0
   endif
-  if type(g:OmniSharp.popup) != type({})
-    let g:OmniSharp.popup = {}
-  endif
   return 1
 endfunction
 
@@ -60,7 +53,7 @@ endfunction
 " already exist. The mappings will be removed as soon as the popup window is
 " closed.
 function! OmniSharp#popup#Map(mode, mapName, defaultLHS, funcall) abort
-  let maps = get(g:OmniSharp.popup, 'mappings', {})
+  let maps = get(g:, 'OmniSharp_popup_mappings', {})
   let configLHS = get(maps, a:mapName, a:defaultLHS)
   if configLHS is 0 | return | endif
   for lhs in type(configLHS) == type([]) ? configLHS : [configLHS]
@@ -110,8 +103,8 @@ endfunction
 
 function s:InitialiseOptions(defaultOptions) abort
   if !exists('s:initialised')
-    let g:OmniSharp.popup.options = get(g:OmniSharp.popup, 'options', {})
-    call extend(g:OmniSharp.popup.options, a:defaultOptions, 'keep')
+    let g:OmniSharp_popup_options = get(g:, 'OmniSharp_popup_options', {})
+    call extend(g:OmniSharp_popup_options, a:defaultOptions, 'keep')
     let s:initialised = 1
   endif
 endfunction
@@ -147,7 +140,7 @@ endfunction
 
 function s:NvimGetOptions() abort
   call s:InitialiseOptions({})
-  return g:OmniSharp.popup.options
+  return g:OmniSharp_popup_options
 endfunction
 
 function! s:NvimOpen(what, opts) abort
@@ -160,7 +153,7 @@ function! s:NvimOpen(what, opts) abort
     let lines = a:what
   endif
   let content_height = len(lines)
-  let position = get(g:OmniSharp.popup, 'position', 'atcursor')
+  let position = get(g:, 'OmniSharp_popup_position', 'atcursor')
   let config = {
   \ 'focusable': v:false,
   \ 'style': 'minimal'
@@ -248,13 +241,13 @@ function s:VimGetOptions(opts) abort
   \ 'mapping': v:true,
   \ 'scrollbar': v:true
   \})
-  return extend(copy(g:OmniSharp.popup.options), a:opts)
+  return extend(copy(g:OmniSharp_popup_options), a:opts)
 endfunction
 
 function! s:VimOpen(what, opts) abort
   let popupOpts = s:VimGetOptions(a:opts)
   let popupOpts.callback = function('s:Unmap')
-  let position = get(g:OmniSharp.popup, 'position', 'atcursor')
+  let position = get(g:, 'OmniSharp_popup_position', 'atcursor')
   " Positions 'peek' and 'full' only apply to file buffers, not documentation
   " buffers
   if type(a:what) == v:t_number && position ==? 'peek'

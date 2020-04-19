@@ -3,7 +3,7 @@ After():
 
 Execute (set up async helper):
   function! s:Callback(...)
-    let g:OmniSharp.test.waiting = 0
+    let g:OmniSharp_test_waiting = 0
   endfunction
 
   function! OmniSharpWarmup(funcname, args) abort
@@ -11,15 +11,15 @@ Execute (set up async helper):
   endfunction
 
   function! OmniSharpTestAwait(funcname, args, warmup = 0) abort
-    let g:OmniSharp.test.waiting = 1
+    let g:OmniSharp_test_waiting = 1
     call function(a:funcname, a:args + [function('s:Callback')])()
     let starttime = reltime()
-    while g:OmniSharp.test.waiting
-    \ && reltime(starttime)[0] < g:OmniSharp.test.timeout
+    while g:OmniSharp_test_waiting
+    \ && reltime(starttime)[0] < g:OmniSharp_test_timeout
       sleep 50m
     endwhile
     if !a:warmup
-      Assert !g:OmniSharp.test.waiting, a:funcname . ' timed out'
+      Assert !g:OmniSharp_test_waiting, a:funcname . ' timed out'
     endif
   endfunction
 

@@ -23,7 +23,5 @@ let g:OmniSharp_selector_ui = ''
 let g:OmniSharp_open_quickfix = 0
 let g:OmniSharp_loglevel = 'info'
 
-let g:OmniSharp = {
-\ 'popup': 0,
-\ 'test': { 'timeout': 10 }
-\}
+let g:OmniSharp_popup = 0
+let g:OmniSharp_test_timeout = 10

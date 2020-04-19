@@ -365,10 +365,10 @@ When a recent enough Vim or neovim is used, OmniSharp-vim will use Vim's popup w
 * completion documentation (Vim only)
 
 OmniSharp-vim will use popups by default for Vims/neovims which support them.
-To disable popups completely, set `g:OmniSharp.popup` to `0`:
+To disable popups completely, set `g:OmniSharp_popup` to `0`:
 
 ```vim
-let g:OmniSharp = { 'popup': 0 }
+let g:OmniSharp_popup = 0
 ```
 
 ### Popup mappings
@@ -394,18 +394,15 @@ Additionally, the signature-help popup window provides the following mappings fo
 | `sigParamNext` | `<C-l>`         |
 | `sigParamPrev` | `<C-h>`         |
 
-These mappings are all configurable, and you can configure more than one mapping for an action, so to use e.g. `CTRL-N` and `CTRL-P` to navigate between signatures instead of `CTRL-J` and `CTRL-K` and to use either `CTRL-E`/`CTRL-Y` or `j`/`k` for single line scrolling, use `g:OmniSharp.popup.mappings` like this:
+These mappings are all configurable, and you can assign more than one mapping for an action.
+So to use e.g. `CTRL-N` and `CTRL-P` to navigate between signatures instead of `CTRL-J` and `CTRL-K`, and to use either `CTRL-E`/`CTRL-Y` or `j`/`k` for single line scrolling, use `g:OmniSharp_popup_mappings` like this:
 
 ```vim
-let g:OmniSharp = {
-\ 'popup': {
-\   'mappings': {
-\     'sigNext': '<C-n>',
-\     'sigPrev': '<C-p>',
-\     'lineDown': ['<C-e>', 'j'],
-\     'lineUp': ['<C-y>', 'k']
-\   }
-\ }
+let g:OmniSharp_popup_mappings = {
+\ 'sigNext': '<C-n>',
+\ 'sigPrev': '<C-p>',
+\ 'lineDown': ['<C-e>', 'j'],
+\ 'lineUp': ['<C-y>', 'k']
 \}
 ```
 
@@ -422,7 +419,7 @@ By default, Vim uses the `Pmenu` highlight group, with no border or padding.
 Add a border and padding, and use the `Normal` highlight group like this:
 
 ```vim
-let g:OmniSharp.popup.options = {
+let g:OmniSharp_popup_options = {
 \ 'highlight': 'Normal',
 \ 'padding': [1],
 \ 'border': [1]
@@ -433,11 +430,11 @@ See the `:help` link above for options for border characters, border highlight g
 
 #### Popup styling for neovim
 
-The `g:OmniSharp.popup.options` dictionary is a set of window options which can be set for the popup.
+The `g:OmniSharp_popup_options` dictionary is a set of window options which can be set for the popup.
 Enable pseudo-transparency and change the highlight group from the default `NormalFloat` to `Normal` like this:
 
 ```vim
-let g:OmniSharp.popup.options = {
+let g:OmniSharp_popup_options = {
 \ 'winblend': 30,
 \ 'winhl': 'Normal:Normal'
 \}
@@ -446,7 +443,7 @@ let g:OmniSharp.popup.options = {
 ### Popup position
 
 The "documentation" popups (including signature help) are always opened as close as possible to the cursor.
-However "buffer" popups (previewing definitions and implementations) may be configured to open in different ways, using the `g:OmniSharp.popup.position` value:
+However "buffer" popups (previewing definitions and implementations) may be configured to open in different ways, using the `g:OmniSharp_popup_position` value:
 
 - `atcursor`: (default) Next to the cursor. Height expands to display as much as possible, so this may result in a very high window.
 - `peek`: Opens below or above the cursor, with the full width of the current window. Looks like a split, without altering window layout.

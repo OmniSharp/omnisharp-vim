@@ -16,6 +16,7 @@ CONTENTS                                                     *omnisharp-contents
     1. Dependencies.................................|omnisharp-dependencies|
     2. Usage........................................|omnisharp-usage|
     3. Options......................................|omnisharp-options|
+      3.1 Popups....................................|omnisharp-popup-options|
     4. Commands.....................................|omnisharp-commands|
     5. Autocmds.....................................|omnisharp-autocmds|
     6. Integrations.................................|omnisharp-integrations|
@@ -44,79 +45,62 @@ autocompletion plugin such as asyncomplete or Deoplete.
 ===============================================================================
 3. OPTIONS                                                    *omnisharp-options*
 
-                                                                  *'g:OmniSharp'*
-|g:OmniSharp| is the global configuration dictionary variable. Previously all
-configuration options have had their own global variables but these will be
-migrated to |g:OmniSharp|. All OmniSharp-vim configuration can be done with a
-single command: >
-    let g:OmniSharp = {
-    \ 'popup': {
-    \   'mappings': {
-    \     'close': 'jk'
-    \   }
-    \ }
-    \}
+-------------------------------------------------------------------------------
+3.1 POPUPS                                              *omnisharp-popup-options*
+
+                                                            *'g:OmniSharp_popup'*
+Disable popups entirely by setting to `0`: >
+Default: 1 >
+    let g:OmniSharp_popup = 0
 <
-Alternatively, create the empty dictionary first, then set subkeys afterwards.
-This documentation will assume this format has been used: >
-    let g:OmniSharp= {}
-    let g:OmniSharp.popup = {}
-    let g:OmniSharp.popup.mappings = {}
-    let g:OmniSharp.popup.mappings.close = 'jk'
-<
-                                                            *'g:OmniSharp.popup'*
-Dictionary to manage all popup configuration. Disable popups entirely by
-setting to `0`: >
-    let g:OmniSharp.popup = 0
-<
-                                                   *'g:OmniSharp.popup.mappings'*
+                                                   *'g:OmniSharp_popup_mappings'*
 Dictionary of popup action mappings.
 Defaults: >
-    let g:OmniSharp.popup = {}
-    let g:OmniSharp.popup.mappings = {}
-    let g:OmniSharp.popup.mappings.close =        '<Esc>'
-    let g:OmniSharp.popup.mappings.lineDown =     '<C-e>'
-    let g:OmniSharp.popup.mappings.lineUp =       '<C-y>'
-    let g:OmniSharp.popup.mappings.halfPageDown = '<C-d>'
-    let g:OmniSharp.popup.mappings.halfPageUp =   '<C-u>'
-    let g:OmniSharp.popup.mappings.pageDown =     '<C-f>'
-    let g:OmniSharp.popup.mappings.pageUp =       '<C-b>'
-    let g:OmniSharp.popup.mappings.sigNext =      '<C-j>'
-    let g:OmniSharp.popup.mappings.sigPrev =      '<C-k>'
-    let g:OmniSharp.popup.mappings.sigParamNext = '<C-l>'
-    let g:OmniSharp.popup.mappings.sigParamPrev = '<C-h>'
+    let g:OmniSharp_popup_mappings = {
+    \ 'close': '<Esc>',
+    \ 'lineDown': '<C-e>',
+    \ 'lineUp': '<C-y>',
+    \ 'halfPageDown': '<C-d>',
+    \ 'halfPageUp': '<C-u>',
+    \ 'pageDown': '<C-f>',
+    \ 'pageUp': '<C-b>',
+    \ 'sigNext': '<C-j>',
+    \ 'sigPrev': '<C-k>',
+    \ 'sigParamNext': '<C-l>',
+    \ 'sigParamPrev': '<C-h>'
+    \}
 <
 Apply multiple mappings by providing a list of mappings instead of a string: >
-    let g:OmniSharp.popup.mappings.close = ['<Esc>', 'jk']
+    let g:OmniSharp_popup_mappings = { 'close': ['<Esc>', 'jk'] }
 <
 Disable individual mappings by assigning an empty array: >
-    let g:OmniSharp.popup.mappings.sigNext = []
+    let g:OmniSharp_popup_mappings = { 'sigNext': [] }
 <
-                                                    *'g:OmniSharp.popup.options'*
+                                                    *'g:OmniSharp_popup_options'*
 Dictionary of popup display options. Note that these are different in Vim and
 Neovim.
 
-Vim: |g:OmniSharp.popup.options| are used as |popup_create-arguments| when
+Vim: |g:OmniSharp_popup_options| are used as |popup_create-arguments| when
 creating popups.
 Example: open popups with the |hl-Normal| highlight group (instead of the
 default |hl-Pmenu|), a border and padding: >
-    let g:OmniSharp.popup.options = {
+    let g:OmniSharp_popup_options = {
     \ 'highlight': 'Normal',
     \ 'padding': [1],
     \ 'border': [1]
     \}
 <
-Neovim: |g:OmniSharp.popup.options| is a dictionary of window options which
+Neovim: |g:OmniSharp_popup_options| is a dictionary of window options which
 are to be set for popup windows.
 Example: disable 'wrap', enable pseudo-transparency with 'winblend' and change
 the highlight group from the default |hl-NormalFloat| to |hl-Normal| like this: >
-    let g:OmniSharp.popup.options = {
+    let g:OmniSharp_popup_options = {
     \ 'wrap': v:false,
     \ 'winblend': 30,
     \ 'winhl': 'Normal:Normal'
     \}
 <
-                                                   *'g:OmniSharp.popup.position'*
+                                                   *'g:OmniSharp_popup_position'*
 How popups displaying file buffers (definition, implementation and metadata)
 should be positioned. Note that this does not include documentation and
 signature-help popups, which display text but not file buffers.
@@ -131,7 +115,7 @@ signature-help popups, which display text but not file buffers.
                     filling the entire Vim view, ignoring splits.
 
 Default: atcursor >
-    let g:OmniSharp.popup.position = 'peek'
+    let g:OmniSharp_popup_position = 'peek'
 <
                                                      *'g:OmniSharp_server_stdio'*
 Use the stdio version of OmniSharp-roslyn. When the stdio version is used,
