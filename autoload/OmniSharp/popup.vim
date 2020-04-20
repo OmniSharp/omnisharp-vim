@@ -91,6 +91,9 @@ function s:CloseLast(redraw) abort
     call s:Unmap()
     unlet s:lastwinid
   endif
+  if exists('#OmniSharp_popup_close')
+    autocmd! OmniSharp_popup_close
+  endif
 endfunction
 
 " Mimic Vim behaviour in neovim: close the window when the cursor is moved to a
@@ -135,6 +138,11 @@ function s:Open(what, opts) abort
   if mode !=# 'n'
     call OmniSharp#popup#Map('n', 'close', '<Esc>', '<SID>CloseLast(1)')
   endif
+  augroup OmniSharp_popup_close
+    autocmd!
+    autocmd InsertEnter,InsertLeave,BufLeave,WinLeave <buffer>
+    \ call s:CloseLast(0)
+  augroup END
   return s:lastwinid
 endfunction
 
@@ -204,6 +212,7 @@ function! s:NvimOpen(what, opts) abort
   endif
   call nvim_set_current_win(s:parentwinid)
   augroup OmniSharp_nvim_popup
+    autocmd!
     autocmd CursorMoved <buffer> call s:CloseLastNvimOnMove()
     autocmd CursorMovedI <buffer> call s:CloseLastNvimOnMove()
   augroup END
