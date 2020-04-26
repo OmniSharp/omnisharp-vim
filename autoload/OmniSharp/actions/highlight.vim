@@ -3,8 +3,9 @@ set cpoptions&vim
 
 function! OmniSharp#actions#highlight#Buffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  if g:OmniSharp_server_stdio && has('textprop')
-    let opts = { 'BufNum':  bufnr('%') }
+  let opts = { 'BufNum':  bufnr('%') }
+  if g:OmniSharp_server_stdio &&
+  \ (has('textprop') || exists('*nvim_create_namespace'))
     call s:StdioHighlight(opts.BufNum)
   else
     " Full semantic highlighting not supported - highlight types instead
@@ -42,31 +43,49 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     " Create the inverse dict for fast lookups
     let s:kindGroups = {}
     for key in keys(s:groupKinds)
-      call prop_type_add(key, {'highlight': key, 'combine': 1})
+      if !has('nvim')
+        call prop_type_add(key, {'highlight': key, 'combine': 1})
+      endif
       for kind in s:groupKinds[key]
         let s:kindGroups[kind] = key
       endfor
     endfor
     let s:textPropertiesInitialized = 1
   endif
+  if has('nvim')
+    let nsid = nvim_create_namespace('OmniSharpHighlight')
+    call nvim_buf_clear_namespace(a:bufnr, nsid, 0, -1)
+  endif
   let curline = 1
   for hl in highlights
-    if curline <= hl.EndLine
-      try
-        call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnr})
-      catch | endtry
-      let curline = hl.EndLine + 1
+    if !has('nvim')
+      if curline <= hl.EndLine
+        try
+          call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnr})
+        catch | endtry
+        let curline = hl.EndLine + 1
+      endif
     endif
     if has_key(s:kindGroups, hl.Kind)
       try
         let start_col = s:TranslateVirtColToCol(a:bufnr, hl.StartLine, hl.StartColumn)
         let end_col = s:TranslateVirtColToCol(a:bufnr, hl.EndLine, hl.EndColumn)
-        call prop_add(hl.StartLine, start_col, {
-        \ 'end_lnum': hl.EndLine,
-        \ 'end_col': end_col,
-        \ 'type': s:kindGroups[hl.Kind],
-        \ 'bufnr': a:bufnr
-        \})
+        if !has('nvim')
+          call prop_add(hl.StartLine, start_col, {
+          \ 'end_lnum': hl.EndLine,
+          \ 'end_col': end_col,
+          \ 'type': s:kindGroups[hl.Kind],
+          \ 'bufnr': a:bufnr
+          \})
+        else
+          for linenr in range(hl.StartLine - 1, hl.EndLine - 1)
+            let col_start = (linenr > hl.StartLine - 1) ? 0 : start_col - 1
+            let col_end = (linenr < hl.EndLine - 1) ? -1 : end_col - 1
+            call nvim_buf_add_highlight(a:bufnr, nsid,
+            \ s:kindGroups[hl.Kind],
+            \ linenr, col_start, col_end)
+          endfor
+        endif
       catch
         " E275: This response is for a hidden buffer, and 'nohidden' is set
         " E964: Invalid prop_add col
