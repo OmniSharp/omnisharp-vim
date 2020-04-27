@@ -40,7 +40,6 @@ if !exists('g:OmniSharp_server_install')
     let g:OmniSharp_server_install = join([cache_home, 'omnisharp-vim', 'omnisharp-roslyn'], dir_separator) 
   endif
 endif
-command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 
 let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
 
@@ -68,6 +67,16 @@ let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', get(g:, 'OmniSh
 
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
 let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 1)
+
+" Set to 1 when ultisnips is installed
+let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
+
+let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
+
+let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
+
+command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
+command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#OpenLog(<q-args>)
 
 " Initialise automatic type and interface highlighting
 let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)
@@ -148,12 +157,5 @@ if !exists('g:OmniSharp_selector_ui')
   \   '!empty(globpath(&runtimepath, printf("plugin/%s.vim", v:val), 1))'
   \ ), 0, '')
 endif
-
-" Set to 1 when ultisnips is installed
-let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
-
-let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
-
-let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
 
 " vim:et:sw=2:sts=2

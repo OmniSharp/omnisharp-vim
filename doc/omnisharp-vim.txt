@@ -276,6 +276,8 @@ For HTTP, sets the log level for the python code. Possible values are "debug",
 Default: warning >
     let g:OmniSharp_loglevel = 'warning'
 <
+Open the log file with |:OmniSharpOpenLog|
+
                                                     *'g:OmniSharp_open_quickfix'*
 By default, OmniSharp-vim opens the quickfix window when it is populated, e.g.
 after find usages, implementations etc. Set this variable to 0 to prevent the
@@ -449,12 +451,18 @@ convenient user re-mapping. These can be used like so: >
     " Run all unit tests in the current file, and file `tests/test1.cs`
     :OmniSharpRunTestsInFile % tests/test1.cs
 <
-
                                                               *:OmniSharpOpenLog*
                                                      *<Plug>(omnisharp_open_log)*
-:OmniSharpOpenLog
-    Open the log file
+:OmniSharpOpenLog [{cmd}]
+    Open the log file, containing messages from the OmniSharp-roslyn server.
+    By default the log is opened in the current window. To open it in a new
+    window or tab, pass a relevant command to use to open the buffer: >
 
+    :OmniSharpOpenLog
+    :OmniSharpOpenLog split
+    :OmniSharpOpenLog vsplit
+    :OmniSharpOpenLog tabedit
+<
                                                        *:OmniSharpGetCodeActions*
                                                  *<Plug>(omnisharp_code_actions)*
 :OmniSharpGetCodeActions

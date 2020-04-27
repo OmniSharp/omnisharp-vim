@@ -35,8 +35,6 @@ command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#HighlightEchoKin
 command! -buffer -bar OmniSharpHighlightTypes call OmniSharp#HighlightBuffer()
 command! -buffer -bar OmniSharpNavigateUp call OmniSharp#NavigateUp()
 command! -buffer -bar OmniSharpNavigateDown call OmniSharp#NavigateDown()
-command! -buffer -bar OmniSharpOpenLog call OmniSharp#OpenLog()
-command! -buffer -bar OmniSharpOpenPythonLog call OmniSharp#OpenPythonLog()
 command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#PreviewDefinition()
 command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#PreviewImplementation()
 command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
@@ -67,7 +65,6 @@ nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR
 nnoremap <buffer> <Plug>(omnisharp_highlight_types) :OmniSharpHighlightTypes<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_up) :OmniSharpNavigateUp<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_down) :OmniSharpNavigateDown<CR>
-nnoremap <buffer> <Plug>(omnisharp_open_log) :OmniSharpOpenLog<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_definition) :OmniSharpPreviewDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_implementation) :OmniSharpPreviewImplementation<CR>
 nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
@@ -105,8 +102,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpNavigateUp
 \|  delcommand OmniSharpNavigateDown
-\|  delcommand OmniSharpOpenLog
-\|  delcommand OmniSharpOpenPythonLog
 \|  delcommand OmniSharpPreviewDefinition
 \|  delcommand OmniSharpPreviewImplementation
 \|  delcommand OmniSharpRename
