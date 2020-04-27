@@ -920,7 +920,7 @@ function! OmniSharp#FindSolutionOrDir(...) abort
       try
         let sln = s:FindSolution(interactive, bufnr)
         call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
-      catch e
+      catch
         return ''
       endtry
     endif
