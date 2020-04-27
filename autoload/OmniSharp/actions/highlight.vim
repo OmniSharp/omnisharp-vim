@@ -68,8 +68,8 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     endif
     if has_key(s:kindGroups, hl.Kind)
       try
-        let start_col = s:TranslateVirtColToCol(a:bufnr, hl.StartLine, hl.StartColumn)
-        let end_col = s:TranslateVirtColToCol(a:bufnr, hl.EndLine, hl.EndColumn)
+        let start_col = s:GetByteIdx(a:bufnr, hl.StartLine, hl.StartColumn)
+        let end_col = s:GetByteIdx(a:bufnr, hl.EndLine, hl.EndColumn)
         if !has('nvim')
           call prop_add(hl.StartLine, start_col, {
           \ 'end_lnum': hl.EndLine,
@@ -79,11 +79,11 @@ function! s:HighlightRH(bufnr, buftick, response) abort
           \})
         else
           for linenr in range(hl.StartLine - 1, hl.EndLine - 1)
-            let col_start = (linenr > hl.StartLine - 1) ? 0 : start_col - 1
-            let col_end = (linenr < hl.EndLine - 1) ? -1 : end_col - 1
             call nvim_buf_add_highlight(a:bufnr, nsid,
             \ s:kindGroups[hl.Kind],
-            \ linenr, col_start, col_end)
+            \ linenr,
+            \ (linenr > hl.StartLine - 1) ? 0 : start_col - 1,
+            \ (linenr < hl.EndLine - 1) ? -1 : end_col - 1)
           endfor
         endif
       catch
@@ -93,27 +93,52 @@ function! s:HighlightRH(bufnr, buftick, response) abort
         break
       endtry
     endif
-    if get(g:, 'OmniSharp_highlight_debug', 0)
-      let hlKind = 'cs' . substitute(hl.Kind, ' ', '_', 'g')
-      if !len(prop_type_get(hlKind))
-        call prop_type_add(hlKind, {'combine': 1})
-      endif
-      try
-        call prop_add(hl.StartLine, hl.StartColumn, {
-        \ 'end_lnum': hl.EndLine,
-        \ 'end_col': hl.EndColumn,
-        \ 'type': hlKind,
-        \ 'bufnr': a:bufnr
-        \})
-      catch | endtry
-    endif
   endfor
+  if get(g:, 'OmniSharp_highlight_debug', 0)
+    let s:lastHighlights = highlights
+  endif
 endfunction
 
-" The vim prop_add api expects the column to be the byte offset and not
-" the character. So for multibyte characters this function returns the
-" byte offset for a given character.
-function! s:TranslateVirtColToCol(bufnr, lnum, vcol) abort
+function OmniSharp#actions#highlight#EchoKind() abort
+  if !g:OmniSharp_server_stdio
+    echo 'Highlight kinds can only be used in stdio mode'
+    return
+  elseif !has('nvim') && !has('textprop')
+    echo 'Highlight kinds requires text properties - your Vim is too old'
+    return
+  elseif has('nvim') && !exists('*nvim_create_namespace')
+    echo 'Highlight kinds requires namespaces - your neovim is too old'
+    return
+  endif
+  let currentHls = 0
+  for hl in get(s:, 'lastHighlights', [])
+    let hlsl = hl.StartLine
+    let hlel = hl.EndLine
+    let start_col = s:GetByteIdx(bufnr('%'), hlsl, hl.StartColumn)
+    let end_col = s:GetByteIdx(bufnr('%'), hlel, hl.EndColumn)
+    if hlsl <= line('.') && hlel >= line('.')
+      if (hlsl == hlel && start_col <= col('.') && end_col > col('.')) ||
+      \ (hlsl < line('.') && hlel > line('.')) ||
+      \ (hlsl < line('.') && end_col > col('.')) ||
+      \ (hlel > line('.') && start_col <= col('.'))
+        let currentHls += 1
+        if has_key(s:kindGroups, hl.Kind)
+          echon ' (' . s:kindGroups[hl.Kind] . ')'
+        else
+          echon hl.Kind
+        endif
+      endif
+    endif
+  endfor
+  if currentHls == 0
+    echo 'No Kind found'
+  endif
+endfunction
+
+" The vim prop_add and neovim nvim_buf_add_highlight apis expect the column to
+" be the byte offset and not the character. So for multibyte characters this
+" function returns the byte offset for a given character.
+function! s:GetByteIdx(bufnr, lnum, vcol) abort
   let buflines = getbufline(a:bufnr, a:lnum)
   if len(buflines) == 0
     return a:vcol
@@ -124,27 +149,6 @@ function! s:TranslateVirtColToCol(bufnr, lnum, vcol) abort
     return a:vcol
   endif
   return col
-endfunction
-
-
-function OmniSharp#actions#highlight#EchoKind() abort
-  if !g:OmniSharp_server_stdio || !has('textprop')
-    echo 'Highlight kinds require text properties, in stdio mode'
-  else
-    let props = filter(prop_list(line('.')),
-    \ 'v:val.col <= col(".") && v:val.col + v:val.length - 1 >= col(".")')
-    if len(props)
-      for prop in props
-        if has_key(s:groupKinds, prop.type)
-          echon ' (' . prop.type . ')'
-        else
-          echon substitute(props[0].type[2:], '_', ' ', 'g')
-        endif
-      endfor
-    else
-      echo 'No Kind found'
-    endif
-  endif
 endfunction
 
 let &cpoptions = s:save_cpo
