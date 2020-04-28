@@ -1,5 +1,6 @@
 {
     "FormattingOptions": {
+        "EnableEditorConfigSupport": false,
         "NewLine": "\n",
         "UseTabs": false,
         "TabSize": 4,
@@ -51,5 +52,9 @@
         "NewLineForMembersInObjectInit": true,
         "NewLineForMembersInAnonymousTypes": true,
         "NewLineForClausesInQuery": true
+    },
+    "RoslynExtensionsOptions": {
+        "EnableAnalyzersSupport": false,
+        "EnableDecompilationSupport": false
     }
 }
