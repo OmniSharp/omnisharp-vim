@@ -1042,17 +1042,17 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
       let location.type = 'E'
       let location.text = location.name . ': ' . result.ErrorMessage
       let parsed = matchlist(result.ErrorStackTrace, ' in \(.\+\):line \(\d\+\)')
-      if len(parsed) == 0
-        echohl WarningMsg
-        echom 'Could not create quickfix from test failure'
-        echohl None
-        echom location.text
-        echom result.ErrorStackTrace
-        continue
+      if len(parsed) > 0
+        let location.lnum = parsed[2]
+      else
+        " An error occurred outside the test. This can occur with .e.g. nunit
+        " when the class constructor throws an exception.
       endif
-      let location.lnum = parsed[2]
     else
       let location.text = location.name . ': ' . result.Outcome
+    endif
+    if !has_key(location, 'lnum')
+      " Success, or unexpected test failure.
       let test = s:FindTest(a:tests, result.MethodName)
       if type(test) == type({})
         let location.lnum = test.nameRange.Start.Line
