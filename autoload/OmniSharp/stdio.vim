@@ -649,11 +649,14 @@ endfunction
 " the character. So for multibyte characters this function returns the
 " byte offset for a given character.
 function! s:TranslateVirtColToCol(bufnr, lnum, vcol) abort
-  let buf_line = getbufline(a:bufnr, a:lnum)[0] . "\n"
-  let col = byteidx(buf_line, a:vcol)
-  " fallack if for some reason the translation did not work
+  let buflines = getbufline(a:bufnr, a:lnum)
+  if len(buflines) == 0
+    return a:vcol
+  endif
+  let bufline = buflines[0] . "\n"
+  let col = byteidx(bufline, a:vcol)
   if col < 0
-    let col = a:lnum
+    return a:vcol
   endif
   return col
 endfunction
