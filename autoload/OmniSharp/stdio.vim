@@ -623,8 +623,10 @@ function! s:FindTextPropertiesRH(bufnr, buftick, response) abort
         \ 'type': s:kindGroups[hl.Kind],
         \ 'bufnr': a:bufnr
         \})
-      catch /^Vim\%((\a\+)\)\=:\%(E275\|E964\):/
-        " This response is for a hidden buffer, and 'nohidden' is in use.
+      catch
+        " E275: This response is for a hidden buffer, and 'nohidden' is set
+        " E964: Invalid prop_add col
+        " E966: Invalid prop_add lnum
         break
       endtry
     endif
