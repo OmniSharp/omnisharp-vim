@@ -1047,6 +1047,9 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
       else
         " An error occurred outside the test. This can occur with .e.g. nunit
         " when the class constructor throws an exception.
+        " Add an extra property, which can be used later to warn the user to
+        " check :messages for details.
+        let location.noStackTrace = 1
       endif
     else
       let location.text = location.name . ': ' . result.Outcome

@@ -585,12 +585,19 @@ function! s:CBRunTestsInFile(summary) abort
     echohl Title
   else
     let passed = 0
+    let noStackTrace = 0
     for location in locations
       if !has_key(location, 'type')
         let passed += 1
       endif
+      if has_key(location, 'noStackTrace')
+        let noStackTrace = 1
+      endif
     endfor
     let title = passed . ' of ' . len(locations) . ' tests passed'
+    if noStackTrace
+      let title .= '. Check :messages for details.'
+    endif
     echohl WarningMsg
   endif
   echomsg title
