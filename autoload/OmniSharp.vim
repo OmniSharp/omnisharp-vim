@@ -1071,7 +1071,7 @@ function! OmniSharp#OpenLog(...) abort
     let logfile = OmniSharp#py#eval('getLogFile()')
     if OmniSharp#CheckPyError() | return | endif
   endif
-  let cmd = a:0 ? a:1 : 'edit'
+  let cmd = (a:0 && len(a:1)) ? a:1 : 'edit'
   exec cmd logfile
 endfunction
 
