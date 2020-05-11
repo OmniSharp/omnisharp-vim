@@ -19,7 +19,7 @@ function! s:StdioHighlight(bufnr) abort
   \ 'ResponseHandler': function('s:HighlightRH', [a:bufnr, buftick]),
   \ 'ReplayOnLoad': 1
   \}
-  call OmniSharp#stdio#Request('/highlight', opts)
+  call OmniSharp#stdio#Request('/v2/highlight', opts)
 endfunction
 
 function! s:HighlightRH(bufnr, buftick, response) abort
@@ -30,60 +30,41 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     call s:StdioHighlight(a:bufnr)
     return
   endif
-  let highlights = get(a:response.Body, 'Highlights', [])
-  if !get(s:, 'textPropertiesInitialized', 0)
-    let s:groupKinds = get(g:, 'OmniSharp_highlight_groups', {
-    \ 'csUserIdentifier': [
-    \   'constant name', 'enum member name', 'field name', 'identifier',
-    \   'local name', 'parameter name', 'property name', 'static symbol'],
-    \ 'csUserInterface': ['interface name'],
-    \ 'csUserMethod': ['extension method name', 'method name'],
-    \ 'csUserType': ['class name', 'enum name', 'namespace name', 'struct name']
-    \})
-    " Create the inverse dict for fast lookups
-    let s:kindGroups = {}
-    for key in keys(s:groupKinds)
-      if !has('nvim')
-        call prop_type_add(key, {'highlight': key, 'combine': 1})
-      endif
-      for kind in s:groupKinds[key]
-        let s:kindGroups[kind] = key
-      endfor
-    endfor
-    let s:textPropertiesInitialized = 1
-  endif
+  call s:InitialiseHighlights()
   if has('nvim')
     let nsid = nvim_create_namespace('OmniSharpHighlight')
     call nvim_buf_clear_namespace(a:bufnr, nsid, 0, -1)
   endif
+  let spans = get(a:response.Body, 'Spans', [])
   let curline = 1
-  for hl in highlights
+  for span in spans
     if !has('nvim')
-      if curline <= hl.EndLine
+      if curline <= span.EndLine
         try
-          call prop_clear(curline, hl.EndLine, {'bufnr': a:bufnr})
+          call prop_clear(curline, span.EndLine, {'bufnr': a:bufnr})
         catch | endtry
-        let curline = hl.EndLine + 1
+        let curline = span.EndLine + 1
       endif
     endif
-    if has_key(s:kindGroups, hl.Kind)
+    let shc = s:SemanticHighlightClassification[span.Type]
+    if type(shc.highlight) == v:t_string
       try
-        let start_col = s:GetByteIdx(a:bufnr, hl.StartLine, hl.StartColumn)
-        let end_col = s:GetByteIdx(a:bufnr, hl.EndLine, hl.EndColumn)
+        let start_col = s:GetByteIdx(a:bufnr, span.StartLine, span.StartColumn)
+        let end_col = s:GetByteIdx(a:bufnr, span.EndLine, span.EndColumn)
         if !has('nvim')
-          call prop_add(hl.StartLine, start_col, {
-          \ 'end_lnum': hl.EndLine,
+          call prop_add(span.StartLine, start_col, {
+          \ 'end_lnum': span.EndLine,
           \ 'end_col': end_col,
-          \ 'type': s:kindGroups[hl.Kind],
+          \ 'type': 'OSHighlight' . shc.highlight,
           \ 'bufnr': a:bufnr
           \})
         else
-          for linenr in range(hl.StartLine - 1, hl.EndLine - 1)
+          for linenr in range(span.StartLine - 1, span.EndLine - 1)
             call nvim_buf_add_highlight(a:bufnr, nsid,
-            \ s:kindGroups[hl.Kind],
+            \ shc.highlight,
             \ linenr,
-            \ (linenr > hl.StartLine - 1) ? 0 : start_col - 1,
-            \ (linenr < hl.EndLine - 1) ? -1 : end_col - 1)
+            \ (linenr > span.StartLine - 1) ? 0 : start_col - 1,
+            \ (linenr < span.EndLine - 1) ? -1 : end_col - 1)
           endfor
         endif
       catch
@@ -94,8 +75,21 @@ function! s:HighlightRH(bufnr, buftick, response) abort
       endtry
     endif
   endfor
-  if get(g:, 'OmniSharp_highlight_debug', 0)
-    let s:lastHighlights = highlights
+  let s:lastSpans = spans
+endfunction
+
+function! s:InitialiseHighlights() abort
+  if get(s:, 'highlightsInitialized', 0) | return | endif
+  let s:highlightsInitialized = 1
+
+  if !has('nvim')
+    let groups = copy(s:SemanticHighlightClassification)
+    let groups = map(groups, 'v:val.highlight')
+    let groups = filter(groups, 'type(v:val) == v:t_string')
+    let groups = uniq(sort(groups))
+    for group in groups
+      call prop_type_add('OSHighlight' . group, {'highlight': group, 'combine': 1})
+    endfor
   endif
 endfunction
 
@@ -110,27 +104,32 @@ function OmniSharp#actions#highlight#EchoKind() abort
     echo 'Highlight kinds requires namespaces - your neovim is too old'
     return
   endif
-  let currentHls = 0
-  for hl in get(s:, 'lastHighlights', [])
-    let hlsl = hl.StartLine
-    let hlel = hl.EndLine
-    let start_col = s:GetByteIdx(bufnr('%'), hlsl, hl.StartColumn)
-    let end_col = s:GetByteIdx(bufnr('%'), hlel, hl.EndColumn)
-    if hlsl <= line('.') && hlel >= line('.')
-      if (hlsl == hlel && start_col <= col('.') && end_col > col('.')) ||
-      \ (hlsl < line('.') && hlel > line('.')) ||
-      \ (hlsl < line('.') && end_col > col('.')) ||
-      \ (hlel > line('.') && start_col <= col('.'))
-        let currentHls += 1
-        if has_key(s:kindGroups, hl.Kind)
-          echon ' (' . s:kindGroups[hl.Kind] . ')'
+  let currentSpans = 0
+  for span in get(s:, 'lastSpans', [])
+    let startLine = span.StartLine
+    let endLine = span.EndLine
+    let startCol = s:GetByteIdx(bufnr('%'), startLine, span.StartColumn)
+    let endCol = s:GetByteIdx(bufnr('%'), endLine, span.EndColumn)
+    if startLine <= line('.') && endLine >= line('.')
+      if (startLine == endLine && startCol <= col('.') && endCol > col('.'))
+      \ || (startLine < line('.') && endLine > line('.'))
+      \ || (startLine < line('.') && endCol > col('.'))
+      \ || (endLine > line('.') && startCol <= col('.'))
+        let currentSpans += 1
+        let shc = s:SemanticHighlightClassification[span.Type]
+        if type(shc.highlight) == v:t_string
+          echon shc.name . ' ('
+          execute 'echohl' shc.highlight
+          echon shc.highlight
+          echohl None
+          echon ')'
         else
-          echon hl.Kind
+          echo shc.name
         endif
       endif
     endif
   endfor
-  if currentHls == 0
+  if currentSpans == 0
     echo 'No Kind found'
   endif
 endfunction
@@ -150,6 +149,77 @@ function! s:GetByteIdx(bufnr, lnum, vcol) abort
   endif
   return col
 endfunction
+
+" All classifications from Roslyn's ClassificationTypeNames
+" https://github.com/dotnet/roslyn/blob/master/src/Workspaces/Core/Portable/Classification/ClassificationTypeNames.cs
+" Keep in sync with omnisharp-roslyn's SemanticHighlightClassification
+let s:SemanticHighlightClassification = [
+\ { 'name': 'Comment',                            'highlight': 0 },
+\ { 'name': 'ExcludedCode',                       'highlight': 0 },
+\ { 'name': 'Identifier',                         'highlight': 'Identifier' },
+\ { 'name': 'Keyword',                            'highlight': 0 },
+\ { 'name': 'ControlKeyword',                     'highlight': 0 },
+\ { 'name': 'NumericLiteral',                     'highlight': 0 },
+\ { 'name': 'Operator',                           'highlight': 0 },
+\ { 'name': 'OperatorOverloaded',                 'highlight': 0 },
+\ { 'name': 'PreprocessorKeyword',                'highlight': 0 },
+\ { 'name': 'StringLiteral',                      'highlight': 0 },
+\ { 'name': 'WhiteSpace',                         'highlight': 0 },
+\ { 'name': 'Text',                               'highlight': 0 },
+\ { 'name': 'StaticSymbol',                       'highlight': 'Identifier' },
+\ { 'name': 'PreprocessorText',                   'highlight': 0 },
+\ { 'name': 'Punctuation',                        'highlight': 0 },
+\ { 'name': 'VerbatimStringLiteral',              'highlight': 0 },
+\ { 'name': 'StringEscapeCharacter',              'highlight': 0 },
+\ { 'name': 'ClassName',                          'highlight': 'Identifier' },
+\ { 'name': 'DelegateName',                       'highlight': 'Identifier' },
+\ { 'name': 'EnumName',                           'highlight': 'Identifier' },
+\ { 'name': 'InterfaceName',                      'highlight': 'Include' },
+\ { 'name': 'ModuleName',                         'highlight': 0 },
+\ { 'name': 'StructName',                         'highlight': 'Identifier' },
+\ { 'name': 'TypeParameterName',                  'highlight': 'Type' },
+\ { 'name': 'FieldName',                          'highlight': 'Identifier' },
+\ { 'name': 'EnumMemberName',                     'highlight': 'Identifier' },
+\ { 'name': 'ConstantName',                       'highlight': 'Identifier' },
+\ { 'name': 'LocalName',                          'highlight': 'Identifier' },
+\ { 'name': 'ParameterName',                      'highlight': 'Identifier' },
+\ { 'name': 'MethodName',                         'highlight': 'Function' },
+\ { 'name': 'ExtensionMethodName',                'highlight': 'Function' },
+\ { 'name': 'PropertyName',                       'highlight': 'Identifier' },
+\ { 'name': 'EventName',                          'highlight': 'Identifier' },
+\ { 'name': 'NamespaceName',                      'highlight': 'Identifier' },
+\ { 'name': 'LabelName',                          'highlight': 'Label' },
+\ { 'name': 'XmlDocCommentAttributeName',         'highlight': 0 },
+\ { 'name': 'XmlDocCommentAttributeQuotes',       'highlight': 0 },
+\ { 'name': 'XmlDocCommentAttributeValue',        'highlight': 0 },
+\ { 'name': 'XmlDocCommentCDataSection',          'highlight': 0 },
+\ { 'name': 'XmlDocCommentComment',               'highlight': 0 },
+\ { 'name': 'XmlDocCommentDelimiter',             'highlight': 0 },
+\ { 'name': 'XmlDocCommentEntityReference',       'highlight': 0 },
+\ { 'name': 'XmlDocCommentName',                  'highlight': 0 },
+\ { 'name': 'XmlDocCommentProcessingInstruction', 'highlight': 0 },
+\ { 'name': 'XmlDocCommentText',                  'highlight': 0 },
+\ { 'name': 'XmlLiteralAttributeName',            'highlight': 0 },
+\ { 'name': 'XmlLiteralAttributeQuotes',          'highlight': 0 },
+\ { 'name': 'XmlLiteralAttributeValue',           'highlight': 0 },
+\ { 'name': 'XmlLiteralCDataSection',             'highlight': 0 },
+\ { 'name': 'XmlLiteralComment',                  'highlight': 0 },
+\ { 'name': 'XmlLiteralDelimiter',                'highlight': 0 },
+\ { 'name': 'XmlLiteralEmbeddedExpression',       'highlight': 0 },
+\ { 'name': 'XmlLiteralEntityReference',          'highlight': 0 },
+\ { 'name': 'XmlLiteralName',                     'highlight': 0 },
+\ { 'name': 'XmlLiteralProcessingInstruction',    'highlight': 0 },
+\ { 'name': 'XmlLiteralText',                     'highlight': 0 },
+\ { 'name': 'RegexComment',                       'highlight': 0 },
+\ { 'name': 'RegexCharacterClass',                'highlight': 0 },
+\ { 'name': 'RegexAnchor',                        'highlight': 0 },
+\ { 'name': 'RegexQuantifier',                    'highlight': 0 },
+\ { 'name': 'RegexGrouping',                      'highlight': 0 },
+\ { 'name': 'RegexAlternation',                   'highlight': 0 },
+\ { 'name': 'RegexText',                          'highlight': 0 },
+\ { 'name': 'RegexSelfEscapedCharacter',          'highlight': 0 },
+\ { 'name': 'RegexOtherEscape',                   'highlight': 0 }
+\]
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo

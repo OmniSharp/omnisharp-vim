@@ -197,18 +197,19 @@ Example: >
 -------------------------------------------------------------------------------
 3.3 HIGHLIGHTS                                      *omnisharp-highlight-options*
 
-                                                  *'g:OmniSharp_highlight_types'*
+                                                     *'g:OmniSharp_highlighting'*
 Enable automatic semantic highlighting.
 Default: 0 >
     " Highlight on BufEnter
-    let g:OmniSharp_highlight_types = 1
+    let g:OmniSharp_highlighting = 1
     " Highlight on BufEnter, InsertLeave and TextChanged
-    let g:OmniSharp_highlight_types = 2
+    let g:OmniSharp_highlighting = 2
     " Highlight after all text changes (all of the above, plus TextChangedI and
     " TextChangedP)
-    let g:OmniSharp_highlight_types = 3
+    let g:OmniSharp_highlighting = 3
 <
                                                  *'g:OmniSharp_highlight_groups'*
+                                                                     DEPRECATED
 Specify which highlight groups should be used to highlight with
 OmniSharp-roslyn "kinds".
 Default: >

@@ -5,11 +5,13 @@ set cpoptions&vim
 " the OmniSharp-roslyn, and then highlights are created using matchadd().
 "
 " The HTTP server with its python interface can only use this type of
-" highlighting.
+" highlighting, as can older versions of vim without text properties (vim 8) or
+" namespaces (neovim).
 "
 " Use OmniSharp#actions#highlight#Buffer() for full semantic highlighting.
 function! OmniSharp#actions#highlight_types#Buffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
+  call s:InitialiseHighlights()
   let opts = { 'BufNum':  bufnr('%') }
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBHighlightBuffer', [opts])
@@ -125,6 +127,15 @@ function! s:Highlight(types, group) abort
   if len(l:types)
     execute 'syntax keyword' a:group join(l:types)
   endif
+endfunction
+
+function! s:InitialiseHighlights() abort
+  if get(s:, 'highlightsInitialized', 0) | return | endif
+  let s:highlightsInitialized = 1
+  highlight default link csUserIdentifier Identifier
+  highlight default link csUserInterface Include
+  highlight default link csUserMethod Function
+  highlight default link csUserType Type
 endfunction
 
 let &cpoptions = s:save_cpo

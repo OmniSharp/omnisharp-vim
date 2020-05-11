@@ -62,7 +62,7 @@ let defaultlevel = g:OmniSharp_server_stdio ? 'info' : 'warning'
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 
 " Default map of solution files and directories to ports.
-" Preserve backwards compatibility with older version "g:OmniSharp_sln_ports
+" Preserve backwards compatibility with older version g:OmniSharp_sln_ports
 let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', get(g:, 'OmniSharp_sln_ports', {}))
 
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
@@ -79,8 +79,9 @@ command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#OpenLog(<q-args>)
 
 " Initialise automatic type and interface highlighting
-let g:OmniSharp_highlight_types = get(g:, 'OmniSharp_highlight_types', 0)
-if g:OmniSharp_highlight_types
+" Preserve backwards compatibility with older version "g:OmniSharp_sln_ports
+let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 0))
+if g:OmniSharp_highlighting
   augroup OmniSharp_HighlightTypes
     autocmd!
     autocmd BufEnter *.cs,*.csx
@@ -88,14 +89,14 @@ if g:OmniSharp_highlight_types
     \   call OmniSharp#actions#highlight#Buffer() |
     \ endif
 
-    if g:OmniSharp_highlight_types >= 2
+    if g:OmniSharp_highlighting >= 2
       autocmd InsertLeave,TextChanged *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
       \   call OmniSharp#actions#highlight#Buffer() |
       \ endif
     endif
 
-    if g:OmniSharp_highlight_types >= 3
+    if g:OmniSharp_highlighting >= 3
       autocmd TextChangedI *.cs,*.csx
       \ if OmniSharp#util#CheckCapabilities() |
       \   call OmniSharp#actions#highlight#Buffer() |
@@ -110,13 +111,6 @@ if g:OmniSharp_highlight_types
     endif
   augroup END
 endif
-
-highlight default link csUserIdentifier Identifier
-highlight default link csUserInterface Include
-highlight default link csUserMethod Function
-highlight default link csUserType Type
-
-highlight default OmniSharpActiveParameter cterm=bold,italic,underline gui=bold,italic,underline
 
 function! s:ALEWantResults() abort
   if !g:OmniSharp_server_stdio | return | endif
@@ -149,7 +143,6 @@ augroup OmniSharp_Integrations
   " Listen for ALE requests
   autocmd User ALEWantResults call s:ALEWantResults()
 augroup END
-
 
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(

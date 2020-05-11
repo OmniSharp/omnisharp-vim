@@ -260,10 +260,10 @@ To highlight a document, use command `:OmniSharpHighlight`.
 To have `.cs` files automatically highlighted when entering a buffer and leaving insert mode, add this to your .vimrc:
 
 ```vim
-let g:OmniSharp_highlight_types = 2
+let g:OmniSharp_highlighting = 2
 ```
 
-To update highlighting after all text changes, even while in insert mode, use `g:OmniSharp_highlight_types = 3` instead.
+To update highlighting after all text changes, even while in insert mode, use `g:OmniSharp_highlighting = 3` instead.
 
 ### Vim 8.1 text properties
 In recent versions of Vim, the OmniSharp-roslyn highlighting can be taken full advantage of using Vim text properties, allowing OmniSharp-vim to overwrite the standard Vim regular-expression syntax highlighting with OmniSharp-roslyn's semantic highlighting.
@@ -301,9 +301,7 @@ let g:OmniSharp_highlight_groups = {
 \}
 ```
 
-In order to find out what OmniSharp-roslyn calls a particular element, there is a "debugging" option available, `g:OmniSharp_highlight_debug`.
-When this is set to `1`, text properties are added to **all** symbols of the document.
-The text properties are not highlighted so this has no visible effect, but when this mode is enabled, command `:OmniSharpHighlightEchoKind` will echo the OmniSharp-rolsyn "kind" of the symbol under the cursor.
+In order to find out what OmniSharp-roslyn calls a particular element, use command `:OmniSharpHighlightEchoKind` to echo the OmniSharp-rolsyn "kind" of the symbol under the cursor.
 
 **Note:** Text property highlighting is only available when using the stdio server, not for HTTP server usage.
 
@@ -504,7 +502,7 @@ set previewheight=5
 let g:ale_linters = { 'cs': ['OmniSharp'] }
 
 " Update semantic highlighting on BufEnter, InsertLeave and TextChanged
-let g:OmniSharp_highlight_types = 2
+let g:OmniSharp_highlighting = 2
 
 augroup omnisharp_commands
     autocmd!
