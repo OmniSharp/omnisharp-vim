@@ -48,12 +48,14 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     let shc = s:GetHighlight(span.Type)
     if type(shc.highlight) == v:t_string
       try
-        let start_col = s:GetByteIdx(a:bufnr, span.StartLine, span.StartColumn)
-        let end_col = s:GetByteIdx(a:bufnr, span.EndLine, span.EndColumn)
+        let startCol = OmniSharp#util#CharToByteIdx(
+        \ a:bufnr, span.StartLine, span.StartColumn)
+        let endCol = OmniSharp#util#CharToByteIdx(
+        \ a:bufnr, span.EndLine, span.EndColumn)
         if !has('nvim')
-          call prop_add(span.StartLine, start_col, {
+          call prop_add(span.StartLine, startCol, {
           \ 'end_lnum': span.EndLine,
-          \ 'end_col': end_col,
+          \ 'end_col': endCol,
           \ 'type': 'OSHighlight' . shc.name,
           \ 'bufnr': a:bufnr
           \})
@@ -62,8 +64,8 @@ function! s:HighlightRH(bufnr, buftick, response) abort
             call nvim_buf_add_highlight(a:bufnr, nsid,
             \ shc.highlight,
             \ linenr,
-            \ (linenr > span.StartLine - 1) ? 0 : start_col - 1,
-            \ (linenr < span.EndLine - 1) ? -1 : end_col - 1)
+            \ (linenr > span.StartLine - 1) ? 0 : startCol - 1,
+            \ (linenr < span.EndLine - 1) ? -1 : endCol - 1)
           endfor
         endif
       catch
@@ -107,15 +109,17 @@ function OmniSharp#actions#highlight#Echo() abort
   endif
   let currentSpans = 0
   for span in get(s:, 'lastSpans', [])
-    let startLine = span.StartLine
-    let endLine = span.EndLine
-    let startCol = s:GetByteIdx(bufnr('%'), startLine, span.StartColumn)
-    let endCol = s:GetByteIdx(bufnr('%'), endLine, span.EndColumn)
-    if startLine <= line('.') && endLine >= line('.')
-      if (startLine == endLine && startCol <= col('.') && endCol > col('.'))
-      \ || (startLine < line('.') && endLine > line('.'))
-      \ || (startLine < line('.') && endCol > col('.'))
-      \ || (endLine > line('.') && startCol <= col('.'))
+    let startCol = OmniSharp#util#CharToByteIdx(
+    \ bufnr('%'), span.StartLine, span.StartColumn)
+    let endCol = OmniSharp#util#CharToByteIdx(
+    \ bufnr('%'), span.EndLine, span.EndColumn)
+    if span.StartLine <= line('.') && span.EndLine >= line('.')
+      let line = line('.')
+      let col = col('.')
+      if (span.StartLine == span.EndLine && startCol <= col && endCol > col)
+      \ || (span.StartLine < line && span.EndLine > line)
+      \ || (span.StartLine < line && endCol > col)
+      \ || (span.EndLine > line && startCol <= col)
         let currentSpans += 1
         let shc = s:GetHighlight(span.Type)
         if type(shc.highlight) == v:t_string
@@ -133,22 +137,6 @@ function OmniSharp#actions#highlight#Echo() abort
   if currentSpans == 0
     echo 'No Kind found'
   endif
-endfunction
-
-" The vim prop_add and neovim nvim_buf_add_highlight apis expect the column to
-" be the byte offset and not the character. So for multibyte characters this
-" function returns the byte offset for a given character.
-function! s:GetByteIdx(bufnr, lnum, vcol) abort
-  let buflines = getbufline(a:bufnr, a:lnum)
-  if len(buflines) == 0
-    return a:vcol
-  endif
-  let bufline = buflines[0] . "\n"
-  let col = byteidx(bufline, a:vcol)
-  if col < 0
-    return a:vcol
-  endif
-  return col
 endfunction
 
 " All classifications from Roslyn's ClassificationTypeNames

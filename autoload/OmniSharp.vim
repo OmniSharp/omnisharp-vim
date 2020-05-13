@@ -348,8 +348,12 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
       \ (&modified && !&hidden ? 'split' : 'edit')
       \ fnameescape(a:location.filename)
     endif
-    if has_key(a:location, 'lnum') && a:location.lnum > 0
-      call cursor(a:location.lnum, a:location.col)
+    if get(a:location, 'lnum', 0) > 0
+      let col = get(a:location, 'vcol', 0)
+      \ ? OmniSharp#util#CharToByteIdx(
+      \     a:location.filename, a:location.lnum, a:location.col)
+      \ : a:location.col
+      call cursor(a:location.lnum, col)
       redraw
     endif
     return 1

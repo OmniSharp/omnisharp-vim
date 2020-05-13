@@ -33,6 +33,21 @@ function! s:is_wsl() abort
   return s:is_wsl_val
 endfunction
 
+" Vim locations for quickfix, text properties etc. always use byte offsets.
+" OmniSharp-roslyn returns char offsets, so these need to be transformed.
+function! OmniSharp#util#CharToByteIdx(filenameOrBufnr, lnum, vcol) abort
+  let bufnr = type(a:filenameOrBufnr) == type('')
+  \ ? bufnr(a:filenameOrBufnr)
+  \ : a:filenameOrBufnr
+  let buflines = getbufline(bufnr, a:lnum)
+  if len(buflines) == 0
+    return a:vcol
+  endif
+  let bufline = buflines[0] . "\n"
+  let col = byteidx(bufline, a:vcol)
+  return col < 0 ? a:vcol : col
+endfunction
+
 function! OmniSharp#util#CheckCapabilities() abort
   if exists('s:capable') | return s:capable | endif
 
@@ -72,47 +87,6 @@ endfunction
 function! OmniSharp#util#EchoErr(msg)
   let v:errmsg = a:msg
   echohl ErrorMsg | echomsg a:msg | echohl None
-endfunction
-
-function! OmniSharp#util#TranslatePathForClient(filename) abort
-  let filename = a:filename
-  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
-    if s:is_msys()
-      let prefix = '/'
-    elseif s:is_cygwin()
-      let prefix = '/cygdrive/'
-    else
-      let prefix = '/mnt/'
-    endif
-    let filename = substitute(filename, '^\([a-zA-Z]\):\\', prefix . '\l\1/', '')
-    let filename = substitute(filename, '\\', '/', 'g')
-  endif
-
-  " Check if the file is a metadatafile. If it is, map it to the
-  " correct temp file on disk
-  if filename =~# '\$metadata\$'
-    let filename = g:OmniSharp_temp_dir . '/' . fnamemodify(filename, ':t')
-  endif
-  return fnamemodify(filename, ':.')
-endfunction
-
-function! OmniSharp#util#TranslatePathForServer(filename) abort
-  let filename = a:filename
-  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
-    " Future releases of WSL will have a wslpath tool, similar to cygpath - when
-    " this becomes standard then this block can be replaced with a call to
-    " wslpath/cygpath
-    if s:is_msys()
-      let prefix = '^/'
-    elseif s:is_cygwin()
-      let prefix = '^/cygdrive/'
-    else
-      let prefix = '^/mnt/'
-    endif
-    let filename = substitute(filename, prefix . '\([a-zA-Z]\)/', '\u\1:\\', '')
-    let filename = substitute(filename, '/', '\\', 'g')
-  endif
-  return filename
 endfunction
 
 function! OmniSharp#util#GetStartCmd(solution_file) abort
@@ -168,6 +142,47 @@ function! OmniSharp#util#PathJoin(parts) abort
     throw 'Unsupported type for joining paths'
   endif
   return join([s:plugin_root_dir] + parts, s:dir_separator)
+endfunction
+
+function! OmniSharp#util#TranslatePathForClient(filename) abort
+  let filename = a:filename
+  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
+    if s:is_msys()
+      let prefix = '/'
+    elseif s:is_cygwin()
+      let prefix = '/cygdrive/'
+    else
+      let prefix = '/mnt/'
+    endif
+    let filename = substitute(filename, '^\([a-zA-Z]\):\\', prefix . '\l\1/', '')
+    let filename = substitute(filename, '\\', '/', 'g')
+  endif
+
+  " Check if the file is a metadatafile. If it is, map it to the
+  " correct temp file on disk
+  if filename =~# '\$metadata\$'
+    let filename = g:OmniSharp_temp_dir . '/' . fnamemodify(filename, ':t')
+  endif
+  return fnamemodify(filename, ':.')
+endfunction
+
+function! OmniSharp#util#TranslatePathForServer(filename) abort
+  let filename = a:filename
+  if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
+    " Future releases of WSL will have a wslpath tool, similar to cygpath - when
+    " this becomes standard then this block can be replaced with a call to
+    " wslpath/cygpath
+    if s:is_msys()
+      let prefix = '^/'
+    elseif s:is_cygwin()
+      let prefix = '^/cygdrive/'
+    else
+      let prefix = '^/mnt/'
+    endif
+    let filename = substitute(filename, prefix . '\([a-zA-Z]\)/', '\u\1:\\', '')
+    let filename = substitute(filename, '/', '\\', 'g')
+  endif
+  return filename
 endfunction
 
 let &cpoptions = s:save_cpo

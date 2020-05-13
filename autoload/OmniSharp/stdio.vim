@@ -293,7 +293,7 @@ function! s:LocationsFromResponse(quickfixes) abort
     \ 'text': text,
     \ 'lnum': quickfix.Line,
     \ 'col': quickfix.Column,
-    \ 'vcol': 0
+    \ 'vcol': 1
     \}
     if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
       let location.end_lnum = quickfix.EndLine
