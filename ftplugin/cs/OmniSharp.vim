@@ -47,7 +47,7 @@ command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
 
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
 command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
-command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#actions#highlight#EchoKind()
+command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
@@ -82,7 +82,8 @@ nnoremap <buffer> <Plug>(omnisharp_type_lookup) :OmniSharpTypeLookup<CR>
 " The following commands and mappings have been renamed, but the old versions
 " are kept here for backwards compatibility
 command! -buffer -bar OmniSharpHighlightTypes call OmniSharp#actions#highlight#Buffer()
-nnoremap <buffer> <Plug>(omnisharp_highlight_types) :OmniSharpHighlightTypes<CR>
+nnoremap <buffer> <Plug>(omnisharp_highlight_types) :OmniSharpHighlight<CR>
+command! -buffer -bar OmniSharpHighlightEchoKind call OmniSharp#actions#highlight#Echo()
 
 if exists('b:undo_ftplugin')
   let b:undo_ftplugin .= ' | '
@@ -104,6 +105,7 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpGlobalCodeCheck
 \|  delcommand OmniSharpGotoDefinition
 \|  delcommand OmniSharpHighlight
+\|  delcommand OmniSharpHighlightEcho
 \|  delcommand OmniSharpHighlightEchoKind
 \|  delcommand OmniSharpHighlightTypes
 \|  delcommand OmniSharpNavigateUp

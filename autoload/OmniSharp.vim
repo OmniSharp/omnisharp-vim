@@ -283,7 +283,7 @@ function! OmniSharp#GotoMetadata(open_in_preview, metadata, opts) abort
     return OmniSharp#stdio#GotoMetadata(
     \ function('s:CBGotoMetadata', [a:open_in_preview, a:opts]), a:metadata)
   else
-    echom 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
+    echomsg 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
     return 0
   endif
 endfunction
@@ -556,7 +556,7 @@ function! OmniSharp#RunTestsInFile(...) abort
   if !s:GuardStdio() | return | endif
   if g:OmniSharp_translate_cygwin_wsl
     echohl WarningMsg
-    echom 'Tests do not work in WSL unfortunately'
+    echomsg 'Tests do not work in WSL unfortunately'
     echohl None
     return
   endif
@@ -609,7 +609,7 @@ function! OmniSharp#RunTest() abort
   if !s:GuardStdio() | return | endif
   if g:OmniSharp_translate_cygwin_wsl
     echohl WarningMsg
-    echom 'Tests do not work in WSL unfortunately'
+    echomsg 'Tests do not work in WSL unfortunately'
     echohl None
     return
   endif
@@ -619,14 +619,14 @@ endfunction
 function! s:CBRunTest(summary) abort
   if a:summary.pass
     if len(a:summary.locations) == 0
-      echom 'No tests were run'
+      echomsg 'No tests were run'
     else
       echohl Title
-      echom a:summary.locations[0].name . ': passed'
+      echomsg a:summary.locations[0].name . ': passed'
       echohl None
     endif
   else
-    echom a:summary.locations[0].name . ': failed'
+    echomsg a:summary.locations[0].name . ': failed'
     let title = 'Test failure: ' . a:summary.locations[0].name
     call s:SetQuickFix(a:summary.locations, title)
   endif
@@ -635,21 +635,21 @@ endfunction
 
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#documentation#TypeLookup() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#documentation#TypeLookup() instead'
   echohl None
   call OmniSharp#actions#documentation#TypeLookup(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation(...) abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#documentation#Documentation() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#documentation#Documentation() instead'
   echohl None
   call OmniSharp#actions#documentation#Documentation(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#SignatureHelp() abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#signature#SignatureHelp() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#signature#SignatureHelp() instead'
   echohl None
   call OmniSharp#actions#signature#SignatureHelp()
 endfunction
@@ -709,16 +709,16 @@ endfunction
 
 function! OmniSharp#HighlightBuffer() abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#highlight#Buffer() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#highlight#Buffer() instead'
   echohl None
   call OmniSharp#actions#highlight#Buffer()
 endfunction
 
 function OmniSharp#HighlightEchoKind() abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#highlight#EchoKind() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#highlight#Echo() instead'
   echohl None
-  call OmniSharp#actions#highlight#EchoKind()
+  call OmniSharp#actions#highlight#Echo()
 endfunction
 
 
@@ -758,7 +758,7 @@ function! OmniSharp#CodeFormat(...) abort
     if type(get(b:, 'OmniSharp_metadata_filename')) != type('')
       call OmniSharp#stdio#CodeFormat(opts)
     else
-      echom 'CodeFormat is not supported in metadata files'
+      echomsg 'CodeFormat is not supported in metadata files'
     endif
   else
     call OmniSharp#py#eval('codeFormat()')
@@ -1221,7 +1221,7 @@ endfunction
 
 function! s:GuardStdio() abort
   if !g:OmniSharp_server_stdio
-    echohl WarningMsg | echom 'stdio only, sorry' | echohl None
+    echohl WarningMsg | echomsg 'stdio only, sorry' | echohl None
     return 0
   endif
   return 1

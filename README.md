@@ -301,7 +301,7 @@ let g:OmniSharp_highlight_groups = {
 \}
 ```
 
-In order to find out what OmniSharp-roslyn calls a particular element, use command `:OmniSharpHighlightEchoKind` to echo the OmniSharp-rolsyn "kind" of the symbol under the cursor.
+In order to find out what OmniSharp-roslyn calls a particular element, use command `:OmniSharpHighlightEcho` to echo the OmniSharp-rolsyn "kind" of the symbol under the cursor.
 
 **Note:** Text property highlighting is only available when using the stdio server, not for HTTP server usage.
 

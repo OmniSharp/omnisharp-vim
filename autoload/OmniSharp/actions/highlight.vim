@@ -30,7 +30,6 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     call s:StdioHighlight(a:bufnr)
     return
   endif
-  call s:InitialiseHighlights()
   if has('nvim')
     let nsid = nvim_create_namespace('OmniSharpHighlight')
     call nvim_buf_clear_namespace(a:bufnr, nsid, 0, -1)
@@ -46,7 +45,7 @@ function! s:HighlightRH(bufnr, buftick, response) abort
         let curline = span.EndLine + 1
       endif
     endif
-    let shc = s:SemanticHighlightClassification[span.Type]
+    let shc = s:GetHighlight(span.Type)
     if type(shc.highlight) == v:t_string
       try
         let start_col = s:GetByteIdx(a:bufnr, span.StartLine, span.StartColumn)
@@ -55,7 +54,7 @@ function! s:HighlightRH(bufnr, buftick, response) abort
           call prop_add(span.StartLine, start_col, {
           \ 'end_lnum': span.EndLine,
           \ 'end_col': end_col,
-          \ 'type': 'OSHighlight' . shc.highlight,
+          \ 'type': 'OSHighlight' . shc.name,
           \ 'bufnr': a:bufnr
           \})
         else
@@ -78,22 +77,24 @@ function! s:HighlightRH(bufnr, buftick, response) abort
   let s:lastSpans = spans
 endfunction
 
-function! s:InitialiseHighlights() abort
-  if get(s:, 'highlightsInitialized', 0) | return | endif
-  let s:highlightsInitialized = 1
-
-  if !has('nvim')
-    let groups = copy(s:SemanticHighlightClassification)
-    let groups = map(groups, 'v:val.highlight')
-    let groups = filter(groups, 'type(v:val) == v:t_string')
-    let groups = uniq(sort(groups))
-    for group in groups
-      call prop_type_add('OSHighlight' . group, {'highlight': group, 'combine': 1})
-    endfor
+function! s:GetHighlight(type) abort
+  let shc = copy(s:ClassificationTypeNames[a:type])
+  if has_key(get(g:, 'OmniSharp_highlight_groups', {}), shc.name)
+    let shc.highlight = g:OmniSharp_highlight_groups[shc.name]
   endif
+  if !has('nvim') && type(shc.highlight) == v:t_string
+    let propName = 'OSHighlight' . shc.name
+    let prop = prop_type_get(propName)
+    if !has_key(prop, 'highlight')
+      call prop_type_add(propName, {'highlight': shc.highlight, 'combine': 1})
+    elseif prop.highlight !=# shc.highlight
+      call prop_type_change(propName, {'highlight': shc.highlight})
+    endif
+  endif
+  return shc
 endfunction
 
-function OmniSharp#actions#highlight#EchoKind() abort
+function OmniSharp#actions#highlight#Echo() abort
   if !g:OmniSharp_server_stdio
     echo 'Highlight kinds can only be used in stdio mode'
     return
@@ -116,7 +117,7 @@ function OmniSharp#actions#highlight#EchoKind() abort
       \ || (startLine < line('.') && endCol > col('.'))
       \ || (endLine > line('.') && startCol <= col('.'))
         let currentSpans += 1
-        let shc = s:SemanticHighlightClassification[span.Type]
+        let shc = s:GetHighlight(span.Type)
         if type(shc.highlight) == v:t_string
           echon shc.name . ' ('
           execute 'echohl' shc.highlight
@@ -152,8 +153,11 @@ endfunction
 
 " All classifications from Roslyn's ClassificationTypeNames
 " https://github.com/dotnet/roslyn/blob/master/src/Workspaces/Core/Portable/Classification/ClassificationTypeNames.cs
-" Keep in sync with omnisharp-roslyn's SemanticHighlightClassification
-let s:SemanticHighlightClassification = [
+" Keep in sync with omnisharp-roslyn's ClassificationTypeNames
+"
+" Structured as an array of dicts instead of an ordinary dict so records can be
+" accessed by index. Endpoint /v2/highlight provides `Type` as an integer index.
+let s:ClassificationTypeNames = [
 \ { 'name': 'Comment',                            'highlight': 0 },
 \ { 'name': 'ExcludedCode',                       'highlight': 0 },
 \ { 'name': 'Identifier',                         'highlight': 'Identifier' },

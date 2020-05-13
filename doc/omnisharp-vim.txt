@@ -209,7 +209,6 @@ Default: 0 >
     let g:OmniSharp_highlighting = 3
 <
                                                  *'g:OmniSharp_highlight_groups'*
-                                                                     DEPRECATED
 Specify which highlight groups should be used to highlight with
 OmniSharp-roslyn "kinds".
 Default: >
