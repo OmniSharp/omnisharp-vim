@@ -1266,6 +1266,25 @@ function! s:FindSolutionsFiles(bufnr) abort
     let dir = fnamemodify(dir, ':h')
   endwhile
 
+  if empty(solution_files)
+    let dir = expand('#' . a:bufnr . ':p:h')
+    let lastfolder = ''
+    let solution_files = []
+
+    while dir !=# lastfolder
+      let solution_files += s:globpath(dir, '*.csproj')
+
+      call uniq(map(solution_files, 'fnamemodify(v:val, ":h")'))
+
+      if !empty(solution_files)
+        return solution_files
+      endif
+
+      let lastfolder = dir
+      let dir = fnamemodify(dir, ':h')
+    endwhile
+  endif
+
   if empty(solution_files) && g:OmniSharp_start_without_solution
     let solution_files = [getcwd()]
   endif
