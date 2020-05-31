@@ -30,6 +30,7 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     call s:StdioHighlight(a:bufnr)
     return
   endif
+  call s:InitialiseHighlights()
   if has('nvim')
     let nsid = nvim_create_namespace('OmniSharpHighlight')
     call nvim_buf_clear_namespace(a:bufnr, nsid, 0, -1)
@@ -96,6 +97,14 @@ function! s:GetHighlight(type) abort
   return shc
 endfunction
 
+function! s:InitialiseHighlights() abort
+  if get(s:, 'highlightsInitialized', 0) | return | endif
+  let s:highlightsInitialized = 1
+  " For backwards-compatibility, check for the old g:OmniSharp_highlight_groups
+  " structure, and convert it to the new style.
+  " ...
+endfunction
+
 function OmniSharp#actions#highlight#Echo() abort
   if !g:OmniSharp_server_stdio
     echo 'Highlight kinds can only be used in stdio mode'
@@ -146,71 +155,71 @@ endfunction
 " Structured as an array of dicts instead of an ordinary dict so records can be
 " accessed by index. Endpoint /v2/highlight provides `Type` as an integer index.
 let s:ClassificationTypeNames = [
-\ { 'name': 'Comment',                            'highlight': 0 },
-\ { 'name': 'ExcludedCode',                       'highlight': 0 },
-\ { 'name': 'Identifier',                         'highlight': 'Identifier' },
-\ { 'name': 'Keyword',                            'highlight': 0 },
-\ { 'name': 'ControlKeyword',                     'highlight': 0 },
-\ { 'name': 'NumericLiteral',                     'highlight': 0 },
-\ { 'name': 'Operator',                           'highlight': 0 },
-\ { 'name': 'OperatorOverloaded',                 'highlight': 0 },
-\ { 'name': 'PreprocessorKeyword',                'highlight': 0 },
-\ { 'name': 'StringLiteral',                      'highlight': 0 },
-\ { 'name': 'WhiteSpace',                         'highlight': 0 },
-\ { 'name': 'Text',                               'highlight': 0 },
-\ { 'name': 'StaticSymbol',                       'highlight': 'Identifier' },
-\ { 'name': 'PreprocessorText',                   'highlight': 0 },
-\ { 'name': 'Punctuation',                        'highlight': 0 },
-\ { 'name': 'VerbatimStringLiteral',              'highlight': 0 },
-\ { 'name': 'StringEscapeCharacter',              'highlight': 0 },
-\ { 'name': 'ClassName',                          'highlight': 'Identifier' },
-\ { 'name': 'DelegateName',                       'highlight': 'Identifier' },
-\ { 'name': 'EnumName',                           'highlight': 'Identifier' },
-\ { 'name': 'InterfaceName',                      'highlight': 'Include' },
-\ { 'name': 'ModuleName',                         'highlight': 0 },
-\ { 'name': 'StructName',                         'highlight': 'Identifier' },
-\ { 'name': 'TypeParameterName',                  'highlight': 'Type' },
-\ { 'name': 'FieldName',                          'highlight': 'Identifier' },
-\ { 'name': 'EnumMemberName',                     'highlight': 'Identifier' },
-\ { 'name': 'ConstantName',                       'highlight': 'Identifier' },
-\ { 'name': 'LocalName',                          'highlight': 'Identifier' },
-\ { 'name': 'ParameterName',                      'highlight': 'Identifier' },
-\ { 'name': 'MethodName',                         'highlight': 'Function' },
-\ { 'name': 'ExtensionMethodName',                'highlight': 'Function' },
-\ { 'name': 'PropertyName',                       'highlight': 'Identifier' },
-\ { 'name': 'EventName',                          'highlight': 'Identifier' },
-\ { 'name': 'NamespaceName',                      'highlight': 'Identifier' },
-\ { 'name': 'LabelName',                          'highlight': 'Label' },
-\ { 'name': 'XmlDocCommentAttributeName',         'highlight': 0 },
-\ { 'name': 'XmlDocCommentAttributeQuotes',       'highlight': 0 },
-\ { 'name': 'XmlDocCommentAttributeValue',        'highlight': 0 },
-\ { 'name': 'XmlDocCommentCDataSection',          'highlight': 0 },
-\ { 'name': 'XmlDocCommentComment',               'highlight': 0 },
-\ { 'name': 'XmlDocCommentDelimiter',             'highlight': 0 },
-\ { 'name': 'XmlDocCommentEntityReference',       'highlight': 0 },
-\ { 'name': 'XmlDocCommentName',                  'highlight': 0 },
-\ { 'name': 'XmlDocCommentProcessingInstruction', 'highlight': 0 },
-\ { 'name': 'XmlDocCommentText',                  'highlight': 0 },
-\ { 'name': 'XmlLiteralAttributeName',            'highlight': 0 },
-\ { 'name': 'XmlLiteralAttributeQuotes',          'highlight': 0 },
-\ { 'name': 'XmlLiteralAttributeValue',           'highlight': 0 },
-\ { 'name': 'XmlLiteralCDataSection',             'highlight': 0 },
-\ { 'name': 'XmlLiteralComment',                  'highlight': 0 },
-\ { 'name': 'XmlLiteralDelimiter',                'highlight': 0 },
-\ { 'name': 'XmlLiteralEmbeddedExpression',       'highlight': 0 },
-\ { 'name': 'XmlLiteralEntityReference',          'highlight': 0 },
-\ { 'name': 'XmlLiteralName',                     'highlight': 0 },
-\ { 'name': 'XmlLiteralProcessingInstruction',    'highlight': 0 },
-\ { 'name': 'XmlLiteralText',                     'highlight': 0 },
-\ { 'name': 'RegexComment',                       'highlight': 0 },
-\ { 'name': 'RegexCharacterClass',                'highlight': 0 },
-\ { 'name': 'RegexAnchor',                        'highlight': 0 },
-\ { 'name': 'RegexQuantifier',                    'highlight': 0 },
-\ { 'name': 'RegexGrouping',                      'highlight': 0 },
-\ { 'name': 'RegexAlternation',                   'highlight': 0 },
-\ { 'name': 'RegexText',                          'highlight': 0 },
-\ { 'name': 'RegexSelfEscapedCharacter',          'highlight': 0 },
-\ { 'name': 'RegexOtherEscape',                   'highlight': 0 }
+\ { 'name': 'Comment',                            'highlight': 0 ,            'desc': 'comment'},
+\ { 'name': 'ExcludedCode',                       'highlight': 0 ,            'desc': 'excluded code'},
+\ { 'name': 'Identifier',                         'highlight': 'Identifier' , 'desc': 'identifier'},
+\ { 'name': 'Keyword',                            'highlight': 0 ,            'desc': 'keyword'},
+\ { 'name': 'ControlKeyword',                     'highlight': 0 ,            'desc': 'keyword - control'},
+\ { 'name': 'NumericLiteral',                     'highlight': 0 ,            'desc': 'number'},
+\ { 'name': 'Operator',                           'highlight': 0 ,            'desc': 'operator'},
+\ { 'name': 'OperatorOverloaded',                 'highlight': 0 ,            'desc': 'operator - overloaded'},
+\ { 'name': 'PreprocessorKeyword',                'highlight': 0 ,            'desc': 'preprocessor keyword'},
+\ { 'name': 'StringLiteral',                      'highlight': 0 ,            'desc': 'string'},
+\ { 'name': 'WhiteSpace',                         'highlight': 0 ,            'desc': 'whitespace'},
+\ { 'name': 'Text',                               'highlight': 0 ,            'desc': 'text'},
+\ { 'name': 'StaticSymbol',                       'highlight': 'Identifier' , 'desc': 'static symbol'},
+\ { 'name': 'PreprocessorText',                   'highlight': 0 ,            'desc': 'preprocessor text'},
+\ { 'name': 'Punctuation',                        'highlight': 0 ,            'desc': 'punctuation'},
+\ { 'name': 'VerbatimStringLiteral',              'highlight': 0 ,            'desc': 'string - verbatim'},
+\ { 'name': 'StringEscapeCharacter',              'highlight': 0 ,            'desc': 'string - escape character'},
+\ { 'name': 'ClassName',                          'highlight': 'Identifier' , 'desc': 'class name'},
+\ { 'name': 'DelegateName',                       'highlight': 'Identifier' , 'desc': 'delegate name'},
+\ { 'name': 'EnumName',                           'highlight': 'Identifier' , 'desc': 'enum name'},
+\ { 'name': 'InterfaceName',                      'highlight': 'Include' ,    'desc': 'interface name'},
+\ { 'name': 'ModuleName',                         'highlight': 0 ,            'desc': 'module name'},
+\ { 'name': 'StructName',                         'highlight': 'Identifier' , 'desc': 'struct name'},
+\ { 'name': 'TypeParameterName',                  'highlight': 'Type' ,       'desc': 'type parameter name'},
+\ { 'name': 'FieldName',                          'highlight': 'Identifier' , 'desc': 'field name'},
+\ { 'name': 'EnumMemberName',                     'highlight': 'Identifier' , 'desc': 'enum member name'},
+\ { 'name': 'ConstantName',                       'highlight': 'Identifier' , 'desc': 'constant name'},
+\ { 'name': 'LocalName',                          'highlight': 'Identifier' , 'desc': 'local name'},
+\ { 'name': 'ParameterName',                      'highlight': 'Identifier' , 'desc': 'parameter name'},
+\ { 'name': 'MethodName',                         'highlight': 'Function' ,   'desc': 'method name'},
+\ { 'name': 'ExtensionMethodName',                'highlight': 'Function' ,   'desc': 'extension method name'},
+\ { 'name': 'PropertyName',                       'highlight': 'Identifier' , 'desc': 'property name'},
+\ { 'name': 'EventName',                          'highlight': 'Identifier' , 'desc': 'event name'},
+\ { 'name': 'NamespaceName',                      'highlight': 'Identifier' , 'desc': 'namespace name'},
+\ { 'name': 'LabelName',                          'highlight': 'Label' ,      'desc': 'label name'},
+\ { 'name': 'XmlDocCommentAttributeName',         'highlight': 0 ,            'desc': 'xml doc comment - attribute name'},
+\ { 'name': 'XmlDocCommentAttributeQuotes',       'highlight': 0 ,            'desc': 'xml doc comment - attribute quotes'},
+\ { 'name': 'XmlDocCommentAttributeValue',        'highlight': 0 ,            'desc': 'xml doc comment - attribute value'},
+\ { 'name': 'XmlDocCommentCDataSection',          'highlight': 0 ,            'desc': 'xml doc comment - cdata section'},
+\ { 'name': 'XmlDocCommentComment',               'highlight': 0 ,            'desc': 'xml doc comment - comment'},
+\ { 'name': 'XmlDocCommentDelimiter',             'highlight': 0 ,            'desc': 'xml doc comment - delimiter'},
+\ { 'name': 'XmlDocCommentEntityReference',       'highlight': 0 ,            'desc': 'xml doc comment - entity reference'},
+\ { 'name': 'XmlDocCommentName',                  'highlight': 0 ,            'desc': 'xml doc comment - name'},
+\ { 'name': 'XmlDocCommentProcessingInstruction', 'highlight': 0 ,            'desc': 'xml doc comment - processing instruction'},
+\ { 'name': 'XmlDocCommentText',                  'highlight': 0 ,            'desc': 'xml doc comment - text'},
+\ { 'name': 'XmlLiteralAttributeName',            'highlight': 0 ,            'desc': 'xml literal - attribute name'},
+\ { 'name': 'XmlLiteralAttributeQuotes',          'highlight': 0 ,            'desc': 'xml literal - attribute quotes'},
+\ { 'name': 'XmlLiteralAttributeValue',           'highlight': 0 ,            'desc': 'xml literal - attribute value'},
+\ { 'name': 'XmlLiteralCDataSection',             'highlight': 0 ,            'desc': 'xml literal - cdata section'},
+\ { 'name': 'XmlLiteralComment',                  'highlight': 0 ,            'desc': 'xml literal - comment'},
+\ { 'name': 'XmlLiteralDelimiter',                'highlight': 0 ,            'desc': 'xml literal - delimiter'},
+\ { 'name': 'XmlLiteralEmbeddedExpression',       'highlight': 0 ,            'desc': 'xml literal - embedded expression'},
+\ { 'name': 'XmlLiteralEntityReference',          'highlight': 0 ,            'desc': 'xml literal - entity reference'},
+\ { 'name': 'XmlLiteralName',                     'highlight': 0 ,            'desc': 'xml literal - name'},
+\ { 'name': 'XmlLiteralProcessingInstruction',    'highlight': 0 ,            'desc': 'xml literal - processing instruction'},
+\ { 'name': 'XmlLiteralText',                     'highlight': 0 ,            'desc': 'xml literal - text'},
+\ { 'name': 'RegexComment',                       'highlight': 0 ,            'desc': 'regex - comment'},
+\ { 'name': 'RegexCharacterClass',                'highlight': 0 ,            'desc': 'regex - character class'},
+\ { 'name': 'RegexAnchor',                        'highlight': 0 ,            'desc': 'regex - anchor'},
+\ { 'name': 'RegexQuantifier',                    'highlight': 0 ,            'desc': 'regex - quantifier'},
+\ { 'name': 'RegexGrouping',                      'highlight': 0 ,            'desc': 'regex - grouping'},
+\ { 'name': 'RegexAlternation',                   'highlight': 0 ,            'desc': 'regex - alternation'},
+\ { 'name': 'RegexText',                          'highlight': 0 ,            'desc': 'regex - text'},
+\ { 'name': 'RegexSelfEscapedCharacter',          'highlight': 0 ,            'desc': 'regex - self escaped character'},
+\ { 'name': 'RegexOtherEscape',                   'highlight': 0 ,            'desc': 'regex - other escape'}
 \]
 
 let &cpoptions = s:save_cpo
