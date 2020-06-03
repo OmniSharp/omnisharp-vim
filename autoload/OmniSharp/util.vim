@@ -119,16 +119,20 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
 
   let command = [ s:server_path ]
   if !g:OmniSharp_server_stdio
-    let command += [ '-p', OmniSharp#GetPort(a:solution_file) ]
+    let command += ['-p', OmniSharp#GetPort(a:solution_file)]
   endif
-  let command += [ '-s', solution_path ]
+  let command += ['-s', solution_path]
+
+  if g:OmniSharp_loglevel ==? 'debug'
+    let command += ['-v']
+  endif
 
   if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
     let command = insert(command, 'mono')
   endif
 
   " Enforce OmniSharp server use utf-8 encoding.
-  let command += [ '-e', 'utf-8' ]
+  let command += ['-e', 'utf-8']
 
   return command
 endfunction
