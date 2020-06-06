@@ -341,7 +341,7 @@ function! s:MakeChanges(body) abort
         noautocmd normal! a<
       endif
       call cursor(change.EndLine, max([1, change.EndColumn - 1]))
-      if change.StartLine < change.EndLine && change.EndColumn == 1
+      if change.StartLine < change.EndLine && (change.EndColumn == 1 || len(getline('.')) == 0)
         " We can't delete before the first character of the line, so add an
         " extra charaqcter which will be immediately deleted again
         noautocmd normal! i>
