@@ -11,7 +11,7 @@ set cpoptions&vim
 " Use OmniSharp#actions#highlight#Buffer() for full semantic highlighting.
 function! OmniSharp#actions#highlight_types#Buffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  call s:InitialiseHighlights()
+  call OmniSharp#actions#highlight_types#Initialise()
   let opts = { 'BufNum':  bufnr('%') }
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBHighlightBuffer', [opts])
@@ -129,7 +129,7 @@ function! s:Highlight(types, group) abort
   endif
 endfunction
 
-function! s:InitialiseHighlights() abort
+function! OmniSharp#actions#highlight_types#Initialise() abort
   if get(s:, 'highlightsInitialized', 0) | return | endif
   let s:highlightsInitialized = 1
   highlight default link csUserIdentifier Identifier

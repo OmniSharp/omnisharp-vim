@@ -102,7 +102,21 @@ function! s:InitialiseHighlights() abort
   let s:highlightsInitialized = 1
   " For backwards-compatibility, check for the old g:OmniSharp_highlight_groups
   " structure, and convert it to the new style.
-  " ...
+  let hlgroups = copy(get(g:, 'OmniSharp_highlight_groups', {}))
+  if len(hlgroups) > 0 && type(values(hlgroups)[0]) == v:t_list
+    let g:OmniSharp_highlight_groups = {}
+    for [highlight, groups] in items(hlgroups)
+      for group in groups
+        let shc = filter(copy(s:ClassificationTypeNames), 'v:val.desc == group')
+        if len(shc) > 0
+          let g:OmniSharp_highlight_groups[shc[0].name] = highlight
+        endif
+      endfor
+    endfor
+    " Since the old g:OmniAhrp_highlight_groups are being used, the old
+    " csUser... highlight groups may also be expected, so initialise them
+    call OmniSharp#actions#highlight_types#Initialise()
+  endif
 endfunction
 
 function OmniSharp#actions#highlight#Echo() abort
