@@ -283,7 +283,7 @@ function! OmniSharp#GotoMetadata(open_in_preview, metadata, opts) abort
     return OmniSharp#stdio#GotoMetadata(
     \ function('s:CBGotoMetadata', [a:open_in_preview, a:opts]), a:metadata)
   else
-    echom 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
+    echomsg 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
     return 0
   endif
 endfunction
@@ -348,8 +348,12 @@ function! OmniSharp#JumpToLocation(location, noautocmds) abort
       \ (&modified && !&hidden ? 'split' : 'edit')
       \ fnameescape(a:location.filename)
     endif
-    if has_key(a:location, 'lnum') && a:location.lnum > 0
-      call cursor(a:location.lnum, a:location.col)
+    if get(a:location, 'lnum', 0) > 0
+      let col = get(a:location, 'vcol', 0)
+      \ ? OmniSharp#util#CharToByteIdx(
+      \     a:location.filename, a:location.lnum, a:location.col)
+      \ : a:location.col
+      call cursor(a:location.lnum, col)
       redraw
     endif
     return 1
@@ -556,7 +560,7 @@ function! OmniSharp#RunTestsInFile(...) abort
   if !s:GuardStdio() | return | endif
   if g:OmniSharp_translate_cygwin_wsl
     echohl WarningMsg
-    echom 'Tests do not work in WSL unfortunately'
+    echomsg 'Tests do not work in WSL unfortunately'
     echohl None
     return
   endif
@@ -609,7 +613,7 @@ function! OmniSharp#RunTest() abort
   if !s:GuardStdio() | return | endif
   if g:OmniSharp_translate_cygwin_wsl
     echohl WarningMsg
-    echom 'Tests do not work in WSL unfortunately'
+    echomsg 'Tests do not work in WSL unfortunately'
     echohl None
     return
   endif
@@ -619,14 +623,14 @@ endfunction
 function! s:CBRunTest(summary) abort
   if a:summary.pass
     if len(a:summary.locations) == 0
-      echom 'No tests were run'
+      echomsg 'No tests were run'
     else
       echohl Title
-      echom a:summary.locations[0].name . ': passed'
+      echomsg a:summary.locations[0].name . ': passed'
       echohl None
     endif
   else
-    echom a:summary.locations[0].name . ': failed'
+    echomsg a:summary.locations[0].name . ': failed'
     let title = 'Test failure: ' . a:summary.locations[0].name
     call s:SetQuickFix(a:summary.locations, title)
   endif
@@ -635,21 +639,21 @@ endfunction
 
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#documentation#TypeLookup() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#documentation#TypeLookup() instead'
   echohl None
   call OmniSharp#actions#documentation#TypeLookup(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation(...) abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#documentation#Documentation() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#documentation#Documentation() instead'
   echohl None
   call OmniSharp#actions#documentation#Documentation(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#SignatureHelp() abort
   echohl WarningMsg
-  echom 'This function is obsolete; use OmniSharp#actions#signature#SignatureHelp() instead'
+  echomsg 'This function is obsolete; use OmniSharp#actions#signature#SignatureHelp() instead'
   echohl None
   call OmniSharp#actions#signature#SignatureHelp()
 endfunction
@@ -708,90 +712,17 @@ endfunction
 
 
 function! OmniSharp#HighlightBuffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  let opts = { 'BufNum':  bufnr('%') }
-  if g:OmniSharp_server_stdio
-    if has('textprop')
-      call OmniSharp#stdio#FindTextProperties(opts.BufNum)
-    else
-      let Callback = function('s:CBHighlightBuffer', [opts])
-      call OmniSharp#stdio#FindHighlightTypes(Callback)
-    endif
-  else
-    if !OmniSharp#IsServerRunning() | return | endif
-    let hltypes = OmniSharp#py#eval('findHighlightTypes()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBHighlightBuffer(opts, hltypes)
-  endif
-endfunction
-
-function! s:CBHighlightBuffer(opts, hltypes) abort
-  if has_key(a:hltypes, 'error')
-    echohl WarningMsg | echom a:hltypes.error | echohl None
-    return
-  endif
-  if bufnr('%') != a:opts.BufNum | return | endif
-
-  let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
-
-  " Clear any matches - highlights with :syn keyword {option} names which cannot
-  " be created with :syn keyword
-  for l:matchid in b:OmniSharp_hl_matches
-    try
-      call matchdelete(l:matchid)
-    catch | endtry
-  endfor
-  let b:OmniSharp_hl_matches = []
-
-  call s:Highlight(a:hltypes.identifiers, 'csUserIdentifier')
-  call s:Highlight(a:hltypes.interfaces, 'csUserInterface')
-  call s:Highlight(a:hltypes.methods, 'csUserMethod')
-  call s:Highlight(a:hltypes.types, 'csUserType')
-
-  silent call s:ClearHighlight('csNewType')
-  syntax region csNewType start="@\@1<!\<new\>"hs=s+4 end="[;\n{(<\[]"me=e-1
-  \ contains=csNew,csUserType,csUserIdentifier
-endfunction
-
-function! s:ClearHighlight(groupname)
-  try
-    execute 'syntax clear' a:groupname
-  catch | endtry
-endfunction
-
-function! s:Highlight(types, group) abort
-  silent call s:ClearHighlight(a:group)
-  if empty(a:types)
-    return
-  endif
-  let l:types = uniq(sort(a:types))
-
-  " Cannot use vim syntax options as keywords, so remove types with these
-  " names. See :h :syn-keyword /Note
-  let l:opts = split('cchar conceal concealends contained containedin ' .
-  \ 'contains display extend fold nextgroup oneline skipempty skipnl ' .
-  \ 'skipwhite transparent')
-
-  " Create a :syn-match for each type with an option name.
-  let l:illegal = filter(copy(l:types), {i,v -> index(l:opts, v, 0, 1) >= 0})
-  for l:ill in l:illegal
-    let matchid = matchadd(a:group, '\<' . l:ill . '\>')
-    call add(b:OmniSharp_hl_matches, matchid)
-  endfor
-
-  call filter(l:types, {i,v -> index(l:opts, v, 0, 1) < 0})
-
-  if len(l:types)
-    execute 'syntax keyword' a:group join(l:types)
-  endif
+  echohl WarningMsg
+  echomsg 'This function is obsolete; use OmniSharp#actions#highlight#Buffer() instead'
+  echohl None
+  call OmniSharp#actions#highlight#Buffer()
 endfunction
 
 function OmniSharp#HighlightEchoKind() abort
-  if !g:OmniSharp_server_stdio || !has('textprop')
-    echo 'Highlight kinds require text properties, in stdio mode'
-  else
-    call OmniSharp#stdio#HighlightEchoKind()
-  endif
+  echohl WarningMsg
+  echomsg 'This function is obsolete; use OmniSharp#actions#highlight#Echo() instead'
+  echohl None
+  call OmniSharp#actions#highlight#Echo()
 endfunction
 
 
@@ -831,7 +762,7 @@ function! OmniSharp#CodeFormat(...) abort
     if type(get(b:, 'OmniSharp_metadata_filename')) != type('')
       call OmniSharp#stdio#CodeFormat(opts)
     else
-      echom 'CodeFormat is not supported in metadata files'
+      echomsg 'CodeFormat is not supported in metadata files'
     endif
   else
     call OmniSharp#py#eval('codeFormat()')
@@ -1294,7 +1225,7 @@ endfunction
 
 function! s:GuardStdio() abort
   if !g:OmniSharp_server_stdio
-    echohl WarningMsg | echom 'stdio only, sorry' | echohl None
+    echohl WarningMsg | echomsg 'stdio only, sorry' | echohl None
     return 0
   endif
   return 1

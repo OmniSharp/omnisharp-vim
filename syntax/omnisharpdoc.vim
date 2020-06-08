@@ -16,6 +16,8 @@ syn match osdTick contained "`" conceal
 hi def link osdSection Statement
 hi def link osdParam Comment
 
+hi def OmniSharpActiveParameter cterm=bold,italic,underline gui=bold,italic,underline
+
 let b:current_syntax = 'omnisharpdoc'
 
 let &cpoptions = s:save_cpo

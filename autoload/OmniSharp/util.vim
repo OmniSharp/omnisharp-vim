@@ -33,6 +33,21 @@ function! s:is_wsl() abort
   return s:is_wsl_val
 endfunction
 
+" Vim locations for quickfix, text properties etc. always use byte offsets.
+" OmniSharp-roslyn returns char offsets, so these need to be transformed.
+function! OmniSharp#util#CharToByteIdx(filenameOrBufnr, lnum, vcol) abort
+  let bufnr = type(a:filenameOrBufnr) == type('')
+  \ ? bufnr(a:filenameOrBufnr)
+  \ : a:filenameOrBufnr
+  let buflines = getbufline(bufnr, a:lnum)
+  if len(buflines) == 0
+    return a:vcol
+  endif
+  let bufline = buflines[0] . "\n"
+  let col = byteidx(bufline, a:vcol)
+  return col < 0 ? a:vcol : col
+endfunction
+
 function! OmniSharp#util#CheckCapabilities() abort
   if exists('s:capable') | return s:capable | endif
 
@@ -74,6 +89,65 @@ function! OmniSharp#util#EchoErr(msg)
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
+function! OmniSharp#util#GetStartCmd(solution_file) abort
+  let solution_path = a:solution_file
+  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
+    let solution_path = fnamemodify(solution_path, ':h')
+  endif
+
+  let solution_path = OmniSharp#util#TranslatePathForServer(solution_path)
+
+  if exists('g:OmniSharp_server_path')
+    let s:server_path = g:OmniSharp_server_path
+  else
+    let parts = [g:OmniSharp_server_install]
+    if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
+      let parts += ['OmniSharp.exe']
+    else
+      let parts += ['run']
+    endif
+    let s:server_path = join(parts, s:dir_separator)
+    if !executable(s:server_path)
+      if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No", 2) == 1
+        call OmniSharp#Install()
+      else
+        redraw
+        return []
+      endif
+    endif
+  endif
+
+  let command = [ s:server_path ]
+  if !g:OmniSharp_server_stdio
+    let command += ['-p', OmniSharp#GetPort(a:solution_file)]
+  endif
+  let command += ['-s', solution_path]
+
+  if g:OmniSharp_loglevel ==? 'debug'
+    let command += ['-v']
+  endif
+
+  if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
+    let command = insert(command, 'mono')
+  endif
+
+  " Enforce OmniSharp server use utf-8 encoding.
+  let command += ['-e', 'utf-8']
+
+  return command
+endfunction
+
+function! OmniSharp#util#PathJoin(parts) abort
+  if type(a:parts) == type('')
+    let parts = [a:parts]
+  elseif type(a:parts) == type([])
+    let parts = a:parts
+  else
+    throw 'Unsupported type for joining paths'
+  endif
+  return join([s:plugin_root_dir] + parts, s:dir_separator)
+endfunction
+
 function! OmniSharp#util#TranslatePathForClient(filename) abort
   let filename = a:filename
   if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
@@ -113,61 +187,6 @@ function! OmniSharp#util#TranslatePathForServer(filename) abort
     let filename = substitute(filename, '/', '\\', 'g')
   endif
   return filename
-endfunction
-
-function! OmniSharp#util#GetStartCmd(solution_file) abort
-  let solution_path = a:solution_file
-  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
-    let solution_path = fnamemodify(solution_path, ':h')
-  endif
-
-  let solution_path = OmniSharp#util#TranslatePathForServer(solution_path)
-
-  if exists('g:OmniSharp_server_path')
-    let s:server_path = g:OmniSharp_server_path
-  else
-    let parts = [g:OmniSharp_server_install]
-    if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
-      let parts += ['OmniSharp.exe']
-    else
-      let parts += ['run']
-    endif
-    let s:server_path = join(parts, s:dir_separator)
-    if !executable(s:server_path)
-      if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No", 2) == 1
-        call OmniSharp#Install()
-      else
-        redraw
-        return []
-      endif
-    endif
-  endif
-
-  let command = [ s:server_path ]
-  if !g:OmniSharp_server_stdio
-    let command += [ '-p', OmniSharp#GetPort(a:solution_file) ]
-  endif
-  let command += [ '-s', solution_path ]
-
-  if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
-    let command = insert(command, 'mono')
-  endif
-
-  " Enforce OmniSharp server use utf-8 encoding.
-  let command += [ '-e', 'utf-8' ]
-
-  return command
-endfunction
-
-function! OmniSharp#util#PathJoin(parts) abort
-  if type(a:parts) == type('')
-    let parts = [a:parts]
-  elseif type(a:parts) == type([])
-    let parts = a:parts
-  else
-    throw 'Unsupported type for joining paths'
-  endif
-  return join([s:plugin_root_dir] + parts, s:dir_separator)
 endfunction
 
 let &cpoptions = s:save_cpo
