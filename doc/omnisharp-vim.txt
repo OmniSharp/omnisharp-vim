@@ -209,16 +209,13 @@ Default: 0 >
     let g:OmniSharp_highlighting = 3
 <
                                                  *'g:OmniSharp_highlight_groups'*
-Specify which highlight groups should be used to highlight with
-OmniSharp-roslyn "kinds".
-Default: >
+Specify how to highlight semantic symbols.
+The |:OmniSharpHighlightEcho| command can be used to find the name of the symbol
+under the cursor. >
     let g:OmniSharp_highlight_groups = {
-    \ 'csUserIdentifier': [
-    \   'constant name', 'enum member name', 'field name', 'identifier',
-    \   'local name', 'parameter name', 'property name', 'static symbol'],
-    \ 'csUserInterface': ['interface name'],
-    \ 'csUserMethod': ['extension method name', 'method name'],
-    \ 'csUserType': ['class name', 'enum name', 'namespace name', 'struct name']
+    \ 'Comment': 'NonText',
+    \ 'XmlDocCommentName': 'Identifier',
+    \ 'XmlDocCommentText': 'NonText'
     \}
 <
 -------------------------------------------------------------------------------
@@ -551,6 +548,12 @@ convenient user re-mapping. These can be used like so: >
                                                     *<Plug>(omnisharp_highlight)*
 :OmniSharpHighlight
     Add/refresh semantic highlighting for the current file
+
+                                                        *:OmniSharpHighlightEcho*
+:OmniSharpHighlightEcho
+    Echo the Roslyn classification name of the symbol under the cursor to the
+    command line. This can be used to configure highlighting with
+    |g:Omnisharp_highlight_groups|
 
                                                               *:OmniSharpInstall*
 :OmniSharpInstall
