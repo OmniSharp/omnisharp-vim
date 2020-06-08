@@ -81,32 +81,9 @@ function! OmniSharp#Complete(findstart, base) abort
 endfunction
 
 
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the number of usages
 function! OmniSharp#FindUsages(...) abort
-  let target = expand('<cword>')
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBFindUsages', [target, opts])
-    call OmniSharp#stdio#FindUsages(Callback)
-  else
-    let locs = OmniSharp#py#eval('findUsages()')
-    if OmniSharp#CheckPyError() | return | endif
-    return s:CBFindUsages(target, opts, locs)
-  endif
-endfunction
-
-function! s:CBFindUsages(target, opts, locations) abort
-  let numUsages = len(a:locations)
-  if numUsages > 0
-    call s:SetQuickFix(a:locations, 'Usages: ' . a:target)
-  else
-    echo 'No usages found'
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numUsages)
-  endif
-  return numUsages
+  call s:WarnObsolete('OmniSharp#actions#usages#Find()')
+  call OmniSharp#actions#usages#Find(a:0 ? a:1 : 0)
 endfunction
 
 
@@ -131,9 +108,10 @@ function! s:CBFindImplementations(target, opts, locations) abort
     echo 'No implementations found'
   else
     if numImplementations == 1
-      call OmniSharp#JumpToLocation(a:locations[0], 0)
+      call OmniSharp#locations#Navigate(a:locations[0], 0)
     else " numImplementations > 1
-      call s:SetQuickFix(a:locations, 'Implementations: ' . a:target)
+      call OmniSharp#locations#SetQuickfix(a:locations,
+      \ 'Implementations: ' . a:target)
     endif
   endif
   if has_key(a:opts, 'Callback')
@@ -157,7 +135,7 @@ endfunction
 function! s:CBFindMembers(opts, locations) abort
   let numMembers = len(a:locations)
   if numMembers > 0
-    call s:SetQuickFix(a:locations, 'Members')
+    call OmniSharp#locations#SetQuickfix(a:locations, 'Members')
   endif
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numMembers)
@@ -212,7 +190,7 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
       let found = 0
     endif
   else
-    let found = OmniSharp#JumpToLocation(a:location, 0)
+    let found = OmniSharp#locations#Navigate(a:location, 0)
   endif
   if has_key(a:opts, 'Callback') && !went_to_metadata
     call a:opts.Callback(found)
@@ -309,7 +287,7 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
     \  'col': a:metadata.Column
     \})
   else
-    call OmniSharp#JumpToLocation({
+    call OmniSharp#locations#Navigate({
     \  'filename': temp_file,
     \  'lnum': a:metadata.Line,
     \  'col': a:metadata.Column
@@ -335,28 +313,6 @@ function! s:PreviewLocation(location) abort
     call OmniSharp#popup#Buffer(bufnr, a:location.lnum, {})
   else
     call OmniSharp#preview#File(a:location.filename, a:location.lnum, a:location.col)
-  endif
-endfunction
-
-function! OmniSharp#JumpToLocation(location, noautocmds) abort
-  if a:location.filename !=# ''
-    " Update the ' mark, adding this location to the jumplist.
-    normal! m'
-    if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
-      execute
-      \ (a:noautocmds ? 'noautocmd' : '')
-      \ (&modified && !&hidden ? 'split' : 'edit')
-      \ fnameescape(a:location.filename)
-    endif
-    if get(a:location, 'lnum', 0) > 0
-      let col = get(a:location, 'vcol', 0)
-      \ ? OmniSharp#util#CharToByteIdx(
-      \     a:location.filename, a:location.lnum, a:location.col)
-      \ : a:location.col
-      call cursor(a:location.lnum, col)
-      redraw
-    endif
-    return 1
   endif
 endfunction
 
@@ -388,7 +344,7 @@ function! s:CBFindSymbol(filter, locations) abort
     call fzf#OmniSharp#FindSymbols(a:locations)
   else
     let title = 'Symbols' . (len(a:filter) ? ': ' . a:filter : '')
-    call s:SetQuickFix(a:locations, title)
+    call OmniSharp#locations#SetQuickfix(a:locations, title)
   endif
 endfunction
 
@@ -549,7 +505,7 @@ endfunction
 
 function! s:CBGlobalCodeCheck(quickfixes) abort
   if len(a:quickfixes) > 0
-    call s:SetQuickFix(a:quickfixes, 'Code Check Messages')
+    call OmniSharp#locations#SetQuickfix(a:quickfixes, 'Code Check Messages')
   else
     echo 'No Code Check messages'
   endif
@@ -606,7 +562,7 @@ function! s:CBRunTestsInFile(summary) abort
   endif
   echomsg title
   echohl None
-  call s:SetQuickFix(locations, title)
+  call OmniSharp#locations#SetQuickfix(locations, title)
 endfunction
 
 function! OmniSharp#RunTest() abort
@@ -632,7 +588,7 @@ function! s:CBRunTest(summary) abort
   else
     echomsg a:summary.locations[0].name . ': failed'
     let title = 'Test failure: ' . a:summary.locations[0].name
-    call s:SetQuickFix(a:summary.locations, title)
+    call OmniSharp#locations#SetQuickfix(a:summary.locations, title)
   endif
 endfunction
 
@@ -746,7 +702,7 @@ endfunction
 
 function! OmniSharp#CodeFormat(...) abort
   call s:WarnObsolete('OmniSharp#actions#format#Format()')
-  call OmniSharp#actions#format#Format()
+  call OmniSharp#actions#format#Format(a:0 ? a:1 : 0)
 endfunction
 
 
@@ -766,7 +722,7 @@ endfunction
 function! s:CBFixUsings(opts, locations) abort
   let numAmbiguous = len(a:locations)
   if numAmbiguous > 0
-    call s:SetQuickFix(a:locations, 'Ambiguous usings')
+    call OmniSharp#locations#SetQuickfix(a:locations, 'Ambiguous usings')
   endif
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numAmbiguous)
@@ -1220,17 +1176,6 @@ function! s:BustAliveCache(...) abort
   let idx = index(s:alive_cache, sln_or_dir)
   if idx != -1
     call remove(s:alive_cache, idx)
-  endif
-endfunction
-
-function! s:SetQuickFix(list, title)
-  if !has('patch-8.0.0657')
-  \ || setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title}) == -1
-    call setqflist(a:list)
-  endif
-  silent doautocmd <nomodeline> QuickFixCmdPost OmniSharp
-  if g:OmniSharp_open_quickfix
-    botright cwindow
   endif
 endfunction
 

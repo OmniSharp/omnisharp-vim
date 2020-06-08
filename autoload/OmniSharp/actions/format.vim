@@ -4,7 +4,7 @@ set cpoptions&vim
 " Optionally accepts a callback function. This can be used to write after
 " formatting, for example.
 function! OmniSharp#actions#format#Format(...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     if type(get(b:, 'OmniSharp_metadata_filename')) != type('')
       call s:StdioFormat(function('s:CBFormat', [opts]))

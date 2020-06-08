@@ -83,7 +83,7 @@ function! s:HandleServerEvent(job, res) abort
             let bufnr = bufinfo[0].bufnr
             call ale#other_source#StartChecking(bufnr, 'OmniSharp')
             let opts = { 'BufNum': bufnr }
-            let quickfixes = s:LocationsFromResponse(result.QuickFixes)
+            let quickfixes = OmniSharp#locations#Parse(result.QuickFixes)
             call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
           endfor
         endif
@@ -275,56 +275,6 @@ function! s:AwaitFuncComplete(state, ...) abort
   endif
 endfunction
 
-function! s:LocationsFromResponse(quickfixes) abort
-  let locations = []
-  let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
-  for quickfix in a:quickfixes
-    let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
-    if get(g:, 'OmniSharp_diagnostic_showid', 0) && has_key(quickfix, 'Id')
-      let text = quickfix.Id . ': ' . text
-    endif
-    if has_key(quickfix, 'FileName')
-      let filename = OmniSharp#util#TranslatePathForClient(quickfix.FileName)
-    else
-      let filename = expand('%:p')
-    endif
-    let location = {
-    \ 'filename': filename,
-    \ 'text': text,
-    \ 'lnum': quickfix.Line,
-    \ 'col': quickfix.Column,
-    \ 'vcol': 1
-    \}
-    if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
-      let location.end_lnum = quickfix.EndLine
-      let location.end_col = quickfix.EndColumn - 1
-    endif
-    let loglevel = get(quickfix, 'LogLevel', '')
-    if loglevel !=# ''
-      let diag_id = get(quickfix, 'Id', '-')
-      if index(keys(overrides), diag_id) >= 0
-        if overrides[diag_id].type ==? 'None'
-          continue
-        endif
-        call extend(location, overrides[diag_id])
-      else
-        if loglevel ==# 'Error'
-          let location.type = 'E'
-        elseif loglevel ==# 'Info'
-          let location.type = 'I'
-        else
-          let location.type = 'W'
-        endif
-        if loglevel ==# 'Hidden'
-          let location.subtype = 'Style'
-        endif
-      endif
-    endif
-    call add(locations, location)
-  endfor
-  return locations
-endfunction
-
 function! OmniSharp#stdio#GetLogFile() abort
   return s:logfile
 endfunction
@@ -368,7 +318,7 @@ endfunction
 
 function! s:CodeCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
 endfunction
 
 
@@ -381,7 +331,7 @@ endfunction
 
 function! s:GlobalCodeCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
+  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
 endfunction
 
 
@@ -421,7 +371,7 @@ endfunction
 function! s:FindImplementationsRH(Callback, response) abort
   if !a:response.Success | return | endif
   let responses = a:response.Body.QuickFixes
-  call a:Callback(type(responses) == type([]) ? s:LocationsFromResponse(responses) : [])
+  call a:Callback(type(responses) == type([]) ? OmniSharp#locations#Parse(responses) : [])
 endfunction
 
 
@@ -434,7 +384,7 @@ endfunction
 
 function! s:FindMembersRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body))
+  call a:Callback(OmniSharp#locations#Parse(a:response.Body))
 endfunction
 
 
@@ -448,21 +398,7 @@ endfunction
 
 function! s:FindSymbolRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
-endfunction
-
-
-function! OmniSharp#stdio#FindUsages(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:FindUsagesRH', [a:Callback])
-  \}
-  call OmniSharp#stdio#Request('/findusages', opts)
-endfunction
-
-function! s:FindUsagesRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  let usages = a:response.Body.QuickFixes
-  call a:Callback(type(usages) == type([]) ? s:LocationsFromResponse(a:response.Body.QuickFixes) : [])
+  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
 endfunction
 
 
@@ -486,7 +422,7 @@ function! s:FixUsingsRH(Callback, response) abort
   if type(a:response.Body.AmbiguousResults) == type(v:null)
     let locations = []
   else
-    let locations = s:LocationsFromResponse(a:response.Body.AmbiguousResults)
+    let locations = OmniSharp#locations#Parse(a:response.Body.AmbiguousResults)
   endif
   call a:Callback(locations)
 endfunction
@@ -548,7 +484,7 @@ function! s:GotoDefinitionRH(Callback, response) abort
   if !a:response.Success | return | endif
   let body = a:response.Body
   if type(body) == type({}) && get(body, 'FileName', v:null) != v:null
-    call a:Callback(s:LocationsFromResponse([body])[0], body)
+    call a:Callback(OmniSharp#locations#Parse([body])[0], body)
   else
     call a:Callback(0, body)
   endif
@@ -628,7 +564,7 @@ function! s:PerformChangesRH(opts, response) abort
     let bufnr = bufnr('%')
     let hidden_bak = &hidden | set hidden
     for change in changes
-      call OmniSharp#JumpToLocation({
+      call OmniSharp#locations#Navigate({
       \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
       \}, 1)
       call OmniSharp#buffer#Update(change)
@@ -637,7 +573,7 @@ function! s:PerformChangesRH(opts, response) abort
       endif
     endfor
     if bufnr('%') != bufnr
-      call OmniSharp#JumpToLocation({
+      call OmniSharp#locations#Navigate({
       \ 'filename': bufname
       \}, 1)
     endif

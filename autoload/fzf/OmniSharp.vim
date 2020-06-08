@@ -10,7 +10,7 @@ function! s:location_sink(str) abort
     endif
   endfor
   echo quickfix.filename
-  call OmniSharp#JumpToLocation(quickfix, 0)
+  call OmniSharp#locations#Navigate(quickfix, 0)
 endfunction
 
 function! fzf#OmniSharp#FindSymbols(quickfixes) abort
