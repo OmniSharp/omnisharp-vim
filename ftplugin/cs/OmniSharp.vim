@@ -22,7 +22,6 @@ if get(g:, 'OmniSharp_start_server', 0) == 1
   call OmniSharp#StartServerIfNotRunning()
 endif
 
-command! -buffer -bar OmniSharpCodeFormat call OmniSharp#CodeFormat()
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
 command! -buffer -bar OmniSharpFindMembers call OmniSharp#FindMembers()
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
@@ -45,6 +44,7 @@ command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniShar
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
 
+command! -buffer -bar OmniSharpCodeFormat call OmniSharp#actions#format#Format()
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
 command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
 command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()

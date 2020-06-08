@@ -325,54 +325,6 @@ function! s:LocationsFromResponse(quickfixes) abort
   return locations
 endfunction
 
-function! s:MakeChanges(body) abort
-  let changes = get(a:body, 'Changes', [])
-  if type(changes) == type(v:null) | let changes = [] | endif
-
-  if len(changes)
-    for change in changes
-      let text = join(split(change.NewText, '\r\?\n', 1), "\n")
-      let start = [change.StartLine, change.StartColumn]
-      let end = [change.EndLine, change.EndColumn]
-      call cursor(start)
-      if change.StartColumn > len(getline('.')) && start != end
-        " We can't set a mark after the last character of the line, so add an
-        " extra charaqcter which will be immediately deleted again
-        noautocmd normal! a<
-      endif
-      call cursor(change.EndLine, max([1, change.EndColumn - 1]))
-      if change.StartLine < change.EndLine && (change.EndColumn == 1 || len(getline('.')) == 0)
-        " We can't delete before the first character of the line, so add an
-        " extra charaqcter which will be immediately deleted again
-        noautocmd normal! i>
-      elseif start == end
-        " Start and end are the same so insert a character to be replaced
-        if change.StartColumn > 1
-          normal! l
-        endif
-        noautocmd normal! i=
-      endif
-      call setpos("'[", [0, change.StartLine, change.StartColumn])
-      let paste_bak = &paste | set paste
-      silent execute "noautocmd keepjumps normal! v`[c\<C-r>=text\<CR>"
-      let &paste = paste_bak
-    endfor
-  elseif get(a:body, 'Buffer', v:null) != v:null
-    let pos = getpos('.')
-    let lines = split(a:body.Buffer, '\r\?\n', 1)
-    if len(lines) < line('$')
-      if exists('*deletebufline')
-        call deletebufline('%', len(lines) + 1, '$')
-      else
-        %delete
-      endif
-    endif
-    call setline(1, lines)
-    let pos[1] = min([pos[1], line('$')])
-    call setpos('.', pos)
-  endif
-endfunction
-
 function! OmniSharp#stdio#GetLogFile() abort
   return s:logfile
 endfunction
@@ -430,30 +382,6 @@ endfunction
 function! s:GlobalCodeCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(s:LocationsFromResponse(a:response.Body.QuickFixes))
-endfunction
-
-
-function! OmniSharp#stdio#CodeFormat(opts) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:CodeFormatRH', [a:opts]),
-  \ 'ExpandTab': &expandtab,
-  \ 'Parameters': {
-  \   'WantsTextChanges': 1
-  \ }
-  \}
-  call OmniSharp#stdio#Request('/codeformat', opts)
-endfunction
-
-function! s:CodeFormatRH(opts, response) abort
-  if !a:response.Success | return | endif
-  normal! m'
-  let winview = winsaveview()
-  call s:MakeChanges(a:response.Body)
-  call winrestview(winview)
-  normal! ``
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback()
-  endif
 endfunction
 
 
@@ -552,7 +480,7 @@ function! s:FixUsingsRH(Callback, response) abort
   if !a:response.Success | return | endif
   normal! m'
   let winview = winsaveview()
-  call s:MakeChanges(a:response.Body)
+  call OmniSharp#buffer#Update(a:response.Body)
   call winrestview(winview)
   normal! ``
   if type(a:response.Body.AmbiguousResults) == type(v:null)
@@ -703,7 +631,7 @@ function! s:PerformChangesRH(opts, response) abort
       call OmniSharp#JumpToLocation({
       \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
       \}, 1)
-      call s:MakeChanges(change)
+      call OmniSharp#buffer#Update(change)
       if bufnr('%') != bufnr
         silent write | silent edit
       endif

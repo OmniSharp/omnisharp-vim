@@ -638,23 +638,17 @@ endfunction
 
 
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
-  echohl WarningMsg
-  echomsg 'This function is obsolete; use OmniSharp#actions#documentation#TypeLookup() instead'
-  echohl None
+  call s:WarnObsolete('OmniSharp#actions#documentation#TypeLookup()')
   call OmniSharp#actions#documentation#TypeLookup(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#TypeLookupWithDocumentation(...) abort
-  echohl WarningMsg
-  echomsg 'This function is obsolete; use OmniSharp#actions#documentation#Documentation() instead'
-  echohl None
+  call s:WarnObsolete('OmniSharp#actions#documentation#Documentation()')
   call OmniSharp#actions#documentation#Documentation(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#SignatureHelp() abort
-  echohl WarningMsg
-  echomsg 'This function is obsolete; use OmniSharp#actions#signature#SignatureHelp() instead'
-  echohl None
+  call s:WarnObsolete('OmniSharp#actions#signature#SignatureHelp()')
   call OmniSharp#actions#signature#SignatureHelp()
 endfunction
 
@@ -712,16 +706,12 @@ endfunction
 
 
 function! OmniSharp#HighlightBuffer() abort
-  echohl WarningMsg
-  echomsg 'This function is obsolete; use OmniSharp#actions#highlight#Buffer() instead'
-  echohl None
+  call s:WarnObsolete('OmniSharp#actions#highlight#Buffer()')
   call OmniSharp#actions#highlight#Buffer()
 endfunction
 
 function OmniSharp#HighlightEchoKind() abort
-  echohl WarningMsg
-  echomsg 'This function is obsolete; use OmniSharp#actions#highlight#Echo() instead'
-  echohl None
+  call s:WarnObsolete('OmniSharp#actions#highlight#Echo()')
   call OmniSharp#actions#highlight#Echo()
 endfunction
 
@@ -754,23 +744,9 @@ function! OmniSharp#BufferHasChanged() abort
 endfunction
 
 
-" Optionally accepts a callback function. This can be used to write after
-" formatting, for example.
 function! OmniSharp#CodeFormat(...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    if type(get(b:, 'OmniSharp_metadata_filename')) != type('')
-      call OmniSharp#stdio#CodeFormat(opts)
-    else
-      echomsg 'CodeFormat is not supported in metadata files'
-    endif
-  else
-    call OmniSharp#py#eval('codeFormat()')
-    call OmniSharp#CheckPyError()
-    if has_key(opts, 'Callback')
-      call opts.Callback()
-    endif
-  endif
+  call s:WarnObsolete('OmniSharp#actions#format#Format()')
+  call OmniSharp#actions#format#Format()
 endfunction
 
 
@@ -1256,6 +1232,12 @@ function! s:SetQuickFix(list, title)
   if g:OmniSharp_open_quickfix
     botright cwindow
   endif
+endfunction
+
+function! s:WarnObsolete(newName) abort
+  echohl WarningMsg
+  echomsg printf('This function is obsolete; use %s instead', a:newName)
+  echohl None
 endfunction
 
 if has('patch-7.4.279')
