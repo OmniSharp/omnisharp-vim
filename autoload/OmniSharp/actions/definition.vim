@@ -4,7 +4,7 @@ set cpoptions&vim
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with a boolean 'found' result
 function! OmniSharp#actions#definition#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'CallbackType': a:1 } : {}
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBGotoDefinition', [opts])
     call s:StdioFind(Callback)
@@ -13,6 +13,18 @@ function! OmniSharp#actions#definition#Find(...) abort
     if OmniSharp#CheckPyError() | return 0 | endif
     " Mock metadata info for old server based setups
     return s:CBGotoDefinition(opts, loc, { 'MetadataSource': {}})
+  endif
+endfunction
+
+function! OmniSharp#actions#definition#Preview(...) abort
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBPreviewDefinition', [opts])
+    call s:StdioFind(Callback)
+  else
+    let loc = OmniSharp#py#eval('gotoDefinition()')
+    if OmniSharp#CheckPyError() | return 0 | endif
+    call s:CBPreviewDefinition({}, loc, {})
   endif
 endfunction
 
@@ -55,6 +67,21 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
     call a:opts.Callback(found)
   endif
   return found
+endfunction
+
+function! s:CBPreviewDefinition(opts, location, metadata) abort
+  if type(a:location) != type({}) " Check whether a dict was returned
+    if g:OmniSharp_lookup_metadata
+    \ && type(a:metadata) == type({})
+    \ && type(a:metadata.MetadataSource) == type({})
+      let found = OmniSharp#GotoMetadata(1, a:metadata, a:opts)
+    else
+      echo 'Not found'
+    endif
+  else
+    call OmniSharp#locations#Preview(a:location)
+    echo fnamemodify(a:location.filename, ':.')
+  endif
 endfunction
 
 let &cpoptions = s:save_cpo

@@ -111,63 +111,14 @@ function! OmniSharp#GotoDefinition(...) abort
   call OmniSharp#actions#definition#Find(a:0 ? a:1 : 0)
 endfunction
 
-
-" TODO: Broken
 function! OmniSharp#PreviewDefinition(...) abort
-  let opts = a:0 ? {'Callback': a:1} : {}
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBPreviewDefinition', [opts])
-    call OmniSharp#stdio#GotoDefinition(Callback)
-  else
-    let loc = OmniSharp#py#eval('gotoDefinition()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBPreviewDefinition({}, loc, {})
-  endif
+  call s:WarnObsolete('OmniSharp#actions#definition#Preview()')
+  call OmniSharp#actions#definition#Preview(a:0 ? a:1 : 0)
 endfunction
 
-function! s:CBPreviewDefinition(opts, location, metadata) abort
-  if type(a:location) != type({}) " Check whether a dict was returned
-    if g:OmniSharp_lookup_metadata
-    \ && type(a:metadata) == type({})
-    \ && type(a:metadata.MetadataSource) == type({})
-      let found = OmniSharp#GotoMetadata(
-      \ 1,
-      \ a:metadata,
-      \ a:opts)
-    else
-      echo 'Not found'
-    endif
-  else
-    call s:PreviewLocation(a:location)
-    echo fnamemodify(a:location.filename, ':.')
-  endif
-endfunction
-
-" TODO: Broken
 function! OmniSharp#PreviewImplementation() abort
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBPreviewImplementation')
-    call OmniSharp#stdio#FindImplementations(Callback)
-  else
-    let locs = OmniSharp#py#eval('findImplementations()')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBPreviewImplementation(locs)
-  endif
-endfunction
-
-function! s:CBPreviewImplementation(locs, ...) abort
-    let numImplementations = len(a:locs)
-    if numImplementations == 0
-      echo 'No implementations found'
-    else
-      call s:PreviewLocation(a:locs[0])
-      let fname = fnamemodify(a:locs[0].filename, ':.')
-      if numImplementations == 1
-        echo fname
-      else
-        echo fname . ': Implementation 1 of ' . numImplementations
-      endif
-    endif
+  call s:WarnObsolete('OmniSharp#actions#implementations#Preview()')
+  call OmniSharp#actions#implementations#Preview()
 endfunction
 
 
@@ -196,7 +147,7 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   call setbufvar(bufnr, 'OmniSharp_metadata_filename', a:response.SourceName)
   let jumped_from_preview = &previewwindow
   if a:open_in_preview
-    call s:PreviewLocation({
+    call OmniSharp#locations#Preview({
     \  'filename': temp_file,
     \  'lnum': a:metadata.Line,
     \  'col': a:metadata.Column
@@ -218,17 +169,6 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   endif
 
   return 1
-endfunction
-
-function! s:PreviewLocation(location) abort
-  if OmniSharp#popup#Enabled()
-    let bufnr = bufadd(a:location.filename)
-    " neovim requires that the buffer be explicitly loaded
-    call bufload(bufnr)
-    call OmniSharp#popup#Buffer(bufnr, a:location.lnum, {})
-  else
-    call OmniSharp#preview#File(a:location.filename, a:location.lnum, a:location.col)
-  endif
 endfunction
 
 

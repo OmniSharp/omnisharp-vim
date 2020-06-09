@@ -4,7 +4,7 @@ set cpoptions&vim
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of members
 function! OmniSharp#actions#members#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'CallbackType': a:1 } : {}
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if g:OmniSharp_server_stdio
     call s:StdioFind(function('s:CBFindMembers', [opts]))
   else

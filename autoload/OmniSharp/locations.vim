@@ -73,6 +73,17 @@ function! OmniSharp#locations#Parse(quickfixes) abort
   return locations
 endfunction
 
+function! OmniSharp#locations#Preview(location) abort
+  if OmniSharp#popup#Enabled()
+    let bufnr = bufadd(a:location.filename)
+    " neovim requires that the buffer be explicitly loaded
+    call bufload(bufnr)
+    call OmniSharp#popup#Buffer(bufnr, a:location.lnum, {})
+  else
+    call OmniSharp#preview#File(a:location.filename, a:location.lnum, a:location.col)
+  endif
+endfunction
+
 function! OmniSharp#locations#SetQuickfix(list, title)
   if !has('patch-8.0.0657')
   \ || setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': a:title}) == -1

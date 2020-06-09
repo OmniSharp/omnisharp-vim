@@ -26,8 +26,6 @@ command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-
 command! -buffer -bar OmniSharpFixUsings call OmniSharp#FixUsings()
 command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#GlobalCodeCheck()
-command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#PreviewDefinition()
-command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#PreviewImplementation()
 command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
 command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#RenameTo(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
@@ -48,6 +46,8 @@ command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer
 command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()
 command! -buffer -bar OmniSharpNavigateUp call OmniSharp#actions#navigate#Up()
 command! -buffer -bar OmniSharpNavigateDown call OmniSharp#actions#navigate#Down()
+command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definition#Preview()
+command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 

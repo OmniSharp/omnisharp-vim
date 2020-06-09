@@ -12,7 +12,7 @@ Given cs():
 Execute (go to metadata preview):
   call OmniSharpTestInitializeBuffer('GotoMetadata1')
   call search("MemoryStream stream")
-  call OmniSharpTestAwait('OmniSharp#PreviewDefinition', [])
+  call OmniSharpTestAwait('OmniSharp#actions#definition#Preview', [])
   wincmd p
   AssertEqual 'MemoryStream.cs', expand('%:t')
   pclose

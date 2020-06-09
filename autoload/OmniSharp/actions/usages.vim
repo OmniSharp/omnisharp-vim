@@ -4,7 +4,7 @@ set cpoptions&vim
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of usages
 function! OmniSharp#actions#usages#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'CallbackType': a:1 } : {}
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   let target = expand('<cword>')
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindUsages', [target, opts])

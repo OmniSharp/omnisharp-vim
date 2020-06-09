@@ -4,7 +4,7 @@ set cpoptions&vim
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of implementations
 function! OmniSharp#actions#implementations#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'CallbackType': a:1 } : {}
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   let target = expand('<cword>')
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindImplementations', [target, opts])
@@ -13,6 +13,17 @@ function! OmniSharp#actions#implementations#Find(...) abort
     let locs = OmniSharp#py#eval('findImplementations()')
     if OmniSharp#CheckPyError() | return | endif
     return s:CBFindImplementations(target, opts, locs)
+  endif
+endfunction
+
+function! OmniSharp#actions#implementations#Preview() abort
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBPreviewImplementation')
+    call s:StdioFind(Callback)
+  else
+    let locs = OmniSharp#py#eval('findImplementations()')
+    if OmniSharp#CheckPyError() | return | endif
+    call s:CBPreviewImplementation(locs)
   endif
 endfunction
 
@@ -47,6 +58,21 @@ function! s:CBFindImplementations(target, opts, locations) abort
     call a:opts.Callback(numImplementations)
   endif
   return numImplementations
+endfunction
+
+function! s:CBPreviewImplementation(locs, ...) abort
+    let numImplementations = len(a:locs)
+    if numImplementations == 0
+      echo 'No implementations found'
+    else
+      call OmniSharp#locations#Preview(a:locs[0])
+      let fname = fnamemodify(a:locs[0].filename, ':.')
+      if numImplementations == 1
+        echo fname
+      else
+        echo fname . ': Implementation 1 of ' . numImplementations
+      endif
+    endif
 endfunction
 
 let &cpoptions = s:save_cpo
