@@ -91,26 +91,9 @@ function! OmniSharp#FindImplementations(...) abort
   call OmniSharp#actions#implementations#Find(a:0 ? a:1 : 0)
 endfunction
 
-
 function! OmniSharp#FindMembers(...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#FindMembers(function('s:CBFindMembers', [opts]))
-  else
-    let locs = OmniSharp#py#eval('findMembers()')
-    if OmniSharp#CheckPyError() | return | endif
-    return s:CBFindMembers(opts, locs)
-  endif
-endfunction
-
-function! s:CBFindMembers(opts, locations) abort
-  let numMembers = len(a:locations)
-  if numMembers > 0
-    call OmniSharp#locations#SetQuickfix(a:locations, 'Members')
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numMembers)
-  endif
+  call s:WarnObsolete('OmniSharp#actions#members#Find()')
+  call OmniSharp#actions#members#Find(a:0 ? a:1 : 0)
 endfunction
 
 

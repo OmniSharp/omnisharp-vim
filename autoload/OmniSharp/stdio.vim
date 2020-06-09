@@ -350,19 +350,6 @@ function! s:CodeStructureRH(bufnr, Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#FindMembers(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:FindMembersRH', [a:Callback])
-  \}
-  call OmniSharp#stdio#Request('/currentfilemembersasflat', opts)
-endfunction
-
-function! s:FindMembersRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body))
-endfunction
-
-
 function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindSymbolRH', [a:Callback]),
