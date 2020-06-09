@@ -350,31 +350,6 @@ function! s:CodeStructureRH(bufnr, Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#FixUsings(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:FixUsingsRH', [a:Callback]),
-  \ 'Parameters': {
-  \   'WantsTextChanges': 1
-  \ }
-  \}
-  call OmniSharp#stdio#Request('/fixusings', opts)
-endfunction
-
-
-function! OmniSharp#stdio#FindImplementations(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:FindImplementationsRH', [a:Callback])
-  \}
-  call OmniSharp#stdio#Request('/findimplementations', opts)
-endfunction
-
-function! s:FindImplementationsRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  let responses = a:response.Body.QuickFixes
-  call a:Callback(type(responses) == type([]) ? OmniSharp#locations#Parse(responses) : [])
-endfunction
-
-
 function! OmniSharp#stdio#FindMembers(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:FindMembersRH', [a:Callback])

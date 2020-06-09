@@ -86,38 +86,9 @@ function! OmniSharp#FindUsages(...) abort
   call OmniSharp#actions#usages#Find(a:0 ? a:1 : 0)
 endfunction
 
-
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the number of implementations
 function! OmniSharp#FindImplementations(...) abort
-  let target = expand('<cword>')
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBFindImplementations', [target, opts])
-    call OmniSharp#stdio#FindImplementations(Callback)
-  else
-    let locs = OmniSharp#py#eval('findImplementations()')
-    if OmniSharp#CheckPyError() | return | endif
-    return s:CBFindImplementations(target, opts, locs)
-  endif
-endfunction
-
-function! s:CBFindImplementations(target, opts, locations) abort
-  let numImplementations = len(a:locations)
-  if numImplementations == 0
-    echo 'No implementations found'
-  else
-    if numImplementations == 1
-      call OmniSharp#locations#Navigate(a:locations[0], 0)
-    else " numImplementations > 1
-      call OmniSharp#locations#SetQuickfix(a:locations,
-      \ 'Implementations: ' . a:target)
-    endif
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numImplementations)
-  endif
-  return numImplementations
+  call s:WarnObsolete('OmniSharp#actions#implementations#Find()')
+  call OmniSharp#actions#implementations#Find(a:0 ? a:1 : 0)
 endfunction
 
 
