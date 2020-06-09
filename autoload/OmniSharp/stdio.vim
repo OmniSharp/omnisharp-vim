@@ -431,20 +431,6 @@ function! s:GetCodeActionsRH(Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
-  \ 'Parameters': a:metadata.MetadataSource
-  \}
-  return OmniSharp#stdio#Request('/metadata', opts)
-endfunction
-
-function! s:GotoMetadataRH(Callback, metadata, response) abort
-  if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
-  return a:Callback(a:response.Body, a:metadata)
-endfunction
-
-
 function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
   \ 'ResponseHandler': function('s:PerformChangesRH', [a:opts]),

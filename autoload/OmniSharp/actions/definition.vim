@@ -54,7 +54,7 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
     if g:OmniSharp_lookup_metadata
     \ && type(a:metadata) == type({})
     \ && type(a:metadata.MetadataSource) == type({})
-      let found = OmniSharp#GotoMetadata(0, a:metadata, a:opts)
+      let found = OmniSharp#actions#metadata#Find(0, a:metadata, a:opts)
       let went_to_metadata = 1
     else
       echo 'Not found'
@@ -74,7 +74,7 @@ function! s:CBPreviewDefinition(opts, location, metadata) abort
     if g:OmniSharp_lookup_metadata
     \ && type(a:metadata) == type({})
     \ && type(a:metadata.MetadataSource) == type({})
-      let found = OmniSharp#GotoMetadata(1, a:metadata, a:opts)
+      let found = OmniSharp#actions#metadata#Find(1, a:metadata, a:opts)
     else
       echo 'Not found'
     endif

@@ -122,56 +122,6 @@ function! OmniSharp#PreviewImplementation() abort
 endfunction
 
 
-function! OmniSharp#GotoMetadata(open_in_preview, metadata, opts) abort
-  if g:OmniSharp_server_stdio
-    return OmniSharp#stdio#GotoMetadata(
-    \ function('s:CBGotoMetadata', [a:open_in_preview, a:opts]), a:metadata)
-  else
-    echomsg 'GotoMetadata is not supported on OmniSharp server. Please look at upgrading to the stdio version'
-    return 0
-  endif
-endfunction
-
-function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
-  let host = OmniSharp#GetHost()
-  let metadata_filename = fnamemodify(
-  \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
-  let temp_file = g:OmniSharp_temp_dir . '/' . metadata_filename
-  call writefile(
-  \ map(split(a:response.Source, "\n", 1), {i,v -> substitute(v, '\r', '', 'g')}),
-  \ temp_file,
-  \ 'b'
-  \)
-  let bufnr = bufadd(temp_file)
-  call setbufvar(bufnr, 'OmniSharp_host', host)
-  call setbufvar(bufnr, 'OmniSharp_metadata_filename', a:response.SourceName)
-  let jumped_from_preview = &previewwindow
-  if a:open_in_preview
-    call OmniSharp#locations#Preview({
-    \  'filename': temp_file,
-    \  'lnum': a:metadata.Line,
-    \  'col': a:metadata.Column
-    \})
-  else
-    call OmniSharp#locations#Navigate({
-    \  'filename': temp_file,
-    \  'lnum': a:metadata.Line,
-    \  'col': a:metadata.Column
-    \}, 0)
-    setlocal nomodifiable readonly
-  endif
-  if a:open_in_preview && !jumped_from_preview && &previewwindow
-    silent wincmd p
-  endif
-
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(1)
-  endif
-
-  return 1
-endfunction
-
-
 function! OmniSharp#FindSymbol(...) abort
   let filter = a:0 ? a:1 : ''
   if !OmniSharp#IsServerRunning() | return | endif
@@ -657,13 +607,14 @@ endfunction
 function! OmniSharp#StartServerIfNotRunning(...) abort
   if OmniSharp#FugitiveCheck() | return | endif
   " Bail early in this check if the file is a metadata file
-  if type(get(b:, 'OmniSharp_metadata_filename', 0)) == type('') | return | endif
+  if type(get(b:, 'OmniSharp_metadata_filename')) == type('') | return | endif
   let sln_or_dir = a:0 ? a:1 : ''
   call OmniSharp#StartServer(sln_or_dir, 1)
 endfunction
 
 function! OmniSharp#FugitiveCheck() abort
-  return &buftype ==# 'nofile' || match(expand('%:p'), '\vfugitive:(///|\\\\)' ) == 0
+  return &buftype ==# 'nofile'
+  \ || match(expand('%:p'), '\vfugitive:(///|\\\\)' ) == 0
 endfunction
 
 function! OmniSharp#StartServer(...) abort
@@ -674,11 +625,13 @@ function! OmniSharp#StartServer(...) abort
     if filereadable(sln_or_dir)
       let file_ext = fnamemodify(sln_or_dir, ':e')
       if file_ext !=? 'sln'
-        call OmniSharp#util#EchoErr("Provided file '" . sln_or_dir . "' is not a solution.")
+        call OmniSharp#util#EchoErr(
+        \ printf("'%s' is not a solution file", sln_or_dir))
         return
       endif
     elseif !isdirectory(sln_or_dir)
-      call OmniSharp#util#EchoErr("Provided path '" . sln_or_dir . "' is not a sln file or a directory.")
+      call OmniSharp#util#EchoErr(
+      \ printf("'%s' is not a solution file or directory", sln_or_dir))
       return
     endif
   else
@@ -688,7 +641,8 @@ function! OmniSharp#StartServer(...) abort
         " .csx and .cake files do not require solutions or projects
         let sln_or_dir = expand('%:p:h')
       else
-        call OmniSharp#util#EchoErr('Could not find solution file or directory to start server')
+        call OmniSharp#util#EchoErr(
+        \ 'Could not find a solution or project to start server with')
         return
       endif
     endif
@@ -699,7 +653,7 @@ function! OmniSharp#StartServer(...) abort
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
     " If the port is hardcoded, we should check if any other vim instances have
     " started this server
-    if !running && !g:OmniSharp_server_stdio && s:IsServerPortHardcoded(sln_or_dir)
+    if !running && s:IsServerPortHardcoded(sln_or_dir)
       let running = OmniSharp#IsServerRunning({ 'sln_or_dir': sln_or_dir })
     endif
 
@@ -711,14 +665,16 @@ endfunction
 
 function! s:StartServer(sln_or_dir) abort
   if OmniSharp#proc#IsJobRunning(a:sln_or_dir)
-    call OmniSharp#util#EchoErr('OmniSharp is already running on ' . a:sln_or_dir)
+    call OmniSharp#util#EchoErr(
+    \ printf("OmniSharp is already running '%s'", a:sln_or_dir))
     return
   endif
 
   let l:command = OmniSharp#util#GetStartCmd(a:sln_or_dir)
 
   if l:command ==# []
-    call OmniSharp#util#EchoErr('Could not determine the command to start the OmniSharp server!')
+    call OmniSharp#util#EchoErr(
+    \ 'Failed to build command to start the OmniSharp server')
     return
   endif
 
@@ -798,7 +754,8 @@ function! OmniSharp#CheckPyError(...)
   let should_print = a:0 ? a:1 : 1
   if !empty(g:OmniSharp_py_err)
     if should_print
-      call OmniSharp#util#EchoErr(g:OmniSharp_py_err.code . ': ' . g:OmniSharp_py_err.msg)
+      call OmniSharp#util#EchoErr(
+      \ printf('%s: %s', g:OmniSharp_py_err.code, g:OmniSharp_py_err.msg))
     endif
     " If we got a connection error when hitting the server, then the server may
     " not be running anymore and we should bust the 'alive' cache
@@ -908,19 +865,22 @@ function! OmniSharp#Install(...) abort
 
   if has('win32')
     let l:logfile = s:plugin_root_dir . '\log\install.log'
-    let l:script = shellescape(s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
+    let l:script = shellescape(
+    \ s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
     let l:version_file_location = l:location . '\OmniSharpInstall-version.txt'
 
-    let l:command = 'powershell -ExecutionPolicy Bypass -File ' . l:script . ' ' .
-    \ l:http . ' -l ' . l:location . ' ' . l:version
+    let l:command = printf(
+    \ 'powershell -ExecutionPolicy Bypass -File %s %s -l %s %s',
+    \ l:script, l:http, l:location, l:version)
   else
     let l:logfile = s:plugin_root_dir . '/log/install.log'
-    let l:script = shellescape(s:plugin_root_dir . '/installer/omnisharp-manager.sh')
+    let l:script = shellescape(
+    \ s:plugin_root_dir . '/installer/omnisharp-manager.sh')
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
     let l:version_file_location = l:location . '/OmniSharpInstall-version.txt'
 
-    let l:command = '/bin/sh ' . l:script . ' ' .
-    \ l:http . ' ' . l:mono . ' -l ' . l:location . ' ' . l:version
+    let l:command = printf('/bin/sh %s %s %s -l %s %s',
+    \ l:script, l:http, l:mono, l:location, l:version)
   endif
 
   " Begin server installation
@@ -1019,9 +979,8 @@ function! s:GuardStdio() abort
 endfunction
 
 function! s:IsServerPortHardcoded(sln_or_dir) abort
-  if exists('g:OmniSharp_port')
-    return 1
-  endif
+  if g:OmniSharp_server_stdio | return 0 | endif
+  if exists('g:OmniSharp_port') | return 1 | endif
   return has_key(s:initial_server_ports, a:sln_or_dir)
 endfunction
 
