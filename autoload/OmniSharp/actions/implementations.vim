@@ -49,7 +49,6 @@ function! s:CBFindImplementations(target, opts, locations) abort
   return numImplementations
 endfunction
 
-
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
 

@@ -28,5 +28,5 @@ Given cs():
 Execute (go to metadata window):
   call OmniSharpTestInitializeBuffer('GotoMetadata2')
   call search("MemoryStream stream")
-  call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
+  call OmniSharpTestAwait('OmniSharp#actions#definition#Find', [])
   AssertEqual 'MemoryStream.cs', expand('%:t')

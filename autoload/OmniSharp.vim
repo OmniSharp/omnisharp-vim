@@ -106,44 +106,13 @@ function! OmniSharp#NavigateUp() abort
   call OmniSharp#actions#navigate#Up()
 endfunction
 
-
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with a boolean 'found' result
 function! OmniSharp#GotoDefinition(...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBGotoDefinition', [opts])
-    call OmniSharp#stdio#GotoDefinition(Callback)
-  else
-    let loc = OmniSharp#py#eval('gotoDefinition()')
-    if OmniSharp#CheckPyError() | return 0 | endif
-    " Mock metadata info for old server based setups
-    return s:CBGotoDefinition(opts, loc, { 'MetadataSource': {}})
-  endif
-endfunction
-
-function! s:CBGotoDefinition(opts, location, metadata) abort
-  let went_to_metadata = 0
-  if type(a:location) != type({}) " Check whether a dict was returned
-    if g:OmniSharp_lookup_metadata
-    \ && type(a:metadata) == type({})
-    \ && type(a:metadata.MetadataSource) == type({})
-      let found = OmniSharp#GotoMetadata(0, a:metadata, a:opts)
-      let went_to_metadata = 1
-    else
-      echo 'Not found'
-      let found = 0
-    endif
-  else
-    let found = OmniSharp#locations#Navigate(a:location, 0)
-  endif
-  if has_key(a:opts, 'Callback') && !went_to_metadata
-    call a:opts.Callback(found)
-  endif
-  return found
+  call s:WarnObsolete('OmniSharp#actions#definition#Find()')
+  call OmniSharp#actions#definition#Find(a:0 ? a:1 : 0)
 endfunction
 
 
+" TODO: Broken
 function! OmniSharp#PreviewDefinition(...) abort
   let opts = a:0 ? {'Callback': a:1} : {}
   if g:OmniSharp_server_stdio
@@ -174,6 +143,7 @@ function! s:CBPreviewDefinition(opts, location, metadata) abort
   endif
 endfunction
 
+" TODO: Broken
 function! OmniSharp#PreviewImplementation() abort
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBPreviewImplementation')

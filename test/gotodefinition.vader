@@ -15,5 +15,5 @@ Given cs():
 Execute (go to definition):
   call OmniSharpTestInitializeBuffer('GotoDefinition')
   call search("i = 0")
-  call OmniSharpTestAwait('OmniSharp#GotoDefinition', [])
+  call OmniSharpTestAwait('OmniSharp#actions#definition#Find', [])
   AssertEqual 3, line(".")

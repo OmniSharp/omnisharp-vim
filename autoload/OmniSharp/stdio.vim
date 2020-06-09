@@ -431,28 +431,6 @@ function! s:GetCodeActionsRH(Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#GotoDefinition(Callback) abort
-  let parameters = {
-  \ 'WantMetadata': v:true,
-  \}
-  let opts = {
-  \ 'ResponseHandler': function('s:GotoDefinitionRH', [a:Callback]),
-  \ 'Parameters': parameters
-  \}
-  call OmniSharp#stdio#Request('/gotodefinition', opts)
-endfunction
-
-function! s:GotoDefinitionRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  let body = a:response.Body
-  if type(body) == type({}) && get(body, 'FileName', v:null) != v:null
-    call a:Callback(OmniSharp#locations#Parse([body])[0], body)
-  else
-    call a:Callback(0, body)
-  endif
-endfunction
-
-
 function! OmniSharp#stdio#GotoMetadata(Callback, metadata) abort
   let opts = {
   \ 'ResponseHandler': function('s:GotoMetadataRH', [a:Callback, a:metadata]),
