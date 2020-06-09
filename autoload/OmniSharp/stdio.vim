@@ -467,27 +467,6 @@ function! s:GotoMetadataRH(Callback, metadata, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#NavigateDown() abort
-  let opts = {
-  \ 'ResponseHandler': function('s:NavigateRH')
-  \}
-  call OmniSharp#stdio#Request('/navigatedown', opts)
-endfunction
-
-function! OmniSharp#stdio#NavigateUp() abort
-  let opts = {
-  \ 'ResponseHandler': function('s:NavigateRH')
-  \}
-  call OmniSharp#stdio#Request('/navigateup', opts)
-endfunction
-
-function! s:NavigateRH(response) abort
-  if !a:response.Success | return | endif
-  normal! m'
-  call cursor(a:response.Body.Line, a:response.Body.Column)
-endfunction
-
-
 function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
   \ 'ResponseHandler': function('s:PerformChangesRH', [a:opts]),

@@ -96,23 +96,14 @@ function! OmniSharp#FindMembers(...) abort
   call OmniSharp#actions#members#Find(a:0 ? a:1 : 0)
 endfunction
 
-
 function! OmniSharp#NavigateDown() abort
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#NavigateDown()
-  else
-    call OmniSharp#py#eval('navigateDown()')
-    call OmniSharp#CheckPyError()
-  endif
+  call s:WarnObsolete('OmniSharp#actions#navigate#Down()')
+  call OmniSharp#actions#navigate#Down()
 endfunction
 
 function! OmniSharp#NavigateUp() abort
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#NavigateUp()
-  else
-    call OmniSharp#py#eval('navigateUp()')
-    call OmniSharp#CheckPyError()
-  endif
+  call s:WarnObsolete('OmniSharp#actions#navigate#Up()')
+  call OmniSharp#actions#navigate#Up()
 endfunction
 
 
