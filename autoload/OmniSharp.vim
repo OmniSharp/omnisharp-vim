@@ -271,49 +271,14 @@ function! s:CBGetCodeActions(mode, actions) abort
 endfunction
 
 
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the results
 function! OmniSharp#CodeCheck(...) abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
-  if pumvisible() || !OmniSharp#IsServerRunning()
-    return get(b:, 'codecheck', [])
-  endif
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#CodeCheck({}, function('s:CBCodeCheck', [opts]))
-  else
-    let codecheck = OmniSharp#py#eval('codeCheck()')
-    if OmniSharp#CheckPyError() | return | endif
-    return s:CBCodeCheck(opts, codecheck)
-  endif
-endfunction
-
-function! s:CBCodeCheck(opts, codecheck) abort
-  let b:codecheck = a:codecheck
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(a:codecheck)
-  endif
-  return b:codecheck
+  call s:WarnObsolete('OmniSharp#actions#diagnostics#Check()')
+  call OmniSharp#actions#diagnostics#Check(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#GlobalCodeCheck() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
-  " Place the results in the quickfix window, if possible
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#GlobalCodeCheck(function('s:CBGlobalCodeCheck'))
-  else
-    let quickfixes = OmniSharp#py#eval('globalCodeCheck()')
-    if OmniSharp#CheckPyError() | return | endif
-    return s:CBGlobalCodeCheck(quickfixes)
-  endif
-endfunction
-
-function! s:CBGlobalCodeCheck(quickfixes) abort
-  if len(a:quickfixes) > 0
-    call OmniSharp#locations#SetQuickfix(a:quickfixes, 'Code Check Messages')
-  else
-    echo 'No Code Check messages'
-  endif
+  call s:WarnObsolete('OmniSharp#actions#diagnostics#CheckGlobal()')
+  call OmniSharp#actions#diagnostics#CheckGlobal()
 endfunction
 
 

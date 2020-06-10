@@ -178,10 +178,10 @@ function! OmniSharp#stdio#Request(command, opts) abort
   if send_buffer
     let body.Arguments.Buffer = buffer
   endif
-  return s:RawRequest(body, a:command, a:opts, sep)
+  return OmniSharp#stdio#RequestSend(body, a:command, a:opts, sep)
 endfunction
 
-function! s:RawRequest(body, command, opts, ...) abort
+function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
   let sep = a:0 ? a:1 : ''
 
   let job = OmniSharp#GetHost().job
@@ -304,34 +304,6 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
       call req.ResponseHandler(res)
     endif
   endif
-endfunction
-
-
-function! OmniSharp#stdio#CodeCheck(opts, Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:CodeCheckRH', [a:Callback]),
-  \ 'ReplayOnLoad': 1
-  \}
-  call extend(opts, a:opts, 'force')
-  call OmniSharp#stdio#Request('/codecheck', opts)
-endfunction
-
-function! s:CodeCheckRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
-endfunction
-
-
-function! OmniSharp#stdio#GlobalCodeCheck(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:GlobalCodeCheckRH', [a:Callback])
-  \}
-  call s:RawRequest({}, '/codecheck', opts)
-endfunction
-
-function! s:GlobalCodeCheckRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
 endfunction
 
 

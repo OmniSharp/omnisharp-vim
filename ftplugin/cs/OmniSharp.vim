@@ -24,7 +24,6 @@ endif
 
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
 command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
-command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#GlobalCodeCheck()
 command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
 command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#RenameTo(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
@@ -41,6 +40,7 @@ command! -buffer -bar OmniSharpFindImplementations call OmniSharp#actions#implem
 command! -buffer -bar OmniSharpFindMembers call OmniSharp#actions#members#Find()
 command! -buffer -bar OmniSharpFindUsages call OmniSharp#actions#usages#Find()
 command! -buffer -bar OmniSharpFixUsings call OmniSharp#actions#usings#Fix()
+command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#actions#diagnostics#CheckGlobal()
 command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#actions#definition#Find()
 command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
 command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()
