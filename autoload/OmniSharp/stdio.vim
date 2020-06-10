@@ -364,32 +364,6 @@ function! s:FindSymbolRH(Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#FixUsings(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:FixUsingsRH', [a:Callback]),
-  \ 'Parameters': {
-  \   'WantsTextChanges': 1
-  \ }
-  \}
-  call OmniSharp#stdio#Request('/fixusings', opts)
-endfunction
-
-function! s:FixUsingsRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  normal! m'
-  let winview = winsaveview()
-  call OmniSharp#buffer#Update(a:response.Body)
-  call winrestview(winview)
-  normal! ``
-  if type(a:response.Body.AmbiguousResults) == type(v:null)
-    let locations = []
-  else
-    let locations = OmniSharp#locations#Parse(a:response.Body.AmbiguousResults)
-  endif
-  call a:Callback(locations)
-endfunction
-
-
 function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:GetCodeActionsRH', [a:Callback]),

@@ -208,7 +208,7 @@ def codeFormat():
 
 
 @vimcmd
-def fix_usings():
+def fixUsings():
     response = getResponse(ctx, '/fixusings', json=True)
     setBuffer(response.get("Buffer"))
     return quickfixes_from_response(ctx, response['AmbiguousResults'])

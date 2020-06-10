@@ -10,8 +10,8 @@ Given cs():
 
 Execute (run fix usings):
   call OmniSharpTestInitializeBuffer('FixUsings1')
-  call OmniSharpWarmup('OmniSharp#FixUsings', [])
-  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
+  call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
+  call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
 
 Expect cs(should remove unused using):
   public class Test
@@ -31,8 +31,8 @@ Given cs():
 
 Execute (run fix usings):
   call OmniSharpTestInitializeBuffer('FixUsings2')
-  call OmniSharpWarmup('OmniSharp#FixUsings', [])
-  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
+  call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
+  call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
 
 Expect cs(should add required using):
   using System;
@@ -63,8 +63,8 @@ Given cs():
 
 Execute (run fix usings):
   call OmniSharpTestInitializeBuffer('FixUsings3')
-  call OmniSharpWarmup('OmniSharp#FixUsings', [])
-  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
+  call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
+  call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
 
 Expect cs(should not add ambiguous using):
   public class test {
@@ -83,7 +83,7 @@ Expect cs(should not add ambiguous using):
 
 Execute (should add ambiguous usings to quickfix):
   call OmniSharpTestInitializeBuffer('FixUsings4')
-  call OmniSharpWarmup('OmniSharp#FixUsings', [])
-  call OmniSharpTestAwait('OmniSharp#FixUsings', [])
+  call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
+  call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
   cfirst
   AssertEqual line('.'), 2
