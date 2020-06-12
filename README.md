@@ -46,6 +46,8 @@ let g:OmniSharp_server_stdio = 1
 
 Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall`. Restart vim and feel the difference!
 
+**Note:** neovim on Windows has been unable to communicate with the stdio server until a (very) recent neovim patch. If you are using nvim-qt _or_ terminal neovim on Windows, you will require a neovim [nightly build](https://github.com/neovim/neovim/releases/nightly) `NVIM v0.5.0-556` (2020-06-11) or newer, or will need to wait for neovim 0.5 to be released.
+
 ## Features
 
 * Contextual code completion
