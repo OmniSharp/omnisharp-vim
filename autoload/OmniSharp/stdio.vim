@@ -336,108 +336,15 @@ function! s:FindSymbolRH(Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#GetCodeActions(mode, Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:GetCodeActionsRH', [a:Callback]),
-  \ 'SavePosition': 1
-  \}
-  if a:mode ==# 'visual'
-    let start = getpos("'<")
-    let end = getpos("'>")
-    " In visual line mode, getpos("'>")[2] is a large number (2147483647).
-    " When this value is too large, use the length of the line as the column
-    " position.
-    if end[2] > 99999
-      let end[2] = len(getline(end[1]))
-    endif
-    let s:codeActionParameters = {
-    \ 'Selection': {
-    \   'Start': {
-    \     'Line': start[1],
-    \     'Column': start[2]
-    \   },
-    \   'End': {
-    \     'Line': end[1],
-    \     'Column': end[2]
-    \   }
-    \ }
-    \}
-    let opts.Parameters = s:codeActionParameters
-  else
-    if exists('s:codeActionParameters')
-      unlet s:codeActionParameters
-    endif
-  endif
-  call OmniSharp#stdio#Request('/v2/getcodeactions', opts)
-endfunction
-
-function! s:GetCodeActionsRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  call a:Callback(a:response.Body.CodeActions)
-endfunction
-
-
 function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH', [a:opts]),
+  \ 'ResponseHandler': function('OmniSharp#buffer#PerformChanges', [a:opts]),
   \ 'Parameters': {
   \   'RenameTo': a:renameto,
   \   'WantsTextChanges': 1
   \ }
   \}
   call OmniSharp#stdio#Request('/rename', opts)
-endfunction
-
-
-function! OmniSharp#stdio#RunCodeAction(action, ...) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:PerformChangesRH', [a:0 ? a:1 : {}]),
-  \ 'Parameters': {
-  \   'Identifier': a:action.Identifier,
-  \   'WantsTextChanges': 1
-  \ },
-  \ 'UsePreviousPosition': 1
-  \}
-  if exists('s:codeActionParameters')
-    call extend(opts.Parameters, s:codeActionParameters, 'force')
-  endif
-  call OmniSharp#stdio#Request('/v2/runcodeaction', opts)
-endfunction
-
-function! s:PerformChangesRH(opts, response) abort
-  if !a:response.Success | return | endif
-  let changes = get(a:response.Body, 'Changes', [])
-  if type(changes) != type([]) || len(changes) == 0
-    echo 'No action taken'
-  else
-    let winview = winsaveview()
-    let bufname = bufname('%')
-    let bufnr = bufnr('%')
-    let hidden_bak = &hidden | set hidden
-    for change in changes
-      call OmniSharp#locations#Navigate({
-      \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
-      \}, 1)
-      call OmniSharp#buffer#Update(change)
-      if bufnr('%') != bufnr
-        silent write | silent edit
-      endif
-    endfor
-    if bufnr('%') != bufnr
-      call OmniSharp#locations#Navigate({
-      \ 'filename': bufname
-      \}, 1)
-    endif
-    call winrestview(winview)
-    let [line, col] = getpos("'`")[1:2]
-    if line > 1 && col > 1
-      normal! ``
-    endif
-    let &hidden = hidden_bak
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback()
-  endif
 endfunction
 
 

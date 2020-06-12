@@ -1,6 +1,42 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+function! OmniSharp#buffer#PerformChanges(opts, response) abort
+  if !a:response.Success | return | endif
+  let changes = get(a:response.Body, 'Changes', [])
+  if type(changes) != type([]) || len(changes) == 0
+    echo 'No action taken'
+  else
+    let winview = winsaveview()
+    let bufname = bufname('%')
+    let bufnr = bufnr('%')
+    let hidden_bak = &hidden | set hidden
+    for change in changes
+      call OmniSharp#locations#Navigate({
+      \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
+      \}, 1)
+      call OmniSharp#buffer#Update(change)
+      if bufnr('%') != bufnr
+        silent write | silent edit
+      endif
+    endfor
+    if bufnr('%') != bufnr
+      call OmniSharp#locations#Navigate({
+      \ 'filename': bufname
+      \}, 1)
+    endif
+    call winrestview(winview)
+    let [line, col] = getpos("'`")[1:2]
+    if line > 1 && col > 1
+      normal! ``
+    endif
+    let &hidden = hidden_bak
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback()
+  endif
+endfunction
+
 function! OmniSharp#buffer#Update(responseBody) abort
   let changes = get(a:responseBody, 'Changes', [])
   if type(changes) == type(v:null) | let changes = [] | endif

@@ -67,7 +67,7 @@ function! ctrlp#OmniSharp#findcodeactions#accept(mode, str) abort
   call ctrlp#exit()
   let action = filter(copy(s:actions), {i,v -> get(v, 'Name') ==# a:str})[0]
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#RunCodeAction(action)
+    call OmniSharp#actions#codeactions#Run(action)
   else
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)

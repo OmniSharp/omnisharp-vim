@@ -154,122 +154,15 @@ function! s:CBFindSymbol(filter, locations) abort
 endfunction
 
 
-" This function returns a count of the currently available code actions. It also
-" uses the code actions to pre-populate the code actions for
-" OmniSharp#GetCodeActions, and clears them on CursorMoved.
-"
-" If a single callback function is passed in, the callback will be called on
-" CursorMoved, allowing this function to be used to set up a temporary "Code
-" actions available" flag, e.g. in the statusline or signs column, and the
-" callback function can be used to clear the flag.
-"
-" If a dict is passed in, the dict may contain one or both of 'CallbackCleanup'
-" and 'CallbackCount' Funcrefs. 'CallbackCleanup' is the single callback
-" function mentioned above. 'CallbackCount' is called after a response with the
-" number of actions available.
-"
-" call OmniSharp#CountCodeActions({-> execute('sign unplace 99')})
-" call OmniSharp#CountCodeActions({
-" \ 'CallbackCleanup': {-> execute('sign unplace 99')},
-" \ 'CallbackCount': function('PlaceSign')
-" \}
 function! OmniSharp#CountCodeActions(...) abort
-  if a:0 && type(a:1) == type(function('tr'))
-    let opts = { 'CallbackCleanup': a:1 }
-  elseif a:0 && type(a:1) == type({})
-    let opts = a:1
-  endif
-
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBCountCodeActions', [opts])
-    call OmniSharp#stdio#GetCodeActions('normal', Callback)
-  else
-    let actions = OmniSharp#py#eval('getCodeActions("normal")')
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBCountCodeActions(opts, actions)
-  endif
-endfunction
-
-function! s:CBCountCodeActions(opts, actions) abort
-  let s:actions = a:actions
-
-  if has_key(a:opts, 'CallbackCount')
-    call a:opts.CallbackCount(len(s:actions))
-  endif
-  let s:Cleanup = function('s:CleanupCodeActions', [a:opts])
-
-  augroup OmniSharp_CountCodeActions
-    autocmd!
-    autocmd CursorMoved <buffer> call s:Cleanup()
-    autocmd CursorMovedI <buffer> call s:Cleanup()
-    autocmd BufLeave <buffer> call s:Cleanup()
-  augroup END
-
-  return len(s:actions)
-endfunction
-
-function! s:CleanupCodeActions(opts) abort
-  unlet s:actions
-  unlet s:Cleanup
-  if has_key(a:opts, 'CallbackCleanup')
-    call a:opts.CallbackCleanup()
-  endif
-  autocmd! OmniSharp_CountCodeActions
+  call s:WarnObsolete('OmniSharp#actions#codeactions#Count()')
+  call OmniSharp#actions#codeactions#Count(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#GetCodeActions(mode) range abort
-  if exists('s:actions')
-    call s:CBGetCodeActions(a:mode, s:actions)
-  elseif g:OmniSharp_server_stdio
-    let Callback = function('s:CBGetCodeActions', [a:mode])
-    call OmniSharp#stdio#GetCodeActions(a:mode, Callback)
-  else
-    let command = printf('getCodeActions(%s)', string(a:mode))
-    let actions = OmniSharp#py#eval(command)
-    if OmniSharp#CheckPyError() | return | endif
-    call s:CBGetCodeActions(a:mode, actions)
-  endif
+  call s:WarnObsolete('OmniSharp#actions#codeactions#Get()')
+  call OmniSharp#actions#codeactions#Get(a:mode)
 endfunction
-
-function! s:CBGetCodeActions(mode, actions) abort
-  if empty(a:actions)
-    echo 'No code actions found'
-    return
-  endif
-  if g:OmniSharp_selector_ui ==? 'unite'
-    let context = {'empty': 0, 'auto_resize': 1}
-    call unite#start([['OmniSharp/findcodeactions', a:mode, a:actions]], context)
-  elseif g:OmniSharp_selector_ui ==? 'ctrlp'
-    call ctrlp#OmniSharp#findcodeactions#setactions(a:mode, a:actions)
-    call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
-  elseif g:OmniSharp_selector_ui ==? 'fzf'
-    call fzf#OmniSharp#GetCodeActions(a:mode, a:actions)
-  else
-    let message = []
-    let i = 0
-    for action in a:actions
-      let i += 1
-      call add(message, printf(' %2d. %s', i, action.Name))
-    endfor
-    call add(message, 'Enter an action number, or just hit Enter to cancel: ')
-    let selection = str2nr(input(join(message, "\n")))
-    if type(selection) == type(0) && selection > 0 && selection <= i
-      let action = a:actions[selection - 1]
-      if g:OmniSharp_server_stdio
-        call OmniSharp#stdio#RunCodeAction(action)
-      else
-        let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
-        let command = printf('runCodeAction(''%s'', ''%s'')', a:mode, command)
-        let action = OmniSharp#py#eval(command)
-        if OmniSharp#CheckPyError() | return | endif
-        if !action
-          echo 'No action taken'
-        endif
-      endif
-    endif
-  endif
-endfunction
-
 
 function! OmniSharp#CodeCheck(...) abort
   call s:WarnObsolete('OmniSharp#actions#diagnostics#Check()')
@@ -668,18 +561,6 @@ function! OmniSharp#RestartAllServers() abort
   for sln_or_dir in running_jobs
     call s:StartServer(sln_or_dir)
   endfor
-endfunction
-
-
-function! OmniSharp#AppendCtrlPExtensions() abort
-  " Don't override settings made elsewhere
-  if !exists('g:ctrlp_extensions')
-    let g:ctrlp_extensions = []
-  endif
-  if !exists('g:OmniSharp_ctrlp_extensions_added')
-    let g:OmniSharp_ctrlp_extensions_added = 1
-    let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
-  endif
 endfunction
 
 

@@ -16,14 +16,11 @@ augroup END
 
 setlocal omnifunc=OmniSharp#Complete
 
-call OmniSharp#AppendCtrlPExtensions()
-
 if get(g:, 'OmniSharp_start_server', 0)
   call OmniSharp#StartServerIfNotRunning()
 endif
 
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
-command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
 command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
 command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#RenameTo(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
@@ -40,6 +37,7 @@ command! -buffer -bar OmniSharpFindImplementations call OmniSharp#actions#implem
 command! -buffer -bar OmniSharpFindMembers call OmniSharp#actions#members#Find()
 command! -buffer -bar OmniSharpFindUsages call OmniSharp#actions#usages#Find()
 command! -buffer -bar OmniSharpFixUsings call OmniSharp#actions#usings#Fix()
+command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#actions#codeactions#Get('normal')
 command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#actions#diagnostics#CheckGlobal()
 command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#actions#definition#Find()
 command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
@@ -59,7 +57,7 @@ nnoremap <buffer> <Plug>(omnisharp_find_symbol) :OmniSharpFindSymbol<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_usages) :OmniSharpFindUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_fix_usings) :OmniSharpFixUsings<CR>
 nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
-xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#GetCodeActions('visual')<CR>
+xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#actions#codeactions#Get('visual')<CR>
 nnoremap <buffer> <Plug>(omnisharp_global_code_check) :OmniSharpGlobalCodeCheck<CR>
 nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>

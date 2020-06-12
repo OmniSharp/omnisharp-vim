@@ -148,5 +148,12 @@ if !exists('g:OmniSharp_selector_ui')
   \   '!empty(globpath(&runtimepath, printf("plugin/%s.vim", v:val), 1))'
   \ ), 0, '')
 endif
+if g:OmniSharp_selector_ui ==? 'ctrlp'
+  let g:ctrlp_extensions = get(g:, 'ctrlp_extensions', [])
+  if !exists('g:OmniSharp_ctrlp_extensions_added')
+    let g:OmniSharp_ctrlp_extensions_added = 1
+    let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
+  endif
+endif
 
 " vim:et:sw=2:sts=2
