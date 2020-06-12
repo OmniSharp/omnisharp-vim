@@ -448,7 +448,7 @@ function! OmniSharp#UpdateBuffer(...) abort
   let opts = a:0 ? { 'Callback': a:1 } : {}
   if !OmniSharp#IsServerRunning() | return | endif
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  if OmniSharp#BufferHasChanged() == 1
+  if OmniSharp#BufferHasChanged()
     if g:OmniSharp_server_stdio
       call OmniSharp#stdio#UpdateBuffer(opts)
     else

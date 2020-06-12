@@ -98,7 +98,7 @@ function! s:GetHighlight(type) abort
 endfunction
 
 function! s:InitialiseHighlights() abort
-  if get(s:, 'highlightsInitialized', 0) | return | endif
+  if get(s:, 'highlightsInitialized') | return | endif
   let s:highlightsInitialized = 1
   " For backwards-compatibility, check for the old g:OmniSharp_highlight_groups
   " structure, and convert it to the new style.

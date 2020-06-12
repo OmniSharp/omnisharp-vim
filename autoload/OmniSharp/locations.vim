@@ -28,7 +28,7 @@ function! OmniSharp#locations#Parse(quickfixes) abort
   let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
   for quickfix in a:quickfixes
     let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
-    if get(g:, 'OmniSharp_diagnostic_showid', 0) && has_key(quickfix, 'Id')
+    if get(g:, 'OmniSharp_diagnostic_showid') && has_key(quickfix, 'Id')
       let text = quickfix.Id . ': ' . text
     endif
     if has_key(quickfix, 'FileName')

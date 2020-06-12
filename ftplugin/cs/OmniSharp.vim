@@ -7,9 +7,9 @@ augroup OmniSharp_FileType
   autocmd! * <buffer>
 
   autocmd BufLeave <buffer>
-  \   if !pumvisible()
-  \|    call OmniSharp#UpdateBuffer()
-  \|  endif
+  \ if !pumvisible() |
+  \   call OmniSharp#UpdateBuffer() |
+  \ endif
 
   autocmd CompleteDone <buffer> call OmniSharp#actions#complete#ExpandSnippet()
 augroup END
@@ -18,7 +18,7 @@ setlocal omnifunc=OmniSharp#Complete
 
 call OmniSharp#AppendCtrlPExtensions()
 
-if get(g:, 'OmniSharp_start_server', 0) == 1
+if get(g:, 'OmniSharp_start_server', 0)
   call OmniSharp#StartServerIfNotRunning()
 endif
 

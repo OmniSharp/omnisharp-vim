@@ -130,7 +130,7 @@ function! s:Highlight(types, group) abort
 endfunction
 
 function! OmniSharp#actions#highlight_types#Initialise() abort
-  if get(s:, 'highlightsInitialized', 0) | return | endif
+  if get(s:, 'highlightsInitialized') | return | endif
   let s:highlightsInitialized = 1
   highlight default link csUserIdentifier Identifier
   highlight default link csUserInterface Include

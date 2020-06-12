@@ -1,5 +1,5 @@
 if !OmniSharp#util#CheckCapabilities() | finish | endif
-if get(g:, 'loaded_ctrlp_OmniSharp_findcodeactions', 0) | finish | endif
+if get(g:, 'loaded_ctrlp_OmniSharp_findcodeactions') | finish | endif
 let g:loaded_ctrlp_OmniSharp_findcodeactions = 1
 
 " Add this extension's settings to g:ctrlp_ext_vars

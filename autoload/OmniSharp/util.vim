@@ -6,7 +6,7 @@ let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
 function! s:is_msys() abort
-  if get(s:, 'is_msys_checked', 0)
+  if get(s:, 'is_msys_checked')
     return s:is_msys_val
   endif
   let s:is_msys_val = strlen(system('grep MSYS_NT /proc/version')) > 0
@@ -16,7 +16,7 @@ function! s:is_msys() abort
 endfunction
 
 function! s:is_cygwin() abort
-  if get(s:, 'is_cygwin_checked', 0)
+  if get(s:, 'is_cygwin_checked')
     return s:is_cygwin_val
   endif
   let s:is_cygwin_val = has('win32unix')
@@ -25,7 +25,7 @@ function! s:is_cygwin() abort
 endfunction
 
 function! s:is_wsl() abort
-  if get(s:, 'is_wsl_checked', 0)
+  if get(s:, 'is_wsl_checked')
     return s:is_wsl_val
   endif
   let s:is_wsl_val = strlen(system('grep Microsoft /proc/version')) > 0

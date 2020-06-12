@@ -1,4 +1,4 @@
-if !get(g:, 'OmniSharp_loaded', 0) | finish | endif
+if !get(g:, 'OmniSharp_loaded') | finish | endif
 if !OmniSharp#util#CheckCapabilities() | finish | endif
 if exists('g:loaded_syntastic_cs_code_checker') | finish | endif
 let g:loaded_syntastic_cs_code_checker = 1

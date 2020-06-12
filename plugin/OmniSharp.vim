@@ -73,8 +73,6 @@ let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
 let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
 
-let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
-
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#OpenLog(<q-args>)
 
