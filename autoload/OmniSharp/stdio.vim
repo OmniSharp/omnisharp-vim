@@ -322,20 +322,6 @@ function! s:CodeStructureRH(bufnr, Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#FindSymbol(filter, Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:FindSymbolRH', [a:Callback]),
-  \ 'Parameters': { 'Filter': a:filter }
-  \}
-  call OmniSharp#stdio#Request('/findsymbols', opts)
-endfunction
-
-function! s:FindSymbolRH(Callback, response) abort
-  if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
-endfunction
-
-
 function! OmniSharp#stdio#RenameTo(renameto, opts) abort
   let opts = {
   \ 'ResponseHandler': function('OmniSharp#buffer#PerformChanges', [a:opts]),
