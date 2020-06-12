@@ -243,58 +243,15 @@ function! OmniSharp#SignatureHelp() abort
   call OmniSharp#actions#signature#SignatureHelp()
 endfunction
 
-
 function! OmniSharp#Rename() abort
-  let renameto = inputdialog('Rename to: ', expand('<cword>'))
-  if renameto !=# ''
-    call OmniSharp#RenameTo(renameto)
-  endif
+  call s:WarnObsolete('OmniSharp#actions#rename#Prompt()')
+  call OmniSharp#actions#rename#Prompt()
 endfunction
 
 function! OmniSharp#RenameTo(renameto, ...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#RenameTo(a:renameto, opts)
-  else
-    let command = printf('renameTo(%s)', string(a:renameto))
-    let changes = OmniSharp#py#eval(command)
-    if OmniSharp#CheckPyError() | return | endif
-
-    let save_lazyredraw = &lazyredraw
-    let save_eventignore = &eventignore
-    let buf = bufnr('%')
-    let curpos = getpos('.')
-    let view = winsaveview()
-    try
-      set lazyredraw eventignore=all
-      for change in changes
-        execute 'silent hide edit' fnameescape(change.FileName)
-        let modified = &modified
-        let content = split(change.Buffer, '\r\?\n')
-        silent % delete _
-        silent 1put =content
-        silent 1 delete _
-        if !modified
-          silent update
-        endif
-      endfor
-    finally
-      if bufnr('%') != buf
-        exec 'buffer ' . buf
-      endif
-      call setpos('.', curpos)
-      call winrestview(view)
-      silent update
-      let &eventignore = save_eventignore
-      silent edit  " reload to apply syntax
-      let &lazyredraw = save_lazyredraw
-    endtry
-    if has_key(opts, 'Callback')
-      call opts.Callback()
-    endif
-  endif
+  call s:WarnObsolete('OmniSharp#actions#rename#To()')
+  call OmniSharp#actions#rename#To(a:renameto, a:0 ? a:1 : 0)
 endfunction
-
 
 function! OmniSharp#HighlightBuffer() abort
   call s:WarnObsolete('OmniSharp#actions#highlight#Buffer()')

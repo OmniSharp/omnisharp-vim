@@ -20,8 +20,6 @@ if get(g:, 'OmniSharp_start_server', 0)
   call OmniSharp#StartServerIfNotRunning()
 endif
 
-command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
-command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#RenameTo(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar OmniSharpRunTest call OmniSharp#RunTest()
@@ -46,6 +44,8 @@ command! -buffer -bar OmniSharpNavigateUp call OmniSharp#actions#navigate#Up()
 command! -buffer -bar OmniSharpNavigateDown call OmniSharp#actions#navigate#Down()
 command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definition#Preview()
 command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
+command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
+command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 

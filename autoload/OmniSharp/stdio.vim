@@ -322,18 +322,6 @@ function! s:CodeStructureRH(bufnr, Callback, response) abort
 endfunction
 
 
-function! OmniSharp#stdio#RenameTo(renameto, opts) abort
-  let opts = {
-  \ 'ResponseHandler': function('OmniSharp#buffer#PerformChanges', [a:opts]),
-  \ 'Parameters': {
-  \   'RenameTo': a:renameto,
-  \   'WantsTextChanges': 1
-  \ }
-  \}
-  call OmniSharp#stdio#Request('/rename', opts)
-endfunction
-
-
 function! OmniSharp#stdio#Project(bufnr, Callback) abort
   if has_key(OmniSharp#GetHost(a:bufnr), 'project')
     call a:Callback()
