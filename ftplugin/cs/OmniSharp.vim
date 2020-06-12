@@ -124,6 +124,6 @@ let b:undo_ftplugin .= '
 \|  delcommand OmniSharpStopServer
 \|  delcommand OmniSharpTypeLookup
 \
-\|  setlocal omnifunc< errorformat< makeprg<'
+\|  setlocal omnifunc<'
 
 " vim:et:sw=2:sts=2
