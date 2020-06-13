@@ -81,9 +81,19 @@ function! OmniSharp#Complete(findstart, base) abort
 endfunction
 
 
-function! OmniSharp#FindUsages(...) abort
-  call s:WarnObsolete('OmniSharp#actions#usages#Find()')
-  call OmniSharp#actions#usages#Find(a:0 ? a:1 : 0)
+function! OmniSharp#CodeCheck(...) abort
+  call s:WarnObsolete('OmniSharp#actions#diagnostics#Check()')
+  call OmniSharp#actions#diagnostics#Check(a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#CodeFormat(...) abort
+  call s:WarnObsolete('OmniSharp#actions#format#Format()')
+  call OmniSharp#actions#format#Format(a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#CountCodeActions(...) abort
+  call s:WarnObsolete('OmniSharp#actions#codeactions#Count()')
+  call OmniSharp#actions#codeactions#Count(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#FindImplementations(...) abort
@@ -96,39 +106,19 @@ function! OmniSharp#FindMembers(...) abort
   call OmniSharp#actions#members#Find(a:0 ? a:1 : 0)
 endfunction
 
-function! OmniSharp#NavigateDown() abort
-  call s:WarnObsolete('OmniSharp#actions#navigate#Down()')
-  call OmniSharp#actions#navigate#Down()
-endfunction
-
-function! OmniSharp#NavigateUp() abort
-  call s:WarnObsolete('OmniSharp#actions#navigate#Up()')
-  call OmniSharp#actions#navigate#Up()
-endfunction
-
-function! OmniSharp#GotoDefinition(...) abort
-  call s:WarnObsolete('OmniSharp#actions#definition#Find()')
-  call OmniSharp#actions#definition#Find(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#PreviewDefinition(...) abort
-  call s:WarnObsolete('OmniSharp#actions#definition#Preview()')
-  call OmniSharp#actions#definition#Preview(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#PreviewImplementation() abort
-  call s:WarnObsolete('OmniSharp#actions#implementations#Preview()')
-  call OmniSharp#actions#implementations#Preview()
-endfunction
-
 function! OmniSharp#FindSymbol(...) abort
   call s:WarnObsolete('OmniSharp#actions#symbols#Find()')
   call OmniSharp#actions#symbols#Find(a:0 ? a:1 : 0)
 endfunction
 
-function! OmniSharp#CountCodeActions(...) abort
-  call s:WarnObsolete('OmniSharp#actions#codeactions#Count()')
-  call OmniSharp#actions#codeactions#Count(a:0 ? a:1 : 0)
+function! OmniSharp#FindUsages(...) abort
+  call s:WarnObsolete('OmniSharp#actions#usages#Find()')
+  call OmniSharp#actions#usages#Find(a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#FixUsings(...) abort
+  call s:WarnObsolete('OmniSharp#actions#usings#Fix()')
+  call OmniSharp#actions#usings#Fix(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#GetCodeActions(mode) range abort
@@ -136,54 +126,14 @@ function! OmniSharp#GetCodeActions(mode) range abort
   call OmniSharp#actions#codeactions#Get(a:mode)
 endfunction
 
-function! OmniSharp#CodeCheck(...) abort
-  call s:WarnObsolete('OmniSharp#actions#diagnostics#Check()')
-  call OmniSharp#actions#diagnostics#Check(a:0 ? a:1 : 0)
-endfunction
-
 function! OmniSharp#GlobalCodeCheck() abort
   call s:WarnObsolete('OmniSharp#actions#diagnostics#CheckGlobal()')
   call OmniSharp#actions#diagnostics#CheckGlobal()
 endfunction
 
-function! OmniSharp#OpenLog(...) abort
-  call s:WarnObsolete('OmniSharp#log#Open()')
-  call OmniSharp#log#Open(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#RunTestsInFile(...) abort
-  call s:WarnObsolete('OmniSharp#actions#test#RunInFile()')
-  call OmniSharp#actions#test#RunInFile(a:0 ? a:000 : 0)
-endfunction
-
-function! OmniSharp#RunTest() abort
-  call s:WarnObsolete('OmniSharp#actions#test#Run()')
-  call OmniSharp#actions#test#Run()
-endfunction
-
-function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
-  call s:WarnObsolete('OmniSharp#actions#documentation#TypeLookup()')
-  call OmniSharp#actions#documentation#TypeLookup(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#TypeLookupWithDocumentation(...) abort
-  call s:WarnObsolete('OmniSharp#actions#documentation#Documentation()')
-  call OmniSharp#actions#documentation#Documentation(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#SignatureHelp() abort
-  call s:WarnObsolete('OmniSharp#actions#signature#SignatureHelp()')
-  call OmniSharp#actions#signature#SignatureHelp()
-endfunction
-
-function! OmniSharp#Rename() abort
-  call s:WarnObsolete('OmniSharp#actions#rename#Prompt()')
-  call OmniSharp#actions#rename#Prompt()
-endfunction
-
-function! OmniSharp#RenameTo(renameto, ...) abort
-  call s:WarnObsolete('OmniSharp#actions#rename#To()')
-  call OmniSharp#actions#rename#To(a:renameto, a:0 ? a:1 : 0)
+function! OmniSharp#GotoDefinition(...) abort
+  call s:WarnObsolete('OmniSharp#actions#definition#Find()')
+  call OmniSharp#actions#definition#Find(a:0 ? a:1 : 0)
 endfunction
 
 function! OmniSharp#HighlightBuffer() abort
@@ -196,19 +146,69 @@ function OmniSharp#HighlightEchoKind() abort
   call OmniSharp#actions#highlight#Echo()
 endfunction
 
+function! OmniSharp#NavigateDown() abort
+  call s:WarnObsolete('OmniSharp#actions#navigate#Down()')
+  call OmniSharp#actions#navigate#Down()
+endfunction
+
+function! OmniSharp#NavigateUp() abort
+  call s:WarnObsolete('OmniSharp#actions#navigate#Up()')
+  call OmniSharp#actions#navigate#Up()
+endfunction
+
+function! OmniSharp#OpenLog(...) abort
+  call s:WarnObsolete('OmniSharp#log#Open()')
+  call OmniSharp#log#Open(a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#PreviewDefinition(...) abort
+  call s:WarnObsolete('OmniSharp#actions#definition#Preview()')
+  call OmniSharp#actions#definition#Preview(a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#PreviewImplementation() abort
+  call s:WarnObsolete('OmniSharp#actions#implementations#Preview()')
+  call OmniSharp#actions#implementations#Preview()
+endfunction
+
+function! OmniSharp#Rename() abort
+  call s:WarnObsolete('OmniSharp#actions#rename#Prompt()')
+  call OmniSharp#actions#rename#Prompt()
+endfunction
+
+function! OmniSharp#RenameTo(renameto, ...) abort
+  call s:WarnObsolete('OmniSharp#actions#rename#To()')
+  call OmniSharp#actions#rename#To(a:renameto, a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#RunTest() abort
+  call s:WarnObsolete('OmniSharp#actions#test#Run()')
+  call OmniSharp#actions#test#Run()
+endfunction
+
+function! OmniSharp#RunTestsInFile(...) abort
+  call s:WarnObsolete('OmniSharp#actions#test#RunInFile()')
+  call OmniSharp#actions#test#RunInFile(a:0 ? a:000 : 0)
+endfunction
+
+function! OmniSharp#SignatureHelp() abort
+  call s:WarnObsolete('OmniSharp#actions#signature#SignatureHelp()')
+  call OmniSharp#actions#signature#SignatureHelp()
+endfunction
+
+function! OmniSharp#TypeLookupWithDocumentation(...) abort
+  call s:WarnObsolete('OmniSharp#actions#documentation#Documentation()')
+  call OmniSharp#actions#documentation#Documentation(a:0 ? a:1 : 0)
+endfunction
+
+function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
+  call s:WarnObsolete('OmniSharp#actions#documentation#TypeLookup()')
+  call OmniSharp#actions#documentation#TypeLookup(a:0 ? a:1 : 0)
+endfunction
+
 function! OmniSharp#UpdateBuffer(...) abort
   call s:WarnObsolete('OmniSharp#actions#buffer#Update()')
   call OmniSharp#actions#buffer#Update(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#CodeFormat(...) abort
-  call s:WarnObsolete('OmniSharp#actions#format#Format()')
-  call OmniSharp#actions#format#Format(a:0 ? a:1 : 0)
-endfunction
-
-function! OmniSharp#FixUsings(...) abort
-  call s:WarnObsolete('OmniSharp#actions#usings#Fix()')
-  call OmniSharp#actions#usings#Fix(a:0 ? a:1 : 0)
 endfunction
 
 function! s:WarnObsolete(newName) abort
