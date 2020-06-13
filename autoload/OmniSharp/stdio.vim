@@ -259,20 +259,6 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
   endif
 endfunction
 
-
-function! OmniSharp#stdio#UpdateBuffer(opts) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:UpdateBufferRH', [a:opts])
-  \}
-  call OmniSharp#stdio#Request('/updatebuffer', opts)
-endfunction
-
-function! s:UpdateBufferRH(opts, response) abort
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback()
-  endif
-endfunction
-
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
 

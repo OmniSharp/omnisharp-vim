@@ -191,34 +191,10 @@ function OmniSharp#HighlightEchoKind() abort
   call OmniSharp#actions#highlight#Echo()
 endfunction
 
-
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously)
 function! OmniSharp#UpdateBuffer(...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
-  if !OmniSharp#IsServerRunning() | return | endif
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  if OmniSharp#BufferHasChanged()
-    if g:OmniSharp_server_stdio
-      call OmniSharp#stdio#UpdateBuffer(opts)
-    else
-      call OmniSharp#py#eval('updateBuffer()')
-      call OmniSharp#CheckPyError()
-      if has_key(opts, 'Callback')
-        call opts.Callback()
-      endif
-    endif
-  endif
+  call s:WarnObsolete('OmniSharp#actions#buffer#Update()')
+  call OmniSharp#actions#buffer#Update(a:0 ? a:1 : 0)
 endfunction
-
-function! OmniSharp#BufferHasChanged() abort
-  if b:changedtick != get(b:, 'OmniSharp_UpdateChangeTick', -1)
-    let b:OmniSharp_UpdateChangeTick = b:changedtick
-    return 1
-  endif
-  return 0
-endfunction
-
 
 function! OmniSharp#CodeFormat(...) abort
   call s:WarnObsolete('OmniSharp#actions#format#Format()')
@@ -228,6 +204,12 @@ endfunction
 function! OmniSharp#FixUsings(...) abort
   call s:WarnObsolete('OmniSharp#actions#usings#Fix()')
   call OmniSharp#actions#usings#Fix(a:0 ? a:1 : 0)
+endfunction
+
+function! s:WarnObsolete(newName) abort
+  echohl WarningMsg
+  echomsg printf('This function is obsolete; use %s instead', a:newName)
+  echohl None
 endfunction
 
 
@@ -666,12 +648,6 @@ function! s:BustAliveCache(...) abort
   if idx != -1
     call remove(s:alive_cache, idx)
   endif
-endfunction
-
-function! s:WarnObsolete(newName) abort
-  echohl WarningMsg
-  echomsg printf('This function is obsolete; use %s instead', a:newName)
-  echohl None
 endfunction
 
 if has('patch-7.4.279')

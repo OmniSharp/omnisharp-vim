@@ -8,7 +8,7 @@ augroup OmniSharp_FileType
 
   autocmd BufLeave <buffer>
   \ if !pumvisible() |
-  \   call OmniSharp#UpdateBuffer() |
+  \   call OmniSharp#actions#buffer#Update() |
   \ endif
 
   autocmd CompleteDone <buffer> call OmniSharp#actions#complete#ExpandSnippet()

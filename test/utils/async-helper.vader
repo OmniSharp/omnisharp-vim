@@ -30,7 +30,7 @@ Execute (set up async helper):
     if has_key(b:, 'OmniSharp_UpdateChangeTick')
       unlet b:OmniSharp_UpdateChangeTick
     endif
-    call OmniSharpTestAwait('OmniSharp#UpdateBuffer', [])
+    call OmniSharpTestAwait('OmniSharp#actions#buffer#Update', [])
   endfunction
 
   function! OmniSharpTestCleanupBuffer() abort
