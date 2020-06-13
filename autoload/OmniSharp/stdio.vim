@@ -5,6 +5,33 @@ let s:nextseq = get(s:, 'nextseq', 1001)
 let s:requests = get(s:, 'requests', {})
 let s:pendingRequests = get(s:, 'pendingRequests', {})
 
+function! OmniSharp#stdio#HandleResponse(job, message) abort
+  try
+    let res = json_decode(a:message)
+  catch
+    call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, 'info')
+    call OmniSharp#log#Log(a:job.job_id . '  JSON error: ' . v:exception, 'info')
+    return
+  endtry
+  let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
+  call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, loglevel)
+  if get(res, 'Type', '') ==# 'event'
+    call s:HandleServerEvent(a:job, res)
+    return
+  endif
+  if !has_key(res, 'Request_seq') || !has_key(s:requests, res.Request_seq)
+    return
+  endif
+  let req = remove(s:requests, res.Request_seq)
+  if has_key(req, 'ResponseHandler')
+    if has_key(req, 'Request')
+      call req.ResponseHandler(res, req.Request)
+    else
+      call req.ResponseHandler(res)
+    endif
+  endif
+endfunction
+
 function! s:HandleServerEvent(job, res) abort
   if has_key(a:res, 'Body') && type(a:res.Body) == type({})
     if !a:job.loaded
@@ -113,22 +140,6 @@ function! s:ServerLoadTimeout(job, timer) abort
   unlet a:job.loading_timeout
 endfunction
 
-let s:logfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
-function! s:Log(message, loglevel) abort
-  let logit = 0
-  if g:OmniSharp_loglevel ==? 'debug'
-    " Log everything
-    let logit = 1
-  elseif g:OmniSharp_loglevel ==? 'info'
-    let logit = a:loglevel ==# 'info'
-  else
-    " g:OmniSharp_loglevel ==? 'none'
-  endif
-  if logit
-    call writefile([a:message], s:logfile, 'a')
-  endif
-endfunction
-
 function! OmniSharp#stdio#Request(command, opts) abort
   if has_key(a:opts, 'UsePreviousPosition')
     let [bufnr, lnum, cnum] = s:lastPosition
@@ -193,7 +204,7 @@ function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
     return 0
   endif
   let job_id = job.job_id
-  call s:Log(job_id . '  Request: ' . a:command, 'debug')
+  call OmniSharp#log#Log(job_id . '  Request: ' . a:command, 'debug')
 
   let a:body['Command'] = a:command
   let a:body['Seq'] = s:nextseq
@@ -212,7 +223,7 @@ function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call s:Log(encodedBody, 'debug')
+  call OmniSharp#log#Log(encodedBody, 'debug')
   if has('nvim')
     call chansend(job_id, encodedBody . "\n")
   else
@@ -226,37 +237,6 @@ function! s:ReplayRequests(...) abort
     call OmniSharp#stdio#Request(key, s:pendingRequests[key])
     unlet s:pendingRequests[key]
   endfor
-endfunction
-
-function! OmniSharp#stdio#GetLogFile() abort
-  return s:logfile
-endfunction
-
-function! OmniSharp#stdio#HandleResponse(job, message) abort
-  try
-    let res = json_decode(a:message)
-  catch
-    call s:Log(a:job.job_id . '  ' . a:message, 'info')
-    call s:Log(a:job.job_id . '  JSON error: ' . v:exception, 'info')
-    return
-  endtry
-  let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
-  call s:Log(a:job.job_id . '  ' . a:message, loglevel)
-  if get(res, 'Type', '') ==# 'event'
-    call s:HandleServerEvent(a:job, res)
-    return
-  endif
-  if !has_key(res, 'Request_seq') || !has_key(s:requests, res.Request_seq)
-    return
-  endif
-  let req = remove(s:requests, res.Request_seq)
-  if has_key(req, 'ResponseHandler')
-    if has_key(req, 'Request')
-      call req.ResponseHandler(res, req.Request)
-    else
-      call req.ResponseHandler(res)
-    endif
-  endif
 endfunction
 
 let &cpoptions = s:save_cpo

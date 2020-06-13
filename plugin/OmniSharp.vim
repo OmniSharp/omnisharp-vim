@@ -74,7 +74,7 @@ let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
 
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
-command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#OpenLog(<q-args>)
+command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 
 " Initialise automatic type and interface highlighting
 " Preserve backwards compatibility with older version "g:OmniSharp_sln_ports

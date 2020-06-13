@@ -146,6 +146,11 @@ function! OmniSharp#GlobalCodeCheck() abort
   call OmniSharp#actions#diagnostics#CheckGlobal()
 endfunction
 
+function! OmniSharp#OpenLog(...) abort
+  call s:WarnObsolete('OmniSharp#log#Open()')
+  call OmniSharp#log#Open(a:0 ? a:1 : 0)
+endfunction
+
 function! OmniSharp#RunTestsInFile(...) abort
   call s:WarnObsolete('OmniSharp#actions#test#RunInFile()')
   call OmniSharp#actions#test#RunInFile(a:0 ? a:000 : 0)
@@ -400,18 +405,6 @@ function! OmniSharp#RestartAllServers() abort
   for sln_or_dir in running_jobs
     call s:StartServer(sln_or_dir)
   endfor
-endfunction
-
-
-function! OmniSharp#OpenLog(...) abort
-  if g:OmniSharp_server_stdio
-    let logfile = OmniSharp#stdio#GetLogFile()
-  else
-    let logfile = OmniSharp#py#eval('getLogFile()')
-    if OmniSharp#CheckPyError() | return | endif
-  endif
-  let cmd = (a:0 && len(a:1)) ? a:1 : 'edit'
-  exec cmd logfile
 endfunction
 
 
