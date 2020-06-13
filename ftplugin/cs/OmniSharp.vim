@@ -22,8 +22,6 @@ endif
 
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
-command! -buffer -bar OmniSharpRunTest call OmniSharp#RunTest()
-command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#RunTestsInFile(<f-args>)
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
@@ -45,6 +43,8 @@ command! -buffer -bar OmniSharpNavigateDown call OmniSharp#actions#navigate#Down
 command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definition#Preview()
 command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
 command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
+command! -buffer -bar OmniSharpRunTest call OmniSharp#actions#test#Run()
+command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<f-args>)
 command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()

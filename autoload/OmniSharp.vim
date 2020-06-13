@@ -146,87 +146,15 @@ function! OmniSharp#GlobalCodeCheck() abort
   call OmniSharp#actions#diagnostics#CheckGlobal()
 endfunction
 
-
 function! OmniSharp#RunTestsInFile(...) abort
-  if !s:GuardStdio() | return | endif
-  if g:OmniSharp_translate_cygwin_wsl
-    echohl WarningMsg
-    echomsg 'Tests do not work in WSL unfortunately'
-    echohl None
-    return
-  endif
-  if a:0 == 0
-    let files = [expand('%:p')]
-  elseif type(a:1) == type([])
-    let files = a:1
-  elseif type(a:1) == type('')
-    let files = a:000
-  endif
-  let files = map(copy(files), {i,f -> fnamemodify(f, ':p')})
-  call OmniSharp#stdio#RunTestsInFile(files, function('s:CBRunTestsInFile'))
-endfunction
-
-function! s:CBRunTestsInFile(summary) abort
-  let pass = 1
-  let locations = []
-  for summary in a:summary
-    call extend(locations, summary.locations)
-    if !summary.pass
-      let pass = 0
-    endif
-  endfor
-  if pass
-    let title = len(locations) . ' tests passed'
-    echohl Title
-  else
-    let passed = 0
-    let noStackTrace = 0
-    for location in locations
-      if !has_key(location, 'type')
-        let passed += 1
-      endif
-      if has_key(location, 'noStackTrace')
-        let noStackTrace = 1
-      endif
-    endfor
-    let title = passed . ' of ' . len(locations) . ' tests passed'
-    if noStackTrace
-      let title .= '. Check :messages for details.'
-    endif
-    echohl WarningMsg
-  endif
-  echomsg title
-  echohl None
-  call OmniSharp#locations#SetQuickfix(locations, title)
+  call s:WarnObsolete('OmniSharp#actions#test#RunInFile()')
+  call OmniSharp#actions#test#RunInFile(a:0 ? a:000 : 0)
 endfunction
 
 function! OmniSharp#RunTest() abort
-  if !s:GuardStdio() | return | endif
-  if g:OmniSharp_translate_cygwin_wsl
-    echohl WarningMsg
-    echomsg 'Tests do not work in WSL unfortunately'
-    echohl None
-    return
-  endif
-  call OmniSharp#stdio#RunTest(bufnr('%'), function('s:CBRunTest'))
+  call s:WarnObsolete('OmniSharp#actions#test#Run()')
+  call OmniSharp#actions#test#Run()
 endfunction
-
-function! s:CBRunTest(summary) abort
-  if a:summary.pass
-    if len(a:summary.locations) == 0
-      echomsg 'No tests were run'
-    else
-      echohl Title
-      echomsg a:summary.locations[0].name . ': passed'
-      echohl None
-    endif
-  else
-    echomsg a:summary.locations[0].name . ': failed'
-    let title = 'Test failure: ' . a:summary.locations[0].name
-    call OmniSharp#locations#SetQuickfix(a:summary.locations, title)
-  endif
-endfunction
-
 
 function! OmniSharp#TypeLookupWithoutDocumentation(...) abort
   call s:WarnObsolete('OmniSharp#actions#documentation#TypeLookup()')
@@ -723,14 +651,6 @@ function! s:FindSolutionsFiles(bufnr) abort
   endif
 
   return solution_files
-endfunction
-
-function! s:GuardStdio() abort
-  if !g:OmniSharp_server_stdio
-    echohl WarningMsg | echomsg 'stdio only, sorry' | echohl None
-    return 0
-  endif
-  return 1
 endfunction
 
 function! s:IsServerPortHardcoded(sln_or_dir) abort
