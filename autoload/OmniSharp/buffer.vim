@@ -44,27 +44,32 @@ function! OmniSharp#buffer#Update(responseBody) abort
   if len(changes)
     for change in changes
       let text = join(split(change.NewText, '\r\?\n', 1), "\n")
-      let start = [change.StartLine, change.StartColumn]
-      let end = [change.EndLine, change.EndColumn]
+      let startCol = OmniSharp#util#CharToByteIdx(
+      \ bufnr('%'), change.StartLine, change.StartColumn)
+      let endCol = OmniSharp#util#CharToByteIdx(
+      \ bufnr('%'), change.EndLine, change.EndColumn)
+      let start = [change.StartLine, startCol]
+      let end = [change.EndLine, endCol]
       call cursor(start)
-      if change.StartColumn > len(getline('.')) && start != end
+      if startCol > len(getline('.')) && start != end
         " We can't set a mark after the last character of the line, so add an
         " extra charaqcter which will be immediately deleted again
         noautocmd normal! a<
       endif
-      call cursor(change.EndLine, max([1, change.EndColumn - 1]))
-      if change.StartLine < change.EndLine && (change.EndColumn == 1 || len(getline('.')) == 0)
+      call cursor(change.EndLine, max([1, endCol - 1]))
+      let lineLen = len(getline('.'))
+      if change.StartLine < change.EndLine && (endCol == 1 || lineLen == 0)
         " We can't delete before the first character of the line, so add an
         " extra charaqcter which will be immediately deleted again
         noautocmd normal! i>
       elseif start == end
         " Start and end are the same so insert a character to be replaced
-        if change.StartColumn > 1
+        if startCol > 1
           normal! l
         endif
         noautocmd normal! i=
       endif
-      call setpos("'[", [0, change.StartLine, change.StartColumn])
+      call setpos("'[", [0, change.StartLine, startCol])
       let paste_bak = &paste | set paste
       try
         silent execute "noautocmd keepjumps normal! v`[c\<C-r>=text\<CR>"
