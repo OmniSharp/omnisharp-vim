@@ -44,7 +44,7 @@ function! s:action_sink(str) abort
     let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
     let result = OmniSharp#py#Eval(command)
     if OmniSharp#py#CheckForError() | return | endif
-    if !action
+    if !result
       echo 'No action taken'
     endif
   endif
