@@ -16,8 +16,8 @@ function! s:Navigate(down) abort
     \}
     call OmniSharp#stdio#Request(a:down ? '/navigatedown' : '/navigateup', opts)
   else
-    call OmniSharp#py#eval(a:down ? 'navigateDown()' : 'navigateUp()')
-    call OmniSharp#CheckPyError()
+    call OmniSharp#py#Eval(a:down ? 'navigateDown()' : 'navigateUp()')
+    call OmniSharp#py#CheckForError()
   endif
 endfunction
 

@@ -22,8 +22,8 @@ function! OmniSharp#log#Open(...)
   if g:OmniSharp_server_stdio
     let logfile = s:stdiologfile
   else
-    let logfile = OmniSharp#py#eval('getLogFile()')
-    if OmniSharp#CheckPyError() | return | endif
+    let logfile = OmniSharp#py#Eval('getLogFile()')
+    if OmniSharp#py#CheckForError() | return | endif
   endif
   let cmd = (a:0 && type(a:1) == type('') && len(a:1)) ? a:1 : 'edit'
   exec cmd logfile

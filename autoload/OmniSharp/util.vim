@@ -166,7 +166,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
 
   let command = [ s:server_path ]
   if !g:OmniSharp_server_stdio
-    let command += ['-p', OmniSharp#GetPort(a:solution_file)]
+    let command += ['-p', OmniSharp#py#GetPort(a:solution_file)]
   endif
   let command += ['-s', solution_path]
 

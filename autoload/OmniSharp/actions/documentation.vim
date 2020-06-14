@@ -8,8 +8,8 @@ function! OmniSharp#actions#documentation#TypeLookup(...) abort
     call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
-    let response = OmniSharp#py#eval(pycmd)
-    if OmniSharp#CheckPyError() | return | endif
+    let response = OmniSharp#py#Eval(pycmd)
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBTypeLookup(opts, response)
   endif
 endfunction
@@ -21,8 +21,8 @@ function! OmniSharp#actions#documentation#Documentation(...) abort
     call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
-    let response = OmniSharp#py#eval(pycmd)
-    if OmniSharp#CheckPyError() | return | endif
+    let response = OmniSharp#py#Eval(pycmd)
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBTypeLookup(opts, response)
   endif
 endfunction

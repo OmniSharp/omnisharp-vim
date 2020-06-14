@@ -24,9 +24,9 @@ function! OmniSharp#actions#complete#Get(partial, ...) abort
     endif
     return []
   else
-    let completions = OmniSharp#py#eval(
+    let completions = OmniSharp#py#Eval(
     \ printf('getCompletions(%s)', string(a:partial)))
-    if OmniSharp#CheckPyError() | let completions = [] | endif
+    if OmniSharp#py#CheckForError() | let completions = [] | endif
     return s:CBGet(opts, completions)
   endif
 endfunction

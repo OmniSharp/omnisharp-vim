@@ -12,8 +12,8 @@ function! OmniSharp#actions#buffer#Update(...) abort
     if g:OmniSharp_server_stdio
       call s:StdioUpdate(opts)
     else
-      call OmniSharp#py#eval('updateBuffer()')
-      call OmniSharp#CheckPyError()
+      call OmniSharp#py#Eval('updateBuffer()')
+      call OmniSharp#py#CheckForError()
       if has_key(opts, 'Callback')
         call opts.Callback()
       endif

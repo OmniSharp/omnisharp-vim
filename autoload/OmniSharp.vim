@@ -5,40 +5,12 @@ set cpoptions&vim
 
 if !g:OmniSharp_server_stdio
   " Load python helper functions
-  call OmniSharp#py#bootstrap()
+  call OmniSharp#py#Bootstrap()
   let g:OmniSharp_py_err = {}
 endif
 
-let s:alive_cache = get(s:, 'alive_cache', [])
-let s:initial_server_ports = get(s:, 'initial_server_ports',
-\ copy(g:OmniSharp_server_ports))
-
-function! OmniSharp#GetPort(...) abort
-  if exists('g:OmniSharp_port')
-    return g:OmniSharp_port
-  endif
-
-  let sln_or_dir = a:0 ? a:1 : OmniSharp#FindSolutionOrDir()
-  if empty(sln_or_dir)
-    return 0
-  endif
-
-  " If we're already running this solution, choose the port we're running on
-  if has_key(g:OmniSharp_server_ports, sln_or_dir)
-    return g:OmniSharp_server_ports[sln_or_dir]
-  endif
-
-  " Otherwise, find a free port and use that for this solution
-  let port = OmniSharp#py#eval('find_free_port()')
-  if OmniSharp#CheckPyError() | return 0 | endif
-  let g:OmniSharp_server_ports[sln_or_dir] = port
-  return port
-endfunction
-
-
 function! OmniSharp#GetHost(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
-
   if empty(getbufvar(bufnr, 'OmniSharp_host'))
     let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
     if g:OmniSharp_server_stdio
@@ -47,7 +19,7 @@ function! OmniSharp#GetHost(...) abort
       \ 'sln_or_dir': sln_or_dir
       \}
     else
-      let port = OmniSharp#GetPort(sln_or_dir)
+      let port = OmniSharp#py#GetPort(sln_or_dir)
       if port == 0
         return ''
       endif
@@ -73,7 +45,6 @@ function! OmniSharp#Complete(findstart, base) abort
     while start > 0 && line[start - 1] =~# '\v[a-zA-z0-9_]'
       let start -= 1
     endwhile
-
     return start
   else
     return OmniSharp#actions#complete#Get(a:base)
@@ -245,24 +216,16 @@ function! OmniSharp#IsServerRunning(...) abort
     " server, so we don't look for a running job and go straight to the network
     " check. Note that this only applies to HTTP servers - Stdio servers must be
     " started by _this_ vim session.
-    if !s:IsServerPortHardcoded(sln_or_dir) && !running
+    if !OmniSharp#py#IsServerPortHardcoded(sln_or_dir) && !running
       return 0
     endif
   endif
 
-  if index(s:alive_cache, sln_or_dir) >= 0 | return 1 | endif
-
   if g:OmniSharp_server_stdio
-    let alive = OmniSharp#proc#GetJob(sln_or_dir).loaded
+    return OmniSharp#proc#GetJob(sln_or_dir).loaded
   else
-    let alive = OmniSharp#py#eval('checkAliveStatus()')
-    if OmniSharp#CheckPyError() | return 0 | endif
+    return OmniSharp#py#CheckAlive(sln_or_dir)
   endif
-  if alive
-    " Cache the alive status so subsequent calls are faster
-    call add(s:alive_cache, sln_or_dir)
-  endif
-  return alive
 endfunction
 
 " Find the solution or directory for this file.
@@ -333,12 +296,13 @@ function! OmniSharp#StartServer(...) abort
   " Optionally perform check if server is already running
   if check_is_running
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
-    " If the port is hardcoded, we should check if any other vim instances have
-    " started this server
-    if !running && s:IsServerPortHardcoded(sln_or_dir)
-      let running = OmniSharp#IsServerRunning({ 'sln_or_dir': sln_or_dir })
+    if !g:OmniSharp_server_stdio
+      " If the port is hardcoded, we should check if any other vim instances
+      " have started this server
+      if !running && OmniSharp#py#IsServerPortHardcoded(sln_or_dir)
+        let running = OmniSharp#IsServerRunning({ 'sln_or_dir': sln_or_dir })
+      endif
     endif
-
     if running | return | endif
   endif
 
@@ -378,9 +342,10 @@ endfunction
 function! OmniSharp#StopServer(...) abort
   let force = a:0 ? a:1 : 0
   let sln_or_dir = a:0 > 1 ? a:2 : OmniSharp#FindSolutionOrDir()
-
   if force || OmniSharp#proc#IsJobRunning(sln_or_dir)
-    call s:BustAliveCache(sln_or_dir)
+    if !g:OmniSharp_server_stdio
+      call OmniSharp#py#Uncache(sln_or_dir)
+    endif
     call OmniSharp#proc#StopJob(sln_or_dir)
   endif
 endfunction
@@ -408,24 +373,6 @@ function! OmniSharp#RestartAllServers() abort
 endfunction
 
 
-function! OmniSharp#CheckPyError(...)
-  let should_print = a:0 ? a:1 : 1
-  if !empty(g:OmniSharp_py_err)
-    if should_print
-      call OmniSharp#util#EchoErr(
-      \ printf('%s: %s', g:OmniSharp_py_err.code, g:OmniSharp_py_err.msg))
-    endif
-    " If we got a connection error when hitting the server, then the server may
-    " not be running anymore and we should bust the 'alive' cache
-    if g:OmniSharp_py_err.code ==? 'CONNECTION'
-      call s:BustAliveCache()
-    endif
-    return 1
-  endif
-  return 0
-endfunction
-
-
 function! s:FindSolution(interactive, bufnr) abort
   let solution_files = s:FindSolutionsFiles(a:bufnr)
   if empty(solution_files)
@@ -439,15 +386,8 @@ function! s:FindSolution(interactive, bufnr) abort
     return solution_files[g:OmniSharp_sln_list_index]
   else
     if g:OmniSharp_autoselect_existing_sln
-      if len(g:OmniSharp_server_ports)
-        " g:OmniSharp_server_ports has been set, auto-select one of the
-        " specified servers
-        let running_slns = []
-        for solutionfile in solution_files
-          if has_key(g:OmniSharp_server_ports, solutionfile)
-            call add(running_slns, solutionfile)
-          endif
-        endfor
+      if !g:OmniSharp_server_stdio
+        let running_slns = OmniSharp#py#FindRunningServer(solution_files)
         if len(running_slns) == 1
           return running_slns[0]
         endif
@@ -493,7 +433,6 @@ function! s:FindServerRunningOnParentDirectory(bufnr) abort
       endif
     endif
   endfor
-
   return longest_dir_match
 endfunction
 
@@ -626,21 +565,6 @@ function! s:FindSolutionsFiles(bufnr) abort
   endif
 
   return solution_files
-endfunction
-
-function! s:IsServerPortHardcoded(sln_or_dir) abort
-  if g:OmniSharp_server_stdio | return 0 | endif
-  if exists('g:OmniSharp_port') | return 1 | endif
-  return has_key(s:initial_server_ports, a:sln_or_dir)
-endfunction
-
-" Remove a server from the alive_cache
-function! s:BustAliveCache(...) abort
-  let sln_or_dir = a:0 ? a:1 : OmniSharp#FindSolutionOrDir(0)
-  let idx = index(s:alive_cache, sln_or_dir)
-  if idx != -1
-    call remove(s:alive_cache, idx)
-  endif
 endfunction
 
 if has('patch-7.4.279')

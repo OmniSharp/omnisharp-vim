@@ -10,8 +10,8 @@ function! OmniSharp#actions#usages#Find(...) abort
     let Callback = function('s:CBFindUsages', [target, opts])
     call s:StdioFind(Callback)
   else
-    let locs = OmniSharp#py#eval('findUsages()')
-    if OmniSharp#CheckPyError() | return | endif
+    let locs = OmniSharp#py#Eval('findUsages()')
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBFindUsages(target, opts, locs)
   endif
 endfunction

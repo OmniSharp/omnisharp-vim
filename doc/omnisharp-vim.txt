@@ -121,6 +121,13 @@ Default: warning >
 <
 Open the log file with |:OmniSharpOpenLog|
 
+                                          *'g:OmniSharp_autoselect_existing_sln'*
+When multiple .sln files are available, OmniSharp-vim will prompt you to
+select one when opening a new .cs file. Use this option to re-select the
+previously selected .sln for subsequent .cs files.
+Default: 0
+    let g:OmniSharp_autoselect_existing_sln = 1
+<
                                            *'g:OmniSharp_server_display_loading'*
                                                                      Stdio only
 Echo "Server loaded for ...sln" message when the server is ready.
@@ -158,9 +165,9 @@ OmniSharp server, it will bind to the port listed here if the solution file or
 directory matches. If there is no match, the port will be chosen at random.
 Default: {} >
     let g:OmniSharp_server_ports = {
-      \ 'C:\path\to\myproject.sln': 2003,
-      \ 'C:\path\to\other\project': 2004,
-      \ }
+    \ 'C:\path\to\myproject.sln': 2003,
+    \ 'C:\path\to\other\project': 2004,
+    \}
 <
 -------------------------------------------------------------------------------
 3.2 DIAGNOSTICS                                    *omnisharp-diagnostic-options*
@@ -319,12 +326,12 @@ g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
 window will be used instead.
 Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
 none are. >
-    let g:OmniSharp_selector_ui = 'unite'
-    OR
-    let g:OmniSharp_selector_ui = 'ctrlp'
-    OR
     let g:OmniSharp_selector_ui = 'fzf'
-    OR
+<or >
+    let g:OmniSharp_selector_ui = 'ctrlp'
+<or >
+    let g:OmniSharp_selector_ui = 'unite'
+<or >
     let g:OmniSharp_selector_ui = ''
 <
                                                      *'g:OmniSharp_want_snippet'*
@@ -527,7 +534,7 @@ convenient user re-mapping. These can be used like so: >
     the server for. >
 
       OmniSharpStartServer ~/project/project.sln
-      OR
+<or >
       OmniSharpStartServer ~/project/
 <
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
@@ -614,8 +621,8 @@ Note that completion is asynchronous only when using the stdio server, see
 A source is provided for the Deoplete completion engine. If Deoplete is
 installed, configure it to use the "omnisharp" source:
 >
-  call deoplete#custom#option('sources', {
+    call deoplete#custom#option('sources', {
     \ 'cs': ['omnisharp'],
-    \ })
+    \})
 <
 ===============================================================================

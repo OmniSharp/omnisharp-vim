@@ -10,8 +10,8 @@ function! OmniSharp#actions#implementations#Find(...) abort
     let Callback = function('s:CBFindImplementations', [target, opts])
     call s:StdioFind(Callback)
   else
-    let locs = OmniSharp#py#eval('findImplementations()')
-    if OmniSharp#CheckPyError() | return | endif
+    let locs = OmniSharp#py#Eval('findImplementations()')
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBFindImplementations(target, opts, locs)
   endif
 endfunction
@@ -21,8 +21,8 @@ function! OmniSharp#actions#implementations#Preview() abort
     let Callback = function('s:CBPreviewImplementation')
     call s:StdioFind(Callback)
   else
-    let locs = OmniSharp#py#eval('findImplementations()')
-    if OmniSharp#CheckPyError() | return | endif
+    let locs = OmniSharp#py#Eval('findImplementations()')
+    if OmniSharp#py#CheckForError() | return | endif
     call s:CBPreviewImplementation(locs)
   endif
 endfunction

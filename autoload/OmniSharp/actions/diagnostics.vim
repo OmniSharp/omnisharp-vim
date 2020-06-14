@@ -17,8 +17,8 @@ function! OmniSharp#actions#diagnostics#Check(...) abort
     let Callback = function('s:CBCodeCheck', [opts])
     call OmniSharp#actions#diagnostics#StdioCheck({}, Callback)
   else
-    let codecheck = OmniSharp#py#eval('codeCheck()')
-    if OmniSharp#CheckPyError() | return | endif
+    let codecheck = OmniSharp#py#Eval('codeCheck()')
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBCodeCheck(opts, codecheck)
   endif
 endfunction
@@ -29,8 +29,8 @@ function! OmniSharp#actions#diagnostics#CheckGlobal(...) abort
   if g:OmniSharp_server_stdio
     call s:StdioCheckGlobal(function('s:CBGlobalCodeCheck'))
   else
-    let quickfixes = OmniSharp#py#eval('globalCodeCheck()')
-    if OmniSharp#CheckPyError() | return | endif
+    let quickfixes = OmniSharp#py#Eval('globalCodeCheck()')
+    if OmniSharp#py#CheckForError() | return | endif
     call s:CBGlobalCodeCheck(quickfixes)
   endif
 endfunction

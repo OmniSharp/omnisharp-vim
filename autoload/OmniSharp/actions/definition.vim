@@ -9,8 +9,8 @@ function! OmniSharp#actions#definition#Find(...) abort
     let Callback = function('s:CBGotoDefinition', [opts])
     call s:StdioFind(Callback)
   else
-    let loc = OmniSharp#py#eval('gotoDefinition()')
-    if OmniSharp#CheckPyError() | return 0 | endif
+    let loc = OmniSharp#py#Eval('gotoDefinition()')
+    if OmniSharp#py#CheckForError() | return 0 | endif
     " Mock metadata info for old server based setups
     return s:CBGotoDefinition(opts, loc, { 'MetadataSource': {}})
   endif
@@ -22,8 +22,8 @@ function! OmniSharp#actions#definition#Preview(...) abort
     let Callback = function('s:CBPreviewDefinition', [opts])
     call s:StdioFind(Callback)
   else
-    let loc = OmniSharp#py#eval('gotoDefinition()')
-    if OmniSharp#CheckPyError() | return 0 | endif
+    let loc = OmniSharp#py#Eval('gotoDefinition()')
+    if OmniSharp#py#CheckForError() | return 0 | endif
     call s:CBPreviewDefinition({}, loc, {})
   endif
 endfunction

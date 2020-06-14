@@ -14,8 +14,8 @@ function! OmniSharp#actions#rename#To(renameto, ...) abort
     call s:StdioRename(a:renameto, opts)
   else
     let command = printf('renameTo(%s)', string(a:renameto))
-    let changes = OmniSharp#py#eval(command)
-    if OmniSharp#CheckPyError() | return | endif
+    let changes = OmniSharp#py#Eval(command)
+    if OmniSharp#py#CheckForError() | return | endif
 
     let save_lazyredraw = &lazyredraw
     let save_eventignore = &eventignore

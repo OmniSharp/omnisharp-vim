@@ -8,8 +8,8 @@ function! OmniSharp#actions#members#Find(...) abort
   if g:OmniSharp_server_stdio
     call s:StdioFind(function('s:CBFindMembers', [opts]))
   else
-    let locs = OmniSharp#py#eval('findMembers()')
-    if OmniSharp#CheckPyError() | return | endif
+    let locs = OmniSharp#py#Eval('findMembers()')
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBFindMembers(opts, locs)
   endif
 endfunction

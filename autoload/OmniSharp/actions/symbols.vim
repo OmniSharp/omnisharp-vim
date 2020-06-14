@@ -8,8 +8,8 @@ function! OmniSharp#actions#symbols#Find(...) abort
     let Callback = function('s:CBFindSymbol', [filter])
     call s:StdioFind(filter, Callback)
   else
-    let locs = OmniSharp#py#eval(printf('findSymbols(%s)', string(filter)))
-    if OmniSharp#CheckPyError() | return | endif
+    let locs = OmniSharp#py#Eval(printf('findSymbols(%s)', string(filter)))
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBFindSymbol(filter, locs)
   endif
 endfunction

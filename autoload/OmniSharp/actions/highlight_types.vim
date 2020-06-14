@@ -18,8 +18,8 @@ function! OmniSharp#actions#highlight_types#Buffer() abort
     call s:StdioFindHighlightTypes(Callback)
   else
     if !OmniSharp#IsServerRunning() | return | endif
-    let hltypes = OmniSharp#py#eval('findHighlightTypes()')
-    if OmniSharp#CheckPyError() | return | endif
+    let hltypes = OmniSharp#py#Eval('findHighlightTypes()')
+    if OmniSharp#py#CheckForError() | return | endif
     call s:CBHighlightBuffer(opts, hltypes)
   endif
 endfunction

@@ -9,8 +9,8 @@ function! OmniSharp#actions#usings#Fix(...) abort
     let Callback = function('s:CBFixUsings', [opts])
     call s:StdioFix(Callback)
   else
-    let locs = OmniSharp#py#eval('fixUsings()')
-    if OmniSharp#CheckPyError() | return | endif
+    let locs = OmniSharp#py#Eval('fixUsings()')
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBFixUsings(opts, locs)
   endif
 endfunction

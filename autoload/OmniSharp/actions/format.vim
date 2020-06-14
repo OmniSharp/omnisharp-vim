@@ -12,8 +12,8 @@ function! OmniSharp#actions#format#Format(...) abort
       echomsg 'CodeFormat is not supported in metadata files'
     endif
   else
-    call OmniSharp#py#eval('codeFormat()')
-    call OmniSharp#CheckPyError()
+    call OmniSharp#py#Eval('codeFormat()')
+    call OmniSharp#py#CheckForError()
     return s:CBFormat(opts)
   endif
 endfunction

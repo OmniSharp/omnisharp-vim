@@ -31,8 +31,8 @@ function! OmniSharp#actions#codeactions#Count(...) abort
     let Callback = function('s:CBCountCodeActions', [opts])
     call s:StdioGet('normal', Callback)
   else
-    let actions = OmniSharp#py#eval('getCodeActions("normal")')
-    if OmniSharp#CheckPyError() | return | endif
+    let actions = OmniSharp#py#Eval('getCodeActions("normal")')
+    if OmniSharp#py#CheckForError() | return | endif
     call s:CBCountCodeActions(opts, actions)
   endif
 endfunction
@@ -101,8 +101,8 @@ function! OmniSharp#actions#codeactions#Get(mode) abort
     call s:StdioGet(a:mode, Callback)
   else
     let command = printf('getCodeActions(%s)', string(a:mode))
-    let actions = OmniSharp#py#eval(command)
-    if OmniSharp#CheckPyError() | return | endif
+    let actions = OmniSharp#py#Eval(command)
+    if OmniSharp#py#CheckForError() | return | endif
     call s:CBGetCodeActions(a:mode, actions)
   endif
 endfunction
@@ -145,8 +145,8 @@ function! s:CBGetCodeActions(mode, actions) abort
       else
         let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
         let command = printf('runCodeAction(''%s'', ''%s'')', a:mode, command)
-        let action = OmniSharp#py#eval(command)
-        if OmniSharp#CheckPyError() | return | endif
+        let action = OmniSharp#py#Eval(command)
+        if OmniSharp#py#CheckForError() | return | endif
         if !action
           echo 'No action taken'
         endif

@@ -35,8 +35,8 @@ function! s:findcodeactions_action_table.run.func(candidate) abort
   else
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
-    let result = OmniSharp#py#eval(command)
-    if OmniSharp#CheckPyError() | return | endif
+    let result = OmniSharp#py#Eval(command)
+    if OmniSharp#py#CheckForError() | return | endif
     if !result
       echo 'No action taken'
     endif
