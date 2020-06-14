@@ -8,8 +8,8 @@ function! OmniSharp#actions#signature#SignatureHelp(...) abort
   if g:OmniSharp_server_stdio
     call s:StdioSignatureHelp(function('s:CBSignatureHelp', [opts]), opts)
   else
-    let response = OmniSharp#py#eval('signatureHelp()')
-    if OmniSharp#CheckPyError() | return | endif
+    let response = OmniSharp#py#Eval('signatureHelp()')
+    if OmniSharp#py#CheckForError() | return | endif
     call s:CBSignatureHelp(response)
   endif
 endfunction
@@ -64,7 +64,7 @@ function! s:StdioSignatureHelpRH(Callback, seq, opts, response) abort
   if has_key(a:opts, 'ForCompleteMethod') && !g:OmniSharp_want_snippet
     " Because of our 'falsified' request with an extra '(', re-synchronise the
     " server's version of the buffer with the actual buffer contents.
-    call OmniSharp#UpdateBuffer()
+    call OmniSharp#actions#buffer#Update()
   endif
   call a:Callback(a:response.Body)
 endfunction

@@ -6,7 +6,7 @@ let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
 function! s:is_msys() abort
-  if get(s:, 'is_msys_checked', 0)
+  if get(s:, 'is_msys_checked')
     return s:is_msys_val
   endif
   let s:is_msys_val = strlen(system('grep MSYS_NT /proc/version')) > 0
@@ -16,7 +16,7 @@ function! s:is_msys() abort
 endfunction
 
 function! s:is_cygwin() abort
-  if get(s:, 'is_cygwin_checked', 0)
+  if get(s:, 'is_cygwin_checked')
     return s:is_cygwin_val
   endif
   let s:is_cygwin_val = has('win32unix')
@@ -25,12 +25,59 @@ function! s:is_cygwin() abort
 endfunction
 
 function! s:is_wsl() abort
-  if get(s:, 'is_wsl_checked', 0)
+  if get(s:, 'is_wsl_checked')
     return s:is_wsl_val
   endif
   let s:is_wsl_val = strlen(system('grep Microsoft /proc/version')) > 0
   let s:is_wsl_checked = 1
   return s:is_wsl_val
+endfunction
+
+" Call a list of async functions in parallel, and wait for them all to complete
+" before calling the OnAllComplete function.
+function! OmniSharp#util#AwaitParallel(Funcs, OnAllComplete) abort
+  let state = {
+  \ 'count': 0,
+  \ 'target': len(a:Funcs),
+  \ 'results': [],
+  \ 'OnAllComplete': a:OnAllComplete
+  \}
+  for Func in a:Funcs
+    call Func(function('s:AwaitFuncComplete', [state]))
+  endfor
+endfunction
+
+" Call a list of async functions in sequence, and wait for them all to complete
+" before calling the OnAllComplete function.
+function! OmniSharp#util#AwaitSequence(Funcs, OnAllComplete, ...) abort
+  if a:0
+    let state = a:1
+  else
+    let state = {
+    \ 'count': 0,
+    \ 'target': len(a:Funcs),
+    \ 'results': [],
+    \ 'OnAllComplete': a:OnAllComplete
+    \}
+  endif
+
+  let Func = remove(a:Funcs, 0)
+  let state.OnComplete = function('OmniSharp#util#AwaitSequence', [a:Funcs, a:OnAllComplete])
+  call Func(function('s:AwaitFuncComplete', [state]))
+endfunction
+
+function! s:AwaitFuncComplete(state, ...) abort
+  if a:0 == 1
+    call add(a:state.results, a:1)
+  elseif a:0 > 1
+    call add(a:state.results, a:000)
+  endif
+  let a:state.count += 1
+  if a:state.count == a:state.target
+    call a:state.OnAllComplete(a:state.results)
+  elseif has_key(a:state, 'OnComplete')
+    call a:state.OnComplete(a:state)
+  endif
 endfunction
 
 " Vim locations for quickfix, text properties etc. always use byte offsets.
@@ -119,7 +166,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
 
   let command = [ s:server_path ]
   if !g:OmniSharp_server_stdio
-    let command += ['-p', OmniSharp#GetPort(a:solution_file)]
+    let command += ['-p', OmniSharp#py#GetPort(a:solution_file)]
   endif
   let command += ['-s', solution_path]
 

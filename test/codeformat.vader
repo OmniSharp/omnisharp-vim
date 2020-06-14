@@ -8,8 +8,8 @@ Given cs():
 
 Execute (run code format):
   call OmniSharpTestInitializeBuffer('CodeFormat')
-  call OmniSharpWarmup('OmniSharp#CodeFormat', [])
-  call OmniSharpTestAwait('OmniSharp#CodeFormat', [])
+  call OmniSharpWarmup('OmniSharp#actions#format#Format', [])
+  call OmniSharpTestAwait('OmniSharp#actions#format#Format', [])
 
 Expect cs(should format document):
   public class Test

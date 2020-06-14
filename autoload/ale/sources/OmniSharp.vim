@@ -4,7 +4,7 @@ function! ale#sources#OmniSharp#WantResults(buffer) abort
   call ale#other_source#StartChecking(a:buffer, 'OmniSharp')
   let opts = { 'BufNum': a:buffer }
   let Callback = function('ale#sources#OmniSharp#ProcessResults', [opts])
-  call OmniSharp#stdio#CodeCheck(opts, Callback)
+  call OmniSharp#actions#diagnostics#StdioCheck(opts, Callback)
 endfunction
 
 function! ale#sources#OmniSharp#ProcessResults(opts, locations) abort

@@ -20,7 +20,7 @@ ctx = VimUtilCtx(vim)
 def openFile(filename, line=0, column=0, noautocmd=0):
     vim.command("let l:loc = {{ 'filename': '{0}', 'lnum': {1}, 'col': {2} }}"
                 .format(filename, line, column))
-    vim.command("call OmniSharp#JumpToLocation(l:loc, {0})".format(noautocmd))
+    vim.command("call OmniSharp#locations#Navigate(l:loc, {0})".format(noautocmd))
 
 
 def setBuffer(text):
@@ -208,7 +208,7 @@ def codeFormat():
 
 
 @vimcmd
-def fix_usings():
+def fixUsings():
     response = getResponse(ctx, '/fixusings', json=True)
     setBuffer(response.get("Buffer"))
     return quickfixes_from_response(ctx, response['AmbiguousResults'])

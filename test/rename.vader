@@ -12,7 +12,7 @@ Given cs():
 Execute (rename constructor):
   call OmniSharpTestInitializeBuffer('RenameTo')
   call search("TestRenameTo()")
-  call OmniSharpTestAwait('OmniSharp#RenameTo', ['Renamed'])
+  call OmniSharpTestAwait('OmniSharp#actions#rename#To', ['Renamed'])
 
 Expect cs(should rename class):
   public class Renamed

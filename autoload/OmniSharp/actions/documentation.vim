@@ -2,14 +2,14 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 function! OmniSharp#actions#documentation#TypeLookup(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'CallbackType': a:1 } : {}
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   let opts.Doc = g:OmniSharp_typeLookupInPreview
   if g:OmniSharp_server_stdio
     call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
-    let response = OmniSharp#py#eval(pycmd)
-    if OmniSharp#CheckPyError() | return | endif
+    let response = OmniSharp#py#Eval(pycmd)
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBTypeLookup(opts, response)
   endif
 endfunction
@@ -21,8 +21,8 @@ function! OmniSharp#actions#documentation#Documentation(...) abort
     call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
-    let response = OmniSharp#py#eval(pycmd)
-    if OmniSharp#CheckPyError() | return | endif
+    let response = OmniSharp#py#Eval(pycmd)
+    if OmniSharp#py#CheckForError() | return | endif
     return s:CBTypeLookup(opts, response)
   endif
 endfunction
@@ -62,8 +62,8 @@ function! s:CBTypeLookup(opts, response) abort
   else
     echo l:type[0 : &columns * &cmdheight - 2]
   endif
-  if has_key(a:opts, 'CallbackType')
-    call a:opts.CallbackType(l:type)
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(l:type)
   endif
 endfunction
 

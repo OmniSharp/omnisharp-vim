@@ -11,7 +11,7 @@ function! OmniSharp#proc#supportsNeovimJobs() abort
 endfunction
 
 function! OmniSharp#proc#neovimOutHandler(job_id, data, event) dict abort
-  if g:OmniSharp_proc_debug
+  if get(g:, 'OmniSharp_proc_debug')
     echom printf('%s: %s', string(a:event), string(a:data))
   endif
   if g:OmniSharp_server_stdio
@@ -67,7 +67,7 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   call s:debug(a:command)
   let opts = {'on_stderr': 'OmniSharp#proc#neovimErrHandler',
              \  'on_exit': 'OmniSharp#proc#neovimExitHandler'}
-  if g:OmniSharp_server_stdio || g:OmniSharp_proc_debug
+  if g:OmniSharp_server_stdio || get(g:, 'OmniSharp_proc_debug')
     let opts['on_stdout'] = 'OmniSharp#proc#neovimOutHandler'
   endif
   let job = {
@@ -88,7 +88,7 @@ function! OmniSharp#proc#supportsVimJobs() abort
 endfunction
 
 function! OmniSharp#proc#vimOutHandler(channel, message) abort
-  if g:OmniSharp_proc_debug
+  if get(g:, 'OmniSharp_proc_debug')
     echom printf('%s: %s', string(a:channel), string(a:message))
   endif
   if g:OmniSharp_server_stdio
@@ -109,7 +109,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
   call s:debug('Using vim job_start to start the following command:')
   call s:debug(a:command)
   let opts = {'err_cb': 'OmniSharp#proc#vimErrHandler'}
-  if g:OmniSharp_server_stdio || g:OmniSharp_proc_debug
+  if g:OmniSharp_server_stdio || get(g:, 'OmniSharp_proc_debug')
     let opts['out_cb'] = 'OmniSharp#proc#vimOutHandler'
   endif
   let job = {
@@ -253,7 +253,7 @@ endfunction
 " private functions {{{ "
 
 function! s:debug(message) abort
-  if g:OmniSharp_proc_debug == 1
+  if get(g:, 'OmniSharp_proc_debug')
     echom 'DEBUG: ' . string(a:message)
   endif
 endfunction

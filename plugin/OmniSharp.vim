@@ -61,10 +61,6 @@ let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnish
 let defaultlevel = g:OmniSharp_server_stdio ? 'info' : 'warning'
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 
-" Default map of solution files and directories to ports.
-" Preserve backwards compatibility with older version g:OmniSharp_sln_ports
-let g:OmniSharp_server_ports = get(g:, 'OmniSharp_server_ports', get(g:, 'OmniSharp_sln_ports', {}))
-
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
 let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 1)
 
@@ -73,13 +69,11 @@ let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
 let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
 
-let g:OmniSharp_proc_debug = get(g:, 'OmniSharp_proc_debug', get(g:, 'omnisharp_proc_debug', 0))
-
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
-command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#OpenLog(<q-args>)
+command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 
 " Initialise automatic type and interface highlighting
-" Preserve backwards compatibility with older version "g:OmniSharp_sln_ports
+" Preserve backwards compatibility with older version g:OmniSharp_highlight_types
 let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 0))
 if g:OmniSharp_highlighting
   augroup OmniSharp_HighlightTypes
@@ -149,6 +143,13 @@ if !exists('g:OmniSharp_selector_ui')
   \   ['unite', 'ctrlp', 'fzf'],
   \   '!empty(globpath(&runtimepath, printf("plugin/%s.vim", v:val), 1))'
   \ ), 0, '')
+endif
+if g:OmniSharp_selector_ui ==? 'ctrlp'
+  let g:ctrlp_extensions = get(g:, 'ctrlp_extensions', [])
+  if !exists('g:OmniSharp_ctrlp_extensions_added')
+    let g:OmniSharp_ctrlp_extensions_added = 1
+    let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
+  endif
 endif
 
 " vim:et:sw=2:sts=2

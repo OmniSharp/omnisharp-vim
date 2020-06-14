@@ -10,7 +10,7 @@ function! s:location_sink(str) abort
     endif
   endfor
   echo quickfix.filename
-  call OmniSharp#JumpToLocation(quickfix, 0)
+  call OmniSharp#locations#Navigate(quickfix, 0)
 endfunction
 
 function! fzf#OmniSharp#FindSymbols(quickfixes) abort
@@ -38,13 +38,13 @@ function! s:action_sink(str) abort
     let action = filtered[0]
   endif
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#RunCodeAction(action)
+    call OmniSharp#actions#codeactions#Run(action)
   else
     let command = substitute(get(action, 'Identifier'), '''', '\\''', 'g')
     let command = printf('runCodeAction(''%s'', ''%s'')', s:mode, command)
-    let result = OmniSharp#py#eval(command)
-    if OmniSharp#CheckPyError() | return | endif
-    if !action
+    let result = OmniSharp#py#Eval(command)
+    if OmniSharp#py#CheckForError() | return | endif
+    if !result
       echo 'No action taken'
     endif
   endif

@@ -7,47 +7,45 @@ augroup OmniSharp_FileType
   autocmd! * <buffer>
 
   autocmd BufLeave <buffer>
-  \   if !pumvisible()
-  \|    call OmniSharp#UpdateBuffer()
-  \|  endif
+  \ if !pumvisible() |
+  \   call OmniSharp#actions#buffer#Update() |
+  \ endif
 
   autocmd CompleteDone <buffer> call OmniSharp#actions#complete#ExpandSnippet()
 augroup END
 
 setlocal omnifunc=OmniSharp#Complete
 
-call OmniSharp#AppendCtrlPExtensions()
-
-if get(g:, 'OmniSharp_start_server', 0) == 1
+if get(g:, 'OmniSharp_start_server', 0)
   call OmniSharp#StartServerIfNotRunning()
 endif
 
-command! -buffer -bar OmniSharpCodeFormat call OmniSharp#CodeFormat()
-command! -buffer -bar OmniSharpFindImplementations call OmniSharp#FindImplementations()
-command! -buffer -bar OmniSharpFindMembers call OmniSharp#FindMembers()
-command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#FindSymbol(<q-args>)
-command! -buffer -bar OmniSharpFindUsages call OmniSharp#FindUsages()
-command! -buffer -bar OmniSharpFixUsings call OmniSharp#FixUsings()
-command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#GetCodeActions('normal')
-command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#GlobalCodeCheck()
-command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#GotoDefinition()
-command! -buffer -bar OmniSharpNavigateUp call OmniSharp#NavigateUp()
-command! -buffer -bar OmniSharpNavigateDown call OmniSharp#NavigateDown()
-command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#PreviewDefinition()
-command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#PreviewImplementation()
-command! -buffer -bar OmniSharpRename call OmniSharp#Rename()
-command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#RenameTo(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
-command! -buffer -bar OmniSharpRunTest call OmniSharp#RunTest()
-command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#RunTestsInFile(<f-args>)
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
 
+command! -buffer -bar OmniSharpCodeFormat call OmniSharp#actions#format#Format()
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
+command! -buffer -bar OmniSharpFindImplementations call OmniSharp#actions#implementations#Find()
+command! -buffer -bar OmniSharpFindMembers call OmniSharp#actions#members#Find()
+command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#actions#symbols#Find(<q-args>)
+command! -buffer -bar OmniSharpFindUsages call OmniSharp#actions#usages#Find()
+command! -buffer -bar OmniSharpFixUsings call OmniSharp#actions#usings#Fix()
+command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#actions#codeactions#Get('normal')
+command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#actions#diagnostics#CheckGlobal()
+command! -buffer -bar OmniSharpGotoDefinition call OmniSharp#actions#definition#Find()
 command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
 command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()
+command! -buffer -bar OmniSharpNavigateUp call OmniSharp#actions#navigate#Up()
+command! -buffer -bar OmniSharpNavigateDown call OmniSharp#actions#navigate#Down()
+command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definition#Preview()
+command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
+command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
+command! -buffer -bar OmniSharpRunTest call OmniSharp#actions#test#Run()
+command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<f-args>)
+command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
@@ -59,7 +57,7 @@ nnoremap <buffer> <Plug>(omnisharp_find_symbol) :OmniSharpFindSymbol<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_usages) :OmniSharpFindUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_fix_usings) :OmniSharpFixUsings<CR>
 nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
-xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#GetCodeActions('visual')<CR>
+xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#actions#codeactions#Get('visual')<CR>
 nnoremap <buffer> <Plug>(omnisharp_global_code_check) :OmniSharpGlobalCodeCheck<CR>
 nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>

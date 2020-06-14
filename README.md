@@ -496,13 +496,13 @@ augroup END
 " Contextual code actions (uses fzf, CtrlP or unite.vim when available)
 nnoremap <Leader><Space> :OmniSharpGetCodeActions<CR>
 " Run code actions with text selected in visual mode to extract method
-xnoremap <Leader><Space> :call OmniSharp#GetCodeActions('visual')<CR>
+xnoremap <Leader><Space> :call OmniSharp#actions#codeactions#Get('visual')<CR>
 
 " Rename with dialog
 nnoremap <Leader>nm :OmniSharpRename<CR>
 nnoremap <F2> :OmniSharpRename<CR>
 " Rename without dialog - with cursor on the symbol to rename: `:Rename newname`
-command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
+command! -nargs=1 Rename :call OmniSharp#actions#rename#To("<args>")
 
 nnoremap <Leader>cf :OmniSharpCodeFormat<CR>
 

@@ -1,5 +1,5 @@
 if !OmniSharp#util#CheckCapabilities() | finish | endif
-if get(g:, 'loaded_ctrlp_OmniSharp_findsymbols', 0) | finish | endif
+if get(g:, 'loaded_ctrlp_OmniSharp_findsymbols') | finish | endif
 let g:loaded_ctrlp_OmniSharp_findsymbols = 1
 
 " Add this extension's settings to g:ctrlp_ext_vars
@@ -74,7 +74,7 @@ function! ctrlp#OmniSharp#findsymbols#accept(mode, str) abort
     endif
   endfor
   echo quickfix.filename
-  call  OmniSharp#JumpToLocation(quickfix, 0)
+  call  OmniSharp#locations#Navigate(quickfix, 0)
 endfunction
 
 " Give the extension an ID
