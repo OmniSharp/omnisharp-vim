@@ -57,7 +57,7 @@ endfunction
 function! s:StdioCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
   call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes,
-        \ function("s:DiagnosticQuickfixFixup")))
+  \ function('s:DiagnosticQuickfixFixup')))
 endfunction
 
 function! s:DiagnosticQuickfixFixup(quickfix) abort
@@ -65,16 +65,22 @@ function! s:DiagnosticQuickfixFixup(quickfix) abort
   if len(exclude_paths) && has_key(a:quickfix, 'FileName')
     for exclude_path in exclude_paths
       if match(a:quickfix.FileName, exclude_path) > 0
-        return
+        return {}
       endif
     endfor
   endif
 
   let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
   let diag_id = get(a:quickfix, 'Id', '-')
-  if index(keys(overrides), diag_id) >= 0
+  if diag_id =~# '.FadeOut$'
+    " Some analyzers such as roslynator provide 2 diagnostics: one to mark
+    " the start of the issue location and another to mark the end, e.g.
+    " `RCS1124FadeOut`. We never make use of these FadeOut diagnostics, as
+    " we can extract start and end locations from the main diagnostic.
+    return {}
+  elseif index(keys(overrides), diag_id) >= 0
     if overrides[diag_id].type ==? 'None'
-      return
+      return {}
     endif
     call extend(a:quickfix, overrides[diag_id])
   endif

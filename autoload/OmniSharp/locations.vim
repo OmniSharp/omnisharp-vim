@@ -27,7 +27,7 @@ function! OmniSharp#locations#Parse(quickfixes, ...) abort
   let locations = []
   for quickfix in a:quickfixes
     let quickfix = a:0 ? a:1(quickfix) : quickfix
-    if type(quickfix) == 0
+    if empty(quickfix)
       continue
     endif
 
@@ -49,7 +49,6 @@ function! OmniSharp#locations#Parse(quickfixes, ...) abort
       let location.end_lnum = quickfix.EndLine
       let location.end_col = quickfix.EndColumn - 1
     endif
-
 
     if has_key(quickfix, 'type')
       let location.type = get(quickfix, 'type')
