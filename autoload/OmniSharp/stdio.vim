@@ -34,110 +34,41 @@ endfunction
 
 function! s:HandleServerEvent(job, res) abort
   if has_key(a:res, 'Body') && type(a:res.Body) == type({})
-    if !a:job.loaded
 
-      " Listen for server-loaded events
-      "-------------------------------------------------------------------------
-      if g:OmniSharp_server_stdio_quickload
-        " Quick load: Mark server as loaded as soon as configuration is finished
-        let message = get(a:res.Body, 'Message', '')
-        if message ==# 'Configuration finished.'
-          let a:job.loaded = 1
-          silent doautocmd <nomodeline> User OmniSharpReady
-          call s:ReplayRequests()
-        endif
-      else
-        " Complete load: Wait for all projects to be loaded before marking
-        " server as loaded
-        if !has_key(a:job, 'loading_timeout')
-          " Create a timeout to mark a job as loaded after 30 seconds despite
-          " not receiving the expected server events.
-          let a:job.loading_timeout = timer_start(
-          \ g:OmniSharp_server_loading_timeout * 1000,
-          \ function('s:ServerLoadTimeout', [a:job]))
-        endif
-        if !has_key(a:job, 'loading')
-          let a:job.loading = []
-        endif
-        let name = get(a:res.Body, 'Name', '')
-        let message = get(a:res.Body, 'Message', '')
-        if name ==# 'OmniSharp.MSBuild.ProjectManager'
-          let project = matchstr(message, '''\zs.*\ze''')
-          if message =~# '^Queue project'
-            call add(a:job.loading, project)
+    " Handle any project loading events
+    call OmniSharp#project#ParseEvent(a:job, a:res.Body)
+
+    " Listen for diagnostics
+    if get(a:res, 'Event', '') ==# 'Diagnostic'
+      if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
+        for result in get(a:res.Body, 'Results', [])
+          let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
+          let bufinfo = getbufinfo(fname)
+          if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
+            continue
           endif
-          if message =~# '^Successfully loaded project'
-          \ || message =~# '^Failed to load project'
-            if message[0] ==# 'F'
-              echom 'Failed to load project: ' . project
-            endif
-            call filter(a:job.loading, {idx,val -> val !=# project})
-            if len(a:job.loading) == 0
-              if g:OmniSharp_server_display_loading
-                let elapsed = reltimefloat(reltime(a:job.start_time))
-                echomsg printf('Loaded server for %s in %.1fs',
-                \ a:job.sln_or_dir, elapsed)
-              endif
-              let a:job.loaded = 1
-              silent doautocmd <nomodeline> User OmniSharpReady
-
-              " TODO: Remove this delay once we have better information about
-              " when the server is completely initialised:
-              " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
-              call timer_start(1000, function('s:ReplayRequests'))
-              " call s:ReplayRequests()
-
-              unlet a:job.loading
-              call timer_stop(a:job.loading_timeout)
-              unlet a:job.loading_timeout
-            endif
-          endif
-        endif
-      endif
-
-    else
-
-      " Server is loaded, listen for diagnostics
-      "-------------------------------------------------------------------------
-      if get(a:res, 'Event', '') ==# 'Diagnostic'
-        if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
-          for result in get(a:res.Body, 'Results', [])
-            let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
-            let bufinfo = getbufinfo(fname)
-            if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
-              continue
-            endif
-            let bufnr = bufinfo[0].bufnr
-            call ale#other_source#StartChecking(bufnr, 'OmniSharp')
-            let opts = { 'BufNum': bufnr }
-            let quickfixes = OmniSharp#locations#Parse(result.QuickFixes)
-            call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
-          endfor
-        endif
-      elseif get(a:res, 'Event', '') ==# 'TestMessage'
-        " Diagnostics received while running tests
-        let lines = split(a:res.Body.Message, '\n')
-        for line in lines
-          if get(a:res.Body, 'MessageLevel', '') ==# 'error'
-            echohl WarningMsg | echomsg line | echohl None
-          elseif g:OmniSharp_runtests_echo_output
-            echomsg line
-          endif
+          let bufnr = bufinfo[0].bufnr
+          call ale#other_source#StartChecking(bufnr, 'OmniSharp')
+          let opts = { 'BufNum': bufnr }
+          let quickfixes = OmniSharp#locations#Parse(result.QuickFixes)
+          call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
         endfor
       endif
-
     endif
-  endif
-endfunction
 
-function! s:ServerLoadTimeout(job, timer) abort
-  if g:OmniSharp_server_display_loading
-    echomsg printf('Server load notification for %s not received after %d seconds - continuing.',
-    \ a:job.sln_or_dir, g:OmniSharp_server_loading_timeout)
+    " Diagnostics received while running tests
+    if get(a:res, 'Event', '') ==# 'TestMessage'
+      let lines = split(a:res.Body.Message, '\n')
+      for line in lines
+        if get(a:res.Body, 'MessageLevel', '') ==# 'error'
+          echohl WarningMsg | echomsg line | echohl None
+        elseif g:OmniSharp_runtests_echo_output
+          echomsg line
+        endif
+      endfor
+    endif
+
   endif
-  let a:job.loaded = 1
-  unlet a:job.loading
-  unlet a:job.loading_timeout
 endfunction
 
 function! OmniSharp#stdio#Request(command, opts) abort
@@ -232,7 +163,7 @@ function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
   return 1
 endfunction
 
-function! s:ReplayRequests(...) abort
+function! OmniSharp#stdio#ReplayRequests(...) abort
   for key in keys(s:pendingRequests)
     call OmniSharp#stdio#Request(key, s:pendingRequests[key])
     unlet s:pendingRequests[key]

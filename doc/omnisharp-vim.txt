@@ -590,7 +590,14 @@ customise your environment depending on the server status.
                                                                *OmniSharpStarted*
 OmniSharpStarted
     Fired as soon as the server is started - it will not immediately be
-    responsive to commands
+    responsive to commands.
+
+                                                        *OmniSharpProjectUpdated*
+OmniSharpProjectUpdate
+    Fired when the project status changes while OmniSharp-roslyn is starting.
+    Used to e.g. display the total number of projects
+    (|OmniSharp#project#CountTotal()|), and number of loaded projects
+    (|OmniSharp#project#CountLoaded()|) in the statusline.
 
                                                                  *OmniSharpReady*
 OmniSharpReady
