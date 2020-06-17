@@ -92,7 +92,12 @@ function! OmniSharp#proc#vimOutHandler(channel, message) abort
     echom printf('%s: %s', string(a:channel), string(a:message))
   endif
   if g:OmniSharp_server_stdio
-    call OmniSharp#stdio#HandleResponse(s:channels[a:channel], a:message)
+    let message = a:message
+    if message =~# "^\uFEFF"
+      " Strip BOM
+      let message = substitute(message, "^\uFEFF", '', '')
+    endif
+    call OmniSharp#stdio#HandleResponse(s:channels[a:channel], message)
   endif
 endfunction
 
