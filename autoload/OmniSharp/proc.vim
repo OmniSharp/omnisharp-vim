@@ -97,7 +97,8 @@ function! OmniSharp#proc#vimOutHandler(channel, message) abort
       " Strip BOM
       let message = substitute(message, "^\uFEFF", '', '')
     endif
-    call OmniSharp#stdio#HandleResponse(s:channels[a:channel], message)
+    let job = s:channels[ch_info(a:channel).id]
+    call OmniSharp#stdio#HandleResponse(job, message)
   endif
 endfunction
 
@@ -121,7 +122,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
   \ 'start_time': reltime(),
   \ 'job_id': job_start(a:command, opts)
   \}
-  let channel_id = job_getchannel(job.job_id)
+  let channel_id = ch_info(job_getchannel(job.job_id)).id
   let s:channels[channel_id] = job
   return job
 endfunction
@@ -182,7 +183,7 @@ function! OmniSharp#proc#Start(command, jobkey) abort
     if job_status(job.job_id) ==# 'run'
       let s:jobs[a:jobkey] = job
     else
-      call OmniSharp#util#EchoErr('Could not run command: ' . join(a:command, ' '))
+      call OmniSharp#util#EchoErr('Could not run command: ' . join(a:command))
     endif
   elseif OmniSharp#proc#supportsVimDispatch()
     let job = OmniSharp#proc#dispatchStart(a:command)
@@ -191,7 +192,9 @@ function! OmniSharp#proc#Start(command, jobkey) abort
     let job = OmniSharp#proc#vimprocStart(a:command)
     let s:jobs[a:jobkey] = job
   else
-    call OmniSharp#util#EchoErr('Please use neovim, or vim 8.0+ or install either vim-dispatch or vimproc.vim plugin to use this feature')
+    call OmniSharp#util#EchoErr(
+    \ 'Please use neovim, or vim 8.0+ or install either vim-dispatch or ' .
+    \ 'vimproc.vim plugin to use this feature')
   endif
   if type(job) == type({})
     let job.sln_or_dir = a:jobkey

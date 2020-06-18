@@ -6,7 +6,7 @@ let g:OmniSharp_temp_dir = get(g:, 'OmniSharp_temp_dir', fnamemodify(tempname(),
 
 let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
 
-let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
+let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 1)
 
 " When g:OmniSharp_server_stdio_quickload = 1, consider server 'loaded' once
 " 'Configuration finished' is received.  When this is 0, wait for notification

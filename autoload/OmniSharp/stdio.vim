@@ -9,6 +9,21 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
   try
     let res = json_decode(a:message)
   catch
+    let a:job.json_errors = get(a:job, 'json_errors', 0) + 1
+    if !OmniSharp#proc#IsJobRunning(a:job)
+      return
+    endif
+    if a:job.json_errors >= 3 && !a:job.loaded
+      call OmniSharp#log#Log('3 errors caught while loading: stopping', 'info')
+      call OmniSharp#proc#StopJob(a:job.sln_or_dir)
+      echohl WarningMsg
+      echomsg 'You appear to be running an HTML server in stdio mode - ' .
+      \ 'upgrade to the stdio server with :OmniSharpInstall, or to continue ' .
+      \' in HTTP mode add the following to your .vimrc and restart Vim:  '
+      \ 'let g:OmniSharp_server_stdio = 0'
+      echohl None
+      return
+    endif
     call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, 'info')
     call OmniSharp#log#Log(a:job.job_id . '  JSON error: ' . v:exception, 'info')
     return
