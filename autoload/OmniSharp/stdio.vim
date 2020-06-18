@@ -53,9 +53,14 @@ function! s:HandleServerEvent(job, res) abort
     " Handle any project loading events
     call OmniSharp#project#ParseEvent(a:job, a:res.Body)
 
-    " Listen for diagnostics
-    if get(a:res, 'Event', '') ==# 'Diagnostic'
-      if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
+    " Listen for diagnostics.
+    " The OmniSharp-roslyn server starts sending diagnostics once projects are
+    " loaded, which e.g. VSCode uses to populate project-wide warnings.
+    " We don't do that, and it doesn't make a lot of sense in a Vim workflow, so
+    " parsing these diagnostics is disabled by default.
+    if get(g:, 'OmniSharp_diagnostics_listen', 0)
+    \ && has_key(g:, 'OmniSharp_ale_diagnostics_requested')
+      if get(a:res, 'Event', '') ==# 'Diagnostic'
         for result in get(a:res.Body, 'Results', [])
           let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
           let bufinfo = getbufinfo(fname)
