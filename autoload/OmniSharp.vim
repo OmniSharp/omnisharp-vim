@@ -6,7 +6,6 @@ set cpoptions&vim
 if !g:OmniSharp_server_stdio
   " Load python helper functions
   call OmniSharp#py#Bootstrap()
-  let g:OmniSharp_py_err = {}
 endif
 
 function! OmniSharp#GetHost(...) abort

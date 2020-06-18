@@ -10,7 +10,7 @@ function! OmniSharp#actions#signature#SignatureHelp(...) abort
   else
     let response = OmniSharp#py#Eval('signatureHelp()')
     if OmniSharp#py#CheckForError() | return | endif
-    call s:CBSignatureHelp(response)
+    call s:CBSignatureHelp(opts, response)
   endif
 endfunction
 
