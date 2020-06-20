@@ -14,7 +14,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
       return
     endif
     if a:job.json_errors >= 3 && !a:job.loaded
-      call OmniSharp#log#Log('3 errors caught while loading: stopping', 'info')
+      call OmniSharp#log#Log(a:job, '3 errors caught while loading: stopping', 'info')
       call OmniSharp#proc#StopJob(a:job.sln_or_dir)
       echohl WarningMsg
       echomsg 'You appear to be running an HTML server in stdio mode - ' .
@@ -24,12 +24,12 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
       echohl None
       return
     endif
-    call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, 'info')
-    call OmniSharp#log#Log(a:job.job_id . '  JSON error: ' . v:exception, 'info')
+    call OmniSharp#log#Log(a:job, a:message, 'info')
+    call OmniSharp#log#Log(a:job, 'JSON error: ' . v:exception, 'info')
     return
   endtry
   let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
-  call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, loglevel)
+  call OmniSharp#log#Log(a:job, a:message, loglevel)
   if get(res, 'Type', '') ==# 'event'
     call s:HandleServerEvent(a:job, res)
     return
@@ -156,8 +156,7 @@ function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
     endif
     return 0
   endif
-  let job_id = a:job.job_id
-  call OmniSharp#log#Log(job_id . '  Request: ' . a:command, 'debug')
+  call OmniSharp#log#Log(a:job, '  Request: ' . a:command, 'debug')
 
   let a:body['Command'] = a:command
   let a:body['Seq'] = s:nextseq
@@ -176,11 +175,11 @@ function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call OmniSharp#log#Log(encodedBody, 'debug')
+  call OmniSharp#log#Log(a:job, encodedBody, 'debug')
   if has('nvim')
-    call chansend(job_id, encodedBody . "\n")
+    call chansend(a:job.job_id, encodedBody . "\n")
   else
-    call ch_sendraw(job_id, encodedBody . "\n")
+    call ch_sendraw(a:job.job_id, encodedBody . "\n")
   endif
   return 1
 endfunction
