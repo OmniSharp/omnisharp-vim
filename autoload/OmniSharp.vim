@@ -14,7 +14,6 @@ function! OmniSharp#GetHost(...) abort
     let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
     if g:OmniSharp_server_stdio
       let host = {
-      \ 'job': OmniSharp#proc#GetJob(sln_or_dir),
       \ 'sln_or_dir': sln_or_dir
       \}
     else
@@ -28,9 +27,10 @@ function! OmniSharp#GetHost(...) abort
   endif
   if g:OmniSharp_server_stdio
     let host = getbufvar(bufnr, 'OmniSharp_host')
-    if !OmniSharp#proc#IsJobRunning(host.job)
-      let host.job = OmniSharp#proc#GetJob(host.sln_or_dir)
-    endif
+    return {
+    \ 'sln_or_dir': host.sln_or_dir,
+    \ 'job': OmniSharp#proc#GetJob(host.sln_or_dir)
+    \}
   endif
   return getbufvar(bufnr, 'OmniSharp_host')
 endfunction
@@ -294,6 +294,12 @@ function! OmniSharp#StartServer(...) abort
 
   " Optionally perform check if server is already running
   if check_is_running
+    let job = OmniSharp#proc#GetJob(sln_or_dir)
+    if type(job) == type({}) && get(job, 'stopped')
+      " The job has been manually stopped - do not start it again until
+      " instructed
+      return
+    endif
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
     if !g:OmniSharp_server_stdio
       " If the port is hardcoded, we should check if any other vim instances
@@ -323,10 +329,9 @@ function! s:StartServer(sln_or_dir) abort
     return
   endif
 
-  let job = OmniSharp#proc#Start(command, a:sln_or_dir)
+  call OmniSharp#proc#Start(command, a:sln_or_dir)
   if g:OmniSharp_server_stdio
     let b:OmniSharp_host = {
-    \ 'job': job,
     \ 'sln_or_dir': a:sln_or_dir
     \}
   endif

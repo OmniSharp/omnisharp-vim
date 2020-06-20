@@ -103,6 +103,10 @@ function! OmniSharp#stdio#Request(command, opts) abort
     let lnum = line('.')
     let cnum = col('.')
   endif
+  let job = OmniSharp#GetHost(bufnr).job
+  if !OmniSharp#proc#IsJobRunning(job)
+    return
+  endif
   if has_key(a:opts, 'SavePosition')
     let s:lastPosition = [bufnr, lnum, cnum]
   endif
@@ -140,21 +144,19 @@ function! OmniSharp#stdio#Request(command, opts) abort
   if send_buffer
     let body.Arguments.Buffer = buffer
   endif
-  return OmniSharp#stdio#RequestSend(body, a:command, a:opts, sep)
+  return OmniSharp#stdio#RequestSend(job, body, a:command, a:opts, sep)
 endfunction
 
-function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
+function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
   let sep = a:0 ? a:1 : ''
-
-  let job = OmniSharp#GetHost().job
-  if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
+  if type(a:job) != type({}) || !has_key(a:job, 'job_id') || !a:job.loaded
     if has_key(a:opts, 'ReplayOnLoad') && !has_key(s:pendingRequests, a:command)
       " This request should be replayed when the server is fully loaded
       let s:pendingRequests[a:command] = a:opts
     endif
     return 0
   endif
-  let job_id = job.job_id
+  let job_id = a:job.job_id
   call OmniSharp#log#Log(job_id . '  Request: ' . a:command, 'debug')
 
   let a:body['Command'] = a:command

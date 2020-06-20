@@ -51,7 +51,8 @@ function! s:StdioCheckGlobal(Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:StdioCheckRH', [a:Callback])
   \}
-  call OmniSharp#stdio#RequestSend({}, '/codecheck', opts)
+  let job = OmniSharp#GetHost().job
+  call OmniSharp#stdio#RequestSend(job, {}, '/codecheck', opts)
 endfunction
 
 function! s:StdioCheckRH(Callback, response) abort

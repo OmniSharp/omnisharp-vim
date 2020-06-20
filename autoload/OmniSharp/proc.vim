@@ -37,8 +37,12 @@ function! OmniSharp#proc#neovimOutHandler(job_id, data, event) dict abort
 endfunction
 
 function! OmniSharp#proc#neovimErrHandler(job_id, data, event) dict abort
-  if type(a:data) == type([]) && len(a:data) && a:data[0] =~# "^\uFEFF$"
+  if type(a:data) == type([]) && len(a:data) == 1 && a:data[0] =~# "^\uFEFF$"
     " Ignore BOM
+    return
+  endif
+  if type(a:data) == type([]) && len(a:data) == 1 && a:data[0] ==# ''
+    " Ignore empty
     return
   endif
   let message = printf('%s: %s', a:event, string(a:data))
@@ -53,9 +57,6 @@ function! OmniSharp#proc#neovimExitHandler(job_id, data, event) dict abort
       break
     endif
   endfor
-  if !empty(jobkey) && has_key(s:jobs, jobkey)
-    call remove(s:jobs, jobkey)
-  endif
 endfunction
 
 function! OmniSharp#proc#neovimJobStart(command) abort
@@ -75,6 +76,7 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   \ 'job_id': jobstart(a:command, opts),
   \ 'partial': ''
   \}
+  let job.pid = jobpid(job.job_id)
   let s:channels[job.job_id] = job
   return job
 endfunction
@@ -122,6 +124,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
   \ 'start_time': reltime(),
   \ 'job_id': job_start(a:command, opts)
   \}
+  let job.pid = job_info(job.job_id).process
   let channel_id = ch_info(job_getchannel(job.job_id)).id
   let s:channels[channel_id] = job
   return job
@@ -219,9 +222,7 @@ function! OmniSharp#proc#StopJob(jobkey) abort
   elseif OmniSharp#proc#supportsVimProc()
     call job.kill()
   endif
-  if has_key(s:jobs, a:jobkey)
-    call remove(s:jobs, a:jobkey)
-  endif
+  let job.stopped = 1
   silent doautocmd <nomodeline> User OmniSharpStopped
 endfunction
 
@@ -240,10 +241,10 @@ function! OmniSharp#proc#IsJobRunning(jobkey) abort
     let job = get(s:jobs, a:jobkey)
   endif
   if OmniSharp#proc#supportsNeovimJobs()
-    return 1
+    return !get(job, 'stopped', 0)
   elseif OmniSharp#proc#supportsVimJobs()
     let status = job_status(job.job_id)
-    return status ==# 'run'
+    return status ==# 'run' && !get(job, 'stopped', 0)
   elseif OmniSharp#proc#supportsVimDispatch()
     return dispatch#completed(job)
   elseif OmniSharp#proc#supportsVimProc()
