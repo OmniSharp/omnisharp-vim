@@ -4,9 +4,7 @@ set cpoptions&vim
 let s:stdiologfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
 
 function! OmniSharp#log#Log(job, message, loglevel) abort
-  if !has_key(a:job, 'logfile')
-    let a:job.logfile = s:Init(a:job)
-  endif
+  call s:Init(a:job)
   let logit = 0
   if g:OmniSharp_loglevel ==? 'debug'
     " Log everything
@@ -18,6 +16,26 @@ function! OmniSharp#log#Log(job, message, loglevel) abort
   endif
   if logit
     call writefile([a:message], a:job.logfile, 'a')
+  endif
+endfunction
+
+" Log a decoded server message
+function! OmniSharp#log#LogServer(job, raw, msg) abort
+  call s:Init(a:job)
+  if !has_key(a:msg, 'Body') || type(a:msg.Body) != type({})
+    call writefile(['RAW: ' . a:raw], a:job.logfile, 'a')
+  elseif get(a:msg, 'Event', '') ==? 'log'
+    " let lines = [
+    " \ printf('[%s]: %s', s:LogLevelPrefix(a:msg.Body.LogLevel), a:msg.Body.Name),
+    " \ '        ' . substitute(a:msg.Body.Message, '\%uD\%u0', "\r", 'g')
+    " \]
+    let lines = split(a:msg.Body.Message, '\%uD\%u0', 1)
+    let lines[0] = '        ' . lines[0]
+    let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
+    call insert(lines, printf('[%s]: %s', prefix, a:msg.Body.Name))
+    call writefile(lines, a:job.logfile, 'a')
+  else
+    call writefile(['ELSE: ' . a:raw], a:job.logfile, 'a')
   endif
 endfunction
 
@@ -38,12 +56,33 @@ function! OmniSharp#log#Open(...)
   exec cmd logfile
 endfunction
 
+function! s:LogLevelPrefix(loglevel) abort
+  if a:loglevel ==# 'TRACE'
+    return 'trce'
+  elseif a:loglevel ==# 'DEBUG'
+    return 'dbug'
+  elseif a:loglevel ==# 'INFORMATION'
+    return 'info'
+  elseif a:loglevel ==# 'WARNING'
+    return 'warn'
+  elseif a:loglevel ==# 'ERROR'
+    return 'fail'
+  elseif a:loglevel ==# 'CRITICAL'
+    return 'crit'
+  else
+    return a:loglevel
+  endif
+endfunction
+
 function! s:Init(job) abort
+  if has_key(a:job, 'logfile')
+    return
+  endif
   let logfile = strftime('%Y%m%d%H%M_') . get(a:job, 'pid') . '_omnisharp.log'
   let logfile = fnamemodify(s:stdiologfile, ':h') . '/' . logfile
   " Add the new log filename to the standard log, so it can be opened with `gf`
   call writefile([logfile], s:stdiologfile, 'a')
-  return logfile
+  let a:job.logfile = logfile
 endfunction
 
 let &cpoptions = s:save_cpo

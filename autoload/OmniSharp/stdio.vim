@@ -28,8 +28,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
     call OmniSharp#log#Log(a:job, 'JSON error: ' . v:exception, 'info')
     return
   endtry
-  let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
-  call OmniSharp#log#Log(a:job, a:message, loglevel)
+  call OmniSharp#log#LogServer(a:job, a:message, res)
   if get(res, 'Type', '') ==# 'event'
     call s:HandleServerEvent(a:job, res)
     return
@@ -175,7 +174,10 @@ function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call OmniSharp#log#Log(a:job, encodedBody, 'debug')
+  if get(g:, 'OmniSharp_proc_debug')
+    " The raw request is already logged by the server in debug mode.
+    call OmniSharp#log#Log(a:job, encodedBody, 'debug')
+  endif
   if has('nvim')
     call chansend(a:job.job_id, encodedBody . "\n")
   else
