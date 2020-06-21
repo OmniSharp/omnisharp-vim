@@ -11,9 +11,11 @@ syn match oslTrace "^\[trce\]"ms=s+1,me=e-1 contained
 syn match oslDebug "^\[dbug\]"ms=s+1,me=e-1 contained
 syn match oslInformation "^\[info\]"ms=s+1,me=e-1 contained
 syn match oslWarning "^\[warn\]"ms=s+1,me=e-1 contained
-syn match oslError "^\[trce\]"ms=s+1,me=e-1 contained
+syn match oslError "^\[fail\]"ms=s+1,me=e-1 contained
 syn match oslError "^\[ERROR\]"ms=s+1,me=e-1 contained
 syn match oslCritical "^\[crit\]"ms=s+1,me=e-1 contained
+
+syn match oslEndpoint "^Request: .*$"hs=s+9
 
 syn region oslRequestResponse start="\*\{12\}\s\+\%(Request\|Response\)\s\+\*\{12\}" end="^}" transparent fold
 
@@ -25,6 +27,8 @@ hi def link oslInformation Type
 hi def link oslWarning WarningMsg
 hi def link oslError ErrorMsg
 hi def link oslCritical ErrorMsg
+
+hi def link oslEndpoint Identifier
 
 let b:current_syntax = 'omnisharplog'
 

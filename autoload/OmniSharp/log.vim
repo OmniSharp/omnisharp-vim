@@ -3,28 +3,27 @@ set cpoptions&vim
 
 let s:stdiologfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
 
-function! OmniSharp#log#Log(job, message, loglevel) abort
+" Log from OmniSharp-vim
+function! OmniSharp#log#Log(job, message, ...) abort
+  if g:OmniSharp_loglevel ==? 'none' | return | endif
   call s:Init(a:job)
-  let logit = 0
-  if g:OmniSharp_loglevel ==? 'debug'
-    " Log everything
-    let logit = 1
-  elseif g:OmniSharp_loglevel ==? 'info'
-    let logit = a:loglevel ==# 'info'
-  else
-    " g:OmniSharp_loglevel ==? 'none'
-  endif
-  if logit
+  let debug = a:0 && a:1
+  if g:OmniSharp_loglevel !=? 'info' || !debug
     call writefile([a:message], a:job.logfile, 'a')
   endif
 endfunction
 
 " Log a decoded server message
 function! OmniSharp#log#LogServer(job, raw, msg) abort
+  if g:OmniSharp_loglevel ==? 'none' | return | endif
   call s:Init(a:job)
-  if !has_key(a:msg, 'Body') || type(a:msg.Body) != type({})
-    call writefile(['RAW: ' . a:raw], a:job.logfile, 'a')
-  elseif get(a:msg, 'Event', '') ==? 'log'
+  if get(g:, 'OmniSharp_proc_debug')
+    call writefile([a:raw], a:job.logfile, 'a')
+  elseif !has_key(a:msg, 'Body') || type(a:msg.Body) != type({})
+    return
+  elseif !has_key(a:msg, 'Event')
+    return
+  elseif get(a:msg, 'Event', '') ==# 'log'
     " Attempt to normalise newlines, which can be \%uD\%u0 in Windows and \%u0
     " in linux
     let message = substitute(a:msg.Body.Message, '\%uD\ze\%u0', '', 'g')
@@ -33,8 +32,20 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
     let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
     call insert(lines, printf('[%s]: %s', prefix, a:msg.Body.Name))
     call writefile(lines, a:job.logfile, 'a')
-  else
-    call writefile(['ELSE: ' . a:raw], a:job.logfile, 'a')
+  elseif get(a:msg, 'Event', '') ==# 'MsBuildProjectDiagnostics'
+    if len(a:msg.Body.Errors) == 0 && len(a:msg.Body.Warnings) == 0
+      return
+    endif
+    let lines = [a:msg.Body.FileName]
+    for error in a:msg.Body.Errors
+      call add(lines, printf('%s(%d,%d): Error: %s',
+      \ error.FileName, error.StartLine, error.StartColumn, error.Text))
+    endfor
+    for warn in a:msg.Body.Warnings
+      call add(lines, printf('%s(%d,%d): Warning: %s',
+      \ warn.FileName, warn.StartLine, warn.StartColumn, warn.Text))
+    endfor
+    call writefile(lines, a:job.logfile, 'a')
   endif
 endfunction
 

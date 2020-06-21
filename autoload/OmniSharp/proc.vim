@@ -78,6 +78,7 @@ function! OmniSharp#proc#neovimJobStart(command) abort
   \}
   let job.pid = jobpid(job.job_id)
   let s:channels[job.job_id] = job
+  call OmniSharp#log#Log(job, split(execute('version'), "\n")[0])
   return job
 endfunction
 
@@ -114,6 +115,9 @@ function! OmniSharp#proc#vimJobStart(command) abort
     call OmniSharp#util#EchoErr('Not using Vim 8.0+')
     return -1
   endif
+
+
+
   call s:debug('Using vim job_start to start the following command:')
   call s:debug(a:command)
   let opts = {'err_cb': 'OmniSharp#proc#vimErrHandler'}
@@ -127,6 +131,7 @@ function! OmniSharp#proc#vimJobStart(command) abort
   let job.pid = job_info(job.job_id).process
   let channel_id = ch_info(job_getchannel(job.job_id)).id
   let s:channels[channel_id] = job
+  call OmniSharp#log#Log(job, join(split(execute('version'), "\n")[0:1], ', '))
   return job
 endfunction
 
@@ -202,6 +207,13 @@ function! OmniSharp#proc#Start(command, jobkey) abort
   if type(job) == type({})
     let job.sln_or_dir = a:jobkey
     let job.loaded = 0
+    call OmniSharp#log#Log(job, '')
+    call OmniSharp#log#Log(job, 'OmniSharp server started.')
+    call OmniSharp#log#Log(job, '    Path: ' . OmniSharp#util#GetServerPath())
+    call OmniSharp#log#Log(job, '    Target: ' . a:jobkey)
+    call OmniSharp#log#Log(job, '    PID: ' . job.pid)
+    call OmniSharp#log#Log(job, '    Command: ' . join(a:command), 1)
+    call OmniSharp#log#Log(job, '')
     silent doautocmd <nomodeline> User OmniSharpStarted
   endif
   return job

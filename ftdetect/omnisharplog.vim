@@ -1,1 +1,1 @@
-autocmd BufRead,BufNewFile *_omnisharp.log set filetype=omnisharplog
+autocmd BufRead,BufNewFile *omnisharp.log set filetype=omnisharplog

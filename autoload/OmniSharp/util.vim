@@ -136,6 +136,10 @@ function! OmniSharp#util#EchoErr(msg)
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction
 
+function! OmniSharp#util#GetServerPath() abort
+  return get(s:, 'server_path', '')
+endfunction
+
 function! OmniSharp#util#GetStartCmd(solution_file) abort
   let solution_path = a:solution_file
   if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
@@ -170,8 +174,8 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
   endif
   let command += ['-s', solution_path]
 
-  if g:OmniSharp_loglevel ==? 'debug'
-    let command += ['-v']
+  if g:OmniSharp_loglevel !=? 'info'
+    let command += ['-l', g:OmniSharp_loglevel]
   endif
 
   if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono

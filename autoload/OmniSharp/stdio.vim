@@ -14,7 +14,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
       return
     endif
     if a:job.json_errors >= 3 && !a:job.loaded
-      call OmniSharp#log#Log(a:job, '3 errors caught while loading: stopping', 'info')
+      call OmniSharp#log#Log(a:job, '3 errors caught while loading: stopping')
       call OmniSharp#proc#StopJob(a:job.sln_or_dir)
       echohl WarningMsg
       echomsg 'You appear to be running an HTML server in stdio mode - ' .
@@ -24,8 +24,8 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
       echohl None
       return
     endif
-    call OmniSharp#log#Log(a:job, a:message, 'info')
-    call OmniSharp#log#Log(a:job, 'JSON error: ' . v:exception, 'info')
+    call OmniSharp#log#Log(a:job, a:message)
+    call OmniSharp#log#Log(a:job, 'JSON error: ' . v:exception)
     return
   endtry
   call OmniSharp#log#LogServer(a:job, a:message, res)
@@ -155,7 +155,7 @@ function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
     endif
     return 0
   endif
-  call OmniSharp#log#Log(a:job, '  Request: ' . a:command, 'debug')
+  call OmniSharp#log#Log(a:job, 'Request: ' . a:command, 1)
 
   let a:body['Command'] = a:command
   let a:body['Seq'] = s:nextseq
@@ -176,7 +176,7 @@ function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
   let s:nextseq += 1
   if get(g:, 'OmniSharp_proc_debug')
     " The raw request is already logged by the server in debug mode.
-    call OmniSharp#log#Log(a:job, encodedBody, 'debug')
+    call OmniSharp#log#Log(a:job, encodedBody, 1)
   endif
   if has('nvim')
     call chansend(a:job.job_id, encodedBody . "\n")
