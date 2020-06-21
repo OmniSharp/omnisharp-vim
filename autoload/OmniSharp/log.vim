@@ -25,11 +25,10 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
   if !has_key(a:msg, 'Body') || type(a:msg.Body) != type({})
     call writefile(['RAW: ' . a:raw], a:job.logfile, 'a')
   elseif get(a:msg, 'Event', '') ==? 'log'
-    " let lines = [
-    " \ printf('[%s]: %s', s:LogLevelPrefix(a:msg.Body.LogLevel), a:msg.Body.Name),
-    " \ '        ' . substitute(a:msg.Body.Message, '\%uD\%u0', "\r", 'g')
-    " \]
-    let lines = split(a:msg.Body.Message, '\%uD\%u0', 1)
+    " Attempt to normalise newlines, which can be \%uD\%u0 in Windows and \%u0
+    " in linux
+    let message = substitute(a:msg.Body.Message, '\%uD\ze\%u0', '', 'g')
+    let lines = split(message, '\%u0', 1)
     let lines[0] = '        ' . lines[0]
     let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
     call insert(lines, printf('[%s]: %s', prefix, a:msg.Body.Name))
