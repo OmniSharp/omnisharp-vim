@@ -10,29 +10,36 @@ endif
 
 function! OmniSharp#GetHost(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
-  if empty(getbufvar(bufnr, 'OmniSharp_host'))
-    let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
-    if g:OmniSharp_server_stdio
-      let host = {
-      \ 'sln_or_dir': sln_or_dir
-      \}
-    else
+  if g:OmniSharp_server_stdio
+    " Using the stdio server, b:OmniSharp_host is a dict containing the
+    " sln_or_dir:
+    " { 'sln_or_dir': '/path/to/solution_or_dir' }
+    let host = getbufvar(bufnr, 'OmniSharp_host', {})
+    if get(host, 'sln_or_dir', '') ==# ''
+      let host.sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
+      call setbufvar(bufnr, 'OmniSharp_host', host)
+    endif
+    " The returned dict includes the job, but the job is _not_ part of
+    " b:OmniSharp_host. It is important to always fetch the job from
+    " OmniSharp#proc#GetJob, ensuring that the job properties (job.job_id,
+    " job.loaded, job.pid etc.) are always correct and up-to-date.
+    return {
+    \ 'sln_or_dir': host.sln_or_dir,
+    \ 'job': OmniSharp#proc#GetJob(host.sln_or_dir)
+    \}
+  else
+    " Using the HTTP server, b:OmniSharp_host is a localhost URL
+    if empty(getbufvar(bufnr, 'OmniSharp_host'))
+      let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
       let port = OmniSharp#py#GetPort(sln_or_dir)
       if port == 0
         return ''
       endif
       let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
+      call setbufvar(bufnr, 'OmniSharp_host', host)
     endif
-    call setbufvar(bufnr, 'OmniSharp_host', host)
+    return getbufvar(bufnr, 'OmniSharp_host')
   endif
-  if g:OmniSharp_server_stdio
-    let host = getbufvar(bufnr, 'OmniSharp_host')
-    return {
-    \ 'sln_or_dir': host.sln_or_dir,
-    \ 'job': OmniSharp#proc#GetJob(host.sln_or_dir)
-    \}
-  endif
-  return getbufvar(bufnr, 'OmniSharp_host')
 endfunction
 
 
