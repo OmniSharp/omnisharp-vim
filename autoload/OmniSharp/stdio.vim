@@ -143,10 +143,14 @@ function! OmniSharp#stdio#Request(command, opts) abort
   if send_buffer
     let body.Arguments.Buffer = buffer
   endif
-  return OmniSharp#stdio#RequestSend(job, body, a:command, a:opts, sep)
+  return s:Request(job, body, a:command, a:opts, sep)
 endfunction
 
-function! OmniSharp#stdio#RequestSend(job, body, command, opts, ...) abort
+function! OmniSharp#stdio#RequestGlobal(job, command, opts) abort
+  call s:Request(a:job, {}, a:command, a:opts)
+endfunction
+
+function! s:Request(job, body, command, opts, ...) abort
   let sep = a:0 ? a:1 : ''
   if type(a:job) != type({}) || !has_key(a:job, 'job_id') || !a:job.loaded
     if has_key(a:opts, 'ReplayOnLoad') && !has_key(s:pendingRequests, a:command)

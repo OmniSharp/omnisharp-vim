@@ -27,7 +27,12 @@ function! OmniSharp#actions#diagnostics#CheckGlobal(...) abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
   " Place the results in the quickfix window, if possible
   if g:OmniSharp_server_stdio
-    call s:StdioCheckGlobal(function('s:CBGlobalCodeCheck'))
+    let Callback = function('s:CBGlobalCodeCheck')
+    let opts = {
+    \ 'ResponseHandler': function('s:StdioCheckRH', [Callback])
+    \}
+    let job = OmniSharp#GetHost().job
+    call OmniSharp#stdio#RequestGlobal(job, '/codecheck', opts)
   else
     let quickfixes = OmniSharp#py#Eval('globalCodeCheck()')
     if OmniSharp#py#CheckForError() | return | endif
@@ -45,14 +50,6 @@ function! OmniSharp#actions#diagnostics#StdioCheck(opts, Callback) abort
   \}
   call extend(opts, a:opts, 'force')
   call OmniSharp#stdio#Request('/codecheck', opts)
-endfunction
-
-function! s:StdioCheckGlobal(Callback) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:StdioCheckRH', [a:Callback])
-  \}
-  let job = OmniSharp#GetHost().job
-  call OmniSharp#stdio#RequestSend(job, {}, '/codecheck', opts)
 endfunction
 
 function! s:StdioCheckRH(Callback, response) abort
