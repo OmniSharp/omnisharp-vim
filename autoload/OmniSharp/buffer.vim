@@ -51,10 +51,14 @@ function! OmniSharp#buffer#Update(responseBody) abort
       let start = [change.StartLine, startCol]
       let end = [change.EndLine, endCol]
       call cursor(start)
-      if startCol > len(getline('.')) && start != end
+      if startCol > len(getline('.'))
         " We can't set a mark after the last character of the line, so add an
         " extra charaqcter which will be immediately deleted again
         noautocmd normal! a<
+        if start == end
+          let endCol += 1
+          let end[0] = endCol
+        endif
       endif
       call cursor(change.EndLine, max([1, endCol - 1]))
       let lineLen = len(getline('.'))
