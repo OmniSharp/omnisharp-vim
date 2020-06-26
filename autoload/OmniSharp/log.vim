@@ -63,6 +63,9 @@ function! OmniSharp#log#Open(...)
     if OmniSharp#py#CheckForError() | return | endif
   endif
   let cmd = (a:0 && type(a:1) == type('') && len(a:1)) ? a:1 : 'edit'
+  if cmd ==# 'edit' && !&hidden
+    let cmd = 'split'
+  endif
   exec cmd logfile
 endfunction
 
