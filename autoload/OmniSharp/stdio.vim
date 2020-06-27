@@ -47,10 +47,15 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
 endfunction
 
 function! s:HandleServerEvent(job, res) abort
-  if has_key(a:res, 'Body') && type(a:res.Body) == type({})
+  let body = get(a:res, 'Body', 0)
+  if type(body) != type({})
+    let body = {}
+  endif
 
-    " Handle any project loading events
-    call OmniSharp#project#ParseEvent(a:job, a:res.Body)
+  " Handle any project loading events
+  call OmniSharp#project#ParseEvent(a:job, get(a:res, 'Event', ''), body)
+
+  if !empty(body)
 
     " Listen for diagnostics.
     " The OmniSharp-roslyn server starts sending diagnostics once projects are
@@ -60,7 +65,7 @@ function! s:HandleServerEvent(job, res) abort
     if get(g:, 'OmniSharp_diagnostics_listen', 0)
     \ && has_key(g:, 'OmniSharp_ale_diagnostics_requested')
       if get(a:res, 'Event', '') ==# 'Diagnostic'
-        for result in get(a:res.Body, 'Results', [])
+        for result in get(body, 'Results', [])
           let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
           let bufinfo = getbufinfo(fname)
           if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
@@ -77,9 +82,9 @@ function! s:HandleServerEvent(job, res) abort
 
     " Diagnostics received while running tests
     if get(a:res, 'Event', '') ==# 'TestMessage'
-      let lines = split(a:res.Body.Message, '\n')
+      let lines = split(body.Message, '\n')
       for line in lines
-        if get(a:res.Body, 'MessageLevel', '') ==# 'error'
+        if get(body, 'MessageLevel', '') ==# 'error'
           echohl WarningMsg | echomsg line | echohl None
         elseif g:OmniSharp_runtests_echo_output
           echomsg line
@@ -152,7 +157,8 @@ endfunction
 
 function! s:Request(job, body, command, opts, ...) abort
   let sep = a:0 ? a:1 : ''
-  if type(a:job) != type({}) || !has_key(a:job, 'job_id') || !a:job.loaded
+  if !has_key(a:opts, 'AllowUnloaded') &&
+  \ (!has_key(a:job, 'job_id') || !a:job.loaded)
     if has_key(a:opts, 'ReplayOnLoad') && !has_key(s:pendingRequests, a:command)
       " This request should be replayed when the server is fully loaded
       let s:pendingRequests[a:command] = a:opts

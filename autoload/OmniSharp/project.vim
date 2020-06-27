@@ -14,7 +14,7 @@ function! OmniSharp#project#CountTotal() abort
 endfunction
 
 " Listen for stdio server-loaded events
-function! OmniSharp#project#ParseEvent(job, eventBody) abort
+function! OmniSharp#project#ParseEvent(job, event, eventBody) abort
   if  g:OmniSharp_server_stdio_quickload
 
     " Quick load: Mark server as loaded as soon as configuration is finished
