@@ -13,23 +13,38 @@ function! OmniSharp#project#CountTotal() abort
   return get(OmniSharp#proc#GetJob(host.sln_or_dir), 'projects_total', 0)
 endfunction
 
+function! OmniSharp#project#RegisterLoaded(job) abort
+  if a:job.loaded | return | endif
+  if g:OmniSharp_server_display_loading
+    let elapsed = reltimefloat(reltime(a:job.start_time))
+    echomsg printf('Loaded server for %s in %.1fs',
+    \ a:job.sln_or_dir, elapsed)
+  endif
+  let a:job.loaded = 1
+  silent doautocmd <nomodeline> User OmniSharpReady
+
+  " TODO: Remove this delay once we have better information about
+  " when the server is completely initialised:
+  " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
+  call timer_start(1000, function('OmniSharp#stdio#ReplayRequests', [a:job]))
+  " call OmniSharp#stdio#ReplayRequests(a:job)
+endfunction
+
 " Listen for stdio server-loaded events
 function! OmniSharp#project#ParseEvent(job, event, eventBody) abort
   if  g:OmniSharp_server_stdio_quickload
 
-    " Quick load: Mark server as loaded as soon as configuration is finished
+    " Quick load: Mark server as ready as soon as configuration is finished.
+    " WARNING: This will _not_ result in fully functional server interaction.
     if a:job.loaded | return | endif
     let message = get(a:eventBody, 'Message', '')
     if message ==# 'Configuration finished.'
-      let a:job.loaded = 1
-      silent doautocmd <nomodeline> User OmniSharpReady
-      call OmniSharp#stdio#ReplayRequests()
+      call OmniSharp#project#RegisterLoaded(a:job)
     endif
 
   else
 
-    " Complete load: Wait for all projects to be loaded before marking server as
-    " loaded
+    " Full load: Wait for all projects to load before marking server as ready
     let projects_loaded = get(a:job, 'projects_loaded', 0)
     let projects_total = get(a:job, 'projects_total', 0)
     if a:job.loaded && projects_loaded == projects_total | return | endif
@@ -46,7 +61,9 @@ function! OmniSharp#project#ParseEvent(job, event, eventBody) abort
     endif
     let name = get(a:eventBody, 'Name', '')
     let message = get(a:eventBody, 'Message', '')
-    if name ==# 'OmniSharp.MSBuild.ProjectManager'
+    if a:event ==# 'started'
+      call OmniSharp#actions#workspace#Get(a:job)
+    elseif name ==# 'OmniSharp.MSBuild.ProjectManager'
       let project = matchstr(message, '''\zs.*\ze''')
       if message =~# '^Queue project'
         call add(a:job.loading, project)
@@ -64,20 +81,7 @@ function! OmniSharp#project#ParseEvent(job, event, eventBody) abort
         let a:job.projects_loaded = projects_loaded + 1
         silent doautocmd <nomodeline> User OmniSharpProjectUpdated
         if len(a:job.loading) == 0
-          if g:OmniSharp_server_display_loading
-            let elapsed = reltimefloat(reltime(a:job.start_time))
-            echomsg printf('Loaded server for %s in %.1fs',
-            \ a:job.sln_or_dir, elapsed)
-          endif
-          let a:job.loaded = 1
-          silent doautocmd <nomodeline> User OmniSharpReady
-
-          " TODO: Remove this delay once we have better information about
-          " when the server is completely initialised:
-          " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
-          call timer_start(1000, function('OmniSharp#stdio#ReplayRequests'))
-          " call OmniSharp#stdio#ReplayRequests()
-
+          call OmniSharp#project#RegisterLoaded(a:job)
           unlet a:job.loading
           call timer_stop(a:job.loading_timeout)
           unlet a:job.loading_timeout

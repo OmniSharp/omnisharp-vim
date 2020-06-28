@@ -196,7 +196,8 @@ function! s:Request(job, body, command, opts, ...) abort
   return 1
 endfunction
 
-function! OmniSharp#stdio#ReplayRequests(...) abort
+function! OmniSharp#stdio#ReplayRequests(job, ...) abort
+  call OmniSharp#log#Log(a:job, 'Replaying requests')
   for key in keys(s:pendingRequests)
     call OmniSharp#stdio#Request(key, s:pendingRequests[key])
     unlet s:pendingRequests[key]
