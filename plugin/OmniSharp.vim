@@ -8,12 +8,8 @@ let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
 
 let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 1)
 
-" When g:OmniSharp_server_stdio_quickload = 1, consider server 'loaded' once
-" 'Configuration finished' is received.  When this is 0, wait for notification
-" that all projects have been loaded.
-let g:OmniSharp_server_stdio_quickload = get(g:, 'OmniSharp_server_stdio_quickload', 0)
 let g:OmniSharp_server_display_loading = get(g:, 'OmniSharp_server_display_loading', 1)
-let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 20)
+let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 30)
 
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
