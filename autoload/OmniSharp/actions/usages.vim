@@ -18,7 +18,10 @@ endfunction
 
 function! s:StdioFind(Callback) abort
   let opts = {
-  \ 'ResponseHandler': function('s:StdioFindRH', [a:Callback])
+  \ 'ResponseHandler': function('s:StdioFindRH', [a:Callback]),
+  \ 'Parameters': {
+  \   'ExcludeDefinition': 1
+  \ }
   \}
   call OmniSharp#stdio#Request('/findusages', opts)
 endfunction
