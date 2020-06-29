@@ -3,7 +3,6 @@ set cpoptions&vim
 
 let s:nextseq = get(s:, 'nextseq', 1001)
 let s:requests = get(s:, 'requests', {})
-let s:pendingRequests = get(s:, 'pendingRequests', {})
 
 function! OmniSharp#stdio#HandleResponse(job, message) abort
   try
@@ -100,17 +99,37 @@ function! OmniSharp#stdio#Request(command, opts) abort
     let [bufnr, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
     let bufnr = a:opts.BufNum
-    let lnum = 1
-    let cnum = 1
+    let lnum = get(a:opts, 'LineNum', 1)
+    let cnum = get(a:opts, 'ColNum', 1)
   else
     let bufnr = bufnr('%')
-    let lnum = line('.')
-    let cnum = col('.')
+    let lnum = get(a:opts, 'LineNum', line('.'))
+    let cnum = get(a:opts, 'ColNum', col('.'))
   endif
-  let job = OmniSharp#GetHost(bufnr).job
+  let host = OmniSharp#GetHost(bufnr)
+  let job = host.job
   if !OmniSharp#proc#IsJobRunning(job)
     return
   endif
+
+  if has_key(a:opts, 'Initializing')
+    " The buffer is being initialized - this request will always be sent
+  else
+    if !get(host, 'initialized')
+      " Replay the request when the buffer has been initialized with the server
+      let opts = extend(a:opts, {
+      \ 'BufNum': bufnr,
+      \ 'LineNum': lnum,
+      \ 'ColNum': cnum
+      \})
+      if has_key(opts, 'UsePreviousPosition')
+        unlet opts.UsePreviousPosition
+      endif
+      call OmniSharp#buffer#Initialize(job, bufnr, a:command, opts)
+      return 0
+    endif
+  endif
+
   if has_key(a:opts, 'SavePosition')
     let s:lastPosition = [bufnr, lnum, cnum]
   endif
@@ -156,15 +175,6 @@ function! OmniSharp#stdio#RequestGlobal(job, command, opts) abort
 endfunction
 
 function! s:Request(job, body, command, opts, ...) abort
-  let sep = a:0 ? a:1 : ''
-  if !has_key(a:opts, 'AllowUnloaded') &&
-  \ (!has_key(a:job, 'job_id') || !a:job.loaded)
-    if has_key(a:opts, 'ReplayOnLoad') && !has_key(s:pendingRequests, a:command)
-      " This request should be replayed when the server is fully loaded
-      let s:pendingRequests[a:command] = a:opts
-    endif
-    return 0
-  endif
   call OmniSharp#log#Log(a:job, 'Request: ' . a:command, 1)
 
   let a:body['Command'] = a:command
@@ -173,6 +183,7 @@ function! s:Request(job, body, command, opts, ...) abort
   if has_key(a:opts, 'Parameters')
     call extend(a:body.Arguments, a:opts.Parameters, 'force')
   endif
+  let sep = a:0 ? a:1 : ''
   if sep !=# ''
     let encodedBody = substitute(json_encode(a:body), sep, '\\r\\n', 'g')
   else
@@ -194,14 +205,6 @@ function! s:Request(job, body, command, opts, ...) abort
     call ch_sendraw(a:job.job_id, encodedBody . "\n")
   endif
   return 1
-endfunction
-
-function! OmniSharp#stdio#ReplayRequests(job, ...) abort
-  call OmniSharp#log#Log(a:job, 'Replaying requests')
-  for key in keys(s:pendingRequests)
-    call OmniSharp#stdio#Request(key, s:pendingRequests[key])
-    unlet s:pendingRequests[key]
-  endfor
 endfunction
 
 let &cpoptions = s:save_cpo

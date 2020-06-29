@@ -12,21 +12,20 @@ function! OmniSharp#GetHost(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
   if g:OmniSharp_server_stdio
     " Using the stdio server, b:OmniSharp_host is a dict containing the
-    " sln_or_dir:
-    " { 'sln_or_dir': '/path/to/solution_or_dir' }
+    " `sln_or_dir` and an `initialized` flag indicating whether this buffer has
+    " successfully been registered with the server:
+    " { 'sln_or_dir': '/path/to/solution_or_dir', 'initialized': 1 }
     let host = getbufvar(bufnr, 'OmniSharp_host', {})
     if get(host, 'sln_or_dir', '') ==# ''
       let host.sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
+      let host.initialized = 0
       call setbufvar(bufnr, 'OmniSharp_host', host)
     endif
     " The returned dict includes the job, but the job is _not_ part of
     " b:OmniSharp_host. It is important to always fetch the job from
     " OmniSharp#proc#GetJob, ensuring that the job properties (job.job_id,
     " job.loaded, job.pid etc.) are always correct and up-to-date.
-    return {
-    \ 'sln_or_dir': host.sln_or_dir,
-    \ 'job': OmniSharp#proc#GetJob(host.sln_or_dir)
-    \}
+    return extend(copy(host), { 'job': OmniSharp#proc#GetJob(host.sln_or_dir) })
   else
     " Using the HTTP server, b:OmniSharp_host is a localhost URL
     if empty(getbufvar(bufnr, 'OmniSharp_host'))

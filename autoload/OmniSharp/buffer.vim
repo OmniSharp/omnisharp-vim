@@ -1,6 +1,32 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+function! OmniSharp#buffer#Initialize(job, bufnr, command, opts) abort
+  let a:job.pending_requests = get(a:job, 'pending_requests', {})
+  let host = getbufvar(a:bufnr, 'OmniSharp_host')
+  if get(host, 'initialized') | return | endif
+  let a:job.pending_requests[a:bufnr] = get(a:job.pending_requests, a:bufnr, {})
+  " More recent requests to the same command replace older pending requests
+  let a:job.pending_requests[a:bufnr][a:command] = a:opts
+  if has_key(OmniSharp#GetHost(a:bufnr), 'initializing') | return | endif
+  let host.initializing = 1
+  let Callback = function('s:CBInitialize', [a:job, a:bufnr, host])
+  call OmniSharp#actions#buffer#Update(Callback, 1)
+endfunction
+
+function! s:CBInitialize(job, bufnr, host) abort
+  let a:host.initialized = 1
+  unlet a:host.initializing
+  call OmniSharp#log#Log(a:job, 'Replaying requests for buffer ' . a:bufnr)
+  for key in keys(a:job.pending_requests[a:bufnr])
+    call OmniSharp#stdio#Request(key, a:job.pending_requests[a:bufnr][key])
+    unlet a:job.pending_requests[a:bufnr][key]
+    if empty(a:job.pending_requests[a:bufnr])
+      unlet a:job.pending_requests[a:bufnr]
+    endif
+  endfor
+endfunction
+
 function! OmniSharp#buffer#PerformChanges(opts, response) abort
   if !a:response.Success | return | endif
   let changes = get(a:response.Body, 'Changes', [])

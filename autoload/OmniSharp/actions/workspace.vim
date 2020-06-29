@@ -5,8 +5,7 @@ let s:attempts = 0
 
 function! OmniSharp#actions#workspace#Get(job) abort
   let opts = {
-  \ 'ResponseHandler': function('s:ProjectsRH', [a:job]),
-  \ 'AllowUnloaded': 1
+  \ 'ResponseHandler': function('s:ProjectsRH', [a:job])
   \}
   let s:attempts += 1
   call OmniSharp#stdio#RequestGlobal(a:job, '/projects', opts)

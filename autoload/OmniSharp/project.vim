@@ -2,13 +2,13 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 function! OmniSharp#project#CountLoaded() abort
-  " TODO: stdio guard?
+  if !g:OmniSharp_server_stdio | return 0 | endif
   let host = OmniSharp#GetHost()
   return get(OmniSharp#proc#GetJob(host.sln_or_dir), 'projects_loaded', 0)
 endfunction
 
 function! OmniSharp#project#CountTotal() abort
-  " TODO: stdio guard?
+  if !g:OmniSharp_server_stdio | return 0 | endif
   let host = OmniSharp#GetHost()
   return get(OmniSharp#proc#GetJob(host.sln_or_dir), 'projects_total', 0)
 endfunction
@@ -22,12 +22,6 @@ function! OmniSharp#project#RegisterLoaded(job) abort
   endif
   let a:job.loaded = 1
   silent doautocmd <nomodeline> User OmniSharpReady
-
-  " TODO: Remove this delay once we have better information about
-  " when the server is completely initialised:
-  " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
-  call timer_start(1000, function('OmniSharp#stdio#ReplayRequests', [a:job]))
-  " call OmniSharp#stdio#ReplayRequests(a:job)
 endfunction
 
 " Listen for stdio server-loaded events
