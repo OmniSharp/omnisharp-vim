@@ -19,6 +19,8 @@ function! OmniSharp#popup#Display(content, opts) abort
     if !popup_getpos(a:opts.winid).visible
       call popup_show(a:opts.winid)
     endif
+    " Prevent popup buffer from being listed in buffer list (`:ls`)
+    call setbufvar(winbufnr(a:opts.winid), '&buflisted', 0)
     return a:opts.winid
   else
     return s:Open(content, a:opts)
@@ -296,6 +298,8 @@ function! s:VimOpen(what, opts) abort
   else
     let winid = popup_atcursor(a:what, popupOpts)
   endif
+  " Prevent popup buffer from being listed in buffer list (`:ls`)
+  call setbufvar(winbufnr(winid), '&buflisted', 0)
   return winid
 endfunction
 
