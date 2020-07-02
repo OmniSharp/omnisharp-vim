@@ -56,7 +56,27 @@ endfunction
 
 function! s:StdioCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
+  let exclude_paths = get(g:, 'OmniSharp_diagnostic_exclude_paths', [])
+  if len(exclude_paths)
+    let adjusted_quickfixes = []
+    for quickfix in a:response.Body.QuickFixes
+      if has_key(quickfix, 'FileName')
+        let exclude = 0
+        for exclude_path in exclude_paths
+          if match(quickfix.FileName, exclude_path) > 0
+            let exclude = 1 | break
+          endif
+        endfor
+        if !exclude
+          let adjusted_quickfixes = add(adjusted_quickfixes, quickfix)
+        endif
+      endif
+    endfor
+    call a:Callback(OmniSharp#locations#Parse(adjusted_quickfixes))
+  else
+    echo 'Not checking since exclude_paths is empty'
+    call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
+  endif
 endfunction
 
 function! s:CBCodeCheck(opts, codecheck) abort
