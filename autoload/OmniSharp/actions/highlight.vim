@@ -30,15 +30,16 @@ function! s:HighlightRH(bufnr, buftick, response) abort
     call s:StdioHighlight(a:bufnr)
     return
   endif
+  let hasNvim = has('nvim')
   call s:InitialiseHighlights()
-  if has('nvim')
+  if hasNvim
     let nsid = nvim_create_namespace('OmniSharpHighlight')
     call nvim_buf_clear_namespace(a:bufnr, nsid, 0, -1)
   endif
   let spans = get(a:response.Body, 'Spans', [])
   let curline = 1
   for span in spans
-    if !has('nvim')
+    if !hasNvim
       if curline <= span.EndLine
         try
           call prop_clear(curline, span.EndLine, {'bufnr': a:bufnr})
@@ -46,14 +47,14 @@ function! s:HighlightRH(bufnr, buftick, response) abort
         let curline = span.EndLine + 1
       endif
     endif
-    let shc = s:GetHighlight(span.Type)
+    let shc = s:GetHighlight(span.Type, hasNvim)
     if type(shc.highlight) == v:t_string
       try
         let startCol = OmniSharp#util#CharToByteIdx(
         \ a:bufnr, span.StartLine, span.StartColumn)
         let endCol = OmniSharp#util#CharToByteIdx(
         \ a:bufnr, span.EndLine, span.EndColumn)
-        if !has('nvim')
+        if !hasNvim
           call prop_add(span.StartLine, startCol, {
           \ 'end_lnum': span.EndLine,
           \ 'end_col': endCol,
@@ -80,12 +81,12 @@ function! s:HighlightRH(bufnr, buftick, response) abort
   let s:lastSpans = spans
 endfunction
 
-function! s:GetHighlight(type) abort
+function! s:GetHighlight(type, hasNvim) abort
   let shc = copy(s:ClassificationTypeNames[a:type])
   if has_key(get(g:, 'OmniSharp_highlight_groups', {}), shc.name)
     let shc.highlight = g:OmniSharp_highlight_groups[shc.name]
   endif
-  if !has('nvim') && type(shc.highlight) == v:t_string
+  if !a:hasNvim && type(shc.highlight) == v:t_string
     let propName = 'OSHighlight' . shc.name
     let prop = prop_type_get(propName)
     if !has_key(prop, 'highlight')
@@ -123,10 +124,12 @@ function OmniSharp#actions#highlight#Echo() abort
   if !g:OmniSharp_server_stdio
     echo 'Highlight kinds can only be used in stdio mode'
     return
-  elseif !has('nvim') && !has('textprop')
+  endif
+  let hasNvim = has('nvim')
+  if !hasNvim && !has('textprop')
     echo 'Highlight kinds requires text properties - your Vim is too old'
     return
-  elseif has('nvim') && !exists('*nvim_create_namespace')
+  elseif hasNvim && !exists('*nvim_create_namespace')
     echo 'Highlight kinds requires namespaces - your neovim is too old'
     return
   endif
@@ -144,7 +147,7 @@ function OmniSharp#actions#highlight#Echo() abort
       \ || (span.StartLine < line && endCol > col)
       \ || (span.EndLine > line && startCol <= col)
         let currentSpans += 1
-        let shc = s:GetHighlight(span.Type)
+        let shc = s:GetHighlight(span.Type, hasNvim)
         if type(shc.highlight) == v:t_string
           echon shc.name . ' ('
           execute 'echohl' shc.highlight
