@@ -23,14 +23,20 @@ function! OmniSharp#locations#Navigate(location, noautocmds) abort
   endif
 endfunction
 
-function! OmniSharp#locations#Parse(quickfixes) abort
+function! s:DefaultFixup(quickfix) abort
+  return a:quickfix
+endfunction
+
+function! OmniSharp#locations#Parse(quickfixes, ...) abort
+  let Fixup = get(a:, 1, function("s:DefaultFixup"))
   let locations = []
-  let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
   for quickfix in a:quickfixes
-    let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
-    if get(g:, 'OmniSharp_diagnostic_showid') && has_key(quickfix, 'Id')
-      let text = quickfix.Id . ': ' . text
+    let quickfix = Fixup(quickfix)
+    if type(quickfix) == 0
+      continue
     endif
+
+    let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
     if has_key(quickfix, 'FileName')
       let filename = OmniSharp#util#TranslatePathForClient(quickfix.FileName)
     else
@@ -43,19 +49,21 @@ function! OmniSharp#locations#Parse(quickfixes) abort
     \ 'col': quickfix.Column,
     \ 'vcol': 1
     \}
+
     if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
       let location.end_lnum = quickfix.EndLine
       let location.end_col = quickfix.EndColumn - 1
     endif
-    let loglevel = get(quickfix, 'LogLevel', '')
-    if loglevel !=# ''
-      let diag_id = get(quickfix, 'Id', '-')
-      if index(keys(overrides), diag_id) >= 0
-        if overrides[diag_id].type ==? 'None'
-          continue
-        endif
-        call extend(location, overrides[diag_id])
-      else
+
+
+    if has_key(quickfix, 'type')
+      let location.type = get(quickfix, 'type')
+      if has_key(quickfix, 'subtype')
+        let location.subtype = get(quickfix, 'subtype')
+      endif
+    else
+      let loglevel = get(quickfix, 'LogLevel', '')
+      if loglevel !=# ''
         if loglevel ==# 'Error'
           let location.type = 'E'
         elseif loglevel ==# 'Info'
@@ -68,6 +76,7 @@ function! OmniSharp#locations#Parse(quickfixes) abort
         endif
       endif
     endif
+
     call add(locations, location)
   endfor
   return locations

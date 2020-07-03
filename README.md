@@ -282,7 +282,7 @@ See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Highlighting-conf
 
 **Note:** Text property highlighting is only available when using the stdio server, not for HTTP server usage. Check the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Highlighting-configuration#legacy-highlighting) for how to highlight when using the HTTP server, or older Vim/neovims.
 
-## Diagnostic overrides
+## Diagnostics
 
 Diagnostics are returned from OmniSharp-roslyn in various ways - via linting plugins such as ALE or Syntastic, and using the `:OmniSharpGlobalCodeCheck` command.
 These diagnostics come from roslyn and roslyn analyzers, and as such they can be managed at the server level in 2 ways - using [rulesets](https://roslyn-analyzers.readthedocs.io/en/latest/config-analyzer.html), and using an [.editorconfig](https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-code-style-settings-reference?view=vs-2019) file.
@@ -312,6 +312,15 @@ let g:OmniSharp_diagnostic_showid = 1
 ```
 
 *Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
+
+Another method for filtering out diagnostic results is via path exclusion using `g:OmniSharp_diagnostic_exclude_paths`. This variable is a list of regular expressions that will exclude paths that have a match to any of its entries.
+```vim
+let g:OmniSharp_diagnostic_exclude_paths = [
+\ 'obj\\',
+\ '[Tt]emp\\',
+\ '\.nuget\\'
+\]
+```
 
 ## Popups
 
