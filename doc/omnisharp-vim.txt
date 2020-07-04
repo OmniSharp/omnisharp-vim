@@ -201,6 +201,18 @@ Example: >
     \ 'RemoveUnnecessaryImportsFixable': {'type': 'None'}
     \}
 <
+                                         *'g:OmniSharp_diagnostic_exclude_paths'*
+Add paths to be excluded from |:OmniSharpGlobalCodeCheck|. The variable is a
+list where each entry is a regular expression for matching paths to exclude.
+Default: []
+
+Example: >
+    let g:OmniSharp_diagnostic_exclude_paths = [
+    \ 'obj\\',
+    \ '[Tt]emp\\',
+    \ '\.nuget\\'
+    \]
+<
 -------------------------------------------------------------------------------
 3.3 HIGHLIGHTS                                      *omnisharp-highlight-options*
 

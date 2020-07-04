@@ -56,7 +56,38 @@ endfunction
 
 function! s:StdioCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes))
+  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes,
+        \ function("s:DiagnosticQuickfixFixup")))
+endfunction
+
+function! s:DiagnosticQuickfixFixup(quickfix) abort
+  let exclude_paths = get(g:, 'OmniSharp_diagnostic_exclude_paths', [])
+  if len(exclude_paths) && has_key(a:quickfix, 'FileName')
+    for exclude_path in exclude_paths
+      if match(a:quickfix.FileName, exclude_path) > 0
+        return
+      endif
+    endfor
+  endif
+
+  let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
+  let diag_id = get(a:quickfix, 'Id', '-')
+  if index(keys(overrides), diag_id) >= 0
+    if overrides[diag_id].type ==? 'None'
+      return
+    endif
+    call extend(a:quickfix, overrides[diag_id])
+  endif
+
+  if get(g:, 'OmniSharp_diagnostic_showid') && has_key(a:quickfix, 'Id')
+    if has_key(a:quickfix, 'Text')
+      let a:quickfix.Text = a:quickfix.Id . ': ' .a:quickfix.Text
+    elseif has_key(a:quickfix, 'Message')
+      let a:quickfix.Message = a:quickfix.Id . ': ' . a:quickfix.Message
+    endif
+  endif
+
+  return a:quickfix
 endfunction
 
 function! s:CBCodeCheck(opts, codecheck) abort
