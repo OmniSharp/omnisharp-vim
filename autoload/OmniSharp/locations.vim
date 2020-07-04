@@ -23,15 +23,10 @@ function! OmniSharp#locations#Navigate(location, noautocmds) abort
   endif
 endfunction
 
-function! s:DefaultFixup(quickfix) abort
-  return a:quickfix
-endfunction
-
 function! OmniSharp#locations#Parse(quickfixes, ...) abort
-  let Fixup = get(a:, 1, function("s:DefaultFixup"))
   let locations = []
   for quickfix in a:quickfixes
-    let quickfix = Fixup(quickfix)
+    let quickfix = a:0 ? a:1(quickfix) : quickfix
     if type(quickfix) == 0
       continue
     endif

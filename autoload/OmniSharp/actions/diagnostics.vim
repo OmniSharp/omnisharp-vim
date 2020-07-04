@@ -70,16 +70,13 @@ function! s:DiagnosticQuickfixFixup(quickfix) abort
     endfor
   endif
 
-  let loglevel = get(a:quickfix, 'LogLevel', '')
-  if loglevel !=# ''
-    let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
-    let diag_id = get(a:quickfix, 'Id', '-')
-    if index(keys(overrides), diag_id) >= 0
-      if overrides[diag_id].type ==? 'None'
-        return
-      endif
-      call extend(a:quickfix, overrides[diag_id])
+  let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
+  let diag_id = get(a:quickfix, 'Id', '-')
+  if index(keys(overrides), diag_id) >= 0
+    if overrides[diag_id].type ==? 'None'
+      return
     endif
+    call extend(a:quickfix, overrides[diag_id])
   endif
 
   if get(g:, 'OmniSharp_diagnostic_showid') && has_key(a:quickfix, 'Id')
