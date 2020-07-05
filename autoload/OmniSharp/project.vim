@@ -22,6 +22,20 @@ function! OmniSharp#project#RegisterLoaded(job) abort
   endif
   let a:job.loaded = 1
   silent doautocmd <nomodeline> User OmniSharpReady
+  " If any requests are waiting to be replayed after the server is loaded,
+  " replay them now
+  " TODO: Remove this 1s delay if/when we get better project-laoded information
+  call timer_start(1000, function('s:ReplayLoadRequests', [a:job]))
+endfunction
+
+function! s:ReplayLoadRequests(job, ...) abort
+  for bufnr in keys(get(a:job, 'pending_load_requests', {}))
+    for key in keys(a:job.pending_load_requests[bufnr])
+      call OmniSharp#stdio#Request(key, a:job.pending_load_requests[bufnr][key])
+      unlet a:job.pending_load_requests[bufnr][key]
+    endfor
+    unlet a:job.pending_load_requests[bufnr]
+  endfor
 endfunction
 
 " Listen for stdio server-loaded events

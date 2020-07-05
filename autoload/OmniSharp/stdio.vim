@@ -16,7 +16,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
       call OmniSharp#log#Log(a:job, '3 errors caught while loading: stopping')
       call OmniSharp#proc#StopJob(a:job.sln_or_dir)
       echohl WarningMsg
-      echomsg 'You appear to be running an HTML server in stdio mode - ' .
+      echomsg 'You appear to be running an HTTP server in stdio mode - ' .
       \ 'upgrade to the stdio server with :OmniSharpInstall, or to continue ' .
       \' in HTTP mode add the following to your .vimrc and restart Vim:  '
       \ 'let g:OmniSharp_server_stdio = 0'
@@ -109,7 +109,7 @@ function! OmniSharp#stdio#Request(command, opts) abort
   let host = OmniSharp#GetHost(bufnr)
   let job = host.job
   if !OmniSharp#proc#IsJobRunning(job)
-    return
+    return 0
   endif
 
   if has_key(a:opts, 'Initializing')

@@ -1,12 +1,12 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#actions#highlight#Buffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  let opts = { 'BufNum':  bufnr('%') }
+function! OmniSharp#actions#highlight#Buffer(...) abort
+  let bufnr = a:0 ? a:1 : bufnr('%')
+  if bufname(bufnr) ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if g:OmniSharp_server_stdio &&
   \ (has('textprop') || exists('*nvim_create_namespace'))
-    call s:StdioHighlight(opts.BufNum)
+    call s:StdioHighlight(bufnr)
   else
     " Full semantic highlighting not supported - highlight types instead
     call OmniSharp#actions#highlight_types#Buffer()
@@ -17,9 +17,26 @@ function! s:StdioHighlight(bufnr) abort
   let buftick = getbufvar(a:bufnr, 'changedtick')
   let opts = {
   \ 'ResponseHandler': function('s:HighlightRH', [a:bufnr, buftick]),
+  \ 'BufNum': a:bufnr,
   \ 'ReplayOnLoad': 1
   \}
   call OmniSharp#stdio#Request('/v2/highlight', opts)
+  let job = OmniSharp#GetHost(a:bufnr).job
+  if type(job) == type({}) && !get(job, 'loaded')
+    " The project is still loading - it is possible to highlight but those
+    " highlights will be improved once loading is complete, so listen for that
+    " and re-run the highlighting on project load.
+    " TODO: If we start listening for individual project load status, then do
+    " this when this project finishes loading, instead of when the entire
+    " solution finishes loading.
+    let pending = get(job, 'pending_load_requests', {})
+    let pending[a:bufnr] = get(pending, a:bufnr, {})
+    " let opts = extend(copy(opts), {
+    " \ 'ResponseHandler': function('s:HighlightRH', [a:bufnr, -1])
+    " \})
+    let pending[a:bufnr]['/v2/highlight'] = opts
+    let job.pending_load_requests = pending
+  endif
 endfunction
 
 function! s:HighlightRH(bufnr, buftick, response) abort
