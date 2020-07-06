@@ -16,6 +16,7 @@ syn match oslError "^\[ERROR\]"ms=s+1,me=e-1 contained
 syn match oslCritical "^\[crit\]"ms=s+1,me=e-1 contained
 
 syn match oslEndpoint "^Request: .*$"hs=s+9
+syn match oslServerEndpoint "^Server \%(Request\|Response\): .*$"hs=s+16
 
 syn region oslRequestResponse start="\*\{12\}\s\+\%(Request\|Response\)\s\+\*\{12\}" end="^}" transparent fold
 
@@ -29,6 +30,7 @@ hi def link oslError ErrorMsg
 hi def link oslCritical ErrorMsg
 
 hi def link oslEndpoint Identifier
+hi def link oslServerEndpoint Constant
 
 let b:current_syntax = 'omnisharplog'
 

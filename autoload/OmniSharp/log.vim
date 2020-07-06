@@ -28,10 +28,24 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
     " in linux
     let message = substitute(a:msg.Body.Message, '\%uD\ze\%u0', '', 'g')
     let lines = split(message, '\%u0', 1)
-    let lines[0] = '        ' . lines[0]
-    let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
-    call insert(lines, printf('[%s]: %s', prefix, a:msg.Body.Name))
-    call writefile(lines, a:job.logfile, 'a')
+    if g:OmniSharp_loglevel ==# 'DEBUG' && lines[0] =~# '^\*\{12\}'
+      " Special loglevel - DEBUG all caps. This still tells the server to pass
+      " full debugging requests and responses plus debugging messages, but
+      " OmniSharp-vim will not log the requests and responses - just record
+      " their commands
+      let prefix = matchstr(lines[0], '\*\s\+\zs\S\+\ze\s\+\*')
+      let commands = filter(lines, "v:val =~# '^\\s*\"Command\":'")
+      if len(commands)
+        let command = matchstr(commands[0], '"Command": "\zs[^"]\+\ze"')
+        let command_name = printf('Server %s: %s', prefix, command)
+        call writefile([command_name], a:job.logfile, 'a')
+      endif
+    else
+      let lines[0] = '        ' . lines[0]
+      let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
+      call insert(lines, printf('[%s]: %s', prefix, a:msg.Body.Name))
+      call writefile(lines, a:job.logfile, 'a')
+    endif
   elseif get(a:msg, 'Event', '') ==# 'MsBuildProjectDiagnostics'
     if len(a:msg.Body.Errors) == 0 && len(a:msg.Body.Warnings) == 0
       return
