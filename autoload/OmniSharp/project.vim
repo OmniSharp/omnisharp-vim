@@ -25,20 +25,14 @@ function! OmniSharp#project#RegisterLoaded(job) abort
   call OmniSharp#log#Log(a:job, 'All projects loaded')
   " If any requests are waiting to be replayed after the server is loaded,
   " replay them now.
+  "
+  " TODO: If we start listening for individual project load status, then do
+  " this when this project finishes loading, instead of when the entire
+  " solution finishes loading.
+  "
   " Remove this 1s delay if/when we get better project-laoded information
   " - currently we don't get any better indicators from the server.
-  call timer_start(1000, function('s:ReplayLoadRequests', [a:job]))
-endfunction
-
-function! s:ReplayLoadRequests(job, ...) abort
-  call OmniSharp#log#Log(a:job, 'Replaying on-load requests')
-  for bufnr in keys(get(a:job, 'pending_load_requests', {}))
-    for key in keys(a:job.pending_load_requests[bufnr])
-      call OmniSharp#stdio#Request(key, a:job.pending_load_requests[bufnr][key])
-      unlet a:job.pending_load_requests[bufnr][key]
-    endfor
-    unlet a:job.pending_load_requests[bufnr]
-  endfor
+  call timer_start(1000, function('OmniSharp#stdio#ReplayOnLoad', [a:job]))
 endfunction
 
 " Listen for stdio server-loaded events

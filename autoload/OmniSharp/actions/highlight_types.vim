@@ -74,6 +74,9 @@ function! s:CBHighlightBuffer(bufnr, hltypes) abort
     echohl WarningMsg | echom a:hltypes.error | echohl None
     return
   endif
+  " matchadd() only works in the current window/buffer, so if the user has
+  " navigated away from the buffer where the request was made, this response can
+  " not be applied
   if bufnr('%') != a:bufnr | return | endif
 
   let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])

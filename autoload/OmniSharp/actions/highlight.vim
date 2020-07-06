@@ -21,22 +21,6 @@ function! s:StdioHighlight(bufnr) abort
   \ 'ReplayOnLoad': 1
   \}
   call OmniSharp#stdio#Request('/v2/highlight', opts)
-  let job = OmniSharp#GetHost(a:bufnr).job
-  if type(job) == type({}) && !get(job, 'loaded')
-    " The project is still loading - it is possible to highlight but those
-    " highlights will be improved once loading is complete, so listen for that
-    " and re-run the highlighting on project load.
-    " TODO: If we start listening for individual project load status, then do
-    " this when this project finishes loading, instead of when the entire
-    " solution finishes loading.
-    let pending = get(job, 'pending_load_requests', {})
-    let pending[a:bufnr] = get(pending, a:bufnr, {})
-    " let opts = extend(copy(opts), {
-    " \ 'ResponseHandler': function('s:HighlightRH', [a:bufnr, -1])
-    " \})
-    let pending[a:bufnr]['/v2/highlight'] = opts
-    let job.pending_load_requests = pending
-  endif
 endfunction
 
 function! s:HighlightRH(bufnr, buftick, response) abort

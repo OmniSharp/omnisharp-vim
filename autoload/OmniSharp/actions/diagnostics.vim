@@ -15,7 +15,7 @@ function! OmniSharp#actions#diagnostics#Check(...) abort
   endif
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBCodeCheck', [opts])
-    call OmniSharp#actions#diagnostics#StdioCheck({}, Callback)
+    call OmniSharp#actions#diagnostics#StdioCheck(bufnr('%'), Callback)
   else
     let codecheck = OmniSharp#py#Eval('codeCheck()')
     if OmniSharp#py#CheckForError() | return | endif
@@ -43,12 +43,12 @@ endfunction
 " Normally this function would be named 's:StdioCheck`, but it is accessed
 " directly from autoload/ale/sources/OmniSharp.vim so requires a full autoload
 " function name.
-function! OmniSharp#actions#diagnostics#StdioCheck(opts, Callback) abort
+function! OmniSharp#actions#diagnostics#StdioCheck(bufnr, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:StdioCheckRH', [a:Callback]),
+  \ 'BufNum': a:bufnr,
   \ 'ReplayOnLoad': 1
   \}
-  call extend(opts, a:opts, 'force')
   call OmniSharp#stdio#Request('/codecheck', opts)
 endfunction
 

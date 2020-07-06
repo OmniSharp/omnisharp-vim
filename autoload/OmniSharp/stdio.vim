@@ -163,11 +163,18 @@ function! OmniSharp#stdio#Request(command, opts) abort
   \   'Column': cnum,
   \ }
   \}
-
   if send_buffer
     let body.Arguments.Buffer = buffer
   endif
-  return s:Request(job, body, a:command, a:opts, sep)
+
+  call s:Request(job, body, a:command, a:opts, sep)
+
+  if has_key(a:opts, 'ReplayOnLoad')
+    let replay_opts = filter(copy(a:opts), 'v:key !=# "ReplayOnLoad"')
+    call s:QueueForReplayOnLoad(job, bufnr, a:command, replay_opts)
+  endif
+
+  return 1
 endfunction
 
 function! OmniSharp#stdio#RequestGlobal(job, command, opts) abort
@@ -204,7 +211,29 @@ function! s:Request(job, body, command, opts, ...) abort
   else
     call ch_sendraw(a:job.job_id, encodedBody . "\n")
   endif
-  return 1
+endfunction
+
+function! s:QueueForReplayOnLoad(job, bufnr, command, opts) abort
+  if type(a:job) == type({}) && !get(a:job, 'loaded')
+    " The project is still loading - it is possible to highlight but those
+    " highlights will be improved once loading is complete, so listen for that
+    " and re-run the highlighting on project load.
+    let pending = get(a:job, 'pending_load_requests', {})
+    let pending[a:bufnr] = get(pending, a:bufnr, {})
+    let pending[a:bufnr][a:command] = a:opts
+    let a:job.pending_load_requests = pending
+  endif
+endfunction
+
+function! OmniSharp#stdio#ReplayOnLoad(job, ...) abort
+  call OmniSharp#log#Log(a:job, 'Replaying on-load requests')
+  for bufnr in keys(get(a:job, 'pending_load_requests', {}))
+    for key in keys(a:job.pending_load_requests[bufnr])
+      call OmniSharp#stdio#Request(key, a:job.pending_load_requests[bufnr][key])
+      unlet a:job.pending_load_requests[bufnr][key]
+    endfor
+    unlet a:job.pending_load_requests[bufnr]
+  endfor
 endfunction
 
 let &cpoptions = s:save_cpo
