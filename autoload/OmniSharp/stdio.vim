@@ -57,12 +57,12 @@ function! s:HandleServerEvent(job, res) abort
   if !empty(body)
 
     " Listen for diagnostics.
-    " The OmniSharp-roslyn server starts sending diagnostics once projects are
-    " loaded, which e.g. VSCode uses to populate project-wide warnings.
-    " We don't do that, and it doesn't make a lot of sense in a Vim workflow, so
-    " parsing these diagnostics is disabled by default.
-    if get(g:, 'OmniSharp_diagnostics_listen', 0)
-    \ && has_key(g:, 'OmniSharp_ale_diagnostics_requested')
+    " When OmniSharp-roslyn is configured with `EnableAnalyzersSupport`, the
+    " first diagnostic or code action request will trigger analysis of ALL
+    " solution documents.
+    " These diagnostics results are sent out over stdio so we might as well
+    " capture them and update ALE for loaded buffers.
+    if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
       if get(a:res, 'Event', '') ==# 'Diagnostic'
         for result in get(body, 'Results', [])
           let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
