@@ -73,8 +73,8 @@ function! s:HandleServerEvent(job, res) abort
           let bufnr = bufinfo[0].bufnr
           call ale#other_source#StartChecking(bufnr, 'OmniSharp')
           let opts = { 'BufNum': bufnr }
-          let quickfixes = OmniSharp#locations#Parse(result.QuickFixes)
-          call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
+          let qfs = OmniSharp#actions#diagnostics#Parse(result.QuickFixes)
+          call ale#sources#OmniSharp#ProcessResults(opts, qfs)
         endfor
       endif
     endif

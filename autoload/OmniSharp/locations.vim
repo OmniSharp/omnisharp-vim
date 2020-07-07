@@ -23,54 +23,22 @@ function! OmniSharp#locations#Navigate(location, noautocmds) abort
   endif
 endfunction
 
-function! OmniSharp#locations#Parse(quickfixes, ...) abort
+function! OmniSharp#locations#Parse(quickfixes) abort
   let locations = []
   for quickfix in a:quickfixes
-    let quickfix = a:0 ? a:1(quickfix) : quickfix
-    if empty(quickfix)
-      continue
-    endif
-
-    let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
-    if has_key(quickfix, 'FileName')
-      let filename = OmniSharp#util#TranslatePathForClient(quickfix.FileName)
-    else
-      let filename = expand('%:p')
-    endif
     let location = {
-    \ 'filename': filename,
-    \ 'text': text,
+    \ 'filename': has_key(quickfix, 'FileName')
+    \   ? OmniSharp#util#TranslatePathForClient(quickfix.FileName)
+    \   : expand('%:p'),
+    \ 'text': get(quickfix, 'Text', get(quickfix, 'Message', '')),
     \ 'lnum': quickfix.Line,
     \ 'col': quickfix.Column,
     \ 'vcol': 1
     \}
-
     if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
       let location.end_lnum = quickfix.EndLine
       let location.end_col = quickfix.EndColumn - 1
     endif
-
-    if has_key(quickfix, 'type')
-      let location.type = get(quickfix, 'type')
-      if has_key(quickfix, 'subtype')
-        let location.subtype = get(quickfix, 'subtype')
-      endif
-    else
-      let loglevel = get(quickfix, 'LogLevel', '')
-      if loglevel !=# ''
-        if loglevel ==# 'Error'
-          let location.type = 'E'
-        elseif loglevel ==# 'Info'
-          let location.type = 'I'
-        else
-          let location.type = 'W'
-        endif
-        if loglevel ==# 'Hidden'
-          let location.subtype = 'Style'
-        endif
-      endif
-    endif
-
     call add(locations, location)
   endfor
   return locations

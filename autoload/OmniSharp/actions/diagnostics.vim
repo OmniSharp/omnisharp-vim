@@ -54,44 +54,79 @@ endfunction
 
 function! s:StdioCheckRH(Callback, response) abort
   if !a:response.Success | return | endif
-  call a:Callback(OmniSharp#locations#Parse(a:response.Body.QuickFixes,
-  \ function('s:DiagnosticQuickfixFixup')))
+  let quickfixes = a:response.Body.QuickFixes
+  call a:Callback(OmniSharp#actions#diagnostics#Parse(quickfixes))
 endfunction
 
-function! s:DiagnosticQuickfixFixup(quickfix) abort
-  let exclude_paths = get(g:, 'OmniSharp_diagnostic_exclude_paths', [])
-  if len(exclude_paths) && has_key(a:quickfix, 'FileName')
-    for exclude_path in exclude_paths
-      if match(a:quickfix.FileName, exclude_path) > 0
-        return {}
+function! OmniSharp#actions#diagnostics#Parse(quickfixes) abort
+  let locations = []
+  for quickfix in a:quickfixes
+
+    let exclude_paths = get(g:, 'OmniSharp_diagnostic_exclude_paths', [])
+    if len(exclude_paths) && has_key(quickfix, 'FileName')
+      for exclude_path in exclude_paths
+        if match(quickfix.FileName, exclude_path) > 0
+          continue
+        endif
+      endfor
+    endif
+
+    let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
+    let diag_id = get(quickfix, 'Id', '-')
+    if diag_id =~# '.FadeOut$'
+      " The `FadeOut` analyzers are a VSCode feature and not usable by Vim.
+      " These diagnostics are always sent as duplicates so just ignore the
+      " FadeOut diagnostic.
+      continue
+    elseif index(keys(overrides), diag_id) >= 0
+      if overrides[diag_id].type ==? 'None'
+        continue
       endif
-    endfor
-  endif
-
-  let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
-  let diag_id = get(a:quickfix, 'Id', '-')
-  if diag_id =~# '.FadeOut$'
-    " Some analyzers such as roslynator provide 2 diagnostics: one to mark
-    " the start of the issue location and another to mark the end, e.g.
-    " `RCS1124FadeOut`. We never make use of these FadeOut diagnostics, as
-    " we can extract start and end locations from the main diagnostic.
-    return {}
-  elseif index(keys(overrides), diag_id) >= 0
-    if overrides[diag_id].type ==? 'None'
-      return {}
+      call extend(quickfix, overrides[diag_id])
     endif
-    call extend(a:quickfix, overrides[diag_id])
-  endif
 
-  if get(g:, 'OmniSharp_diagnostic_showid') && has_key(a:quickfix, 'Id')
-    if has_key(a:quickfix, 'Text')
-      let a:quickfix.Text = a:quickfix.Id . ': ' .a:quickfix.Text
-    elseif has_key(a:quickfix, 'Message')
-      let a:quickfix.Message = a:quickfix.Id . ': ' . a:quickfix.Message
+    let text = get(quickfix, 'Text', get(quickfix, 'Message', ''))
+    if get(g:, 'OmniSharp_diagnostic_showid') && has_key(quickfix, 'Id')
+      let text = quickfix.Id . ': ' . text
     endif
-  endif
+    let location = {
+    \ 'filename': has_key(quickfix, 'FileName')
+    \   ? OmniSharp#util#TranslatePathForClient(quickfix.FileName)
+    \   : expand('%:p'),
+    \ 'text': text,
+    \ 'lnum': quickfix.Line,
+    \ 'col': quickfix.Column,
+    \ 'vcol': 1
+    \}
+    if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
+      let location.end_lnum = quickfix.EndLine
+      let location.end_col = quickfix.EndColumn - 1
+    endif
 
-  return a:quickfix
+    if has_key(quickfix, 'type')
+      let location.type = get(quickfix, 'type')
+      if has_key(quickfix, 'subtype')
+        let location.subtype = get(quickfix, 'subtype')
+      endif
+    else
+      let loglevel = get(quickfix, 'LogLevel', '')
+      if loglevel !=# ''
+        if loglevel ==# 'Error'
+          let location.type = 'E'
+        elseif loglevel ==# 'Info'
+          let location.type = 'I'
+        else
+          let location.type = 'W'
+        endif
+        if loglevel ==# 'Hidden'
+          let location.subtype = 'Style'
+        endif
+      endif
+    endif
+
+    call add(locations, location)
+  endfor
+  return locations
 endfunction
 
 function! s:CBCodeCheck(opts, codecheck) abort
