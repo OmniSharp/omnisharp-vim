@@ -8,7 +8,7 @@ set cpoptions&vim
 let s:alive_cache = get(s:, 'alive_cache', [])
 let s:pycmd = has('python3') ? 'python3' : 'python'
 let s:pyfile = has('python3') ? 'py3file' : 'pyfile'
-
+let g:OmniSharp_py_err = {}
 let g:OmniSharp_python_path = OmniSharp#util#PathJoin(['python'])
 
 " Default map of solution files and directories to ports.

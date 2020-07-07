@@ -1,12 +1,12 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#actions#highlight#Buffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  let opts = { 'BufNum':  bufnr('%') }
+function! OmniSharp#actions#highlight#Buffer(...) abort
+  let bufnr = a:0 ? a:1 : bufnr('%')
+  if bufname(bufnr) ==# '' || OmniSharp#FugitiveCheck() | return | endif
   if g:OmniSharp_server_stdio &&
   \ (has('textprop') || exists('*nvim_create_namespace'))
-    call s:StdioHighlight(opts.BufNum)
+    call s:StdioHighlight(bufnr)
   else
     " Full semantic highlighting not supported - highlight types instead
     call OmniSharp#actions#highlight_types#Buffer()
@@ -17,6 +17,7 @@ function! s:StdioHighlight(bufnr) abort
   let buftick = getbufvar(a:bufnr, 'changedtick')
   let opts = {
   \ 'ResponseHandler': function('s:HighlightRH', [a:bufnr, buftick]),
+  \ 'BufNum': a:bufnr,
   \ 'ReplayOnLoad': 1
   \}
   call OmniSharp#stdio#Request('/v2/highlight', opts)

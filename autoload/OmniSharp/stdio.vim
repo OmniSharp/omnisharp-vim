@@ -3,18 +3,31 @@ set cpoptions&vim
 
 let s:nextseq = get(s:, 'nextseq', 1001)
 let s:requests = get(s:, 'requests', {})
-let s:pendingRequests = get(s:, 'pendingRequests', {})
 
 function! OmniSharp#stdio#HandleResponse(job, message) abort
   try
     let res = json_decode(a:message)
   catch
-    call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, 'info')
-    call OmniSharp#log#Log(a:job.job_id . '  JSON error: ' . v:exception, 'info')
+    let a:job.json_errors = get(a:job, 'json_errors', 0) + 1
+    if !OmniSharp#proc#IsJobRunning(a:job)
+      return
+    endif
+    if a:job.json_errors >= 3 && !a:job.loaded
+      call OmniSharp#log#Log(a:job, '3 errors caught while loading: stopping')
+      call OmniSharp#proc#StopJob(a:job.sln_or_dir)
+      echohl WarningMsg
+      echomsg 'You appear to be running an HTTP server in stdio mode - ' .
+      \ 'upgrade to the stdio server with :OmniSharpInstall, or to continue ' .
+      \' in HTTP mode add the following to your .vimrc and restart Vim:  '
+      \ 'let g:OmniSharp_server_stdio = 0'
+      echohl None
+      return
+    endif
+    call OmniSharp#log#Log(a:job, a:message)
+    call OmniSharp#log#Log(a:job, 'JSON error: ' . v:exception)
     return
   endtry
-  let loglevel =  get(res, 'Event', '') ==? 'log' ? 'info' : 'debug'
-  call OmniSharp#log#Log(a:job.job_id . '  ' . a:message, loglevel)
+  call OmniSharp#log#LogServer(a:job, a:message, res)
   if get(res, 'Type', '') ==# 'event'
     call s:HandleServerEvent(a:job, res)
     return
@@ -33,111 +46,52 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
 endfunction
 
 function! s:HandleServerEvent(job, res) abort
-  if has_key(a:res, 'Body') && type(a:res.Body) == type({})
-    if !a:job.loaded
+  let body = get(a:res, 'Body', 0)
+  if type(body) != type({})
+    let body = {}
+  endif
 
-      " Listen for server-loaded events
-      "-------------------------------------------------------------------------
-      if g:OmniSharp_server_stdio_quickload
-        " Quick load: Mark server as loaded as soon as configuration is finished
-        let message = get(a:res.Body, 'Message', '')
-        if message ==# 'Configuration finished.'
-          let a:job.loaded = 1
-          silent doautocmd <nomodeline> User OmniSharpReady
-          call s:ReplayRequests()
-        endif
-      else
-        " Complete load: Wait for all projects to be loaded before marking
-        " server as loaded
-        if !has_key(a:job, 'loading_timeout')
-          " Create a timeout to mark a job as loaded after 30 seconds despite
-          " not receiving the expected server events.
-          let a:job.loading_timeout = timer_start(
-          \ g:OmniSharp_server_loading_timeout * 1000,
-          \ function('s:ServerLoadTimeout', [a:job]))
-        endif
-        if !has_key(a:job, 'loading')
-          let a:job.loading = []
-        endif
-        let name = get(a:res.Body, 'Name', '')
-        let message = get(a:res.Body, 'Message', '')
-        if name ==# 'OmniSharp.MSBuild.ProjectManager'
-          let project = matchstr(message, '''\zs.*\ze''')
-          if message =~# '^Queue project'
-            call add(a:job.loading, project)
-          endif
-          if message =~# '^Successfully loaded project'
-          \ || message =~# '^Failed to load project'
-            if message[0] ==# 'F'
-              echom 'Failed to load project: ' . project
-            endif
-            call filter(a:job.loading, {idx,val -> val !=# project})
-            if len(a:job.loading) == 0
-              if g:OmniSharp_server_display_loading
-                let elapsed = reltimefloat(reltime(a:job.start_time))
-                echomsg printf('Loaded server for %s in %.1fs',
-                \ a:job.sln_or_dir, elapsed)
-              endif
-              let a:job.loaded = 1
-              silent doautocmd <nomodeline> User OmniSharpReady
+  " Handle any project loading events
+  call OmniSharp#project#ParseEvent(a:job, get(a:res, 'Event', ''), body)
 
-              " TODO: Remove this delay once we have better information about
-              " when the server is completely initialised:
-              " https://github.com/OmniSharp/omnisharp-roslyn/issues/1521
-              call timer_start(1000, function('s:ReplayRequests'))
-              " call s:ReplayRequests()
+  if !empty(body)
 
-              unlet a:job.loading
-              call timer_stop(a:job.loading_timeout)
-              unlet a:job.loading_timeout
-            endif
-          endif
-        endif
-      endif
-
-    else
-
-      " Server is loaded, listen for diagnostics
-      "-------------------------------------------------------------------------
+    " Listen for diagnostics.
+    " When OmniSharp-roslyn is configured with `EnableAnalyzersSupport`, the
+    " first diagnostic or code action request will trigger analysis of ALL
+    " solution documents.
+    " These diagnostics results are sent out over stdio so we might as well
+    " capture them and update ALE for loaded buffers.
+    if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
       if get(a:res, 'Event', '') ==# 'Diagnostic'
-        if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
-          for result in get(a:res.Body, 'Results', [])
-            let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
-            let bufinfo = getbufinfo(fname)
-            if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
-              continue
-            endif
-            let bufnr = bufinfo[0].bufnr
-            call ale#other_source#StartChecking(bufnr, 'OmniSharp')
-            let opts = { 'BufNum': bufnr }
-            let quickfixes = OmniSharp#locations#Parse(result.QuickFixes)
-            call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
-          endfor
-        endif
-      elseif get(a:res, 'Event', '') ==# 'TestMessage'
-        " Diagnostics received while running tests
-        let lines = split(a:res.Body.Message, '\n')
-        for line in lines
-          if get(a:res.Body, 'MessageLevel', '') ==# 'error'
-            echohl WarningMsg | echomsg line | echohl None
-          elseif g:OmniSharp_runtests_echo_output
-            echomsg line
+        for result in get(body, 'Results', [])
+          let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
+          let bufinfo = getbufinfo(fname)
+          if len(bufinfo) == 0 || !has_key(bufinfo[0], 'bufnr')
+            continue
           endif
+          let bufnr = bufinfo[0].bufnr
+          call ale#other_source#StartChecking(bufnr, 'OmniSharp')
+          let opts = { 'BufNum': bufnr }
+          let quickfixes = OmniSharp#locations#Parse(result.QuickFixes)
+          call ale#sources#OmniSharp#ProcessResults(opts, quickfixes)
         endfor
       endif
-
     endif
-  endif
-endfunction
 
-function! s:ServerLoadTimeout(job, timer) abort
-  if g:OmniSharp_server_display_loading
-    echomsg printf('Server load notification for %s not received after %d seconds - continuing.',
-    \ a:job.sln_or_dir, g:OmniSharp_server_loading_timeout)
+    " Diagnostics received while running tests
+    if get(a:res, 'Event', '') ==# 'TestMessage'
+      let lines = split(body.Message, '\n')
+      for line in lines
+        if get(body, 'MessageLevel', '') ==# 'error'
+          echohl WarningMsg | echomsg line | echohl None
+        elseif g:OmniSharp_runtests_echo_output
+          echomsg line
+        endif
+      endfor
+    endif
+
   endif
-  let a:job.loaded = 1
-  unlet a:job.loading
-  unlet a:job.loading_timeout
 endfunction
 
 function! OmniSharp#stdio#Request(command, opts) abort
@@ -145,13 +99,37 @@ function! OmniSharp#stdio#Request(command, opts) abort
     let [bufnr, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
     let bufnr = a:opts.BufNum
-    let lnum = 1
-    let cnum = 1
+    let lnum = get(a:opts, 'LineNum', 1)
+    let cnum = get(a:opts, 'ColNum', 1)
   else
     let bufnr = bufnr('%')
-    let lnum = line('.')
-    let cnum = col('.')
+    let lnum = get(a:opts, 'LineNum', line('.'))
+    let cnum = get(a:opts, 'ColNum', col('.'))
   endif
+  let host = OmniSharp#GetHost(bufnr)
+  let job = host.job
+  if !OmniSharp#proc#IsJobRunning(job)
+    return 0
+  endif
+
+  if has_key(a:opts, 'Initializing')
+    " The buffer is being initialized - this request will always be sent
+  else
+    if !get(host, 'initialized')
+      " Replay the request when the buffer has been initialized with the server
+      let opts = extend(a:opts, {
+      \ 'BufNum': bufnr,
+      \ 'LineNum': lnum,
+      \ 'ColNum': cnum
+      \})
+      if has_key(opts, 'UsePreviousPosition')
+        unlet opts.UsePreviousPosition
+      endif
+      call OmniSharp#buffer#Initialize(job, bufnr, a:command, opts)
+      return 0
+    endif
+  endif
+
   if has_key(a:opts, 'SavePosition')
     let s:lastPosition = [bufnr, lnum, cnum]
   endif
@@ -185,26 +163,26 @@ function! OmniSharp#stdio#Request(command, opts) abort
   \   'Column': cnum,
   \ }
   \}
-
   if send_buffer
     let body.Arguments.Buffer = buffer
   endif
-  return OmniSharp#stdio#RequestSend(body, a:command, a:opts, sep)
+
+  call s:Request(job, body, a:command, a:opts, sep)
+
+  if has_key(a:opts, 'ReplayOnLoad')
+    let replay_opts = filter(copy(a:opts), 'v:key !=# "ReplayOnLoad"')
+    call s:QueueForReplayOnLoad(job, bufnr, a:command, replay_opts)
+  endif
+
+  return 1
 endfunction
 
-function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
-  let sep = a:0 ? a:1 : ''
+function! OmniSharp#stdio#RequestGlobal(job, command, opts) abort
+  call s:Request(a:job, {}, a:command, a:opts)
+endfunction
 
-  let job = OmniSharp#GetHost().job
-  if type(job) != type({}) || !has_key(job, 'job_id') || !job.loaded
-    if has_key(a:opts, 'ReplayOnLoad') && !has_key(s:pendingRequests, a:command)
-      " This request should be replayed when the server is fully loaded
-      let s:pendingRequests[a:command] = a:opts
-    endif
-    return 0
-  endif
-  let job_id = job.job_id
-  call OmniSharp#log#Log(job_id . '  Request: ' . a:command, 'debug')
+function! s:Request(job, body, command, opts, ...) abort
+  call OmniSharp#log#Log(a:job, 'Request: ' . a:command, 1)
 
   let a:body['Command'] = a:command
   let a:body['Seq'] = s:nextseq
@@ -212,6 +190,7 @@ function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
   if has_key(a:opts, 'Parameters')
     call extend(a:body.Arguments, a:opts.Parameters, 'force')
   endif
+  let sep = a:0 ? a:1 : ''
   if sep !=# ''
     let encodedBody = substitute(json_encode(a:body), sep, '\\r\\n', 'g')
   else
@@ -223,19 +202,37 @@ function! OmniSharp#stdio#RequestSend(body, command, opts, ...) abort
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
   let s:nextseq += 1
-  call OmniSharp#log#Log(encodedBody, 'debug')
-  if has('nvim')
-    call chansend(job_id, encodedBody . "\n")
-  else
-    call ch_sendraw(job_id, encodedBody . "\n")
+  if get(g:, 'OmniSharp_proc_debug')
+    " The raw request is already logged by the server in debug mode.
+    call OmniSharp#log#Log(a:job, encodedBody, 1)
   endif
-  return 1
+  if has('nvim')
+    call chansend(a:job.job_id, encodedBody . "\n")
+  else
+    call ch_sendraw(a:job.job_id, encodedBody . "\n")
+  endif
 endfunction
 
-function! s:ReplayRequests(...) abort
-  for key in keys(s:pendingRequests)
-    call OmniSharp#stdio#Request(key, s:pendingRequests[key])
-    unlet s:pendingRequests[key]
+function! s:QueueForReplayOnLoad(job, bufnr, command, opts) abort
+  if type(a:job) == type({}) && !get(a:job, 'loaded')
+    " The project is still loading - it is possible to highlight but those
+    " highlights will be improved once loading is complete, so listen for that
+    " and re-run the highlighting on project load.
+    let pending = get(a:job, 'pending_load_requests', {})
+    let pending[a:bufnr] = get(pending, a:bufnr, {})
+    let pending[a:bufnr][a:command] = a:opts
+    let a:job.pending_load_requests = pending
+  endif
+endfunction
+
+function! OmniSharp#stdio#ReplayOnLoad(job, ...) abort
+  call OmniSharp#log#Log(a:job, 'Replaying on-load requests')
+  for bufnr in keys(get(a:job, 'pending_load_requests', {}))
+    for key in keys(a:job.pending_load_requests[bufnr])
+      call OmniSharp#stdio#Request(key, a:job.pending_load_requests[bufnr][key])
+      unlet a:job.pending_load_requests[bufnr][key]
+    endfor
+    unlet a:job.pending_load_requests[bufnr]
   endfor
 endfunction
 

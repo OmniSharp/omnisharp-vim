@@ -6,34 +6,39 @@ set cpoptions&vim
 if !g:OmniSharp_server_stdio
   " Load python helper functions
   call OmniSharp#py#Bootstrap()
-  let g:OmniSharp_py_err = {}
 endif
 
 function! OmniSharp#GetHost(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
-  if empty(getbufvar(bufnr, 'OmniSharp_host'))
-    let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
-    if g:OmniSharp_server_stdio
-      let host = {
-      \ 'job': OmniSharp#proc#GetJob(sln_or_dir),
-      \ 'sln_or_dir': sln_or_dir
-      \}
-    else
+  if g:OmniSharp_server_stdio
+    " Using the stdio server, b:OmniSharp_host is a dict containing the
+    " `sln_or_dir` and an `initialized` flag indicating whether this buffer has
+    " successfully been registered with the server:
+    " { 'sln_or_dir': '/path/to/solution_or_dir', 'initialized': 1 }
+    let host = getbufvar(bufnr, 'OmniSharp_host', {})
+    if get(host, 'sln_or_dir', '') ==# ''
+      let host.sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
+      let host.initialized = 0
+      call setbufvar(bufnr, 'OmniSharp_host', host)
+    endif
+    " The returned dict includes the job, but the job is _not_ part of
+    " b:OmniSharp_host. It is important to always fetch the job from
+    " OmniSharp#proc#GetJob, ensuring that the job properties (job.job_id,
+    " job.loaded, job.pid etc.) are always correct and up-to-date.
+    return extend(copy(host), { 'job': OmniSharp#proc#GetJob(host.sln_or_dir) })
+  else
+    " Using the HTTP server, b:OmniSharp_host is a localhost URL
+    if empty(getbufvar(bufnr, 'OmniSharp_host'))
+      let sln_or_dir = OmniSharp#FindSolutionOrDir(1, bufnr)
       let port = OmniSharp#py#GetPort(sln_or_dir)
       if port == 0
         return ''
       endif
       let host = get(g:, 'OmniSharp_host', 'http://localhost:' . port)
+      call setbufvar(bufnr, 'OmniSharp_host', host)
     endif
-    call setbufvar(bufnr, 'OmniSharp_host', host)
+    return getbufvar(bufnr, 'OmniSharp_host')
   endif
-  if g:OmniSharp_server_stdio
-    let host = getbufvar(bufnr, 'OmniSharp_host')
-    if !OmniSharp#proc#IsJobRunning(host.job)
-      let host.job = OmniSharp#proc#GetJob(host.sln_or_dir)
-    endif
-  endif
-  return getbufvar(bufnr, 'OmniSharp_host')
 endfunction
 
 
@@ -295,6 +300,12 @@ function! OmniSharp#StartServer(...) abort
 
   " Optionally perform check if server is already running
   if check_is_running
+    let job = OmniSharp#proc#GetJob(sln_or_dir)
+    if type(job) == type({}) && get(job, 'stopped')
+      " The job has been manually stopped - do not start it again until
+      " instructed
+      return
+    endif
     let running = OmniSharp#proc#IsJobRunning(sln_or_dir)
     if !g:OmniSharp_server_stdio
       " If the port is hardcoded, we should check if any other vim instances
@@ -324,10 +335,9 @@ function! s:StartServer(sln_or_dir) abort
     return
   endif
 
-  let job = OmniSharp#proc#Start(command, a:sln_or_dir)
+  call OmniSharp#proc#Start(command, a:sln_or_dir)
   if g:OmniSharp_server_stdio
     let b:OmniSharp_host = {
-    \ 'job': job,
     \ 'sln_or_dir': a:sln_or_dir
     \}
   endif

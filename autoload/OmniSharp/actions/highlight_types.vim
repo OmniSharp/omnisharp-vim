@@ -12,22 +12,23 @@ set cpoptions&vim
 function! OmniSharp#actions#highlight_types#Buffer() abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   call OmniSharp#actions#highlight_types#Initialise()
-  let opts = { 'BufNum':  bufnr('%') }
+  let bufnr = bufnr('%')
   if g:OmniSharp_server_stdio
-    let Callback = function('s:CBHighlightBuffer', [opts])
-    call s:StdioFindHighlightTypes(Callback)
+    let Callback = function('s:CBHighlightBuffer', [bufnr])
+    call s:StdioFindHighlightTypes(bufnr, Callback)
   else
     if !OmniSharp#IsServerRunning() | return | endif
     let hltypes = OmniSharp#py#Eval('findHighlightTypes()')
     if OmniSharp#py#CheckForError() | return | endif
-    call s:CBHighlightBuffer(opts, hltypes)
+    call s:CBHighlightBuffer(bufnr, hltypes)
   endif
 endfunction
 
-function! s:StdioFindHighlightTypes(Callback) abort
+function! s:StdioFindHighlightTypes(bufnr, Callback) abort
   let bufferLines = getline(1, '$')
   let opts = {
   \ 'ResponseHandler': function('s:FindHighlightTypesRH', [a:Callback, bufferLines]),
+  \ 'BufNum': a:bufnr,
   \ 'ReplayOnLoad': 1
   \}
   call OmniSharp#stdio#Request('/highlight', opts)
@@ -68,12 +69,15 @@ function! s:FindHighlightTypesRH(Callback, bufferLines, response) abort
   call a:Callback(hltypes)
 endfunction
 
-function! s:CBHighlightBuffer(opts, hltypes) abort
+function! s:CBHighlightBuffer(bufnr, hltypes) abort
   if has_key(a:hltypes, 'error')
     echohl WarningMsg | echom a:hltypes.error | echohl None
     return
   endif
-  if bufnr('%') != a:opts.BufNum | return | endif
+  " matchadd() only works in the current window/buffer, so if the user has
+  " navigated away from the buffer where the request was made, this response can
+  " not be applied
+  if bufnr('%') != a:bufnr | return | endif
 
   let b:OmniSharp_hl_matches = get(b:, 'OmniSharp_hl_matches', [])
 

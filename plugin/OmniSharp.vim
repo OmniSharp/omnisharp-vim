@@ -6,14 +6,10 @@ let g:OmniSharp_temp_dir = get(g:, 'OmniSharp_temp_dir', fnamemodify(tempname(),
 
 let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
 
-let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 0)
+let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 1)
 
-" When g:OmniSharp_server_stdio_quickload = 1, consider server 'loaded' once
-" 'Configuration finished' is received.  When this is 0, wait for notification
-" that all projects have been loaded.
-let g:OmniSharp_server_stdio_quickload = get(g:, 'OmniSharp_server_stdio_quickload', 0)
 let g:OmniSharp_server_display_loading = get(g:, 'OmniSharp_server_display_loading', 1)
-let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 20)
+let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 180)
 
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
@@ -67,14 +63,14 @@ let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output',
 " Set to 1 when ultisnips is installed
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
-let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 0)
+let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 1)
 
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 
 " Initialise automatic type and interface highlighting
 " Preserve backwards compatibility with older version g:OmniSharp_highlight_types
-let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 0))
+let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 2))
 if g:OmniSharp_highlighting
   augroup OmniSharp_HighlightTypes
     autocmd!
