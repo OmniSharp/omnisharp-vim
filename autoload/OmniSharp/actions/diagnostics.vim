@@ -64,11 +64,16 @@ function! OmniSharp#actions#diagnostics#Parse(quickfixes) abort
 
     let exclude_paths = get(g:, 'OmniSharp_diagnostic_exclude_paths', [])
     if len(exclude_paths) && has_key(quickfix, 'FileName')
+      let exclude = 0
       for exclude_path in exclude_paths
         if match(quickfix.FileName, exclude_path) > 0
-          continue
+          let exclude = 1
+          break
         endif
       endfor
+      if exclude
+        continue
+      endif
     endif
 
     let overrides = get(g:, 'OmniSharp_diagnostic_overrides', {})
