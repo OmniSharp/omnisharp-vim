@@ -70,7 +70,7 @@ command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 
 " Initialise automatic type and interface highlighting
 " Preserve backwards compatibility with older version g:OmniSharp_highlight_types
-let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 0))
+let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 2))
 if g:OmniSharp_highlighting
   augroup OmniSharp_HighlightTypes
     autocmd!
