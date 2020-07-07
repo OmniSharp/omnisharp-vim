@@ -19,10 +19,10 @@ Use Vim's popup windows and neovim's floating windows to display code/documentat
 
 ## New! Run unit tests
 
-Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
+It is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
 
 ```vim
-" Run the current unit test (the cursor should be inside the test method)
+" Run the current unit test (the cursor should be on/inside the test method)
 :OmniSharpRunTest
 
 " Run all unit tests in the current file
@@ -32,26 +32,30 @@ Using stdio mode, it is now possible to run unit tests via OmniSharp-roslyn, wit
 :OmniSharpRunTestsInFile % tests/test1.cs
 ```
 
-Note that this unfortunately does _not_ work in translated WSL, due to the way OmniSharp-roslyn runs the tests.
+**Note:** this is only available using the stdio server, and unfortunately does _not_ work in translated WSL, due to the way OmniSharp-roslyn runs the tests.
 
-## New! Asynchronous server interactions
+## Asynchronous server interactions over stdio
 
-For vim8 and neovim, OmniSharp-vim can now use the OmniSharp-roslyn stdio server instead of the HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
+For vim8 and neovim, OmniSharp-vim uses the OmniSharp-roslyn stdio server instead of the older HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
 
-This is initially opt-in only until some [user feedback](https://github.com/OmniSharp/omnisharp-vim/issues/468) is received. To switch from the HTTP server to stdio, add this to your .vimrc:
+**Note:** neovim on Windows has been unable to communicate with the stdio server until a (very) recent neovim patch.
+If you are using nvim-qt _or_ terminal neovim on Windows, you will require a neovim [nightly build](https://github.com/neovim/neovim/releases/nightly) `NVIM v0.5.0-556` (2020-06-11) or newer, or will need to wait for neovim 0.5 to be released.
+
+**Note to WSL users:** OmniSharp-roslyn stdio version 1.35.3 does _not_ work from WSL, using the Windows server, see [OmniSharp-roslyn #1844](https://github.com/OmniSharp/omnisharp-roslyn/issues/1844).
+Install the previous version with `:OmniSharpInstall v1.35.2`
+
+To use the HTTP server instead, add this to your .vimrc:
 
 ```vim
-let g:OmniSharp_server_stdio = 1
+let g:OmniSharp_server_stdio = 0
 ```
 
-Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall`. Restart vim and feel the difference!
-
-**Note:** neovim on Windows has been unable to communicate with the stdio server until a (very) recent neovim patch. If you are using nvim-qt _or_ terminal neovim on Windows, you will require a neovim [nightly build](https://github.com/neovim/neovim/releases/nightly) `NVIM v0.5.0-556` (2020-06-11) or newer, or will need to wait for neovim 0.5 to be released.
+Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-installed with `:OmniSharpInstall`.
 
 ## Features
 
 * Contextual code completion
-  * Code documentation is displayed in the preview window when available (Xml Documentation for Windows, MonoDoc documentation for Mono)
+  * Code documentation and type lookup, displayed in popups or the preview window, when available (depends on installed SDKs)
   * Completion Sources are provided for:
     * [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim)
     * [coc.nvim](https://github.com/neoclide/coc.nvim)
@@ -69,10 +73,7 @@ Then open vim to a .cs file and install the stdio server with `:OmniSharpInstall
 * Find all code issues in solution and populate the quickfix window
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
-* Semantic type highlighting
-* Lookup type information of an type/variable/method
-  * Can be printed to the status line or in the preview window
-  * Displays documentation for an entity when using preview window
+* Full semantic highlighting
 * Code error checking
 * Code formatter
 * Run unit tests and navigate to failing assertions
@@ -117,23 +118,23 @@ filetype indent plugin on
 ```
 
 ### Server
-OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer 'y' and the latest version will be downloaded and extracted to `~/.cache/omnisharp-vim/omnisharp-roslyn`, ready to use. *Note:* Requires [`curl`](https://curl.haxx.se/) or [`wget`](https://www.gnu.org/software/wget/) on Linux, macOS, Cygwin and WSL.
+OmniSharp-vim depends on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server. The first time OmniSharp-vim tries to open a C# file, it will check for the presence of the server, and if not found it will ask if it should be downloaded. Answer `y` and the latest version will be downloaded and extracted to `~/.cache/omnisharp-vim/omnisharp-roslyn`, ready to use. *Note:* Requires [`curl`](https://curl.haxx.se/) or [`wget`](https://www.gnu.org/software/wget/) on Linux, macOS, Cygwin and WSL.
 
 Running the command `:OmniSharpInstall` in vim will also install/upgrade to the latest OmniSharp-roslyn release.
 To install a particular release, including pre-releases, specify the version number like this:
 
 ```vim
-:OmniSharpInstall v1.34.2
+:OmniSharpInstall v1.35.2
 ```
 
-*Note:* These methods depend on the `g:OmniSharp_server_stdio` variable to decide which OmniSharp-roslyn server to download. If you are unsure, try using the new stdio option first, and only fall back to HTTP if you have problems.
+*Note:* These methods depend on the `g:OmniSharp_server_stdio` variable to decide which OmniSharp-roslyn server to download. If you are unsure, try using the default stdio option first, and only fall back to HTTP if you have problems.
 
 * **vim8.0+ or neovim**: Use the stdio server, it is used asynchronously and there is no python requirement.
 
 * **< vim8.0**: Use the HTTP server. Your vim must have python (2 or 3) support, and you'll need either [vim-dispatch](https://github.com/tpope/vim-dispatch) or [vimproc.vim](https://github.com/Shougo/vimproc.vim) to be installed
 
 ```vim
-" Use the stdio version of OmniSharp-roslyn:
+" Use the stdio version of OmniSharp-roslyn - this is the default
 let g:OmniSharp_server_stdio = 1
 
 " Use the HTTP version of OmniSharp-roslyn:
@@ -157,12 +158,16 @@ No special configuration is required for cygwin. The automatic installation scri
 
 #### Windows Subsystem for Linux (WSL)
 OmniSharp-roslyn can function perfectly well in WSL using linux binaries, if the environment is correctly configured (see [OmniSharp-roslyn](https://github.com/OmniSharp/omnisharp-roslyn) for requirements).
-However, if you have the .NET Framework installed in Windows, you may have better results using the Windows binaries. To do this, follow the Manual installation instructions above, configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
+However, if you have the .NET Framework installed in Windows, you may have better results using the Windows binaries.
+To do this, follow the Manual installation instructions above, configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
 
 ```vim
 let g:OmniSharp_server_path = '/mnt/c/OmniSharp/omnisharp.win-x64/OmniSharp.exe'
 let g:OmniSharp_translate_cygwin_wsl = 1
 ```
+
+**Note:** OmniSharp-roslyn stdio version 1.35.3 does _not_ work from WSL, using the Windows server, see [OmniSharp-roslyn #1844](https://github.com/OmniSharp/omnisharp-roslyn/issues/1844).
+Install the previous version with `:OmniSharpInstall v1.35.2`
 
 #### Linux and Mac
 OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
@@ -171,12 +176,14 @@ OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](ht
     let g:OmniSharp_server_use_mono = 1
 ```
 
+Any time `g:OmniSharp_server_use_mono` is modified, the server needs to be re-installed with `:OmniSharpInstall`.
+
 ##### libuv
-For the HTTP version, OmniSharp-Roslyn also requires [libuv](http://libuv.org/) on Linux and Mac. This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv1-dev` on debian/Ubuntu, `pacman -S libuv` on arch linux, `dnf install libuv libuv-devel` on Fedora/CentOS, etc.
+For the HTTP server, OmniSharp-Roslyn also requires [libuv](http://libuv.org/) on Linux and Mac. This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv1-dev` on debian/Ubuntu, `pacman -S libuv` on arch linux, `dnf install libuv libuv-devel` on Fedora/CentOS, etc.
 
 Please note that if your distro has a "dev" package (`libuv1-dev`, `libuv-devel` etc.) then you will probably need it.
 
-**Note:** This is **not** necessary for the stdio version of OmniSharp-roslyn.
+**Note:** This is **not** necessary for the default stdio version of OmniSharp-roslyn.
 
 ### Install Python (HTTP only)
 Install the latest version of python 3 ([Python 3.7](https://www.python.org/downloads/release/python-370/)) or 2 ([Python 2.7.15](https://www.python.org/downloads/release/python-2715/)).
@@ -188,13 +195,13 @@ Verify that Python is working inside Vim with
 :echo has('python3') || has('python')
 ```
 
-**Note:** If you are using the stdio version of OmniSharp-roslyn, you do not need python.
+**Note:** If you are using the default stdio version of OmniSharp-roslyn, you do not need python.
 
 ### Asynchronous command execution
 OmniSharp-vim can start the server only if any of the following criteria is met:
 
 * Vim with job control API is used (8.0+)
-* [neovim](https://neovim.io) with job control API is used
+* neovim with job control API is used
 * [vim-dispatch](https://github.com/tpope/vim-dispatch) is installed
 * [vimproc.vim](https://github.com/Shougo/vimproc.vim) is installed
 
@@ -241,13 +248,8 @@ It tries to detect your solution file (.sln) and starts the OmniSharp-roslyn ser
 In vim8 and neovim, the server is started invisibly by a vim job.
 In older versions of vim, the server will be started in different ways depending on whether you are using vim-dispatch in tmux, or are using vim-proc, gvim or running vim in a terminal.
 
-This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in your vimrc. You can then start the server manually from within vim with `:OmniSharpStartServer`. Alternatively, the server can be manually started from outside vim:
-
-```sh
-[mono] OmniSharp.exe -s (path/to/sln)
-```
-
-Add `-v` to get extra debugging output from the server.
+This behaviour can be disabled by setting `let g:OmniSharp_start_server = 0` in your vimrc.
+You can then start the server manually from within vim with `:OmniSharpStartServer`.
 
 To get completions, open a C# file from your solution within Vim and press `<C-x><C-o>` (that is ctrl x followed by ctrl o) in Insert mode, or use a completion or autocompletion plugin.
 
@@ -259,10 +261,11 @@ See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki) for more custom 
 OmniSharp-roslyn can provide highlighting information about every symbol of the document.
 
 To highlight a document, use command `:OmniSharpHighlight`.
-To have `.cs` files automatically highlighted when entering a buffer and leaving insert mode, add this to your .vimrc:
+By default, `.cs` files are automatically highlighted when entering a buffer and leaving insert mode.
+To disable automatic highlighting, add this to your .vimrc:
 
 ```vim
-let g:OmniSharp_highlighting = 2
+let g:OmniSharp_highlighting = 0
 ```
 
 To update highlighting after all text changes, even while in insert mode, use `g:OmniSharp_highlighting = 3` instead.
@@ -280,7 +283,8 @@ let g:OmniSharp_highlight_groups = {
 The `:OmniSharpHighlightEcho` command can be used to find out what type of symbol is under the cursor.
 See the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Highlighting-configuration) for the full list of symbol types, and configuration details.
 
-**Note:** Text property highlighting is only available when using the stdio server, not for HTTP server usage. Check the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Highlighting-configuration#legacy-highlighting) for how to highlight when using the HTTP server, or older Vim/neovims.
+**Note:** Full semantic highlighting uses Vim's text properties and neovim's namespaces, and is only available when using the stdio server, not for HTTP server usage.
+Check the [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Highlighting-configuration#legacy-highlighting) for how to configure the simpler regex-highlighting when using the HTTP server, or older Vim/neovims.
 
 ## Diagnostics
 
@@ -313,12 +317,15 @@ let g:OmniSharp_diagnostic_showid = 1
 
 *Note:* Diagnostic overrides are only available in stdio mode, not HTTP mode.
 
-Another method for filtering out diagnostic results is via path exclusion using `g:OmniSharp_diagnostic_exclude_paths`. This variable is a list of regular expressions that will exclude paths that have a match to any of its entries.
+Another method for filtering out diagnostic results is via path exclusion using `g:OmniSharp_diagnostic_exclude_paths`.
+This variable is a list of regular expressions that will exclude paths that have a match to any of its entries:
+
 ```vim
 let g:OmniSharp_diagnostic_exclude_paths = [
 \ 'obj\\',
 \ '[Tt]emp\\',
-\ '\.nuget\\'
+\ '\.nuget\\',
+\ '\<AssemblyInfo\.cs\>'
 \]
 ```
 

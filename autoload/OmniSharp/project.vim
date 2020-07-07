@@ -43,7 +43,7 @@ function! OmniSharp#project#ParseEvent(job, event, eventBody) abort
   if a:job.loaded && projects_loaded == projects_total | return | endif
 
   if !has_key(a:job, 'loading_timeout')
-    " Create a timeout to mark a job as loaded after 30 seconds despite not
+    " Create a timeout to mark a job as loaded after 180 seconds despite not
     " receiving the expected server events.
     let a:job.loading_timeout = timer_start(
     \ g:OmniSharp_server_loading_timeout * 1000,
