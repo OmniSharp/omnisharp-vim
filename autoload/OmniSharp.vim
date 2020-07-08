@@ -513,7 +513,13 @@ function! OmniSharp#Install(...) abort
     let l:version = ''
     try
       let l:command = has('win32') ? 'type ' : 'cat '
-      let l:version = trim(system(l:command . l:version_file_location)) . ' '
+      let l:version = system(l:command . l:version_file_location)
+      if exists('*trim')
+        let l:version = trim(l:version)
+      else
+        let l:version = substitute(l:version, '^\s*\(.\{-}\)\s*$', '\1', '')
+      endif
+      let l:version .= ' '
     catch | endtry
     echohl Title
     echomsg printf('OmniSharp-Roslyn %sinstalled to %s', l:version, l:location)

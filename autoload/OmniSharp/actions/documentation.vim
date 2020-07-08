@@ -47,7 +47,12 @@ endfunction
 function! s:CBTypeLookup(opts, response) abort
   let l:type = a:response.Type != v:null ? a:response.Type : ''
   if a:opts.Doc
-    let content = trim(l:type . OmniSharp#actions#documentation#Format(a:response, {}))
+    let content = l:type . OmniSharp#actions#documentation#Format(a:response, {})
+    if exists('*trim')
+      let content = trim(content)
+    else
+      let content = substitute(content, '^\s*\(.\{-}\)\s*$', '\1', '')
+    endif
     if OmniSharp#popup#Enabled()
       if has_key(a:opts, 'ForCompletion')
         " If the popupmenu has already closed, exit early
