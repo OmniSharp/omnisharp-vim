@@ -103,18 +103,21 @@ function! OmniSharp#util#CheckCapabilities() abort
   if g:OmniSharp_server_stdio
     if has('nvim')
       if !(exists('*jobstart') && has('lambda'))
-        call OmniSharp#util#EchoErr('Error: A newer version of neovim is required for stdio')
+        call OmniSharp#util#EchoErr(
+        \ 'Error: A newer version of neovim is required for stdio')
         let s:capable = 0
       endif
     else
       if !(has('job') && has('channel') && has('lambda'))
-        call OmniSharp#util#EchoErr('Error: A newer version of Vim is required for stdio')
+        call OmniSharp#util#EchoErr(
+        \ 'Error: A newer version of Vim is required for stdio')
         let s:capable = 0
       endif
     endif
   else
     if !(has('python') || has('python3'))
-      call OmniSharp#util#EchoErr('Error: OmniSharp requires Vim compiled with +python or +python3')
+      call OmniSharp#util#EchoErr(
+      \ 'Error: OmniSharp requires Vim compiled with +python or +python3')
       let s:capable = 0
     endif
   endif
@@ -151,15 +154,21 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
   if exists('g:OmniSharp_server_path')
     let s:server_path = g:OmniSharp_server_path
   else
-    let parts = [g:OmniSharp_server_install]
-    if has('win32') || s:is_cygwin() || g:OmniSharp_server_use_mono
+    let parts = [OmniSharp#util#ServerDir()]
+    if has('win32')
+    \ || g:OmniSharp_translate_cygwin_wsl
+    \ || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
     else
       let parts += ['run']
     endif
     let s:server_path = join(parts, s:dir_separator)
     if !executable(s:server_path)
-      if confirm('The OmniSharp server does not appear to be installed. Would you like to install it?', "&Yes\n&No", 2) == 1
+      let msg = [
+      \ 'The OmniSharp server does not appear to be installed.',
+      \ 'Would you like to install it?'
+      \]
+      if confirm(join(msg), "&Yes\n&No", 2) == 1
         call OmniSharp#Install()
       else
         redraw
@@ -199,6 +208,54 @@ function! OmniSharp#util#PathJoin(parts) abort
   return join([s:plugin_root_dir] + parts, s:dir_separator)
 endfunction
 
+function! OmniSharp#util#ServerDir() abort
+  if exists('g:OmniSharp_server_install')
+    return g:OmniSharp_server_install
+  endif
+
+  if exists('g:OmniSharp_server_path')
+    return fnamemodify(g:OmniSharp_server_path, ':p:h')
+  endif
+
+  " Check for existing server
+  let install_parts = [expand('$HOME'), '.omnisharp', 'omnisharp-roslyn']
+  let prior_install = join(install_parts, s:dir_separator)
+
+  if isdirectory(prior_install)
+    return prior_install
+  endif
+
+  if has('win32')
+    let basedir = expand('$LOCALAPPDATA')
+  elseif g:OmniSharp_translate_cygwin_wsl
+    let basedir = OmniSharp#util#Trim(
+    \ system('cmd.exe /c echo %LocalAppData% 2>/dev/null'))
+    let win_dir = join([basedir, 'omnisharp-vim', 'omnisharp-roslyn'], '\')
+    return OmniSharp#util#TranslatePathForClient(win_dir)
+  elseif exists('$XDG_CACHE_HOME')
+    let basedir = expand('$XDG_CACHE_HOME')
+  else
+    let basedir = join([expand('$HOME'), '.cache'], s:dir_separator)
+  endif
+  return join([basedir, 'omnisharp-vim', 'omnisharp-roslyn'], s:dir_separator)
+endfunction
+
+" The trim() function was added in 8.0.1630 - when not available, use
+" substitute()
+function! OmniSharp#util#Trim(value) abort
+  if exists('*trim')
+    return trim(a:value)
+  else
+    return substitute(a:value, '^\s*\(.\{-}\)\s*$', '\1', '')
+  endif
+endfunction
+
+" Get a global temp path that can be used to store temp files for this instance
+function! OmniSharp#util#TempDir() abort
+  let s:temp_dir = get(s:, 'temp_dir', fnamemodify(tempname(), ':p:h'))
+  return s:temp_dir
+endfunction
+
 function! OmniSharp#util#TranslatePathForClient(filename) abort
   let filename = a:filename
   if g:OmniSharp_translate_cygwin_wsl && (s:is_wsl() || s:is_msys() || s:is_cygwin())
@@ -216,7 +273,7 @@ function! OmniSharp#util#TranslatePathForClient(filename) abort
   " Check if the file is a metadatafile. If it is, map it to the
   " correct temp file on disk
   if filename =~# '\$metadata\$'
-    let filename = g:OmniSharp_temp_dir . '/' . fnamemodify(filename, ':t')
+    let filename = OmniSharp#util#TempDir() . '/' . fnamemodify(filename, ':t')
   endif
   return fnamemodify(filename, ':.')
 endfunction

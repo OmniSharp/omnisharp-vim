@@ -468,7 +468,7 @@ function! OmniSharp#Install(...) abort
 
   let l:http = g:OmniSharp_server_stdio ? '' : '-H'
   let l:version = a:0 > 0 ? '-v ' . shellescape(a:1) : ''
-  let l:location = shellescape(g:OmniSharp_server_install)
+  let l:location = shellescape(OmniSharp#util#ServerDir())
 
   if has('win32')
     let l:logfile = s:plugin_root_dir . '\log\install.log'
@@ -488,6 +488,10 @@ function! OmniSharp#Install(...) abort
 
     let l:command = printf('/bin/sh %s %s %s -l %s %s',
     \ l:script, l:http, l:mono, l:location, l:version)
+
+    if g:OmniSharp_translate_cygwin_wsl
+      let l:command .= ' -W'
+    endif
   endif
 
   " Begin server installation
@@ -514,12 +518,7 @@ function! OmniSharp#Install(...) abort
     try
       let l:command = has('win32') ? 'type ' : 'cat '
       let l:version = system(l:command . l:version_file_location)
-      if exists('*trim')
-        let l:version = trim(l:version)
-      else
-        let l:version = substitute(l:version, '^\s*\(.\{-}\)\s*$', '\1', '')
-      endif
-      let l:version .= ' '
+      let l:version = OmniSharp#util#Trim(l:version) . ' '
     catch | endtry
     echohl Title
     echomsg printf('OmniSharp-Roslyn %sinstalled to %s', l:version, l:location)

@@ -159,12 +159,13 @@ No special configuration is required for cygwin. The automatic installation scri
 #### Windows Subsystem for Linux (WSL)
 OmniSharp-roslyn can function perfectly well in WSL using linux binaries, if the environment is correctly configured (see [OmniSharp-roslyn](https://github.com/OmniSharp/omnisharp-roslyn) for requirements).
 However, if you have the .NET Framework installed in Windows, you may have better results using the Windows binaries.
-To do this, follow the Manual installation instructions above, configure your vimrc to point to the `OmniSharp.exe` file, and let OmniSharp-vim know that you are operating in Cygwin/WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
+To do this, let OmniSharp-vim know that you are operating in WSL mode (indicating that file paths need to be translated by OmniSharp-vim from Unix-Windows and back:
 
 ```vim
-let g:OmniSharp_server_path = '/mnt/c/OmniSharp/omnisharp.win-x64/OmniSharp.exe'
 let g:OmniSharp_translate_cygwin_wsl = 1
 ```
+
+Running `:OmniSharpInstall` from WSL when `g:OmniSharp_translate_cygwin_wsl = 1` results in the Windows version of OmniSharp-roslyn being installed to the standard Windows location `%LocalAppData%\omnisharp-vim\omnisharp-roslyn`.
 
 **Note:** OmniSharp-roslyn stdio version 1.35.3 does _not_ work from WSL, using the Windows server, see [OmniSharp-roslyn #1844](https://github.com/OmniSharp/omnisharp-roslyn/issues/1844).
 Install the previous version with `:OmniSharpInstall v1.35.2`

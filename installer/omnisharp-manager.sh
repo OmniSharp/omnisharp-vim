@@ -18,6 +18,7 @@ Options:
     -h            | Help message
     -H            | Install the HTTP version of the server
     -M            | Use the system Mono rather than the bundled Mono
+    -W            | Use the Windows version of the server (used from WSL)
 EOF
 }
 
@@ -31,13 +32,14 @@ get_latest_version() {
 
 location="$HOME/.omnisharp/"
 
-while getopts v:l:HMuh o "$@"
+while getopts v:l:HMWuh o "$@"
 do
     case "$o" in
         v)      version="$OPTARG";;
         l)      location="$OPTARG";;
         H)      http=".http";;
         M)      mono=1;;
+        W)      windows=1;;
         u)      usage && exit 0;;
         h)      print_help && exit 0;;
         [?])    usage && exit 1;;
@@ -102,6 +104,11 @@ case "$(uname -s)" in
 esac
 
 [ -n "$mono" ] && os="mono"
+
+if [ -n "$windows" ]; then
+   os="win-${machine}"
+   ext="zip"
+fi
 
 file_name="omnisharp${http}-${os}.${ext}"
 

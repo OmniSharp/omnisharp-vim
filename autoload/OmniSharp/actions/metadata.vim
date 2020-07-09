@@ -30,7 +30,7 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   let host = OmniSharp#GetHost()
   let metadata_filename = fnamemodify(
   \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
-  let temp_file = g:OmniSharp_temp_dir . '/' . metadata_filename
+  let temp_file = OmniSharp#util#TempDir() . '/' . metadata_filename
   let lines = split(a:response.Source, "\n", 1)
   let lines = map(lines, {i,v -> substitute(v, '\r', '', 'g')})
   call writefile(lines, temp_file, 'b')
