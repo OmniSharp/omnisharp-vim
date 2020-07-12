@@ -49,7 +49,7 @@ if g:OmniSharp_highlighting
   augroup OmniSharp_HighlightTypes
     autocmd!
     autocmd BufEnter *.cs,*.csx
-    \ if OmniSharp#util#CheckCapabilities() |
+    \ if !pumvisible() && OmniSharp#util#CheckCapabilities() |
     \   call OmniSharp#actions#highlight#Buffer() |
     \ endif
 
