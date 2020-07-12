@@ -34,10 +34,12 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
       " OmniSharp-vim will not log the requests and responses - just record
       " their commands
       let prefix = matchstr(lines[0], '\*\s\+\zs\S\+\ze\s\+\*')
+      let num_lines = len(lines)
       let commands = filter(lines, "v:val =~# '^\\s*\"Command\":'")
       if len(commands)
         let command = matchstr(commands[0], '"Command": "\zs[^"]\+\ze"')
-        let command_name = printf('Server %s: %s', prefix, command)
+        let command_name = printf('Server %s: %s (%d lines)',
+        \ prefix, command, num_lines - 1)
         call writefile([command_name], a:job.logfile, 'a')
       endif
     else

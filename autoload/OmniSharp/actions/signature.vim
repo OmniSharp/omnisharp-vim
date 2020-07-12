@@ -64,7 +64,7 @@ function! s:StdioSignatureHelpRH(Callback, seq, opts, response) abort
   if has_key(a:opts, 'ForCompleteMethod') && !g:OmniSharp_want_snippet
     " Because of our 'falsified' request with an extra '(', re-synchronise the
     " server's version of the buffer with the actual buffer contents.
-    call OmniSharp#actions#buffer#Update()
+    call OmniSharp#actions#buffer#Update(0, 0, 1)
   endif
   call a:Callback(a:response.Body)
 endfunction

@@ -1,38 +1,35 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously)
+" Optional arguments:
+" - callback: funcref to be called after the response is returned (synchronously
+"   or asynchronously)
+" - initializing: flag indicating that this is the first request for this buffer
+" - sendBuffer: flag indicating that the buffer contents should be sent,
+"   regardless of &modified status or b:changedtick
 function! OmniSharp#actions#buffer#Update(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
-  let initializing = a:0 > 1
+  let cb = a:0 && type(a:1) == type(function('tr')) ? { 'Callback': a:1 } : {}
+  let initializing = a:0 > 1 && a:2 is 1
+  let sendBuffer = initializing || (a:0 > 2 ? a:3 : 0)
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
-  if initializing ||  b:changedtick != get(b:, 'OmniSharp_UpdateChangeTick', -1)
+  let lasttick = get(b:, 'OmniSharp_UpdateChangeTick', -1)
+  if initializing || sendBuffer || b:changedtick != lasttick
     let b:OmniSharp_UpdateChangeTick = b:changedtick
     if g:OmniSharp_server_stdio
-      if initializing
-        let opts.Initializing = 1
-      endif
-      call s:StdioUpdate(opts)
+      let opts = {
+      \ 'ResponseHandler': function('s:StdioUpdateRH', [cb]),
+      \ 'Initializing': initializing
+      \}
+      call OmniSharp#stdio#Request('/updatebuffer', opts)
     else
       if !OmniSharp#IsServerRunning() | return | endif
       call OmniSharp#py#Eval('updateBuffer()')
       call OmniSharp#py#CheckForError()
-      if has_key(opts, 'Callback')
-        call opts.Callback()
+      if has_key(cb, 'Callback')
+        call cb.Callback()
       endif
     endif
   endif
-endfunction
-
-function! s:StdioUpdate(opts) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:StdioUpdateRH', [a:opts])
-  \}
-  if has_key(a:opts, 'Initializing')
-    let opts.Initializing = 1
-  endif
-  call OmniSharp#stdio#Request('/updatebuffer', opts)
 endfunction
 
 function! s:StdioUpdateRH(opts, response) abort

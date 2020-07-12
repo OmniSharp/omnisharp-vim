@@ -112,7 +112,7 @@ function! OmniSharp#stdio#Request(command, opts) abort
     return 0
   endif
 
-  if has_key(a:opts, 'Initializing')
+  if get(a:opts, 'Initializing', 0)
     " The buffer is being initialized - this request will always be sent
   else
     if !get(host, 'initialized')
