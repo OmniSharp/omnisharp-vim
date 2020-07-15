@@ -60,9 +60,11 @@ function! s:HandleServerEvent(job, res) abort
     " When OmniSharp-roslyn is configured with `EnableAnalyzersSupport`, the
     " first diagnostic or code action request will trigger analysis of ALL
     " solution documents.
-    " These diagnostics results are sent out over stdio so we might as well
-    " capture them and update ALE for loaded buffers.
-    if has_key(g:, 'OmniSharp_ale_diagnostics_requested')
+    " These diagnostics results are sent out over stdio so we can capture them
+    " and update ALE for loaded buffers. This is necessary because, especially
+    " when the project is first loading, the requested diagnostics are often
+    " wrong and quickly replaced by correct, unsolicited diagnostics.
+    if has_key(g:, 'OmniSharp_diagnostics_requested')
       if get(a:res, 'Event', '') ==# 'Diagnostic'
         for result in get(body, 'Results', [])
           let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
