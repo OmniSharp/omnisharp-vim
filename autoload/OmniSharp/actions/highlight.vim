@@ -4,9 +4,17 @@ set cpoptions&vim
 function! OmniSharp#actions#highlight#Buffer(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
   if bufname(bufnr) ==# '' || OmniSharp#FugitiveCheck() | return | endif
+  if getbufvar(bufnr, 'OmniSharp_debounce_highlight', 0)
+    call timer_stop(getbufvar(bufnr, 'OmniSharp_debounce_highlight'))
+  endif
+  call setbufvar(bufnr, 'OmniSharp_debounce_highlight',
+  \ timer_start(200, function('s:HighlightBuffer', [bufnr])))
+endfunction
+
+function! s:HighlightBuffer(bufnr, timer) abort
   if g:OmniSharp_server_stdio &&
   \ (has('textprop') || exists('*nvim_create_namespace'))
-    call s:StdioHighlight(bufnr)
+    call s:StdioHighlight(a:bufnr)
   else
     " Full semantic highlighting not supported - highlight types instead
     call OmniSharp#actions#highlight_types#Buffer()
