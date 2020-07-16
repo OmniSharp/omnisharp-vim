@@ -43,9 +43,9 @@ command! -buffer -bar OmniSharpNavigateDown call OmniSharp#actions#navigate#Down
 command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definition#Preview()
 command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
 command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
+command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
 command! -buffer -bar OmniSharpRunTest call OmniSharp#actions#test#Run()
 command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<f-args>)
-command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
 
@@ -91,37 +91,37 @@ endif
 let b:undo_ftplugin .= '
 \ execute "autocmd! OmniSharp_FileType * <buffer>"
 \
-\|  unlet b:OmniSharp_ftplugin_loaded
-\|  delcommand OmniSharpCodeFormat
-\|  delcommand OmniSharpDocumentation
-\|  delcommand OmniSharpFindImplementations
-\|  delcommand OmniSharpFindMembers
-\|  delcommand OmniSharpFindSymbol
-\|  delcommand OmniSharpFindUsages
-\|  delcommand OmniSharpFixUsings
-\|  delcommand OmniSharpGetCodeActions
-\|  delcommand OmniSharpGlobalCodeCheck
-\|  delcommand OmniSharpGotoDefinition
-\|  delcommand OmniSharpHighlight
-\|  delcommand OmniSharpHighlightEcho
-\|  delcommand OmniSharpHighlightEchoKind
-\|  delcommand OmniSharpHighlightTypes
-\|  delcommand OmniSharpNavigateUp
-\|  delcommand OmniSharpNavigateDown
-\|  delcommand OmniSharpPreviewDefinition
-\|  delcommand OmniSharpPreviewImplementation
-\|  delcommand OmniSharpRename
-\|  delcommand OmniSharpRenameTo
-\|  delcommand OmniSharpRestartAllServers
-\|  delcommand OmniSharpRestartServer
-\|  delcommand OmniSharpRunTest
-\|  delcommand OmniSharpRunTestsInFile
-\|  delcommand OmniSharpSignatureHelp
-\|  delcommand OmniSharpStartServer
-\|  delcommand OmniSharpStopAllServers
-\|  delcommand OmniSharpStopServer
-\|  delcommand OmniSharpTypeLookup
+\| unlet b:OmniSharp_ftplugin_loaded
+\| delcommand OmniSharpCodeFormat
+\| delcommand OmniSharpDocumentation
+\| delcommand OmniSharpFindImplementations
+\| delcommand OmniSharpFindMembers
+\| delcommand OmniSharpFindSymbol
+\| delcommand OmniSharpFindUsages
+\| delcommand OmniSharpFixUsings
+\| delcommand OmniSharpGetCodeActions
+\| delcommand OmniSharpGlobalCodeCheck
+\| delcommand OmniSharpGotoDefinition
+\| delcommand OmniSharpHighlight
+\| delcommand OmniSharpHighlightEcho
+\| delcommand OmniSharpHighlightEchoKind
+\| delcommand OmniSharpHighlightTypes
+\| delcommand OmniSharpNavigateUp
+\| delcommand OmniSharpNavigateDown
+\| delcommand OmniSharpPreviewDefinition
+\| delcommand OmniSharpPreviewImplementation
+\| delcommand OmniSharpRename
+\| delcommand OmniSharpRenameTo
+\| delcommand OmniSharpRestartAllServers
+\| delcommand OmniSharpRestartServer
+\| delcommand OmniSharpRunTest
+\| delcommand OmniSharpRunTestsInFile
+\| delcommand OmniSharpSignatureHelp
+\| delcommand OmniSharpStartServer
+\| delcommand OmniSharpStopAllServers
+\| delcommand OmniSharpStopServer
+\| delcommand OmniSharpTypeLookup
 \
-\|  setlocal omnifunc<'
+\| setlocal omnifunc<'
 
 " vim:et:sw=2:sts=2
