@@ -16,7 +16,7 @@ endfunction
 
 function! s:ProjectRH(Callback, bufnr, response) abort
   if !a:response.Success | return | endif
-  let host = OmniSharp#GetHost(a:bufnr)
+  let host = getbufvar(a:bufnr, 'OmniSharp_host')
   let host.project = a:response.Body
   call a:Callback()
 endfunction

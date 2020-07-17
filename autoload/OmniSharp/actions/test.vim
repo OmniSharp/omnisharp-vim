@@ -3,17 +3,18 @@ set cpoptions&vim
 
 let s:runningTest = 0
 
-function! OmniSharp#actions#test#Run() abort
+function! OmniSharp#actions#test#Run(...) abort
   if !s:CheckCapabilities() | return | endif
-  if !has_key(OmniSharp#GetHost(bufnr('%')), 'project')
+  let bufnr = a:0 ? a:1 : bufnr('%')
+  if !has_key(OmniSharp#GetHost(bufnr), 'project')
     " Initialize the test by fetching the project for the buffer - then call
     " this function again in the callback
-    call OmniSharp#actions#project#Get(bufnr('%'),
-    \ function('OmniSharp#actions#test#Run'))
+    call OmniSharp#actions#project#Get(bufnr,
+    \ function('OmniSharp#actions#test#Run', [bufnr]))
     return
   endif
   let s:runningTest = 1
-  call OmniSharp#actions#codestructure#Get(bufnr('%'),
+  call OmniSharp#actions#codestructure#Get(bufnr,
   \ function('s:RunTest', [function('s:CBRunTest')]))
 endfunction
 
