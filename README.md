@@ -153,9 +153,6 @@ let g:OmniSharp_server_path = 'C:\OmniSharp\omnisharp.win-x64\OmniSharp.exe'
 let g:OmniSharp_server_path = '/home/me/omnisharp/omnisharp.http-linux-x64/run'
 ```
 
-#### Windows: Cygwin
-No special configuration is required for cygwin. The automatic installation script for cygwin downloads the *Windows* OmniSharp-roslyn release. OmniSharp-vim detects that it is running in a cygwin environment and automatically enables Windows/cygwin file path translations by setting the default value of `g:OmniSharp_translate_cygwin_wsl` to `1`.
-
 #### Windows Subsystem for Linux (WSL)
 OmniSharp-roslyn can function perfectly well in WSL using linux binaries, if the environment is correctly configured (see [OmniSharp-roslyn](https://github.com/OmniSharp/omnisharp-roslyn) for requirements).
 However, if you have the .NET Framework installed in Windows, you may have better results using the Windows binaries.
@@ -169,6 +166,11 @@ Running `:OmniSharpInstall` from WSL when `g:OmniSharp_translate_cygwin_wsl = 1`
 
 **Note:** OmniSharp-roslyn stdio version 1.35.3 does _not_ work from WSL, using the Windows server, see [OmniSharp-roslyn #1844](https://github.com/OmniSharp/omnisharp-roslyn/issues/1844).
 Install the previous version with `:OmniSharpInstall v1.35.2`
+
+#### Windows: Cygwin
+The automatic installation script for cygwin downloads the *Windows* OmniSharp-roslyn release. OmniSharp-vim detects that it is running in a cygwin environment and automatically enables Windows/cygwin file path translations by setting the default value of `g:OmniSharp_translate_cygwin_wsl` to `1`.
+
+**Note:** The Windows stdio server unfortunately does not work from cygwin, so when cygwin is detected (`has('win32unix')`) the HTTP server is used by default.
 
 #### Linux and Mac
 OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.

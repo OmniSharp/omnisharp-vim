@@ -3,7 +3,8 @@ let g:OmniSharp_loaded = 1
 
 let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
 
-let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', 1)
+" Default to `1`, except in cygwin defaults to `0`
+let g:OmniSharp_server_stdio = get(g:, 'OmniSharp_server_stdio', !has('win32unix'))
 
 let g:OmniSharp_server_display_loading = get(g:, 'OmniSharp_server_display_loading', 1)
 let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeout', 180)
@@ -15,6 +16,7 @@ let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
 
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
 
+" Default to `0`, except in cygwin
 let g:OmniSharp_translate_cygwin_wsl = get(g:, 'OmniSharp_translate_cygwin_wsl', has('win32unix'))
 
 let g:OmniSharp_typeLookupInPreview = get(g:, 'OmniSharp_typeLookupInPreview', 0)
