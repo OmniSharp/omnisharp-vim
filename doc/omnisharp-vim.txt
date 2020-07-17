@@ -412,9 +412,9 @@ convenient user re-mapping. These can be used like so: >
     Displays the definition of the symbol under the cursor in the preview
     window
 
-                                               *:OmniSharpPreviewImplementations*
+                                                *:OmniSharpPreviewImplementation*
                                        *<Plug>(omnisharp_preview_implementation)*
-:OmniSharpPreviewImplementations
+:OmniSharpPreviewImplementation
     Displays the implementation of the interface/class under the cursor in the
     preview window. If more than one implementation exists, the number of
     implementations is echoed.
