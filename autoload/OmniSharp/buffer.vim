@@ -36,14 +36,29 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
     let winview = winsaveview()
     let bufname = bufname('%')
     let bufnr = bufnr('%')
+    let unload_bufnrs = []
     let hidden_bak = &hidden | set hidden
     for change in changes
-      call OmniSharp#locations#Navigate({
-      \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
-      \}, 1)
-      call OmniSharp#buffer#Update(change)
-      if bufnr('%') != bufnr
-        silent write | silent edit
+      let modificationType = get(change, 'ModificationType', 0)
+      if modificationType == 0 " Modified
+        call OmniSharp#locations#Navigate({
+        \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
+        \}, 1)
+        call OmniSharp#buffer#Update(change)
+        if bufnr('%') != bufnr
+          silent write | silent edit
+        endif
+      elseif modificationType == 1 " Opened
+        " ModificationType 1 is typically done in conjunction with a rename
+        " (ModificationType 2)
+        let bufname = OmniSharp#util#TranslatePathForClient(change.FileName)
+        let bufnr = bufadd(bufname)
+        " neovim requires that the buffer be explicitly loaded
+        call bufload(bufnr)
+      elseif modificationType == 2 " Renamed
+        let oldbufname = OmniSharp#util#TranslatePathForClient(change.FileName)
+        let oldbufnr = bufadd(oldbufname)
+        call add(unload_bufnrs, oldbufnr)
       endif
     endfor
     if bufnr('%') != bufnr
@@ -51,6 +66,12 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
       \ 'filename': bufname
       \}, 1)
     endif
+    for unload_bufnr in unload_bufnrs
+      " Don't worry about unwritten changes when there has been a rename - the
+      " buffer contents were sent along with the code-action request, so the
+      " modified contents are what has been written.
+      execute 'bwipeout!' unload_bufnr
+    endfor
     call winrestview(winview)
     let [line, col] = getpos("'`")[1:2]
     if line > 1 && col > 1

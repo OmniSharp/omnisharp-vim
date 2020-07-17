@@ -162,7 +162,8 @@ function! OmniSharp#actions#codeactions#Run(action, ...) abort
   \ 'ResponseHandler': RH,
   \ 'Parameters': {
   \   'Identifier': a:action.Identifier,
-  \   'WantsTextChanges': 1
+  \   'WantsTextChanges': 1,
+  \   'WantsAllCodeActionOperations': 1
   \ },
   \ 'UsePreviousPosition': 1
   \}
