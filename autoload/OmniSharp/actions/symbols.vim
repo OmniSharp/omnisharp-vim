@@ -3,21 +3,22 @@ set cpoptions&vim
 
 function! OmniSharp#actions#symbols#Find(...) abort
   let filter = a:0 && a:1 isnot 0 ? a:1 : ''
+  let symbolfilter = a:0 == 2 ? a:2 : 'TypeAndMember'
   if !OmniSharp#IsServerRunning() | return | endif
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBFindSymbol', [filter])
-    call s:StdioFind(filter, Callback)
+    call s:StdioFind(filter, symbolfilter, Callback)
   else
-    let locs = OmniSharp#py#Eval(printf('findSymbols(%s)', string(filter)))
+    let locs = OmniSharp#py#Eval(printf('findSymbols(%s, %s)', string(filter), string(symbolfilter)))
     if OmniSharp#py#CheckForError() | return | endif
     return s:CBFindSymbol(filter, locs)
   endif
 endfunction
 
-function! s:StdioFind(filter, Callback) abort
+function! s:StdioFind(filter, symbolfilter, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:StdioFindRH', [a:Callback]),
-  \ 'Parameters': { 'Filter': a:filter }
+  \ 'Parameters': { 'Filter': a:filter, 'SymbolFilter': a:symbolfilter }
   \}
   call OmniSharp#stdio#Request('/findsymbols', opts)
 endfunction
