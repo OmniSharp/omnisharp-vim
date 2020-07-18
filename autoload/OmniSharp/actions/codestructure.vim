@@ -1,11 +1,11 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#actions#codestructure#Get(bufnr, Callback) abort
+function! OmniSharp#actions#codestructure#Get(bufnr, sendbuffer, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:CodeStructureRH', [a:bufnr, a:Callback]),
   \ 'BufNum': a:bufnr,
-  \ 'SendBuffer': 0
+  \ 'SendBuffer': a:sendbuffer
   \}
   call OmniSharp#stdio#Request('/v2/codestructure', opts)
 endfunction
