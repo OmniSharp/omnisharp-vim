@@ -31,6 +31,7 @@ command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentatio
 command! -buffer -bar OmniSharpFindImplementations call OmniSharp#actions#implementations#Find()
 command! -buffer -bar OmniSharpFindMembers call OmniSharp#actions#members#Find()
 command! -buffer -bar -nargs=? OmniSharpFindSymbol call OmniSharp#actions#symbols#Find(<q-args>)
+command! -buffer -bar -nargs=? OmniSharpFindType call OmniSharp#actions#symbols#Find(<q-args>, 'Type')
 command! -buffer -bar OmniSharpFindUsages call OmniSharp#actions#usages#Find()
 command! -buffer -bar OmniSharpFixUsings call OmniSharp#actions#usings#Fix()
 command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#actions#codeactions#Get('normal')
@@ -54,6 +55,7 @@ nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_implementations) :OmniSharpFindImplementations<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_members) :OmniSharpFindMembers<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_symbol) :OmniSharpFindSymbol<CR>
+nnoremap <buffer> <Plug>(omnisharp_find_type) :OmniSharpFindType<CR>
 nnoremap <buffer> <Plug>(omnisharp_find_usages) :OmniSharpFindUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_fix_usings) :OmniSharpFixUsings<CR>
 nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
@@ -97,6 +99,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpFindImplementations
 \| delcommand OmniSharpFindMembers
 \| delcommand OmniSharpFindSymbol
+\| delcommand OmniSharpFindType
 \| delcommand OmniSharpFindUsages
 \| delcommand OmniSharpFixUsings
 \| delcommand OmniSharpGetCodeActions

@@ -215,9 +215,10 @@ def fixUsings():
 
 
 @vimcmd
-def findSymbols(filter=''):
+def findSymbols(filter='', symbolfilter=''):
     parameters = {}
     parameters["filter"] = filter
+    parameters["symbolfilter"] = symbolfilter
     response = getResponse(ctx, '/findsymbols', parameters, json=True)
     return quickfixes_from_response(ctx, response['QuickFixes'])
 

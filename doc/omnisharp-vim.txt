@@ -424,6 +424,12 @@ convenient user re-mapping. These can be used like so: >
 :OmniSharpFindSymbol
     Fuzzy-search through symbols
 
+                                                           *:OmniSharpFindType*
+                                                 *<Plug>(omnisharp_find_type)*
+:OmniSharpFindType
+    Fuzzy-search through types. Better performance than OmniSharpFindSymbol in
+    a large codebase.
+
                                                            *:OmniSharpFindUsages*
                                                   *<Plug>(omnisharp_find_usages)*
 :OmniSharpFindUsages
