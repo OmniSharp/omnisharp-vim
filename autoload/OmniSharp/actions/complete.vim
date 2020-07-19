@@ -69,10 +69,10 @@ endfunction
 
 function! s:StdioGetCompletions(partial, Callback) abort
   let wantDocPopup = OmniSharp#popup#Enabled()
-  \ && g:omnicomplete_fetch_full_documentation
+  \ && g:OmniSharp_complete_documentation
   \ && &completeopt =~# 'popup'
   let wantDoc = wantDocPopup ? 'false'
-  \ : g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
+  \ : g:OmniSharp_complete_documentation ? 'true' : 'false'
   let wantSnippet = g:OmniSharp_want_snippet ? 'true' : 'false'
   let parameters = {
   \ 'WordToComplete': a:partial,
@@ -109,7 +109,7 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     \}
     if a:wantDocPopup
       let completion.info = cmp.MethodHeader . "\n ..."
-    elseif g:omnicomplete_fetch_full_documentation
+    elseif g:OmniSharp_complete_documentation
       let completion.info = ' '
       if has_key(cmp, 'Description') && cmp.Description != v:null
         let completion.info = cmp.Description
