@@ -11,11 +11,17 @@ endfunction
 
 function! s:CreateFolds(bufnr, codeElements) abort
   if a:bufnr != bufnr('%') | return | endif
+  let ranges = reverse(s:FindBlocks(a:codeElements))
+  if len(ranges) == 0
+    return
+  endif
   setlocal foldmethod=manual
   normal! zE
-  for range in reverse(s:FindBlocks(a:codeElements))
+  for range in ranges
     execute printf('%d,%dfold', range[0], range[1])
   endfor
+  " All folds are currently closed - reset to current foldlevel
+  let &l:foldlevel = &foldlevel
 endfunction
 
 function! s:FindBlocks(codeElements) abort
