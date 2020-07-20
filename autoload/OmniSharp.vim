@@ -238,9 +238,9 @@ function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnr = a:0 > 1 ? a:2 : bufnr('%')
   if empty(getbufvar(bufnr, 'OmniSharp_buf_server'))
-    let dir = s:FindServerRunningOnParentDirectory(bufnr)
-    if !empty(dir)
-      call setbufvar(bufnr, 'OmniSharp_buf_server', dir)
+    let sln_or_dir = s:FindRunningServerForBuffer(bufnr)
+    if !empty(sln_or_dir)
+      call setbufvar(bufnr, 'OmniSharp_buf_server', sln_or_dir)
     else
       try
         let sln = s:FindSolution(interactive, bufnr)
@@ -429,26 +429,31 @@ function! s:FindSolution(interactive, bufnr) abort
   endif
 endfunction
 
-function! s:FindServerRunningOnParentDirectory(bufnr) abort
+" Check whether filename is in the same directory or subdirectory of a running
+" server solution, or one of the solution's included projects
+function! s:FindRunningServerForBuffer(bufnr) abort
   let filename = expand('#' . a:bufnr . ':p')
+  let selected_sln_or_dir = ''
   let longest_dir_match = ''
   let longest_dir_length = 0
   let running_jobs = OmniSharp#proc#ListRunningJobs()
   for sln_or_dir in running_jobs
-    if isdirectory(sln_or_dir) && s:DirectoryContainsFile(sln_or_dir, filename)
-      let dir_length = len(sln_or_dir)
-      if dir_length > longest_dir_length
-        let longest_dir_match = sln_or_dir
-        let longest_dir_length = dir_length
+    let paths = [sln_or_dir]
+    for project in get(OmniSharp#proc#GetJob(sln_or_dir), 'projects', [])
+      call add(paths, project.path)
+    endfor
+    for path in paths
+      let directory = isdirectory(path) ? path : fnamemodify(path, ':h')
+      if stridx(filename, directory) == 0
+        if len(path) > longest_dir_length
+          let longest_dir_match = path
+          let selected_sln_or_dir = sln_or_dir
+          let longest_dir_length = len(path)
+        endif
       endif
-    endif
+    endfor
   endfor
-  return longest_dir_match
-endfunction
-
-function! s:DirectoryContainsFile(directory, file) abort
-  let idx = stridx(a:file, a:directory)
-  return (idx == 0)
+  return selected_sln_or_dir
 endfunction
 
 
