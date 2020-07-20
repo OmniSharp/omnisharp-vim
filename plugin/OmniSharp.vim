@@ -14,6 +14,7 @@ let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', 1)
 let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_solution', 1)
 
 let g:OmniSharp_complete_documentation = get(g:, 'OmniSharp_complete_documentation', get(g:, 'omnicomplete_fetch_full_documentation', 1))
+let g:OmniSharp_fold_kinds = get(g:, 'OmniSharp_fold_kinds', [])
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', g:OmniSharp_server_stdio ? 'info' : 'warning')
 let g:OmniSharp_lookup_metadata = get(g:, 'OmniSharp_lookup_metadata', 1)
 let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)

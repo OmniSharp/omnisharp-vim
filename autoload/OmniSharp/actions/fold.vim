@@ -22,7 +22,8 @@ function! s:FindBlocks(codeElements) abort
   if type(a:codeElements) != type([]) | return [] | endif
   let ranges = []
   for element in a:codeElements
-    if get(element, 'Kind', '') !=# 'namespace'
+    if len(g:OmniSharp_fold_kinds) == 0 ||
+    \ index(g:OmniSharp_fold_kinds, get(element, 'Kind', '')) >= 0
       if has_key(element, 'Ranges') && has_key(element.Ranges, 'full')
         let full = element.Ranges.full
         let start = get(get(full, 'Start', {}), 'Line', 0)
