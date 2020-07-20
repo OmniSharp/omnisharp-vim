@@ -510,6 +510,11 @@ convenient user re-mapping. These can be used like so: >
 :OmniSharpGetCodeActions
     Fuzzy-serach through available code actions
 
+                                                     *:OmniSharpRepeatCodeAction*
+                                           *<Plug>(omnisharp_code_action_repeat)*
+:OmniSharpRepeatCodeAction
+    Repeat the last code action performed at the current cursor position
+
                                                       *:OmniSharpGlobalCodeCheck*
                                             *<Plug>(omnisharp_global_code_check)*
 :OmniSharpGlobalCodeCheck

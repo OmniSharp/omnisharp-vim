@@ -488,9 +488,12 @@ augroup omnisharp_commands
   autocmd FileType cs nmap <silent> <buffer> ]] <Plug>(omnisharp_navigate_down)
   " Find all code errors/warnings for the current solution and populate the quickfix window
   autocmd FileType cs nmap <silent> <buffer> <Leader>osgcc <Plug>(omnisharp_global_code_check)
-  " Contextual code actions (uses fzf, CtrlP or unite.vim when available)
+  " Contextual code actions (uses fzf, CtrlP or unite.vim selector when available)
   autocmd FileType cs nmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
   autocmd FileType cs xmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
+  " Repeat the last code action performed (does not use a selector)
+  autocmd FileType cs nmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
+  autocmd FileType cs xmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
 
   autocmd FileType cs nmap <silent> <buffer> <Leader>os= <Plug>(omnisharp_code_format)
 
