@@ -354,6 +354,24 @@ Use this option to enable syntastic integration >
 -------------------------------------------------------------------------------
 3.7 MISCELLANEOUS                               *omnisharp-miscellaneous-options*
 
+                                                         *g:OmniSharp_fold_kinds*
+The "kinds" of elements to fold with |:OmniSharpFold|. Possible values are:
+
+    // types
+    class, delegate, enum, interface, struct
+
+    // members
+    constant, constructor, destructor, enumMember, event, field, indexer,
+    method, operator, property
+
+    // other
+    namespace, unknown
+
+An empty list means that _all_ kinds should be folded, when they span a range
+greater than 'foldminlines'.
+Default: [] >
+    let g:OmniSharp_fold_kinds = ['method', 'constructor', 'destructor']
+<
                                                     *g:OmniSharp_lookup_metadata*
 When using `OmniSharpGotoDefinition` and `OmniSharpPreviewDefinition`,
 fall back to looking up metadata for compiled types.
@@ -446,6 +464,13 @@ convenient user re-mapping. These can be used like so: >
                                                    *<Plug>(omnisharp_fix_usings)*
 :OmniSharpFixUsings
     Removes unused using directives
+
+                                                                 *:OmniSharpFold*
+                                                         *<Plug>(omnisharp_fold)*
+:OmniSharpFold
+    Create folds around code structure elements such as methods and classes.
+    Folds are only created for elements spanning over 'foldminlines' lines.
+    The kinds of elements to fold can be configured with |g:OmniSharp_fold_kinds|
 
                                                            *:OmniSharpTypeLookup*
                                                   *<Plug>(omnisharp_type_lookup)*
