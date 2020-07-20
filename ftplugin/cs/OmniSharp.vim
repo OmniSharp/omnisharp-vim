@@ -45,6 +45,7 @@ command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definiti
 command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
 command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
 command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
+command! -buffer -bar OmniSharpRepeatCodeAction call OmniSharp#actions#codeactions#Repeat('normal')
 command! -buffer -bar OmniSharpRunTest call OmniSharp#actions#test#Run()
 command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<f-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
@@ -60,6 +61,8 @@ nnoremap <buffer> <Plug>(omnisharp_find_usages) :OmniSharpFindUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_fix_usings) :OmniSharpFixUsings<CR>
 nnoremap <buffer> <Plug>(omnisharp_code_actions) :OmniSharpGetCodeActions<CR>
 xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#actions#codeactions#Get('visual')<CR>
+nnoremap <buffer> <Plug>(omnisharp_code_action_repeat) :OmniSharpRepeatCodeAction<CR>
+xnoremap <buffer> <Plug>(omnisharp_code_action_repeat) :call OmniSharp#actions#codeactions#Repeat('visual')<CR>
 nnoremap <buffer> <Plug>(omnisharp_global_code_check) :OmniSharpGlobalCodeCheck<CR>
 nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>
@@ -117,6 +120,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpRenameTo
 \| delcommand OmniSharpRestartAllServers
 \| delcommand OmniSharpRestartServer
+\| delcommand OmniSharpRepeatCodeAction
 \| delcommand OmniSharpRunTest
 \| delcommand OmniSharpRunTestsInFile
 \| delcommand OmniSharpSignatureHelp

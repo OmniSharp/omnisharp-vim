@@ -97,7 +97,7 @@ function! s:HandleServerEvent(job, res) abort
 endfunction
 
 function! OmniSharp#stdio#Request(command, opts) abort
-  if has_key(a:opts, 'UsePreviousPosition')
+  if get(a:opts, 'UsePreviousPosition', 0)
     let [bufnr, lnum, cnum] = s:lastPosition
   elseif has_key(a:opts, 'BufNum') && a:opts.BufNum != bufnr('%')
     let bufnr = a:opts.BufNum

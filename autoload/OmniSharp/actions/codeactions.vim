@@ -42,6 +42,11 @@ function! s:StdioGet(mode, Callback) abort
   \ 'ResponseHandler': function('s:StdioGetRH', [a:Callback]),
   \ 'SavePosition': 1
   \}
+  call s:PrepareParameters(opts, a:mode)
+  call OmniSharp#stdio#Request('/v2/getcodeactions', opts)
+endfunction
+
+function! s:PrepareParameters(opts, mode) abort
   if a:mode ==# 'visual'
     let start = getpos("'<")
     let end = getpos("'>")
@@ -63,13 +68,12 @@ function! s:StdioGet(mode, Callback) abort
     \   }
     \ }
     \}
-    let opts.Parameters = s:codeActionParameters
+    let a:opts.Parameters = s:codeActionParameters
   else
     if exists('s:codeActionParameters')
       unlet s:codeActionParameters
     endif
   endif
-  call OmniSharp#stdio#Request('/v2/getcodeactions', opts)
 endfunction
 
 function! s:StdioGetRH(Callback, response) abort
@@ -156,16 +160,35 @@ function! s:CBGetCodeActions(mode, actions) abort
 endfunction
 
 
+function! OmniSharp#actions#codeactions#Repeat(mode) abort
+  if !g:OmniSharp_server_stdio
+    echomsg 'This functionality is only available with the stdio server'
+    return
+  endif
+  if !exists('s:lastCodeActionIdentifier')
+    echomsg 'There is no last code action to repeat'
+    return
+  endif
+  call s:PrepareParameters({}, a:mode)
+  let RH = function('OmniSharp#buffer#PerformChanges', [{}])
+  call s:RunCodeAction(s:lastCodeActionIdentifier, 1, RH)
+endfunction
+
 function! OmniSharp#actions#codeactions#Run(action, ...) abort
   let RH = function('OmniSharp#buffer#PerformChanges', [a:0 ? a:1 : {}])
+  let s:lastCodeActionIdentifier = a:action.Identifier
+  call s:RunCodeAction(a:action.Identifier, 0, RH)
+endfunction
+
+function! s:RunCodeAction(identifier, repeating, ResponseHandler) abort
   let opts = {
-  \ 'ResponseHandler': RH,
+  \ 'ResponseHandler': a:ResponseHandler,
   \ 'Parameters': {
-  \   'Identifier': a:action.Identifier,
+  \   'Identifier': a:identifier,
   \   'WantsTextChanges': 1,
   \   'WantsAllCodeActionOperations': 1
   \ },
-  \ 'UsePreviousPosition': 1
+  \ 'UsePreviousPosition': !a:repeating
   \}
   if exists('s:codeActionParameters')
     call extend(opts.Parameters, s:codeActionParameters, 'force')
