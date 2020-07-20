@@ -4,6 +4,7 @@ set cpoptions&vim
 function! OmniSharp#actions#fold#Create() abort
   if !g:OmniSharp_server_stdio
     echomsg 'This functionality is only available with the stdio server'
+    return
   endif
   call OmniSharp#actions#codestructure#Get(bufnr('%'), 1,
   \ function('s:CreateFolds'))
