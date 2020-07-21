@@ -544,8 +544,9 @@ convenient user re-mapping. These can be used like so: >
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
                                                                *:OmniSharpStatus*
-:OmniSharpStatus
-    Displays the status of all running and stopped servers
+:OmniSharpStatus[!]
+    Displays the status of all running servers.
+    When the [!] is included the list will include stopped/dead servers.
 
                                                           *:OmniSharpStartServer*
                                                  *<Plug>(omnisharp_start_server)*

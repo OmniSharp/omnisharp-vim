@@ -1,8 +1,8 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:jobs = {}
-let s:channels = {}
+let s:jobs = get(s:, 'jobs', {})
+let s:channels = get(s:, 'channels', {})
 
 " Neovim jobs {{{ "
 
@@ -115,9 +115,6 @@ function! OmniSharp#proc#vimJobStart(command) abort
     call OmniSharp#util#EchoErr('Not using Vim 8.0+')
     return -1
   endif
-
-
-
   call s:debug('Using vim job_start to start the following command:')
   call s:debug(a:command)
   let opts = {'err_cb': 'OmniSharp#proc#vimErrHandler'}

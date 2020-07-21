@@ -457,17 +457,23 @@ function! s:FindRunningServerForBuffer(bufnr) abort
 endfunction
 
 
-function! OmniSharp#Status() abort
-  let slns = OmniSharp#proc#ListJobs()
-  if len(slns) == 0
-    echohl WarningMsg
-    echo 'No servers started'
-    echohl None
+function! OmniSharp#Status(include_dead) abort
+  let jobs = map(OmniSharp#proc#ListJobs(), {_,s -> OmniSharp#proc#GetJob(s)})
+  call filter(jobs, {_,j -> type(j) == type({})})
+  if len(jobs) == 0
+    echohl WarningMsg | echo 'No servers started' | echohl None
     return
   endif
-  for sln_or_dir in slns
-    if OmniSharp#proc#IsJobRunning(sln_or_dir)
-      let job = OmniSharp#proc#GetJob(sln_or_dir)
+
+  function! s:SortServers(j1, j2) abort
+    let t1 = has_key(a:j1, 'start_time') ? reltimefloat(a:j1.start_time) : 0
+    let t2 = has_key(a:j2, 'start_time') ? reltimefloat(a:j2.start_time) : 0
+    return t1 == t2 ? 0 : t1 < t2 ? 1 : -1
+  endfunction
+  call sort(jobs, 's:SortServers')
+
+  for job in jobs
+    if OmniSharp#proc#IsJobRunning(job.sln_or_dir)
       let total = get(job, 'projects_total', 0)
       let loaded = get(job, 'projects_loaded', 0)
       let pl = total == 1 ? '' : 's'
@@ -481,7 +487,7 @@ function! OmniSharp#Status() abort
           let status = printf('loading (%d of %d project%s)', loaded, total, pl)
         endif
       else
-        if OmniSharp#py#CheckAlive(sln_or_dir)
+        if OmniSharp#py#CheckAlive(job.sln_or_dir)
           echohl Title
           let status = 'running'
         else
@@ -512,12 +518,14 @@ function! OmniSharp#Status() abort
           endif
         endif
       endif
-    else
-      echohl WarningMsg
+    elseif a:include_dead
+      echohl Comment
       let status = 'not running'
       let pid = ''
+    else
+      continue
     endif
-    echo sln_or_dir
+    echo job.sln_or_dir
     echohl None
     if !empty(pid)
       echon "\n  pid: "
