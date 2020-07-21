@@ -118,9 +118,9 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpPreviewImplementation
 \| delcommand OmniSharpRename
 \| delcommand OmniSharpRenameTo
+\| delcommand OmniSharpRepeatCodeAction
 \| delcommand OmniSharpRestartAllServers
 \| delcommand OmniSharpRestartServer
-\| delcommand OmniSharpRepeatCodeAction
 \| delcommand OmniSharpRunTest
 \| delcommand OmniSharpRunTestsInFile
 \| delcommand OmniSharpSignatureHelp

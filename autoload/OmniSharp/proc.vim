@@ -238,6 +238,10 @@ function! OmniSharp#proc#StopJob(jobkey) abort
   silent doautocmd <nomodeline> User OmniSharpStopped
 endfunction
 
+function! OmniSharp#proc#ListJobs() abort
+  return keys(s:jobs)
+endfunction
+
 function! OmniSharp#proc#ListRunningJobs() abort
   return filter(keys(s:jobs), 'OmniSharp#proc#IsJobRunning(v:val)')
 endfunction

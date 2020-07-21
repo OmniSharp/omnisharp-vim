@@ -457,6 +457,79 @@ function! s:FindRunningServerForBuffer(bufnr) abort
 endfunction
 
 
+function! OmniSharp#Status() abort
+  let slns = OmniSharp#proc#ListJobs()
+  if len(slns) == 0
+    echohl WarningMsg
+    echo 'No servers started'
+    echohl None
+    return
+  endif
+  for sln_or_dir in slns
+    if OmniSharp#proc#IsJobRunning(sln_or_dir)
+      let job = OmniSharp#proc#GetJob(sln_or_dir)
+      let total = get(job, 'projects_total', 0)
+      let loaded = get(job, 'projects_loaded', 0)
+      let pl = total == 1 ? '' : 's'
+      let pid = get(job, 'pid', '')
+      if g:OmniSharp_server_stdio
+        if get(job, 'loaded') || !g:OmniSharp_server_stdio
+          echohl Title
+            let status = printf('running (%d project%s)', total, pl)
+        else
+          echohl ModeMsg
+          let status = printf('loading (%d of %d project%s)', loaded, total, pl)
+        endif
+      else
+        if OmniSharp#py#CheckAlive(sln_or_dir)
+          echohl Title
+          let status = 'running'
+        else
+          echohl ModeMsg
+          let status = 'not running'
+        endif
+      endif
+      if has_key(job, 'start_time')
+        let seconds = float2nr(reltimefloat(reltime(job.start_time)))
+        if seconds < 60
+          let status .= printf(' for %d seconds', seconds)
+        else
+          let minutes = seconds / 60
+          if minutes == 1
+            let status .= ' for 1 minute'
+          elseif minutes < 60
+            let status .= printf(' for %d minutes', minutes)
+          else
+            let hours = minutes / 60
+            let minutes %= 60
+            if hours == 1
+              let status .= printf(' for an hour and %d minutes', minutes)
+            elseif hours < 48
+              let status .= printf(' for %d hours', hours)
+            else
+              let status .= printf(' for %d days', hours / 24)
+            endif
+          endif
+        endif
+      endif
+    else
+      echohl WarningMsg
+      let status = 'not running'
+      let pid = ''
+    endif
+    echo sln_or_dir
+    echohl None
+    if !empty(pid)
+      echon "\n  pid: "
+      echohl Identifier
+      echon pid . "\n"
+      echohl None
+    endif
+    echo '  ' . status
+  endfor
+endfunction
+
+
 let s:plugin_root_dir = expand('<sfile>:p:h:h')
 
 function! OmniSharp#Install(...) abort

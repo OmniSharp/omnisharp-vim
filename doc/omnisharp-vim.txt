@@ -543,6 +543,10 @@ convenient user re-mapping. These can be used like so: >
     Restarts the OmniSharp server
     NOTE: Requires vim 8.0+, neovim or vim-dispatch
 
+                                                               *:OmniSharpStatus*
+:OmniSharpStatus
+    Displays the status of all running and stopped servers
+
                                                           *:OmniSharpStartServer*
                                                  *<Plug>(omnisharp_start_server)*
 :OmniSharpStartServer {sln-or-dir}
