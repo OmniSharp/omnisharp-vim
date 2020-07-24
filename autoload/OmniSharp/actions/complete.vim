@@ -100,6 +100,9 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
       let menu = (cmp.ReturnType != v:null ? cmp.ReturnType . ' ' : '') .
       \ (cmp.DisplayText != v:null ? cmp.DisplayText : cmp.MethodHeader)
     endif
+    if word == v:null
+      continue
+    endif
     let completion = {
     \ 'snip': get(cmp, 'Snippet', ''),
     \ 'word': word,
