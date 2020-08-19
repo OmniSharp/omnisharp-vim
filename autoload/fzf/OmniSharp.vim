@@ -84,7 +84,6 @@ unlet s:save_cpo
 
 " vim:et:sw=2:sts=2
 
-" adding find usages====================
 function! s:location_sink(str) abort
   for quickfix in s:quickfixes
     if quickfix.text == a:str
@@ -106,5 +105,4 @@ function! fzf#OmniSharp#FindUsages(quickfixes) abort
   \ 'down': '40%',
   \ 'sink': function('s:location_sink')})
 endfunction
-" end of my changes
 
