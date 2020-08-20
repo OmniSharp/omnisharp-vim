@@ -1,6 +1,7 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the number of usages
 function! OmniSharp#actions#usages#Find(...) abort
@@ -38,10 +39,12 @@ endfunction
 
 function! s:CBFindUsages(target, opts, locations) abort
   let numUsages = len(a:locations)
-  if numUsages > 0
-    call OmniSharp#locations#SetQuickfix(a:locations, 'Usages: ' . a:target)
-  else
+  if numUsages == 0
     echo 'No usages found'
+  elseif get(g:, 'OmniSharp_selector_findusages', '') == 'fzf'
+    call fzf#OmniSharp#FindUsages(a:locations, a:target)
+  else
+    call OmniSharp#locations#SetQuickfix(a:locations, 'Usages: ' . a:target)
   endif
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numUsages)

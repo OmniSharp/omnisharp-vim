@@ -67,7 +67,7 @@ Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-insta
 * Jump to the definition of a type/variable/method
 * Find symbols interactively (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
 * Find implementations/derived types
-* Find usages
+* Find usages *(FZF support set `g:OmniSharp_selector_findusages = 'fzf'`)
 * Contextual code actions (unused usings, use var....etc.) (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
 * Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/w0rp/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Find all code issues in solution and populate the quickfix window
