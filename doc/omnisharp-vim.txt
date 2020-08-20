@@ -342,6 +342,10 @@ none are. >
 <or >
     let g:OmniSharp_selector_ui = ''
 <
+                                                       *g:OmniSharp_selector_findusages*
+Use this to allow fzf to control :OmniSharpFindUsages >
+    let g:OmniSharp_selector_findusages = 'fzf'
+<
                                                        *g:OmniSharp_want_snippet*
 Use this option to enable snippet completion, when ultisnips is available.
 Default: 0 >
