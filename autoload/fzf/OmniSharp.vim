@@ -83,7 +83,7 @@ function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
   let s:quickfixes = a:quickfixes
   let usages = []
   for quickfix in s:quickfixes
-    let line = quickfix.lnum . ': ' . quickfix.text 
+    let line = quickfix.filename . ": " . quickfix.lnum . " col " . quickfix.col . '     ' . quickfix.text 
     call add(usages, line)
   endfor
   echom usages
