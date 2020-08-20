@@ -79,20 +79,18 @@ function! fzf#OmniSharp#GetCodeActions(mode, actions) abort
   \ 'sink': function('s:action_sink')})
 endfunction
 
-let &cpoptions = s:save_cpo
-unlet s:save_cpo
-
-" vim:et:sw=2:sts=2
-
-function! fzf#OmniSharp#FindUsages(quickfixes) abort
+function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
   let s:quickfixes = a:quickfixes
   let usages = []
   for quickfix in s:quickfixes
-    call add(usages, quickfix.text)
+    let line = quickfix.lnum . ': ' . quickfix.text 
+    call add(usages, line)
   endfor
-  call fzf#run({
+  echom usages
+  call fzf#run(fzf#wrap({
   \ 'source': usages,
   \ 'down': '40%',
-  \ 'sink': function('s:location_sink')})
+  \ 'sink': function('s:location_sink')}))
 endfunction
 
+" vim:et:sw=2:sts=2
