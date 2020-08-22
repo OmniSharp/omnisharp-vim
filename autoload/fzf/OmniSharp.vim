@@ -17,7 +17,8 @@ function! fzf#OmniSharp#FindSymbols(quickfixes) abort
   let s:quickfixes = a:quickfixes
   let symbols = []
   for quickfix in s:quickfixes
-    call add(symbols, quickfix.text)
+    let line = quickfix.filename . ": " . quickfix.lnum . " col " . quickfix.col . '     ' . quickfix.text 
+    call add(symbols, line)
   endfor
   call fzf#run({
   \ 'source': symbols,
