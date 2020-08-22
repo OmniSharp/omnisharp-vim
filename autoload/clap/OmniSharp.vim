@@ -81,9 +81,6 @@ function! clap#OmniSharp#GetCodeActions(mode, actions) abort
   \ 'sink': function('s:action_sink')})
 endfunction
 
->>>>>>> c50a273... basic functionality for vim-clap with :OmniSharpFindUsages and :OmniSharpFindSymbol
-=======
->>>>>>> 4379f8a... removed unused code
 function! clap#OmniSharp#FindUsages(quickfixes, target) abort
   let s:quickfixes = a:quickfixes
   let usages = []
