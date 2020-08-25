@@ -28,7 +28,7 @@ function! s:is_wsl() abort
   if get(s:, 'is_wsl_checked')
     return s:is_wsl_val
   endif
-  let s:is_wsl_val = strlen(system('grep Microsoft /proc/version')) > 0
+  let s:is_wsl_val = strlen(system('grep -i Microsoft /proc/version')) > 0
   let s:is_wsl_checked = 1
   return s:is_wsl_val
 endfunction
