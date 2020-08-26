@@ -23,9 +23,9 @@ EOF
 }
 
 get_latest_version() {
-    if [ "$(command -v curl)" ]; then
+    if command -v curl >/dev/null 2>&1 ; then
         curl --user-agent "curl" --silent "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
-    elif [ "$(command -v wget)" ]; then
+    elif command -v wget >/dev/null 2>&1 ; then
         wget -qO- "https://api.github.com/repos/OmniSharp/omnisharp-roslyn/releases/latest"
     fi | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
@@ -47,16 +47,16 @@ do
 done
 
 # Ensure that either 'curl' or 'wget' is installed
-if [ ! "$(command -v curl)" ] && [ ! "$(command -v wget)" ]; then
+if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1 ; then
     echo "Error: the installer requires either 'curl' or 'wget'"
     exit 1
 fi
 
 # Check that either 'tar' or 'unzip' is installed
 # (and set the file extension appropriately)
-if [ "$(command -v tar)" ] && [ "$(command -v gzip)" ]; then
+if command -v tar >/dev/null 2>&1 && command -v gzip >/dev/null 2>&1 ; then
     ext="tar.gz"
-elif [ "$(command -v unzip)" ]; then
+elif command -v unzip >/dev/null 2>&1 ; then
     ext="zip"
 else
     echo "Error: the installer requires either 'tar' or 'unzip'"
@@ -81,7 +81,7 @@ case "$(uname -s)" in
         if [ "$(uname -o)" = "Cygwin" ]; then
             os="win-${machine}"
 
-            if [ "$(command -v unzip)" ]; then
+            if command -v unzip >/dev/null 2>&1 ; then
                 ext="zip"
             else
                 echo "Error: the installer requires 'unzip' to work on Cygwin"
@@ -90,7 +90,7 @@ case "$(uname -s)" in
         elif [ "$(uname -o)" = "Msys" ]; then
             os="win-${machine}"
 
-            if [ "$(command -v unzip)" ]; then
+            if command -v unzip >/dev/null 2>&1 ; then
                 ext="zip"
             else
                 echo "Error: the installer requires 'unzip' to work on MinGW"
@@ -121,9 +121,9 @@ full_url="${base_url}/${version}/${file_name}"
 rm -rf "$location"
 mkdir -p "$location"
 
-if [ "$(command -v curl)" ]; then
+if command -v curl >/dev/null 2>&1 ; then
     curl -L "$full_url" -o "$location/$file_name"
-elif [ "$(command -v wget)" ]; then
+elif command -v wget >/dev/null 2>&1 ; then
     wget -P "$location" "$full_url"
 fi
 
