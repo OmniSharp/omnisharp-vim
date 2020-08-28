@@ -437,13 +437,17 @@ function! s:FindRunningServerForBuffer(bufnr) abort
   let longest_dir_match = ''
   let longest_dir_length = 0
   let running_jobs = OmniSharp#proc#ListRunningJobs()
+  let dir_separator = fnamemodify('.', ':p')[-1 :]
   for sln_or_dir in running_jobs
     let paths = [sln_or_dir]
     for project in get(OmniSharp#proc#GetJob(sln_or_dir), 'projects', [])
-      call add(paths, project.path)
+      call add(paths, OmniSharp#util#TranslatePathForClient(project.path))
     endfor
     for path in paths
       let directory = isdirectory(path) ? path : fnamemodify(path, ':h')
+      if directory[len(directory) -1] != dir_separator
+        let directory .= dir_separator
+      endif
       if stridx(filename, directory) == 0
         if len(path) > longest_dir_length
           let longest_dir_match = path
