@@ -60,6 +60,7 @@ Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-insta
     * [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim)
     * [coc.nvim](https://github.com/neoclide/coc.nvim)
     * [ncm2](https://github.com/ncm2/ncm2)
+    * [deoplete](https://github.com/Shougo/deoplete.nvim) (note: needs to be [configured manually](#optional-add-deoplete-source))
   * Completion snippets are supported. e.g. Console.WriteLine(TAB) (ENTER) will complete to Console.WriteLine(string value) and expand a dynamic snippet, this will place you in SELECT mode and the first method argument will be selected. 
     * Requires [UltiSnips](https://github.com/SirVer/ultisnips) and supports standard C-x C-o completion as well as completion/autocompletion plugins such as [asyncomplete-vim](https://github.com/prabirshrestha/asyncomplete.vim), [Supertab](https://github.com/ervandew/supertab), [Neocomplete](https://github.com/Shougo/neocomplete.vim) etc.
     * Requires `set completeopt-=preview` when using [Neocomplete](https://github.com/Shougo/neocomplete.vim) because of a compatibility issue with [UltiSnips](https://github.com/SirVer/ultisnips). 
@@ -243,6 +244,24 @@ let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
 let g:OmniSharp_selector_ui = 'fzf'    " Use fzf.vim
 let g:OmniSharp_selector_ui = ''       " Use vim - command line, quickfix etc.
 ```
+
+### (optional) Add deoplete source
+
+```vim
+call deoplete#custom#option('sources', {
+        \ 'cs': ['omnisharp_stdio'],
+        \})
+```
+
+You can also add it alongside other deoplete sources as well, for example:
+
+```vim
+call deoplete#custom#option('sources', {
+        \ 'cs': ['omnisharp_stdio', 'around', 'file', 'dictionary', 'tag', 'buffer'],
+        \})
+```
+
+NOTE: If you are using the HTTP server (ie. `g:OmniSharp_server_stdio` is `0`) then you will need to use the `omnisharp` source instead of `omnisharp_stdio` above.
 
 ## How to use
 By default, the server is started automatically when you open a .cs file.
