@@ -653,11 +653,7 @@ Note that completion is asynchronous only when using the stdio server, see
 
 6.5 Deoplete~
 
-A source is provided for the Deoplete completion engine. If Deoplete is
-installed, configure it to use the "omnisharp" source:
->
-    call deoplete#custom#option('sources', {
-    \ 'cs': ['omnisharp'],
-    \})
-<
+A source is provided for the Deoplete completion framework. - no further
+configuration is required.
+
 ===============================================================================
