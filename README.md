@@ -15,7 +15,7 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 
 Use Vim's popup windows and neovim's floating windows to display code/documentation without disrupting your window layouts: see [Popups](#popups) section for details and configuration options.
 
-![Popup Demo](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/omnisharp-popup-demo.gif)
+![Popup Demo _(see the wiki [example config](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-config) for a similar configuration to this demo)_](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/omnisharp-popup-demo.gif)
 
 ## New! Run unit tests
 
@@ -432,6 +432,9 @@ However "buffer" popups (previewing definitions and implementations) may be conf
 ## Configuration
 
 ### Example vimrc
+
+Below is an example .vimrc for getting started with OmniSharp-vim.
+For a more complete example with autocompletion, fzf integration, statusline indicators etc., have a look at the [Example config](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-config) in the wiki.
 
 ```vim
 " Use the vim-plug plugin manager: https://github.com/junegunn/vim-plug
