@@ -31,12 +31,15 @@ class Source(Base):
         if match:
             groups = match.groups()
             return groups[0], groups[1]
-        return None
+        return None, None
 
     def gather_candidates(self, context):
         currentInput = context['input']
 
         lhs, partial = self.parseInput(currentInput)
+
+        if lhs is None:
+            return []
 
         if lhs != self.previousLhs or not partial.startswith(self.previousPartial):
             self.previousLhs = lhs
