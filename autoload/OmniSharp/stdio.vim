@@ -7,13 +7,14 @@ let s:requests = get(s:, 'requests', {})
 function! OmniSharp#stdio#HandleResponse(job, message) abort
   try
     let res = json_decode(a:message)
+    let a:job.logsize = get(a:job, 'logsize', 0) + 1
   catch
     let a:job.json_errors = get(a:job, 'json_errors', 0) + 1
     if !OmniSharp#proc#IsJobRunning(a:job)
       return
     endif
-    if a:job.json_errors >= 3 && !a:job.loaded
-      call OmniSharp#log#Log(a:job, '3 errors caught while loading: stopping')
+    if a:job.json_errors >= 10 && get(a:job, 'logsize', 0) < 10 && !a:job.loaded
+      call OmniSharp#log#Log(a:job, '10 errors caught while loading: stopping')
       call OmniSharp#proc#StopJob(a:job.sln_or_dir)
       echohl WarningMsg
       echomsg 'You appear to be running an HTTP server in stdio mode - ' .
