@@ -15,7 +15,9 @@ The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisha
 
 Use Vim's popup windows and neovim's floating windows to display code/documentation without disrupting your window layouts: see [Popups](#popups) section for details and configuration options.
 
-![Popup Demo _(see the wiki [example config](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-config) for a similar configuration to this demo)_](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/omnisharp-popup-demo.gif)
+![Popup Demo](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/omnisharp-popup-demo.gif)
+
+ _(see the wiki [example config](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-config) for a similar configuration to this demo)_
 
 ## New! Run unit tests
 
