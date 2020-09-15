@@ -3,9 +3,14 @@ if !OmniSharp#util#CheckCapabilities() | finish | endif
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+function! s:format_line(quickfix) abort
+  return printf('%s: %d col %d     %s',
+  \ a:quickfix.filename, a:quickfix.lnum, a:quickfix.col, a:quickfix.text)
+endfunction
+
 function! s:location_sink(str) abort
   for quickfix in s:quickfixes
-    if quickfix.text == a:str
+    if s:format_line(quickfix) == a:str
       break
     endif
   endfor
@@ -17,8 +22,7 @@ function! fzf#OmniSharp#FindSymbols(quickfixes) abort
   let s:quickfixes = a:quickfixes
   let symbols = []
   for quickfix in s:quickfixes
-    let line = quickfix.filename . ": " . quickfix.lnum . " col " . quickfix.col . '     ' . quickfix.text 
-    call add(symbols, line)
+    call add(symbols, s:format_line(quickfix))
   endfor
   call fzf#run({
   \ 'source': symbols,
@@ -57,9 +61,9 @@ function! fzf#OmniSharp#GetCodeActions(mode, actions) abort
 
   if has('win32')
     " Check whether any actions contain non-ascii characters. These are not
-    " reliably passed to FZF and back, so rather than matching on the action name,
-    " an index will be prefixed and the selected action will be selected by prefix
-    " instead.
+    " reliably passed to FZF and back, so rather than matching on the action
+    " name, an index will be prefixed and the selected action will be selected
+    " by prefix instead.
     for action in s:actions
       if action.Name =~# '[^\x00-\x7F]'
         let s:match_on_prefix = 1
@@ -84,10 +88,8 @@ function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
   let s:quickfixes = a:quickfixes
   let usages = []
   for quickfix in s:quickfixes
-    let line = quickfix.filename . ": " . quickfix.lnum . " col " . quickfix.col . '     ' . quickfix.text 
-    call add(usages, line)
+    call add(usages, s:format_line(quickfix))
   endfor
-  echom usages
   call fzf#run(fzf#wrap({
   \ 'source': usages,
   \ 'down': '40%',
