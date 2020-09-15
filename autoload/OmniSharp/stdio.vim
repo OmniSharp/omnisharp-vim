@@ -10,7 +10,7 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
     let a:job.logsize = get(a:job, 'logsize', 0) + 1
   catch
     let a:job.json_errors = get(a:job, 'json_errors', 0) + 1
-    if !OmniSharp#proc#IsJobRunning(a:job)
+    if !OmniSharp#proc#IsJobRunning(a:job) || get(a:job, 'stopping')
       return
     endif
     if a:job.json_errors >= 10 && get(a:job, 'logsize', 0) < 10 && !a:job.loaded

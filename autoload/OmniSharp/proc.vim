@@ -221,6 +221,7 @@ function! OmniSharp#proc#StopJob(jobkey) abort
     return
   endif
   let job = s:jobs[a:jobkey]
+  let job.stopping = 1
 
   if OmniSharp#proc#supportsNeovimJobs()
     call jobstop(job.job_id)
