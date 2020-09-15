@@ -1,8 +1,10 @@
+
 """ omnisharp source for deoplete """
 import logging
 import os
 import sys
 from os.path import abspath, dirname, exists, join, pardir
+import re
 
 from .base import Base
 
@@ -17,27 +19,29 @@ class Source(Base):
         self.mark = '[OS]'
         self.rank = 500
         self.filetypes = ['cs']
-        self.input_pattern = r'[^. \t0-9]\.\w*|\w+'
+        # This pattern will trigger auto completion even if the typed text has not reached min_pattern_length
+        self.input_pattern = r'[^. \t0-9]\.\w*'
         self.is_volatile = True
-        self.previous_input = ''
+        self.previousLhs = ''
+        self.partial = ''
 
-        vars = self.vim.vars
+    def parseInput(self, value):
+        match = re.match(r"^(.*\W)(\w*)$", value)
 
-        vars['deoplete#source#omnisharp#_results'] = []
-        vars['deoplete#source#omnisharp#_receivedResults'] = False
+        if match:
+            groups = match.groups()
+            return groups[0], groups[1]
+        return None
 
     def gather_candidates(self, context):
-        vars = self.vim.vars
+        currentInput = context['input']
 
-        if context['input'] == self.previous_input:
-            if vars['deoplete#source#omnisharp#_receivedResults']:
-                return vars['deoplete#source#omnisharp#_results']
+        lhs, partial = self.parseInput(currentInput)
 
+        if lhs != self.previousLhs or not partial.startswith(self.previousPartial):
+            self.previousLhs = lhs
+            self.previousPartial = partial
+            self.vim.call('deoplete#source#omnisharp#sendRequest', lhs, partial)
             return []
 
-        vars['deoplete#source#omnisharp#_receivedResults'] = False
-        self.previous_input = context['input']
-
-        self.vim.call('deoplete#source#omnisharp#sendRequest')
-        return []
-
+        return self.vim.vars['deoplete#source#omnisharp#_results'] or []

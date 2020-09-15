@@ -1,14 +1,18 @@
 
-function! deoplete#source#omnisharp#receiveResponse(results)
-  let g:deoplete#source#omnisharp#_results = a:results
-  let g:deoplete#source#omnisharp#_receivedResults = v:true
+let s:currentLhsRequest = v:null
 
+function! s:onReceivedResponse(lhs, results)
+  if s:currentLhsRequest != a:lhs
+    return
+  endif
+
+  let g:deoplete#source#omnisharp#_results = a:results
   call deoplete#auto_complete()
 endfunction
 
-function! deoplete#source#omnisharp#sendRequest()
-    " Send an empty string as partial because deoplete does its own fuzzy matching
-    call OmniSharp#actions#complete#Get('', function('deoplete#source#omnisharp#receiveResponse'))
+function! deoplete#source#omnisharp#sendRequest(lhs, partial)
+  let s:currentLhsRequest = a:lhs
+  let g:deoplete#source#omnisharp#_results = v:null
+  call OmniSharp#actions#complete#Get(a:partial, {results -> s:onReceivedResponse(a:lhs, results)})
 endfunction
-
 
