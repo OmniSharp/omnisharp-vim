@@ -255,10 +255,10 @@ function! OmniSharp#proc#IsJobRunning(jobkey) abort
     let job = get(s:jobs, a:jobkey)
   endif
   if OmniSharp#proc#supportsNeovimJobs()
-    return !get(job, 'stopped', 0)
+    return !(get(job, 'stopped', 0) || get(job, 'stopping', 0))
   elseif OmniSharp#proc#supportsVimJobs()
     let status = job_status(job.job_id)
-    return status ==# 'run' && !get(job, 'stopped', 0)
+    return status ==# 'run' && !(get(job, 'stopped', 0) || get(job, 'stopping', 0))
   elseif OmniSharp#proc#supportsVimDispatch()
     return dispatch#completed(job)
   elseif OmniSharp#proc#supportsVimProc()
