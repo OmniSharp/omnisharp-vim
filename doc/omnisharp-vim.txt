@@ -346,6 +346,10 @@ none are. >
 Use this to allow fzf to control :OmniSharpFindUsages >
     let g:OmniSharp_selector_findusages = 'fzf'
 <
+                                                       *g:OmniSharp_fzf_options*
+Use this to pass custom options to fzf.vim >
+    let g:OmniSharp_fzf_options = { 'right': '50%' }
+<
                                                        *g:OmniSharp_want_snippet*
 Use this option to enable snippet completion, when ultisnips is available.
 Default: 0 >
