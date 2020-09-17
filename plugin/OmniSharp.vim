@@ -124,8 +124,5 @@ if g:OmniSharp_selector_ui ==? 'ctrlp'
     let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
   endif
 endif
-if g:OmniSharp_selector_ui ==? 'fzf'
-  let g:OmniSharp_fzf_options = get(g:, 'OmniSharp_fzf_options', {})
-endif
 
 " vim:et:sw=2:sts=2

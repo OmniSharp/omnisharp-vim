@@ -24,7 +24,7 @@ function! fzf#OmniSharp#FindSymbols(quickfixes) abort
   for quickfix in s:quickfixes
     call add(symbols, s:format_line(quickfix))
   endfor
-  let fzf_options = len(g:OmniSharp_fzf_options) ? copy(g:OmniSharp_fzf_options) : { 'down': '40%' }
+  let fzf_options = copy(get(g:, 'OmniSharp_fzf_options', { 'down': '40%' }))
   call fzf#run(
   \ extend(fzf_options, {
   \ 'source': symbols,
@@ -79,7 +79,7 @@ function! fzf#OmniSharp#GetCodeActions(mode, actions) abort
   let s:mode = a:mode
   let actionNames = map(copy(s:actions), 'v:val.Name')
 
-  let fzf_options = len(g:OmniSharp_fzf_options) ? copy(g:OmniSharp_fzf_options) : { 'down': '10%' }
+  let fzf_options = copy(get(g:, 'OmniSharp_fzf_options', { 'down': '10%' }))
   call fzf#run(
   \ extend(fzf_options, {
   \ 'source': actionNames,
@@ -92,7 +92,7 @@ function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
   for quickfix in s:quickfixes
     call add(usages, s:format_line(quickfix))
   endfor
-  let fzf_options = len(g:OmniSharp_fzf_options) ? copy(g:OmniSharp_fzf_options) : { 'down': '40%' }
+  let fzf_options = copy(get(g:, 'OmniSharp_fzf_options', { 'down': '40%' }))
   call fzf#run(fzf#wrap(
   \ extend(fzf_options, {
   \ 'source': usages,
