@@ -24,10 +24,11 @@ function! fzf#OmniSharp#FindSymbols(quickfixes) abort
   for quickfix in s:quickfixes
     call add(symbols, s:format_line(quickfix))
   endfor
-  call fzf#run({
+  let fzf_options = len(g:OmniSharp_fzf_options) ? g:OmniSharp_fzf_options : { 'down': '40%' }
+  call fzf#run(
+  \ extend(fzf_options, {
   \ 'source': symbols,
-  \ 'down': '40%',
-  \ 'sink': function('s:location_sink')})
+  \ 'sink': function('s:location_sink')}))
 endfunction
 
 function! s:action_sink(str) abort
@@ -78,10 +79,11 @@ function! fzf#OmniSharp#GetCodeActions(mode, actions) abort
   let s:mode = a:mode
   let actionNames = map(copy(s:actions), 'v:val.Name')
 
-  call fzf#run({
+  let fzf_options = len(g:OmniSharp_fzf_options) ? g:OmniSharp_fzf_options : { 'down': '10%' }
+  call fzf#run(
+  \ extend(fzf_options, {
   \ 'source': actionNames,
-  \ 'down': '10%',
-  \ 'sink': function('s:action_sink')})
+  \ 'sink': function('s:action_sink')}))
 endfunction
 
 function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
@@ -90,10 +92,11 @@ function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
   for quickfix in s:quickfixes
     call add(usages, s:format_line(quickfix))
   endfor
-  call fzf#run(fzf#wrap({
+  let fzf_options = len(g:OmniSharp_fzf_options) ? g:OmniSharp_fzf_options : { 'down': '40%' }
+  call fzf#run(fzf#wrap(
+  \ extend(fzf_options, {
   \ 'source': usages,
-  \ 'down': '40%',
-  \ 'sink': function('s:location_sink')}))
+  \ 'sink': function('s:location_sink')})))
 endfunction
 
 " vim:et:sw=2:sts=2
