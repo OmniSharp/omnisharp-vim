@@ -106,6 +106,9 @@ function! OmniSharp#proc#vimOutHandler(channel, message) abort
 endfunction
 
 function! OmniSharp#proc#vimErrHandler(channel, message) abort
+  if ch_status(a:channel) ==# 'closed'
+    return
+  endif
   let message = printf('%s: %s', string(a:channel), string(a:message))
   call OmniSharp#util#EchoErr(message)
 endfunction
