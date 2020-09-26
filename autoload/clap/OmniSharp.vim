@@ -3,9 +3,14 @@ if !OmniSharp#util#CheckCapabilities() | finish | endif
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+function! s:format_line(quickfix) abort
+  return printf('%s: %d col %d     %s',
+  \ a:quickfix.filename, a:quickfix.lnum, a:quickfix.col, a:quickfix.text)
+endfunction
+
 function! s:location_sink(str) abort
   for quickfix in s:quickfixes
-    if quickfix.text == a:str
+    if s:format_line(quickfix) == a:str
       break
     endif
   endfor
@@ -17,13 +22,12 @@ function! clap#OmniSharp#FindSymbols(quickfixes) abort
   let s:quickfixes = a:quickfixes
   let symbols = []
   for quickfix in s:quickfixes
-    let line = quickfix.filename . ": " . quickfix.lnum . " col " . quickfix.col . '     ' . quickfix.text 
-    call add(symbols, line)
+    call add(symbols, s:format_line(quickfix))
   endfor
   let g:clap_provider_symbols = {
   \ 'source': symbols,
   \ 'sink': function('s:location_sink')
-  \ }
+  \}
   Clap symbols
 endfunction
 
@@ -77,7 +81,7 @@ function! clap#OmniSharp#GetCodeActions(mode, actions) abort
   let g:clap_provider_actions = {
   \ 'source': actionNames,
   \ 'sink': function('s:action_sink')
-  \ }
+  \}
   Clap actions
 endfunction
 
@@ -85,14 +89,12 @@ function! clap#OmniSharp#FindUsages(quickfixes, target) abort
   let s:quickfixes = a:quickfixes
   let usages = []
   for quickfix in s:quickfixes
-    let line = quickfix.filename . ": " . quickfix.lnum . " col " . quickfix.col . '     ' . quickfix.text 
-    call add(usages, line)
+    call add(usages, s:format_line(quickfix))
   endfor
-  echom usages
   let g:clap_provider_usages = {
   \ 'source': usages,
   \ 'sink': function('s:location_sink')
-  \ }
+  \}
   Clap usages
 endfunction
 
