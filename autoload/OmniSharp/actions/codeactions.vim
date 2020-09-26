@@ -133,6 +133,8 @@ function! s:CBGetCodeActions(mode, actions) abort
     call ctrlp#init(ctrlp#OmniSharp#findcodeactions#id())
   elseif g:OmniSharp_selector_ui ==? 'fzf'
     call fzf#OmniSharp#GetCodeActions(a:mode, a:actions)
+  elseif g:OmniSharp_selector_ui ==? 'vim-clap'
+    call clap#OmniSharp#GetCodeActions(a:mode, a:actions)
   else
     let message = []
     let i = 0
