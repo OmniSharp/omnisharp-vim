@@ -332,10 +332,9 @@ Use this option to specify a selector UI for choosing code actions and
 navigating to symbols. When no selector UI plugin is detected, or
 g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
 window will be used instead.
-Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
-none are. If both fzf and vim-clap are installed, you can explicitly set it to vim-
-clap to override fzf >
-		let g:OmniSharp_selector_ui = 'vim-clap'
+Default: Whichever of fzf.vim, vim-clap, unite.vim or ctrlp.vim is installed,
+or '' if none are. >
+    let g:OmniSharp_selector_ui = 'clap'
 <or >
     let g:OmniSharp_selector_ui = 'fzf'
 <or >
@@ -345,13 +344,15 @@ clap to override fzf >
 <or >
     let g:OmniSharp_selector_ui = ''
 <
-                                                       *g:OmniSharp_selector_findusages*
-Allows fzf or vim-clap to use :OmniSharpFindUsages respectively. >
+                                                *g:OmniSharp_selector_findusages*
+Allows |:OmniSharpFindUsages| to use fzf or vim-clap as a selector, instead of
+populating the quickfix.
+Default: '' >
     let g:OmniSharp_selector_findusages = 'fzf'
 <or >
-    let g:OmniSharp_selector_findusages = 'vim-clap'
+    let g:OmniSharp_selector_findusages = 'clap'
 <
-                                                       *g:OmniSharp_fzf_options*
+                                                        *g:OmniSharp_fzf_options*
 Use this to pass custom options to fzf.vim >
     let g:OmniSharp_fzf_options = { 'right': '50%' }
 <

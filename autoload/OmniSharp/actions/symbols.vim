@@ -33,7 +33,7 @@ function! s:CBFindSymbol(filter, locations) abort
     echo 'No symbols found'
     return
   endif
-  if g:OmniSharp_selector_ui ==? 'vim-clap'
+  if g:OmniSharp_selector_ui ==? 'clap'
     call clap#OmniSharp#FindSymbols(a:locations)
   elseif g:OmniSharp_selector_ui ==? 'unite'
     call unite#start([['OmniSharp/findsymbols', a:locations]])

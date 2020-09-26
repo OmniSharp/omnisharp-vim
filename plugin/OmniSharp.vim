@@ -113,7 +113,7 @@ augroup END
 
 if !exists('g:OmniSharp_selector_ui')
   let g:OmniSharp_selector_ui = get(filter(
-  \   ['unite', 'ctrlp', 'fzf','vim-clap'],
+  \   ['unite', 'ctrlp', 'fzf','clap'],
   \   '!empty(globpath(&runtimepath, printf("plugin/%s.vim", v:val), 1))'
   \ ), 0, '')
 endif
