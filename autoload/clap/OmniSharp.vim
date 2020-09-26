@@ -24,7 +24,7 @@ function! clap#OmniSharp#FindSymbols(quickfixes) abort
   \ 'source': symbols,
   \ 'sink': function('s:location_sink')
   \ }
-  exec ':Clap symbols'
+  Clap symbols
 endfunction
 
 function! s:action_sink(str) abort
@@ -78,7 +78,7 @@ function! clap#OmniSharp#GetCodeActions(mode, actions) abort
   \ 'source': actionNames,
   \ 'sink': function('s:action_sink')
   \ }
-  exec ':Clap actions'
+  Clap actions
 endfunction
 
 function! clap#OmniSharp#FindUsages(quickfixes, target) abort
@@ -93,7 +93,7 @@ function! clap#OmniSharp#FindUsages(quickfixes, target) abort
   \ 'source': usages,
   \ 'sink': function('s:location_sink')
   \ }
-  exec ':Clap usages'
+  Clap usages
 endfunction
 
 " vim:et:sw=2:sts=2
