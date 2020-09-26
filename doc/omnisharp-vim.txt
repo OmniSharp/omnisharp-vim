@@ -346,8 +346,7 @@ clap to override fzf >
     let g:OmniSharp_selector_ui = ''
 <
                                                        *g:OmniSharp_selector_findusages*
-Use this one of these optins to allow vim-clap or fzf to control 
-:OmniSharpFindUsages respectively. >
+Allows fzf or vim-clap to use :OmniSharpFindUsages respectively. >
     let g:OmniSharp_selector_findusages = 'fzf'
 <or >
     let g:OmniSharp_selector_findusages = 'vim-clap'
