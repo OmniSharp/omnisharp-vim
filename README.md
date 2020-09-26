@@ -68,10 +68,10 @@ Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-insta
     * Requires `set completeopt-=preview` when using [Neocomplete](https://github.com/Shougo/neocomplete.vim) because of a compatibility issue with [UltiSnips](https://github.com/SirVer/ultisnips). 
 
 * Jump to the definition of a type/variable/method
-* Find symbols interactively (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
+* Find symbols interactively (uses selector plugin by default: [fzf.vim](https://github.com/junegunn/fzf.vim), [vim-clap](https://github.com/liuchengxu/vim-clap), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
 * Find implementations/derived types
-* Find usages *(FZF support set `g:OmniSharp_selector_findusages = 'fzf'`)
-* Contextual code actions (unused usings, use var....etc.) (can use plugin: [fzf.vim](https://github.com/junegunn/fzf.vim), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
+* Find usages (optionally uses selector plugin: [fzf.vim](https://github.com/junegunn/fzf.vim) or [vim-clap](https://github.com/liuchengxu/vim-clap))
+* Contextual code actions (unused usings, use var....etc.) (uses selector plugin by default: [fzf.vim](https://github.com/junegunn/fzf.vim), [vim-clap](https://github.com/liuchengxu/vim-clap), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
 * Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/w0rp/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Find all code issues in solution and populate the quickfix window
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
@@ -231,20 +231,29 @@ Configure it to work with OmniSharp with the following line in your vimrc.
 let g:syntastic_cs_checkers = ['code_checker']
 ```
 
-### (optional) Install ctrlp.vim, unite.vim or fzf.vim
+### (optional) Install fzf.vim, vim-clap, ctrlp.vim or unite.vim
 If one of these plugins is detected, it will be used as the selector for Code Actions and Find Symbols features:
 
 - [fzf.vim](https://github.com/junegunn/fzf.vim)
+- [vim-clap](https://github.com/liuchengxu/vim-clap)
 - [CtrlP](https://github.com/ctrlpvim/ctrlp.vim)
 - [unite.vim](https://github.com/Shougo/unite.vim)
 
 If you have installed more than one, or you prefer to use native vim functionality (command line, quickfix window etc.) rather than a selector plugin, you can choose an option with the `g:OmniSharp_selector_ui` variable.
 
 ```vim
-let g:OmniSharp_selector_ui = 'unite'  " Use unite.vim
-let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
 let g:OmniSharp_selector_ui = 'fzf'    " Use fzf.vim
+let g:OmniSharp_selector_ui = 'clap'   " Use vim-clap
+let g:OmniSharp_selector_ui = 'ctrlp'  " Use ctrlp.vim
+let g:OmniSharp_selector_ui = 'unite'  " Use unite.vim
 let g:OmniSharp_selector_ui = ''       " Use vim - command line, quickfix etc.
+```
+
+To use fzf.vim or vim-clap as a selector for `:OmniSharpFindUsages` results instead of the quickfix list, configure it explicitly:
+
+```vim
+let g:OmniSharp_selector_findusages = 'fzf'
+let g:OmniSharp_selector_findusages = 'clap'
 ```
 
 ## How to use
@@ -494,7 +503,7 @@ augroup omnisharp_commands
   autocmd FileType cs nmap <silent> <buffer> ]] <Plug>(omnisharp_navigate_down)
   " Find all code errors/warnings for the current solution and populate the quickfix window
   autocmd FileType cs nmap <silent> <buffer> <Leader>osgcc <Plug>(omnisharp_global_code_check)
-  " Contextual code actions (uses fzf, CtrlP or unite.vim selector when available)
+  " Contextual code actions (uses fzf, vim-clap, CtrlP or unite.vim selector when available)
   autocmd FileType cs nmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
   autocmd FileType cs xmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
   " Repeat the last code action performed (does not use a selector)
