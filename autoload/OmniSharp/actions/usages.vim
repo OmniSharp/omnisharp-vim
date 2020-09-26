@@ -43,6 +43,8 @@ function! s:CBFindUsages(target, opts, locations) abort
     echo 'No usages found'
   elseif get(g:, 'OmniSharp_selector_findusages', '') == 'fzf'
     call fzf#OmniSharp#FindUsages(a:locations, a:target)
+  elseif get(g:, 'OmniSharp_selector_findusages', '') == 'vim-clap'
+    call clap#OmniSharp#FindUsages(a:locations, a:target)
   else
     call OmniSharp#locations#SetQuickfix(a:locations, 'Usages: ' . a:target)
   endif

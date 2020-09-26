@@ -333,7 +333,10 @@ navigating to symbols. When no selector UI plugin is detected, or
 g:OmniSharp_selector_ui is set to '', then the vim command-line and quickfix
 window will be used instead.
 Default: Whichever of unite.vim, ctrlp.vim or fzf.vim is installed, or '' if
-none are. >
+none are. If both fzf and vim-clap are installed, you can explicitly set it to vim-
+clap to override fzf >
+		let g:OmniSharp_selector_ui = 'vim-clap'
+<or >
     let g:OmniSharp_selector_ui = 'fzf'
 <or >
     let g:OmniSharp_selector_ui = 'ctrlp'
@@ -343,8 +346,10 @@ none are. >
     let g:OmniSharp_selector_ui = ''
 <
                                                        *g:OmniSharp_selector_findusages*
-Use this to allow fzf to control :OmniSharpFindUsages >
+Allows fzf or vim-clap to use :OmniSharpFindUsages respectively. >
     let g:OmniSharp_selector_findusages = 'fzf'
+<or >
+    let g:OmniSharp_selector_findusages = 'vim-clap'
 <
                                                        *g:OmniSharp_fzf_options*
 Use this to pass custom options to fzf.vim >
