@@ -72,7 +72,7 @@ Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-insta
 * Find implementations/derived types
 * Find usages (optionally uses selector plugin: [fzf](https://github.com/junegunn/fzf) or [vim-clap](https://github.com/liuchengxu/vim-clap))
 * Contextual code actions (unused usings, use var....etc.) (uses selector plugin by default: [fzf](https://github.com/junegunn/fzf), [vim-clap](https://github.com/liuchengxu/vim-clap), [CtrlP](https://github.com/ctrlpvim/ctrlp.vim) or [unite.vim](https://github.com/Shougo/unite.vim))
-* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/w0rp/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
+* Find code issues (unused usings, use base type where possible....etc.) (requires plugin: [ALE](https://github.com/dense-analysis/ale) or [Syntastic](https://github.com/vim-syntastic/syntastic))
 * Find all code issues in solution and populate the quickfix window
 * Fix using statements for the current buffer (sort, remove and add any missing using statements where possible)
 * Rename refactoring
@@ -213,7 +213,7 @@ OmniSharp-vim can start the server only if any of the following criteria is met:
 
 ### (optional) Install ALE
 
-If [ALE](https://github.com/w0rp/ale) is installed, it will automatically be used to asynchronously check your code for errors.
+If [ALE](https://github.com/dense-analysis/ale) is installed, it will automatically be used to asynchronously check your code for errors.
 
 No further configuration is necessary. However, be aware that ALE supports multiple C# linters, and will run all linters that are available on your system. To limit ALE to only use OmniSharp (recommended), add this to your .vimrc:
 
@@ -453,7 +453,7 @@ For a more complete example with autocompletion, fzf integration, statusline ind
 " vim-plug downloads the plugins listed.
 silent! if plug#begin('~/.vim/plugged')
 Plug 'OmniSharp/omnisharp-vim'
-Plug 'w0rp/ale'
+Plug 'dense-analysis/ale'
 call plug#end()
 endif
 
