@@ -124,6 +124,9 @@ function! OmniSharp#proc#vimJobStart(command) abort
   if g:OmniSharp_server_stdio || get(g:, 'OmniSharp_proc_debug')
     let opts['out_cb'] = 'OmniSharp#proc#vimOutHandler'
   endif
+  if has('patch-8.1.350')
+    let opts.noblock = 1
+  endif
   let job = {
   \ 'start_time': reltime(),
   \ 'job_id': job_start(a:command, opts)
