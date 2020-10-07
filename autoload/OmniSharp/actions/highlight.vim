@@ -34,9 +34,13 @@ endfunction
 function! s:HighlightRH(bufnr, buftick, response) abort
   if !a:response.Success | return | endif
   if getbufvar(a:bufnr, 'changedtick') != a:buftick
-    " The buffer has changed while fetching highlights - fetch fresh highlights
-    " from the server
-    call s:StdioHighlight(a:bufnr)
+    " The buffer has changed while fetching highlights: fetch fresh highlights
+    " from the server.
+    " If in insert mode, only continue highlighting if the user
+    " has configured _all_ highlighting triggers.
+    if mode() ==# 'n' || get(g:, 'OmniSharp_highlighting', 0) >= 3
+      call OmniSharp#actions#highlight#Buffer(a:bufnr)
+    endif
     return
   endif
   let hasNvim = has('nvim')

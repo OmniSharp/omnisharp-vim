@@ -154,7 +154,7 @@ function! s:GetDocumentationDelayed() abort
   \ || len(v:event.completed_item.info) == 0
     return
   endif
-  let s:docTimer = timer_start(get(g:, 'OmniSharpCompletionDocDebounce', 50),
+  let s:docTimer = timer_start(get(g:, 'OmniSharpCompletionDocDebounce', 200),
   \ function('s:GetDocumentation', [v:event.completed_item]))
 endfunction
 
