@@ -97,7 +97,7 @@ function! s:CBCountCodeActions(opts, actions) abort
 endfunction
 
 
-function! OmniSharp#actions#codeactions#Get(mode) abort
+function! OmniSharp#actions#codeactions#Get(mode) range abort
   if exists('s:actions')
     call s:CBGetCodeActions(a:mode, s:actions)
   elseif g:OmniSharp_server_stdio
