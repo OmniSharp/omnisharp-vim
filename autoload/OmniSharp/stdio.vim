@@ -37,6 +37,11 @@ function! OmniSharp#stdio#HandleResponse(job, message) abort
     return
   endif
   let req = remove(s:requests, res.Request_seq)
+  let elapsed = reltimefloat(reltime(req.StartTime))
+  call OmniSharp#log#Log(
+  \ a:job,
+  \ printf('Response: %s after %.3f', req.Command, elapsed),
+  \ 1)
   if has_key(req, 'ResponseHandler')
     if has_key(req, 'Request')
       call req.ResponseHandler(res, req.Request)
@@ -200,7 +205,11 @@ function! s:Request(job, body, command, opts, ...) abort
     let encodedBody = json_encode(a:body)
   endif
 
-  let s:requests[s:nextseq] = { 'Seq': s:nextseq }
+  let s:requests[s:nextseq] = {
+  \ 'Command': a:command,
+  \ 'Seq': s:nextseq,
+  \ 'StartTime': reltime()
+  \}
   if has_key(a:opts, 'ResponseHandler')
     let s:requests[s:nextseq].ResponseHandler = a:opts.ResponseHandler
   endif
