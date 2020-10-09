@@ -77,7 +77,7 @@ let s:SingleCharacterSymbolByAccessModifier = {
 function! ReduceToOneCharacter(textBeforeDisplayName) abort
   let accessModifier = matchlist(a:textBeforeDisplayName, '\w\+')[0]
   let accessModifierLen = len(accessModifier)
-  return s:SingleCharacterSymbolByAccessModifier[accessModifier] . a:textBeforeDisplayName[accessModifierLen:]
+  return '['.s:SingleCharacterSymbolByAccessModifier[accessModifier].']' . a:textBeforeDisplayName[accessModifierLen:]
 endfunction
 
 function! s:CBFindMembers(opts, locations) abort
