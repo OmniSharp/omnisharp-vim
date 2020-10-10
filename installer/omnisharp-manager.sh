@@ -106,8 +106,14 @@ esac
 [ -n "$mono" ] && os="mono"
 
 if [ -n "$windows" ]; then
-   os="win-${machine}"
-   ext="zip"
+  os="win-${machine}"
+
+  if command -v unzip >/dev/null 2>&1 ; then
+    ext="zip"
+  else
+    echo "Error: the installer requires 'unzip' to work on WSL"
+    exit 1
+  fi
 fi
 
 file_name="omnisharp${http}-${os}.${ext}"
