@@ -43,9 +43,6 @@ For vim8 and neovim, OmniSharp-vim uses the OmniSharp-roslyn stdio server instea
 **Note:** neovim on Windows has been unable to communicate with the stdio server until a (very) recent neovim patch.
 If you are using nvim-qt _or_ terminal neovim on Windows, you will require a neovim [nightly build](https://github.com/neovim/neovim/releases/nightly) `NVIM v0.5.0-556` (2020-06-11) or newer, or will need to wait for neovim 0.5 to be released.
 
-**Note to WSL users:** OmniSharp-roslyn stdio version 1.35.3 does _not_ work from WSL, using the Windows server, see [OmniSharp-roslyn #1844](https://github.com/OmniSharp/omnisharp-roslyn/issues/1844).
-Install the previous version with `:OmniSharpInstall v1.35.2`
-
 To use the HTTP server instead, add this to your .vimrc:
 
 ```vim
