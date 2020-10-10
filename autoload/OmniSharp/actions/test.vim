@@ -14,7 +14,7 @@ function! OmniSharp#actions#test#Run(...) abort
     return
   endif
   let s:runningTest = 1
-  call OmniSharp#actions#codestructure#Get(bufnr,
+  call OmniSharp#actions#codestructure#Get(bufnr, 0,
   \ function('s:RunTest', [function('s:CBRunTest')]))
 endfunction
 
@@ -176,7 +176,7 @@ endfunction
 
 function! s:FindTestsInFiles(Callback, buffers, ...) abort
   call OmniSharp#util#AwaitParallel(
-  \ map(copy(a:buffers), {i,b -> function('OmniSharp#actions#codestructure#Get', [b])}),
+  \ map(copy(a:buffers), {i,b -> function('OmniSharp#actions#codestructure#Get', [b, 0])}),
   \ function('s:RunTestsInFiles', [a:Callback]))
 endfunction
 

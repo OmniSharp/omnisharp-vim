@@ -61,7 +61,7 @@ def getCompletions(partialWord):
     parameters['WordToComplete'] = partialWord
 
     parameters['WantDocumentationForEveryCompletionResult'] = \
-        bool(int(vim.eval('g:omnicomplete_fetch_full_documentation')))
+        bool(int(vim.eval('g:OmniSharp_complete_documentation')))
 
     want_snippet = \
         bool(int(vim.eval('g:OmniSharp_want_snippet')))
