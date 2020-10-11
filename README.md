@@ -164,9 +164,6 @@ let g:OmniSharp_translate_cygwin_wsl = 1
 
 Running `:OmniSharpInstall` from WSL when `g:OmniSharp_translate_cygwin_wsl = 1` results in the Windows version of OmniSharp-roslyn being installed to the standard Windows location `%LocalAppData%\omnisharp-vim\omnisharp-roslyn`.
 
-**Note:** OmniSharp-roslyn stdio version 1.35.3 does _not_ work from WSL, using the Windows server, see [OmniSharp-roslyn #1844](https://github.com/OmniSharp/omnisharp-roslyn/issues/1844).
-Install the previous version with `:OmniSharpInstall v1.35.2`
-
 #### Windows: Cygwin
 The automatic installation script for cygwin downloads the *Windows* OmniSharp-roslyn release. OmniSharp-vim detects that it is running in a cygwin environment and automatically enables Windows/cygwin file path translations by setting the default value of `g:OmniSharp_translate_cygwin_wsl` to `1`.
 
