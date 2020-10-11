@@ -139,12 +139,14 @@ if [ $? -gt 0 ] || [ ! -f "$location/$file_name" ]; then
     exit 1
 fi
 
+set -eu
 if [ "$ext" = "zip" ]; then
     unzip "$location/$file_name" -d "$location/"
     chmod +x $(find "$location" -type f)
 else
     tar -zxvf "$location/$file_name" -C "$location/"
 fi
+set +eu
 
 # If using the system Mono, make the files executable
 if [ -n "$mono" ] && [ $mono -eq 1 ]; then
