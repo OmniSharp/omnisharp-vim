@@ -63,7 +63,7 @@ function! s:ComputeItemSignature(item) abort
   endif
   let line   = a:item.Ranges.name.Start.Line
   let endcol = a:item.Ranges.name.Start.Column - 2
-  let textBeforeDisplayName = trim(getline(line)[:endcol], " \t", 1)
+  let textBeforeDisplayName = substitute(getline(line)[:endcol], '^\s*', '', '')
   if textBeforeDisplayName !~# '^\(private\|internal\|protected\|public\)'
     let textBeforeDisplayName = a:item.Properties.accessibility . ' ' . textBeforeDisplayName
   endif

@@ -60,13 +60,13 @@ function! OmniSharp#locations#SetQuickfix(list, title) abort
 endfunction
 
 function! OmniSharp#locations#SetQuickfixWithVerticalAlign(list, title) abort
-  call s:SetQuickfixFromDict(a:list, {'title': a:title, 'quickfixtextfunc': 's:QuickfixVerticalAlignFunction'})
+  call s:SetQuickfixFromDict(a:list, {'title': a:title, 'quickfixtextfunc': 'OmniSharp#locations#_quickfixtextfuncAlign'})
 endfunction
 
 function! s:SetQuickfixFromDict(list, dict) abort
   if !has('patch-8.0.0657')
-  \ || setqflist([], ' ', {'nr': '$', 'items': a:list, 'title': get(a:dict, 'title', 'OmniSharp')}) == -1
-    call setqflist(a:list, ' ', a:dict)
+  \ || setqflist([], ' ', extend(a:dict, {'nr': '$', 'items': a:list})) == -1
+    call setqflist(a:list)
   endif
   silent doautocmd <nomodeline> QuickFixCmdPost OmniSharp
   if g:OmniSharp_open_quickfix
@@ -74,40 +74,40 @@ function! s:SetQuickfixFromDict(list, dict) abort
   endif
 endfunction
 
-function! s:QuickfixVerticalAlignFunction(info) abort
-	if a:info.quickfix
-		let qfl = getqflist({'id': a:info.id, 'items': 0}).items
-	else
-		let qfl = getloclist(a:info.winid, {'id': a:info.id, 'items': 0}).items
-	endif
-	let l = []
-	let efm_type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
-	let lnum_width =   len(max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), { _,v -> qfl[v].lnum })))
-	let col_width =    len(max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), {_, v -> qfl[v].col})))
-	let fname_width =  max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), {_, v -> strchars(fnamemodify(bufname(qfl[v].bufnr), ':t'), 1)}))
-	let type_width =   max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), {_, v -> strlen(get(efm_type, qfl[v].type, ''))}))
-	let errnum_width = len(max(map(range(a:info.start_idx - 1, a:info.end_idx - 1),{_, v -> qfl[v].nr})))
-	for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
-		let e = qfl[idx]
-		if !e.valid
-			call add(l, '|| ' .. e.text)
-		else
-			if e.lnum == 0 && e.col == 0
-				call add(l, bufname(e.bufnr))
-			else
-				let fname = fnamemodify(printf('%-*S', fname_width, bufname(e.bufnr)), ':t')
-				let lnum = printf('%*d', lnum_width, e.lnum)
-				let col = printf('%*d', col_width, e.col)
-				let type = printf('%-*S', type_width, get(efm_type, e.type, ''))
-				let errnum = ''
-				if e.nr
-					let errnum = printf('%*d', errnum_width + 1, e.nr)
-				endif
-				call add(l, printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
-			endif
-		endif
-	endfor
-	return l
+function! OmniSharp#locations#_quickfixtextfuncAlign(info) abort
+  if a:info.quickfix
+    let qfl = getqflist({'id': a:info.id, 'items': 0}).items
+  else
+    let qfl = getloclist(a:info.winid, {'id': a:info.id, 'items': 0}).items
+  endif
+  let l = []
+  let efm_type = {'e': 'error', 'w': 'warning', 'i': 'info', 'n': 'note'}
+  let lnum_width =   len(max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), { _,v -> qfl[v].lnum })))
+  let col_width =    len(max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), {_, v -> qfl[v].col})))
+  let fname_width =  max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), {_, v -> strchars(fnamemodify(bufname(qfl[v].bufnr), ':t'), 1)}))
+  let type_width =   max(map(range(a:info.start_idx - 1, a:info.end_idx - 1), {_, v -> strlen(get(efm_type, qfl[v].type, ''))}))
+  let errnum_width = len(max(map(range(a:info.start_idx - 1, a:info.end_idx - 1),{_, v -> qfl[v].nr})))
+  for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
+    let e = qfl[idx]
+    if !e.valid
+      call add(l, '|| ' . e.text)
+    else
+      if e.lnum == 0 && e.col == 0
+        call add(l, bufname(e.bufnr))
+      else
+        let fname = fnamemodify(printf('%-*S', fname_width, bufname(e.bufnr)), ':t')
+        let lnum = printf('%*d', lnum_width, e.lnum)
+        let col = printf('%*d', col_width, e.col)
+        let type = printf('%-*S', type_width, get(efm_type, e.type, ''))
+        let errnum = ''
+        if e.nr
+          let errnum = printf('%*d', errnum_width + 1, e.nr)
+        endif
+        call add(l, printf('%s|%s col %s %s%s| %s', fname, lnum, col, type, errnum, e.text))
+      endif
+    endif
+  endfor
+  return l
 endfunction
 
 let &cpoptions = s:save_cpo
