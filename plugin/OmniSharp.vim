@@ -33,6 +33,8 @@ let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnish
 let defaultlevel = g:OmniSharp_server_stdio ? 'info' : 'warning'
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 
+let g:OmniSharp_diagnostic_listen = get(g:, 'OmniSharp_diagnostic_listen', 2)
+
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
 let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 1)
 

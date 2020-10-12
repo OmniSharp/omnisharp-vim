@@ -165,6 +165,28 @@ Default: {} >
 -------------------------------------------------------------------------------
 3.2 DIAGNOSTICS                                    *omnisharp-diagnostic-options*
 
+                                                  *g:OmniSharp_diagnostic_listen*
+When using ALE for displaying diagnostics, OmniSharp-vim can listen for
+diagnostics sent asynchronously by the OmniSharp-roslyn server, and continue
+to update ALE as these are received. This can be particularly useful on
+startup, when the initial diagnostics received from the server may not reflect
+the full state of the buffer, as the project has not been fully leaded by the
+server.
+However in some environments, server analysers may continue to send
+conflicting diagnostics, so in this situation diagnostic listening should be
+disabled.
+Note: disabling diagnostic listening does _not_ disable all diagnostics.
+Normal editing will still trigger ALE updates, and these will be reflected by
+ALE as usual. This setting only applies to unsolicited diagnostics pushed by
+the server.
+Default: 2 >
+    " Do not listen for diagnostics
+    let g:OmniSharp_diagnostic_listen = 0
+    " Listen to the first diagnostic received for each buffer
+    let g:OmniSharp_diagnostic_listen = 1
+    " Listen for diagnostics and update ALE
+    let g:OmniSharp_diagnostic_listen = 2
+<
                                                   *g:OmniSharp_diagnostic_showid*
 When set to 1, include the ID in diagnostic outputs, e.g. ALE linting issues
 and |:OmniSharpGlobalCodeCheck| quickfix results.

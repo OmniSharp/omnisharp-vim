@@ -70,7 +70,8 @@ function! s:HandleServerEvent(job, res) abort
     " and update ALE for loaded buffers. This is necessary because, especially
     " when the project is first loading, the requested diagnostics are often
     " wrong and quickly replaced by correct, unsolicited diagnostics.
-    if has_key(g:, 'OmniSharp_diagnostics_requested')
+    if g:OmniSharp_diagnostic_listen > 0 &&
+    \ has_key(g:, 'OmniSharp_diagnostics_requested')
       if get(a:res, 'Event', '') ==# 'Diagnostic'
         for result in get(body, 'Results', [])
           let fname = OmniSharp#util#TranslatePathForClient(result.FileName)
@@ -79,9 +80,25 @@ function! s:HandleServerEvent(job, res) abort
             continue
           endif
           let bufnr = bufinfo[0].bufnr
+          if g:OmniSharp_diagnostic_listen == 1
+            let host = getbufvar(bufnr, 'OmniSharp_host')
+            if get(host, 'diagnostics_received')
+              continue
+            endif
+            let host.diagnostics_received = 1
+          endif
           call ale#other_source#StartChecking(bufnr, 'OmniSharp')
           let opts = { 'BufNum': bufnr }
           let qfs = OmniSharp#actions#diagnostics#Parse(result.QuickFixes)
+          let counts = {}
+          for sev in ['E', 'W', 'I']
+            let counts[sev] = len(filter(copy(qfs), {_,qf -> qf.type ==# sev}))
+          endfor
+          call OmniSharp#log#Log(
+          \ a:job,
+          \ printf('Diagnostics received for %s, E:%d W:%d I:%d',
+          \   fname, counts.E, counts.W, counts.I),
+          \ 1)
           call ale#sources#OmniSharp#ProcessResults(opts, qfs)
         endfor
       endif
