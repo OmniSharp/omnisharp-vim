@@ -39,7 +39,7 @@ jobs:
       mono: none
       dotnet: 3.1.102
       install:
-        - installer/omnisharp-manager.sh -l $HOME/.omnisharp/omnisharp-roslyn/
+        - installer/omnisharp-manager.sh -l $HOME/.omnisharp/omnisharp-roslyn
         - git clone https://github.com/junegunn/vader.vim.git $TRAVIS_BUILD_DIR/../vader.vim
         - git clone https://github.com/vim/vim
         - pushd vim
