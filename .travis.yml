@@ -49,4 +49,4 @@ jobs:
         - popd
       before_script: cd test
       script: /usr/local/bin/vim -esNu vimrc -c 'Vader! *'
-      after_script: cat ../log/stdio.log
+      after_script: cat ../log/*_omnisharp.log
