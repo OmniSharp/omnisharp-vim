@@ -124,28 +124,33 @@ base_url="https://github.com/OmniSharp/omnisharp-roslyn/releases/download"
 full_url="${base_url}/${version}/${file_name}"
 # echo "$full_url"
 
-rm -rf "$location"
-mkdir -p "$location"
+download_location="${location}-${version}"
+
+rm -rf "$download_location"
+mkdir -p "$download_location"
 
 if command -v curl >/dev/null 2>&1 ; then
-    curl -L "$full_url" -o "$location/$file_name"
+    curl -L "$full_url" -o "$download_location/$file_name"
 elif command -v wget >/dev/null 2>&1 ; then
-    wget -P "$location" "$full_url"
+    wget -P "$download_location" "$full_url"
 fi
 
 # Check if the server was successfully downloaded
-if [ $? -gt 0 ] || [ ! -f "$location/$file_name" ]; then
+if [ $? -gt 0 ] || [ ! -f "$download_location/$file_name" ]; then
     echo "Error: failed to download the server, possibly a network issue"
     exit 1
 fi
 
 set -eu
 if [ "$ext" = "zip" ]; then
-    unzip "$location/$file_name" -d "$location/"
-    chmod +x $(find "$location" -type f)
+    unzip "$download_location/$file_name" -d "$download_location/"
+    chmod +x $(find "$download_location" -type f)
 else
-    tar -zxvf "$location/$file_name" -C "$location/"
+    tar -zxvf "$download_location/$file_name" -C "$download_location/"
 fi
+
+rm -rf "$location"
+mv "$download_location" "$location"
 set +eu
 
 # If using the system Mono, make the files executable
