@@ -37,7 +37,7 @@ jobs:
       language: csharp
       sudo: true
       mono: none
-      dotnet: 3.1.102
+      dotnet: 3.1.402
       install:
         - installer/omnisharp-manager.sh -l $HOME/.omnisharp/omnisharp-roslyn
         - git clone https://github.com/junegunn/vader.vim.git $TRAVIS_BUILD_DIR/../vader.vim
