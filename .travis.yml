@@ -33,6 +33,15 @@ jobs:
       before_script: cd $TRAVIS_BUILD_DIR/python
       script: tox
 
+    - name: python 3.8
+      language: python
+      python: 3.8
+      sudo: true
+      dist: xenial
+      install: pip install tox-travis
+      before_script: cd $TRAVIS_BUILD_DIR/python
+      script: tox
+
     - name: Vim (vader)
       language: csharp
       sudo: true
