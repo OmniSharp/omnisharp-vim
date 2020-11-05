@@ -31,12 +31,33 @@ function! s:StdioSignatureHelp(Callback, opts) abort
       "   Console.Write(|
       " We therefore need to add a '(' to the request and move the cursor
       " position.
+      "
+      " When arrow-keys are used instead of CTRL-N, the method name is _not_
+      " inserted, so instead of:
+      "   Console.Write|
+      " we just have:
+      "   Console.|
+      " or
+      "   Console.Wri|
+      " In this case, we need to add/complete the method name as well as the '('
+      " in our request buffer.
       let line = getline('.')
       let col = col('.')
+      let method = substitute(a:opts.ForCompleteMethod, '(.*$', '', '')
+      let methodlen = len(method)
+      let tmpline = line[0 : col - 2]
+      let add = ''
+      let added = 0
+      while added < methodlen && tmpline !~# method . '$'
+        let add = method[len(method) - 1 :] . add
+        let method = method[: len(method) - 2]
+        let added += 1
+      endwhile
+      let tmpline .= add . '(' . line[col - 1 :]
       let opts.OverrideBuffer = {
-      \ 'Line': line[0 : col - 2] . '(' . line[col - 1 :],
+      \ 'Line': tmpline,
       \ 'LineNr': line('.'),
-      \ 'Col': col + 1
+      \ 'Col': col + added + 1
       \}
     else
       " When g:OmniSharp_want_snippet == 1, the line returned from
@@ -114,6 +135,9 @@ function! OmniSharp#actions#signature#Display(deltaSig, deltaParam) abort
   let isig =
   \ isig < 0 ? len(s:last.Signatures) - 1 :
   \ isig >= len(s:last.Signatures) ? 0 : isig
+  if isig == -1
+    return
+  endif
   let s:last.SigIndex = isig
   let signature = s:last.Signatures[isig]
 

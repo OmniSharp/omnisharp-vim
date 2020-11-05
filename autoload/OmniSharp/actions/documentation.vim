@@ -5,7 +5,7 @@ function! OmniSharp#actions#documentation#TypeLookup(...) abort
   let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   let opts.Doc = g:OmniSharp_typeLookupInPreview
   if g:OmniSharp_server_stdio
-    call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
+    call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]), opts)
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
     let response = OmniSharp#py#Eval(pycmd)
@@ -18,7 +18,7 @@ function! OmniSharp#actions#documentation#Documentation(...) abort
   let opts = a:0 ? a:1 : {}
   let opts.Doc = 1
   if g:OmniSharp_server_stdio
-    call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]))
+    call s:StdioTypeLookup(opts.Doc, function('s:CBTypeLookup', [opts]), opts)
   else
     let pycmd = printf('typeLookup(%s)', opts.Doc ? 'True' : 'False')
     let response = OmniSharp#py#Eval(pycmd)
@@ -27,12 +27,41 @@ function! OmniSharp#actions#documentation#Documentation(...) abort
   endif
 endfunction
 
-function! s:StdioTypeLookup(includeDocumentation, Callback) abort
-  let includeDocumentation = a:includeDocumentation ? 'true' : 'false'
+function! s:StdioTypeLookup(includeDocumentation, Callback, opts) abort
   let opts = {
   \ 'ResponseHandler': function('s:StdioTypeLookupRH', [a:Callback]),
-  \ 'Parameters': { 'IncludeDocumentation': includeDocumentation}
+  \ 'Parameters': {
+  \    'IncludeDocumentation': a:includeDocumentation ? 'true' : 'false'
+  \ }
   \}
+  if has_key(a:opts, 'ForCompletion')
+    " Awkward hacks required.
+    " When arrow-keys are used instead of CTRL-N/CTRL-P for navigating through
+    " completion options, we will have lines like this:
+    "   Console.|
+    " or
+    "   Console.Bee|
+    " For fetching documentation, we need the full property name, like this:
+    "   Console.Beep|
+    let line = getline('.')
+    let col = col('.')
+    let property = a:opts.ForCompletion
+    let propertylen = len(property)
+    let tmpline = line[0 : col - 2]
+    let add = ''
+    let added = 0
+    while added < propertylen && tmpline !~# property . '$'
+      let add = property[len(property) - 1 :] . add
+      let property = property[: len(property) - 2]
+      let added += 1
+    endwhile
+    let tmpline .= add . line[col - 1 :]
+    let opts.OverrideBuffer = {
+    \ 'Line': tmpline,
+    \ 'LineNr': line('.'),
+    \ 'Col': col
+    \}
+  endif
   call OmniSharp#stdio#Request('/typelookup', opts)
 endfunction
 
