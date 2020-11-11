@@ -238,19 +238,13 @@ function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnr = a:0 > 1 ? a:2 : bufnr('%')
   if empty(getbufvar(bufnr, 'OmniSharp_buf_server'))
-    let sln_or_dir = s:FindRunningServerForBuffer(bufnr)
-    if !empty(sln_or_dir)
-      call setbufvar(bufnr, 'OmniSharp_buf_server', sln_or_dir)
-    else
-      try
-        let sln = s:FindSolution(interactive, bufnr)
-        call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
-      catch
-        return ''
-      endtry
-    endif
+    try
+      let sln = s:FindSolution(interactive, bufnr)
+      call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
+    catch
+      return ''
+    endtry
   endif
-
   return getbufvar(bufnr, 'OmniSharp_buf_server')
 endfunction
 
@@ -386,7 +380,8 @@ endfunction
 function! s:FindSolution(interactive, bufnr) abort
   let solution_files = s:FindSolutionsFiles(a:bufnr)
   if empty(solution_files)
-    return ''
+    " This file has no parent solution, so check for running solutions
+    return s:FindRunningServerForBuffer(a:bufnr)
   endif
 
   if len(solution_files) == 1
@@ -395,6 +390,12 @@ function! s:FindSolution(interactive, bufnr) abort
   \      g:OmniSharp_sln_list_index < len(solution_files)
     return solution_files[g:OmniSharp_sln_list_index]
   else
+    " Use an existing solution if one exists
+    let running = s:FindRunningServerForBuffer(a:bufnr)
+    if !empty(running)
+      return running
+    endif
+
     if g:OmniSharp_autoselect_existing_sln
       if !g:OmniSharp_server_stdio
         let running_slns = OmniSharp#py#FindRunningServer(solution_files)
