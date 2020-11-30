@@ -41,6 +41,9 @@ let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output',
 " Set to 1 when ultisnips is installed
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
 
+" Only has effect if OmniSharp_want_snippet is 0.
+let g:OmniSharp_completion_without_overloads = get(g:, 'OmniSharp_completion_without_overloads', 0)
+
 let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 1)
 
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)

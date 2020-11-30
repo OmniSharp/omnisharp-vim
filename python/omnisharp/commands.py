@@ -66,6 +66,9 @@ def getCompletions(partialWord):
     want_snippet = \
         bool(int(vim.eval('g:OmniSharp_want_snippet')))
 
+    without_overloads = \
+        bool(int(vim.eval('g:OmniSharp_completion_without_overloads')))
+
     parameters['WantSnippet'] = want_snippet
     parameters['WantMethodHeader'] = True
     parameters['WantReturnType'] = True
@@ -78,6 +81,9 @@ def getCompletions(partialWord):
             if want_snippet:
                 word = cmp['MethodHeader'] or cmp['CompletionText']
                 menu = cmp['ReturnType'] or cmp['DisplayText']
+            elif without_overloads:
+                word = cmp['CompletionText']
+                menu = ''
             else:
                 word = cmp['CompletionText'] or cmp['MethodHeader']
                 menu = cmp['DisplayText'] or cmp['MethodHeader']
@@ -90,7 +96,7 @@ def getCompletions(partialWord):
                 'info': ((cmp['Description'] or ' ')
                          .replace('\r\n', '\n')),
                 'icase': 1,
-                'dup': 1
+                'dup': without_overloads ? 0 : 1
             })
     return vim_completions
 
