@@ -7,8 +7,13 @@ function! OmniSharp#actions#signature#SignatureHelp(...) abort
   let opts = a:0 ? a:1 : {}
   augroup OmniSharp_signature_help_insert
     autocmd!
+    " Update the signature help box when new text is inserted.
     autocmd TextChangedI <buffer>
     \ call  OmniSharp#actions#signature#SignatureHelp()
+
+    " Remove this augroup when leaving insert mode
+    autocmd InsertLeave <buffer>
+    \ autocmd! OmniSharp_signature_help_insert
   augroup END
   if g:OmniSharp_server_stdio
     call s:StdioSignatureHelp(function('s:CBSignatureHelp', [opts]), opts)
