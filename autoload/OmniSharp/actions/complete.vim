@@ -95,6 +95,9 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     if g:OmniSharp_want_snippet
       let word = cmp.MethodHeader != v:null ? cmp.MethodHeader : cmp.CompletionText
       let menu = cmp.ReturnType != v:null ? cmp.ReturnType : cmp.DisplayText
+    elseif g:OmniSharp_completion_without_overloads
+      let word = cmp.CompletionText
+      let menu = ''
     else
       let word = cmp.CompletionText != v:null ? cmp.CompletionText : cmp.MethodHeader
       let menu = (cmp.ReturnType != v:null ? cmp.ReturnType . ' ' : '') .
@@ -108,7 +111,7 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     \ 'word': word,
     \ 'menu': menu,
     \ 'icase': 1,
-    \ 'dup': 1
+    \ 'dup': g:OmniSharp_completion_without_overloads ? 0 : 1
     \}
     if a:wantDocPopup
       let completion.info = cmp.MethodHeader . "\n ..."
