@@ -142,7 +142,7 @@ function s:Open(what, opts) abort
   endif
   augroup OmniSharp_popup_close
     autocmd!
-    autocmd InsertEnter,InsertLeave,BufLeave,WinLeave <buffer>
+    autocmd InsertEnter,InsertLeave,BufLeave,WinLeave,CompleteChanged <buffer>
     \ call s:CloseLast(0)
   augroup END
   return s:lastwinid
