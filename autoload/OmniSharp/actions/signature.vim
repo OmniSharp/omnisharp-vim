@@ -5,9 +5,6 @@ let s:seq = get(s:, 'seq', 0)
 
 function! OmniSharp#actions#signature#SignatureHelp(...) abort
   let opts = a:0 ? a:1 : {}
-  if exists('#OmniSharp_signature_help_insert')
-    autocmd! OmniSharp_signature_help_insert
-  endif
   augroup OmniSharp_signature_help_insert
     autocmd!
     autocmd TextChangedI <buffer>
