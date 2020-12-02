@@ -96,7 +96,7 @@ def getCompletions(partialWord):
                 'info': ((cmp['Description'] or ' ')
                          .replace('\r\n', '\n')),
                 'icase': 1,
-                'dup': without_overloads ? 0 : 1
+                'dup': 0 if without_overloads else 1
             })
     return vim_completions
 
