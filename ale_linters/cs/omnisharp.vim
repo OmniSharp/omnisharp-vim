@@ -42,7 +42,7 @@ call ale#linter#Define('cs', {
 \   'name': 'omnisharp',
 \   'aliases': ['Omnisharp', 'OmniSharp'],
 \   'executable': 'python',
-\   'command_callback': 'ale_linters#cs#omnisharp#GetCommand',
+\   'command': function('ale_linters#cs#omnisharp#GetCommand'),
 \   'callback': 'ale_linters#cs#omnisharp#ProcessOutput',
 \})
 
