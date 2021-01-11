@@ -144,7 +144,7 @@ fi
 set -eu
 if [ "$ext" = "zip" ]; then
     unzip "$download_location/$file_name" -d "$download_location/"
-    chmod +x $(find "$download_location" -type f)
+    find "$download_location" -type f -exec chmod +x {} +
 else
     tar -zxvf "$download_location/$file_name" -C "$download_location/"
 fi
@@ -155,7 +155,7 @@ set +eu
 
 # If using the system Mono, make the files executable
 if [ -n "$mono" ] && [ $mono -eq 1 ]; then
-    chmod +x $(find "$location" -type f)
+    find "$location" -type f -exec chmod +x {} +
 fi
 
 echo "$version" > "$location/OmniSharpInstall-version.txt"
