@@ -8,7 +8,7 @@ function! OmniSharp#locations#Navigate(location, noautocmds) abort
     if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
       execute
       \ (a:noautocmds ? 'noautocmd' : '')
-      \ (&modified && !&hidden ? 'split' : 'edit')
+      \ (&modified && !&hidden ? 'split' : get(g:, 'OmniSharp_edit_command', 'edit'))
       \ fnameescape(a:location.filename)
     endif
     if get(a:location, 'lnum', 0) > 0
