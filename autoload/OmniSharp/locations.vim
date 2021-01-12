@@ -1,15 +1,22 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#locations#Navigate(location, noautocmds) abort
+function! OmniSharp#locations#Navigate(location, silentedit) abort
   if a:location.filename !=# ''
     " Update the ' mark, adding this location to the jumplist.
     normal! m'
     if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
-      execute
-      \ (a:noautocmds ? 'noautocmd' : '')
-      \ (&modified && !&hidden ? 'split' : get(g:, 'OmniSharp_edit_command', 'edit'))
-      \ fnameescape(a:location.filename)
+      let editcommand = get(g:, 'OmniSharp_edit_command', 'edit')
+      if a:silentedit
+        let editcommand = 'edit'
+      endif
+      if &modified && !&hidden && editcommand ==# 'edit'
+        let editcommand = 'split'
+      endif
+      if a:silentedit
+        let editcommand = 'noautocmd ' . editcommand
+      endif
+      execute editcommand fnameescape(a:location.filename)
     endif
     if get(a:location, 'lnum', 0) > 0
       let col = get(a:location, 'vcol', 0)
