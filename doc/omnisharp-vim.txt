@@ -433,6 +433,13 @@ performance reasons. Full documentation can still be fetched when needed using
 the |:OmniSharpDocumentation| command. Default: 1 >
     let g:omnicomplete_fetch_full_documentation = 1
 <
+                                                    *g:omnicomplete_edit_command*
+Use this option to specify which command OmniSharp will use to open locations
+found via various commands (for instance `OmniSharpGotoDefinition` or
+`OmniSharpFindUsages`).
+Default: edit >
+    let g:OmniSharp_edit_command = 'tabedit'
+<
 ===============================================================================
 4. COMMANDS                                                  *omnisharp-commands*
 
