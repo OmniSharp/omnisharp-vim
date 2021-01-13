@@ -67,12 +67,17 @@ function! OmniSharp#locations#SetQuickfix(list, title) abort
 endfunction
 
 function! OmniSharp#locations#SetQuickfixWithVerticalAlign(list, title) abort
-  call s:SetQuickfixFromDict(a:list, {'title': a:title, 'quickfixtextfunc': 'OmniSharp#locations#_quickfixtextfuncAlign'})
+  " setqflist 'what' argument
+  let what = {
+  \ 'title': a:title,
+  \ 'quickfixtextfunc': function('s:QuickfixTextFuncAlign')
+  \}
+  call s:SetQuickfixFromDict(a:list, what)
 endfunction
 
-function! s:SetQuickfixFromDict(list, dict) abort
+function! s:SetQuickfixFromDict(list, what) abort
   if !has('patch-8.0.0657')
-  \ || setqflist([], ' ', extend(a:dict, {'nr': '$', 'items': a:list})) == -1
+  \ || setqflist([], ' ', extend(a:what, {'nr': '$', 'items': a:list})) == -1
     call setqflist(a:list)
   endif
   silent doautocmd <nomodeline> QuickFixCmdPost OmniSharp
@@ -81,7 +86,7 @@ function! s:SetQuickfixFromDict(list, dict) abort
   endif
 endfunction
 
-function! OmniSharp#locations#_quickfixtextfuncAlign(info) abort
+function! s:QuickfixTextFuncAlign(info) abort
   if a:info.quickfix
     let qfl = getqflist({'id': a:info.id, 'items': 0}).items
   else
