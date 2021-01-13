@@ -7,13 +7,27 @@ set cpoptions&vim
 function! OmniSharp#actions#usages#Find(...) abort
   let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   let target = expand('<cword>')
+  let Callback = function('s:CBFindUsages', [target, opts])
+  return s:FindUsages(Callback)
+endfunction
+
+function! OmniSharp#actions#usages#OpenAll(...) abort
+  let fname = expand('%:p')
+  let cmd = (a:0 && type(a:1) == type('') && len(a:1)) ? a:1 : 'tabedit'
+  let Callback = function('s:CBOpenAllUsages', [fname, cmd])
+  return s:FindUsages(Callback)
+endfunction
+
+function! s:FindUsages(Callback) abort
+  let target = expand('<cword>')
   if g:OmniSharp_server_stdio
-    let Callback = function('s:CBFindUsages', [target, opts])
-    call s:StdioFind(Callback)
+    let Callback = function('s:CBFindUsages', [target, {}])
+    call s:StdioFind(a:Callback)
   else
     let locs = OmniSharp#py#Eval('findUsages()')
     if OmniSharp#py#CheckForError() | return | endif
-    return s:CBFindUsages(target, opts, locs)
+    let ret = a:Callback(locs)
+    return ret
   endif
 endfunction
 
@@ -52,6 +66,35 @@ function! s:CBFindUsages(target, opts, locations) abort
     call a:opts.Callback(numUsages)
   endif
   return numUsages
+endfunction
+
+function! s:CBOpenAllUsages(fname, cmd, locations) abort
+  if len(a:locations) == 0
+    echo 'No usages found'
+    return
+  endif
+  let restoreAutochdir = 0
+  if &autochdir
+    let restoreAutochdir = 1
+    set noautochdir
+  endif
+  let opennames = {}
+  for bufObj in getbufinfo({'bufloaded': 1, 'buflisted': 1})
+    let opennames[bufObj.name] = 0
+  endfor
+  let filenames = {}
+  for location in a:locations
+    let absName = fnamemodify(location.filename, ':p')
+    if !has_key(opennames, absName) && a:fname !=? absName && !has_key(filenames, absName)
+      let filenames[absName] = location
+    endif
+  endfor
+  for name in keys(filenames)
+    call OmniSharp#locations#NavigateWith(filenames[name], a:cmd)
+  endfor
+  if restoreAutochdir
+    set autochdir
+  endif
 endfunction
 
 let &cpoptions = s:save_cpo

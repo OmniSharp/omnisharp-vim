@@ -41,6 +41,7 @@ command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer
 command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()
 command! -buffer -bar OmniSharpNavigateUp call OmniSharp#actions#navigate#Up()
 command! -buffer -bar OmniSharpNavigateDown call OmniSharp#actions#navigate#Down()
+command! -buffer -bar -nargs=? OmniSharpOpenAllUsages call OmniSharp#actions#usages#OpenAll(<q-args>)
 command! -buffer -bar OmniSharpPreviewDefinition call OmniSharp#actions#definition#Preview()
 command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#implementations#Preview()
 command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
@@ -68,6 +69,7 @@ nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR
 nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_up) :OmniSharpNavigateUp<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_down) :OmniSharpNavigateDown<CR>
+nnoremap <buffer> <Plug>(omnisharp_open_all_usages) :OmniSharpOpenAllUsages<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_definition) :OmniSharpPreviewDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_implementation) :OmniSharpPreviewImplementation<CR>
 nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
@@ -116,6 +118,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpNavigateDown
 \| delcommand OmniSharpPreviewDefinition
 \| delcommand OmniSharpPreviewImplementation
+\| delcommand OmniSharpOpenAllUsages
 \| delcommand OmniSharpRename
 \| delcommand OmniSharpRenameTo
 \| delcommand OmniSharpRepeatCodeAction

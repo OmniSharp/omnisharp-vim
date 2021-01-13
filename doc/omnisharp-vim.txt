@@ -490,6 +490,12 @@ convenient user re-mapping. These can be used like so: >
     Fills quicklist with usages of symbol under the cursor
     NOTE: Navigates to usage if only one is found
 
+                                                        *:OmniSharpOpenAllUsages*
+                                              *<Plug>(omnisharp_open_all_usages)*
+:OmniSharpOpenAllUsages
+    Searches usages of symbol under the cursor, and opens all files with usages
+    in separate buffers. Skips files which are already open.
+
                                                           *:OmniSharpFindMembers*
                                                  *<Plug>(omnisharp_find_members)*
 :OmniSharpFindMembers
