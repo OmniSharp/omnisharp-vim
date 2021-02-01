@@ -29,14 +29,14 @@ function! OmniSharp#locations#Navigate(location, ...) abort
       if noautocmd
         let editcommand = 'edit'
       endif
-      if &modified && !&hidden && editcommand ==# 'edit'
-        let editcommand = 'split'
-      endif
-      if noautocmd
-        let editcommand = 'noautocmd ' . editcommand
-      endif
       let changebuffer = fnamemodify(loc.filename, ':p') !=# expand('%:p')
       if changebuffer || editcommand !=# 'edit'
+        if &modified && !&hidden && editcommand ==# 'edit'
+          let editcommand = 'split'
+        endif
+        if noautocmd
+          let editcommand = 'noautocmd ' . editcommand
+        endif
         execute editcommand fnameescape(loc.filename)
       endif
       if get(loc, 'lnum', 0) > 0
