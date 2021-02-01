@@ -1,10 +1,27 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with a boolean 'found' result
+" Navigate to the definition of the symbol under the cursor.
+" Optional arguments:
+" Callback: When a callback is passed in, it is called after the response is
+"           returned (synchronously or asynchronously) with a boolean 'found'
+"           result.
+" editcommand: The command to use to open buffers, e.g. 'split', 'vsplit',
+"              'tabedit' or 'edit' (default).
 function! OmniSharp#actions#definition#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
+  let opts = { 'editcommand': 'edit' }
+  if a:0 && type(a:1) == type(function('tr'))
+    let opts.Callback = a:1
+  endif
+  if a:0 > 1 && type(a:2) == type(function('tr'))
+    let opts.Callback = a:2
+  endif
+  if a:0 && type(a:1) == type('') && a:1 !=# ''
+    let opts.editcommand = a:1
+  endif
+  if a:0 > 1 && type(a:2) == type('') && a:1 !=# ''
+    let opts.editcommand = a:2
+  endif
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBGotoDefinition', [opts])
     call s:StdioFind(Callback)
@@ -61,7 +78,7 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
       let found = 0
     endif
   else
-    let found = OmniSharp#locations#Navigate(a:location)
+    let found = OmniSharp#locations#Navigate(a:location, a:opts.editcommand)
   endif
   if has_key(a:opts, 'Callback') && !went_to_metadata
     call a:opts.Callback(found)

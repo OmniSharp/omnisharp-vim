@@ -15,25 +15,26 @@ function! OmniSharp#locations#Navigate(location, ...) abort
   if a:location.filename !=# ''
     " Update the ' mark, adding this location to the jumplist.
     normal! m'
-    if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
+    let editcommand = 'edit'
+    if a:0
+      if type(a:1) == type(0)
+        let editcommand = a:1 ? 'silent' : 'edit'
+      else
+        let editcommand = a:1
+      endif
+    endif
+    let noautocmd = editcommand ==# 'silent'
+    if noautocmd
       let editcommand = 'edit'
-      if a:0
-        if type(a:1) == type(0)
-          let editcommand = a:1 ? 'silent' : 'edit'
-        else
-          let editcommand = a:1
-        endif
-      endif
-      let noautocmd = editcommand ==# 'silent'
-      if noautocmd
-        let editcommand = 'edit'
-      endif
-      if &modified && !&hidden && editcommand ==# 'edit'
-        let editcommand = 'split'
-      endif
-      if noautocmd
-        let editcommand = 'noautocmd ' . editcommand
-      endif
+    endif
+    if &modified && !&hidden && editcommand ==# 'edit'
+      let editcommand = 'split'
+    endif
+    if noautocmd
+      let editcommand = 'noautocmd ' . editcommand
+    endif
+    let changebuffer = fnamemodify(a:location.filename, ':p') !=# expand('%:p')
+    if changebuffer || editcommand !=# 'edit'
       execute editcommand fnameescape(a:location.filename)
     endif
     if get(a:location, 'lnum', 0) > 0
