@@ -43,7 +43,7 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
       if modificationType == 0 " Modified
         call OmniSharp#locations#Navigate({
         \ 'filename': OmniSharp#util#TranslatePathForClient(change.FileName),
-        \}, 1)
+        \}, 'silent')
         call OmniSharp#buffer#Update(change)
         if bufnr('%') != bufnr
           silent write | silent edit
@@ -64,7 +64,7 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
     if bufnr('%') != bufnr
       call OmniSharp#locations#Navigate({
       \ 'filename': bufname
-      \}, 1)
+      \}, 'silent')
     endif
     for unload_bufnr in unload_bufnrs
       " Don't worry about unwritten changes when there has been a rename - the

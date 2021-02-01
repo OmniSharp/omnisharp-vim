@@ -17,10 +17,10 @@ logger = logging.getLogger('omnisharp')
 ctx = VimUtilCtx(vim)
 
 
-def openFile(filename, line=0, column=0, silentedit=0):
+def openFile(filename, line=0, column=0, editcommand='edit'):
     vim.command("let l:loc = {{ 'filename': '{0}', 'lnum': {1}, 'col': {2} }}"
                 .format(filename, line, column))
-    vim.command("call OmniSharp#locations#Navigate(l:loc, {0})".format(silentedit))
+    vim.command("call OmniSharp#locations#Navigate(l:loc, {0})".format(editcommand))
 
 
 def setBuffer(text):
@@ -130,13 +130,13 @@ def runCodeAction(mode, action):
         vim.command('let l:hidden_bak = &hidden | set hidden')
         for changeDefinition in changes:
             filename = formatPathForClient(ctx, changeDefinition['FileName'])
-            openFile(filename, silentedit=1)
+            openFile(filename, editcommand='silent')
             if not setBuffer(changeDefinition.get('Buffer')):
                 for change in changeDefinition.get('Changes', []):
                     setBuffer(change.get('NewText'))
             if vim.current.buffer.number != bufnum:
                 vim.command('silent write | silent edit')
-        openFile(bufname, pos[0], pos[1], 1)
+        openFile(bufname, pos[0], pos[1], 'silent')
         vim.command('let &hidden = l:hidden_bak | unlet l:hidden_bak')
         return True
     return False

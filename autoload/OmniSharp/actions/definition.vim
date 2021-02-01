@@ -61,7 +61,7 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
       let found = 0
     endif
   else
-    let found = OmniSharp#locations#Navigate(a:location, 0)
+    let found = OmniSharp#locations#Navigate(a:location)
   endif
   if has_key(a:opts, 'Callback') && !went_to_metadata
     call a:opts.Callback(found)

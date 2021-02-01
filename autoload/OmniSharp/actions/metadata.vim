@@ -46,7 +46,7 @@ function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
   if a:open_in_preview
     call OmniSharp#locations#Preview(location)
   else
-    call OmniSharp#locations#Navigate(location, 0)
+    call OmniSharp#locations#Navigate(location)
     setlocal nomodifiable readonly
   endif
   if a:open_in_preview && !jumped_from_preview && &previewwindow

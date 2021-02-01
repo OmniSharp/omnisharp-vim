@@ -1,19 +1,37 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#locations#Navigate(location, silentedit) abort
+" Navigate to location.
+" a:location: A location dict, or list of location dicts. The location or
+"             locations have the same format as a quickfix list entry.
+"             See :help setqflist-what
+" Optional argument:
+" editcommand: The command to use to open buffers, e.g. 'split', 'vsplit',
+"              'tabedit' or 'edit' (default).
+"              Pass 'silent' to perform a silent navigation, with no autocmds
+"              executed.
+function! OmniSharp#locations#Navigate(location, ...) abort
+  " TODO: if type(a:location) == type([])
   if a:location.filename !=# ''
     " Update the ' mark, adding this location to the jumplist.
     normal! m'
     if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
-      let editcommand = get(g:, 'OmniSharp_edit_command', 'edit')
-      if a:silentedit
+      let editcommand = 'edit'
+      if a:0
+        if type(a:1) == type(0)
+          let editcommand = a:1 ? 'silent' : 'edit'
+        else
+          let editcommand = a:1
+        endif
+      endif
+      let noautocmd = editcommand ==# 'silent'
+      if noautocmd
         let editcommand = 'edit'
       endif
       if &modified && !&hidden && editcommand ==# 'edit'
         let editcommand = 'split'
       endif
-      if a:silentedit
+      if noautocmd
         let editcommand = 'noautocmd ' . editcommand
       endif
       execute editcommand fnameescape(a:location.filename)
