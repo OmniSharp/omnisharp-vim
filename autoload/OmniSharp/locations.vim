@@ -11,42 +11,45 @@ set cpoptions&vim
 "              Pass 'silent' to perform a silent navigation, with no autocmds
 "              executed.
 function! OmniSharp#locations#Navigate(location, ...) abort
-  " TODO: if type(a:location) == type([])
-  if a:location.filename !=# ''
-    " Update the ' mark, adding this location to the jumplist.
-    normal! m'
-    let editcommand = 'edit'
-    if a:0
-      if type(a:1) == type(0)
-        let editcommand = a:1 ? 'silent' : 'edit'
-      else
-        let editcommand = a:1
-      endif
-    endif
-    let noautocmd = editcommand ==# 'silent'
-    if noautocmd
+  let locations = type(a:location) == type([]) ? a:location : [a:location]
+  let navigated = 0
+  for loc in locations
+    if loc.filename !=# ''
+      " Update the ' mark, adding this location to the jumplist.
+      normal! m'
       let editcommand = 'edit'
+      if a:0
+        if type(a:1) == type(0)
+          let editcommand = a:1 ? 'silent' : 'edit'
+        else
+          let editcommand = a:1
+        endif
+      endif
+      let noautocmd = editcommand ==# 'silent'
+      if noautocmd
+        let editcommand = 'edit'
+      endif
+      if &modified && !&hidden && editcommand ==# 'edit'
+        let editcommand = 'split'
+      endif
+      if noautocmd
+        let editcommand = 'noautocmd ' . editcommand
+      endif
+      let changebuffer = fnamemodify(loc.filename, ':p') !=# expand('%:p')
+      if changebuffer || editcommand !=# 'edit'
+        execute editcommand fnameescape(loc.filename)
+      endif
+      if get(loc, 'lnum', 0) > 0
+        let col = get(loc, 'vcol', 0)
+        \ ? OmniSharp#util#CharToByteIdx(loc.filename, loc.lnum, loc.col)
+        \ : loc.col
+        call cursor(loc.lnum, col)
+        redraw
+      endif
+      let navigated = 1
     endif
-    if &modified && !&hidden && editcommand ==# 'edit'
-      let editcommand = 'split'
-    endif
-    if noautocmd
-      let editcommand = 'noautocmd ' . editcommand
-    endif
-    let changebuffer = fnamemodify(a:location.filename, ':p') !=# expand('%:p')
-    if changebuffer || editcommand !=# 'edit'
-      execute editcommand fnameescape(a:location.filename)
-    endif
-    if get(a:location, 'lnum', 0) > 0
-      let col = get(a:location, 'vcol', 0)
-      \ ? OmniSharp#util#CharToByteIdx(
-      \     a:location.filename, a:location.lnum, a:location.col)
-      \ : a:location.col
-      call cursor(a:location.lnum, col)
-      redraw
-    endif
-    return 1
-  endif
+  endfor
+  return navigated
 endfunction
 
 function! OmniSharp#locations#Parse(quickfixes) abort
