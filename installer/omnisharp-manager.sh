@@ -63,15 +63,18 @@ else
     exit 1
 fi
 
-# Check the machine architecture
-case "$(uname -m)" in
-    "x86_64")   machine="x64";;
-    "i368")     machine="x86";;
-    *)
-        echo "Error: OmniSharp-Roslyn only works on x86 CPU architecture"
-        exit 1
-        ;;
-esac
+# If not installing in mono mode
+if [ -z "$mono" ]; then
+    # Check the machine architecture
+    case "$(uname -m)" in
+        "x86_64")   machine="x64";;
+        "i368")     machine="x86";;
+        *)
+            echo "Error: OmniSharp-Roslyn only works on x86 CPU architecture"
+            exit 1
+            ;;
+    esac
+fi
 
 # Check the operating system
 case "$(uname -s)" in
