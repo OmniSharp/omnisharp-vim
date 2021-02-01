@@ -1,9 +1,11 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-
-" Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the number of usages
+" Find usages of the symbol under the cursor.
+" Optional argument:
+" Callback: When a callback is passed in, the usage locations will be sent to
+"           the callback *instead of* to the configured selector
+"           (g:OmniSharp_selector_findusages) or quickfix list.
 function! OmniSharp#actions#usages#Find(...) abort
   let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   let target = expand('<cword>')
@@ -41,15 +43,14 @@ function! s:CBFindUsages(target, opts, locations) abort
   let numUsages = len(a:locations)
   if numUsages == 0
     echo 'No usages found'
+  elseif has_key(a:opts, 'Callback')
+    call a:opts.Callback(a:locations)
   elseif get(g:, 'OmniSharp_selector_findusages', '') ==? 'fzf'
     call fzf#OmniSharp#FindUsages(a:locations, a:target)
   elseif get(g:, 'OmniSharp_selector_findusages', '') ==? 'clap'
     call clap#OmniSharp#FindUsages(a:locations, a:target)
   else
     call OmniSharp#locations#SetQuickfix(a:locations, 'Usages: ' . a:target)
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numUsages)
   endif
   return numUsages
 endfunction
