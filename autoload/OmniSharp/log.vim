@@ -28,7 +28,17 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
     " in linux
     let message = substitute(a:msg.Body.Message, '\%uD\ze\%u0', '', 'g')
     let lines = split(message, '\%u0', 1)
-    if g:OmniSharp_loglevel ==# 'DEBUG' && lines[0] =~# '^\*\{12\}'
+    if a:msg.Body.Name ==# 'OmniSharp.Roslyn.BufferManager'
+      let line0 = lines[0]
+      if lines[0] =~# '^\s*Updating file .\+ with new text:$'
+        " Strip the trailing ':'
+        let line0 = line0[:-2]
+      endif
+      " The server sends the full content of the buffer. Don't log it.
+      let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
+      let lines = [printf('[%s]: %s\n', prefix, a:msg.Body.Name), line0]
+      call writefile(lines, a:job.logfile, 'a')
+    elseif g:OmniSharp_loglevel ==# 'DEBUG' && lines[0] =~# '^\*\{12\}'
       " Special loglevel - DEBUG all caps. This still tells the server to pass
       " full debugging requests and responses plus debugging messages, but
       " OmniSharp-vim will not log the requests and responses - just record
