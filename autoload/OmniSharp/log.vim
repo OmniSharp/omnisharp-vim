@@ -36,7 +36,7 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
       endif
       " The server sends the full content of the buffer. Don't log it.
       let prefix = s:LogLevelPrefix(a:msg.Body.LogLevel)
-      let lines = [printf('[%s]: %s\n', prefix, a:msg.Body.Name), line0]
+      let lines = [printf('[%s]: %s', prefix, a:msg.Body.Name), line0]
       call writefile(lines, a:job.logfile, 'a')
     elseif g:OmniSharp_loglevel ==# 'DEBUG' && lines[0] =~# '^\*\{12\}'
       " Special loglevel - DEBUG all caps. This still tells the server to pass
