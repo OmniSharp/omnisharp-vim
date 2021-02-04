@@ -29,7 +29,7 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
     let message = substitute(a:msg.Body.Message, '\%uD\ze\%u0', '', 'g')
     let lines = split(message, '\%u0', 1)
     if a:msg.Body.Name ==# 'OmniSharp.Roslyn.BufferManager'
-      let line0 = lines[0]
+      let line0 = '        ' . lines[0]
       if lines[0] =~# '^\s*Updating file .\+ with new text:$'
         " Strip the trailing ':'
         let line0 = line0[:-2]
