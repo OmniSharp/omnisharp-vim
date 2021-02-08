@@ -410,6 +410,17 @@ Use this option to enable syntastic integration >
 -------------------------------------------------------------------------------
 3.7 MISCELLANEOUS                               *omnisharp-miscellaneous-options*
 
+                                                 *g:OmniSharp_filename_modifiers*
+File paths returned from the server are normalized using Vim
+|filename-modifiers|. The |g:OmniSharp_filename_modifiers| variable allows
+configuring which modifiers are used.
+Additionally, the special value "relative" may be used to force all paths into
+a relatve format, e.g. "../../project/file.cs".
+Default: :. >
+    let g:OmniSharp_filename_modifiers = ':p:~'
+<or >
+    let g:OmniSharp_filename_modifiers = 'relative'
+<
                                                     *g:OmniSharp_lookup_metadata*
 When using `OmniSharpGotoDefinition` and `OmniSharpPreviewDefinition`,
 fall back to looking up metadata for compiled types.
