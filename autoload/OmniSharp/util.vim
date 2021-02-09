@@ -285,14 +285,15 @@ function! OmniSharp#util#TranslatePathForClient(filename) abort
   if modifiers ==# 'relative'
     let filename = fnamemodify(filename, ':p')
     let common = escape(getcwd(), '\')
-    let result = ''
-    while substitute(filename, common . s:dir_separator, '', '') ==# filename
-    \ && common !=# fnamemodify(common, ':h')
+    let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
+    let relprefix = ''
+    while relpath ==# filename && common !=# fnamemodify(common, ':h')
       let common = fnamemodify(common, ':h')
-      let result .= '..' . s:dir_separator
+      let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
+      let relprefix .= '..' . s:dir_separator
     endwhile
     if common !=# fnamemodify(common, ':h')
-      return result . substitute(filename, common . s:dir_separator, '', '')
+      return relprefix . relpath
     endif
     let modifiers = ':p'
   endif
