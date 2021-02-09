@@ -287,11 +287,11 @@ function! OmniSharp#util#TranslatePathForClient(filename) abort
     let common = escape(getcwd(), '\')
     let result = ''
     while substitute(filename, common . s:dir_separator, '', '') ==# filename
-    \ && common !=# s:dir_separator
+    \ && common !=# fnamemodify(common, ':h')
       let common = fnamemodify(common, ':h')
       let result .= '..' . s:dir_separator
     endwhile
-    if common !=# s:dir_separator
+    if common !=# fnamemodify(common, ':h')
       return result . substitute(filename, common . s:dir_separator, '', '')
     endif
     let modifiers = ':p'
