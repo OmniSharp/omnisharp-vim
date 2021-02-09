@@ -232,7 +232,10 @@ function! OmniSharp#util#ServerDir() abort
     let basedir = OmniSharp#util#Trim(
     \ system('cmd.exe /c echo %LocalAppData% 2>/dev/null'))
     let win_dir = join([basedir, 'omnisharp-vim', 'omnisharp-roslyn'], '\')
-    return OmniSharp#util#TranslatePathForClient(win_dir)
+    let unix_dir = OmniSharp#util#TranslatePathForClient(win_dir)
+    " Ensure the the dir is not relative, and then strip the trailing '\' added
+    " by the ':p' filename-modifier
+    return fnamemodify(unix_dir, ':p')[:-2]
   elseif exists('$XDG_CACHE_HOME')
     let basedir = expand('$XDG_CACHE_HOME')
   else
