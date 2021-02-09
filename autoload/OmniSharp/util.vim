@@ -283,6 +283,7 @@ function! OmniSharp#util#TranslatePathForClient(filename) abort
   let modifiers = get(g:, 'OmniSharp_filename_modifiers', ':.')
 
   if modifiers ==# 'relative'
+    let filename = fnamemodify(filename, ':p')
     let common = escape(getcwd(), '\')
     let result = ''
     while substitute(filename, common . s:dir_separator, '', '') ==# filename
