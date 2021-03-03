@@ -7,15 +7,19 @@ set cpoptions&vim
 "           the callback *instead of* to the configured selector
 "           (g:OmniSharp_selector_findusages) or quickfix list.
 function! OmniSharp#actions#usages#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
-  let target = expand('<cword>')
+  if a:0 && a:1 isnot 0
+    let Callback = a:1
+  else
+    let target = expand('<cword>')
+    let Callback = function('s:CBFindUsages', [target])
+  endif
+
   if g:OmniSharp_server_stdio
-    let Callback = function('s:CBFindUsages', [target, opts])
     call s:StdioFind(Callback)
   else
     let locs = OmniSharp#py#Eval('findUsages()')
     if OmniSharp#py#CheckForError() | return | endif
-    return s:CBFindUsages(target, opts, locs)
+    return Callback(locs)
   endif
 endfunction
 
@@ -39,12 +43,10 @@ function! s:StdioFindRH(Callback, response) abort
   endif
 endfunction
 
-function! s:CBFindUsages(target, opts, locations) abort
+function! s:CBFindUsages(target, locations) abort
   let numUsages = len(a:locations)
   if numUsages == 0
     echo 'No usages found'
-  elseif has_key(a:opts, 'Callback')
-    call a:opts.Callback(a:locations)
   elseif get(g:, 'OmniSharp_selector_findusages', '') ==? 'fzf'
     call fzf#OmniSharp#FindUsages(a:locations, a:target)
   elseif get(g:, 'OmniSharp_selector_findusages', '') ==? 'clap'
