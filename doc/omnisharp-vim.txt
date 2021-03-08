@@ -415,7 +415,7 @@ File paths returned from the server are normalized using Vim
 |filename-modifiers|. The |g:OmniSharp_filename_modifiers| variable allows
 configuring which modifiers are used.
 Additionally, the special value "relative" may be used to force all paths into
-a relatve format, e.g. "../../project/file.cs".
+a relative format, e.g. "../../project/file.cs".
 Default: :. >
     let g:OmniSharp_filename_modifiers = ':p:~'
 <or >

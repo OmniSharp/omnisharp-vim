@@ -49,9 +49,11 @@ function! s:CBFindImplementations(target, opts, locations) abort
   if numImplementations == 0
     echo 'No implementations found'
   elseif numImplementations == 1
-    call OmniSharp#locations#Navigate(a:locations[0])
+    let location = OmniSharp#locations#Modify(a:locations[0])
+    call OmniSharp#locations#Navigate(location)
   else " numImplementations > 1
-    call OmniSharp#locations#SetQuickfix(a:locations,
+    let locations = OmniSharp#locations#Modify(a:locations)
+    call OmniSharp#locations#SetQuickfix(locations,
     \ 'Implementations: ' . a:target)
   endif
   if has_key(a:opts, 'Callback')
@@ -60,17 +62,17 @@ function! s:CBFindImplementations(target, opts, locations) abort
   return numImplementations
 endfunction
 
-function! s:CBPreviewImplementation(locs, ...) abort
-    let numImplementations = len(a:locs)
+function! s:CBPreviewImplementation(locations, ...) abort
+    let numImplementations = len(a:locations)
     if numImplementations == 0
       echo 'No implementations found'
     else
-      call OmniSharp#locations#Preview(a:locs[0])
-      let fname = fnamemodify(a:locs[0].filename, ':.')
+      let location = OmniSharp#locations#Modify(a:locations[0])
+      call OmniSharp#locations#Preview(location)
       if numImplementations == 1
-        echo fname
+        echo location.filename
       else
-        echo fname . ': Implementation 1 of ' . numImplementations
+        echo location.filename . ': Implementation 1 of ' . numImplementations
       endif
     endif
 endfunction

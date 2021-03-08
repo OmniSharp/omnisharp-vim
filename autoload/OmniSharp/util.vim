@@ -280,25 +280,7 @@ function! OmniSharp#util#TranslatePathForClient(filename) abort
     let filename = OmniSharp#util#TempDir() . '/' . fnamemodify(filename, ':t')
   endif
 
-  let modifiers = get(g:, 'OmniSharp_filename_modifiers', ':.')
-
-  if modifiers ==# 'relative'
-    let filename = fnamemodify(filename, ':p')
-    let common = escape(getcwd(), '\')
-    let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
-    let relprefix = ''
-    while relpath ==# filename && common !=# fnamemodify(common, ':h')
-      let common = fnamemodify(common, ':h')
-      let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
-      let relprefix .= '..' . s:dir_separator
-    endwhile
-    if common !=# fnamemodify(common, ':h')
-      return relprefix . relpath
-    endif
-    let modifiers = ':p'
-  endif
-
-  return fnamemodify(filename, modifiers)
+  return fnamemodify(filename, ':p')
 endfunction
 
 function! OmniSharp#util#TranslatePathForServer(filename) abort

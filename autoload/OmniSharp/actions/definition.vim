@@ -78,7 +78,8 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
       let found = 0
     endif
   else
-    let found = OmniSharp#locations#Navigate(a:location, a:opts.editcommand)
+    let location = OmniSharp#locations#Modify(a:location)
+    let found = OmniSharp#locations#Navigate(location, a:opts.editcommand)
   endif
   if has_key(a:opts, 'Callback') && !went_to_metadata
     call a:opts.Callback(found)
@@ -96,7 +97,8 @@ function! s:CBPreviewDefinition(opts, location, metadata) abort
       echo 'Not found'
     endif
   else
-    call OmniSharp#locations#Preview(a:location)
+    let location = OmniSharp#locations#Modify(a:location)
+    call OmniSharp#locations#Preview(location)
     echo fnamemodify(a:location.filename, ':.')
   endif
 endfunction

@@ -46,7 +46,8 @@ endfunction
 function! s:CBFixUsings(opts, locations) abort
   let numAmbiguous = len(a:locations)
   if numAmbiguous > 0
-    call OmniSharp#locations#SetQuickfix(a:locations, 'Ambiguous usings')
+    let locations = OmniSharp#locations#Modify(a:locations)
+    call OmniSharp#locations#SetQuickfix(locations, 'Ambiguous usings')
   endif
   if has_key(a:opts, 'Callback')
     call a:opts.Callback(numAmbiguous)

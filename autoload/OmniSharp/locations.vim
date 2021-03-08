@@ -1,6 +1,39 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+let s:dir_separator = fnamemodify('.', ':p')[-1 :]
+
+function! OmniSharp#locations#Modify(locations) abort
+  " a:locations may be either a single 'quickfix' location, or list of locations
+  let locs = copy(type(a:locations) == type([]) ? a:locations : [a:locations])
+  for location in locs
+    let location.filename = OmniSharp#locations#ModifyPath(location.filename)
+  endfor
+  return type(a:locations) == type([]) ? locs : locs[0]
+endfunction
+
+function! OmniSharp#locations#ModifyPath(filename) abort
+  let modifiers = get(g:, 'OmniSharp_filename_modifiers', ':.')
+
+  if modifiers ==# 'relative'
+    let filename = fnamemodify(a:filename, ':p')
+    let common = escape(getcwd(), '\')
+    let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
+    let relprefix = ''
+    while relpath ==# filename && common !=# fnamemodify(common, ':h')
+      let common = fnamemodify(common, ':h')
+      let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
+      let relprefix .= '..' . s:dir_separator
+    endwhile
+    if common !=# fnamemodify(common, ':h')
+      return relprefix . relpath
+    endif
+    let modifiers = ':p'
+  endif
+
+  return fnamemodify(a:filename, modifiers)
+endfunction
+
 " Navigate to location.
 " a:location: A location dict, or list of location dicts. The location or
 "             locations have the same format as a quickfix list entry.
