@@ -2,15 +2,22 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 " Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the number of members
+" returned (synchronously or asynchronously) with the list of found locations
+" of members.
+" This is done instead of showing a quick-fix.
 function! OmniSharp#actions#members#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
+  if a:0 && a:1 isnot 0
+    let Callback = a:1
+  else
+    let Callback = function('s:CBFindMembers')
+  endif
+
   if g:OmniSharp_server_stdio
-    call s:StdioFind(function('s:CBFindMembers', [opts]))
+    call s:StdioFind(Callback)
   else
     let locs = OmniSharp#py#Eval('findMembers()')
     if OmniSharp#py#CheckForError() | return | endif
-    return s:CBFindMembers(opts, locs)
+    return Callback(locs)
   endif
 endfunction
 
@@ -83,13 +90,10 @@ function! ReduceToOneCharacter(textBeforeDisplayName) abort
   return s:SingleCharacterSymbolByAccessModifier[accessModifier] . a:textBeforeDisplayName[accessModifierLen:]
 endfunction
 
-function! s:CBFindMembers(opts, locations) abort
+function! s:CBFindMembers(locations) abort
   let numMembers = len(a:locations)
   if numMembers > 0
     call OmniSharp#locations#SetQuickfixWithVerticalAlign(a:locations, 'Members')
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numMembers)
   endif
   return numMembers
 endfunction

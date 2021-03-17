@@ -2,17 +2,22 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 " Accepts a Funcref callback argument, to be called after the response is
-" returned (synchronously or asynchronously) with the number of implementations
+" returned (synchronously or asynchronously) with the list of found locations.
+" This is done instead of navigating to them or showing a quick-fix.
 function! OmniSharp#actions#implementations#Find(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
-  let target = expand('<cword>')
+  if a:0 && a:1 isnot 0
+    let Callback = a:1
+  else
+    let target = expand('<cword>')
+    let Callback = function('s:CBFindImplementations', [target])
+  endif
+
   if g:OmniSharp_server_stdio
-    let Callback = function('s:CBFindImplementations', [target, opts])
     call s:StdioFind(Callback)
   else
     let locs = OmniSharp#py#Eval('findImplementations()')
     if OmniSharp#py#CheckForError() | return | endif
-    return s:CBFindImplementations(target, opts, locs)
+    return Callback(locs)
   endif
 endfunction
 
@@ -44,7 +49,7 @@ function! s:StdioFindRH(Callback, response) abort
   endif
 endfunction
 
-function! s:CBFindImplementations(target, opts, locations) abort
+function! s:CBFindImplementations(target, locations) abort
   let numImplementations = len(a:locations)
   if numImplementations == 0
     echo 'No implementations found'
@@ -54,9 +59,6 @@ function! s:CBFindImplementations(target, opts, locations) abort
     let locations = OmniSharp#locations#Modify(a:locations)
     call OmniSharp#locations#SetQuickfix(locations,
     \ 'Implementations: ' . a:target)
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(numImplementations)
   endif
   return numImplementations
 endfunction
