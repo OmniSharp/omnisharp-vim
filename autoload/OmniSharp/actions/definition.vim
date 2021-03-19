@@ -65,11 +65,44 @@ function! s:StdioFindRH(Callback, response) abort
     if g:OmniSharp_lookup_metadata
     \ && type(body) == type({})
     \ && type(body.MetadataSource) == type({})
-      call s:MetadataFind(a:Callback, body)
+      let Callback = function('s:CBMetadataFind', [a:Callback])
+      call s:StdioMetadataFind(Callback, body)
     else
       call a:Callback(0, 1)
     endif
   endif
+endfunction
+
+function! s:StdioMetadataFind(Callback, metadata) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:StdioMetadataFindRH', [a:Callback, a:metadata]),
+  \ 'Parameters': a:metadata.MetadataSource
+  \}
+  call OmniSharp#stdio#Request('/metadata', opts)
+endfunction
+
+function! s:StdioMetadataFindRH(Callback, metadata, response) abort
+  if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
+  call a:Callback(a:response.Body, a:metadata)
+endfunction
+
+function! s:CBMetadataFind(Callback, response, metadata) abort
+  let host = OmniSharp#GetHost()
+  let metadata_filename = fnamemodify(
+  \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
+  let temp_file = OmniSharp#util#TempDir() . '/' . metadata_filename
+  let lines = split(a:response.Source, "\n", 1)
+  let lines = map(lines, {i,v -> substitute(v, '\r', '', 'g')})
+  call writefile(lines, temp_file, 'b')
+  let bufnr = bufadd(temp_file)
+  call setbufvar(bufnr, 'OmniSharp_host', host)
+  call setbufvar(bufnr, 'OmniSharp_metadata_filename', a:response.SourceName)
+  let location = {
+  \ 'filename': temp_file,
+  \ 'lnum': a:metadata.Line,
+  \ 'col': a:metadata.Column
+  \}
+  call a:Callback(location, 1)
 endfunction
 
 function! s:CBGotoDefinition(opts, location, fromMetadata) abort
@@ -99,50 +132,6 @@ function! s:CBPreviewDefinition(location, fromMetadata) abort
       silent wincmd p
     endif
   endif
-endfunction
-
-function! s:MetadataFind(callback, metadata) abort
-  if g:OmniSharp_server_stdio
-    let Callback = function('s:CBMetadataFind', [a:callback])
-    call s:StdioMetadataFind(Callback, a:metadata)
-    return 1
-  else
-    echomsg 'GotoMetadata is not supported with the HTTP OmniSharp server. '
-    \ . 'Please consider upgrading to the stdio version.'
-    return 0
-  endif
-endfunction
-
-function! s:StdioMetadataFind(Callback, metadata) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:StdioMetadataFindRH', [a:Callback, a:metadata]),
-  \ 'Parameters': a:metadata.MetadataSource
-  \}
-  call OmniSharp#stdio#Request('/metadata', opts)
-endfunction
-
-function! s:StdioMetadataFindRH(Callback, metadata, response) abort
-  if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
-  call a:Callback(a:response.Body, a:metadata)
-endfunction
-
-function! s:CBMetadataFind(callback, response, metadata) abort
-  let host = OmniSharp#GetHost()
-  let metadata_filename = fnamemodify(
-  \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
-  let temp_file = OmniSharp#util#TempDir() . '/' . metadata_filename
-  let lines = split(a:response.Source, "\n", 1)
-  let lines = map(lines, {i,v -> substitute(v, '\r', '', 'g')})
-  call writefile(lines, temp_file, 'b')
-  let bufnr = bufadd(temp_file)
-  call setbufvar(bufnr, 'OmniSharp_host', host)
-  call setbufvar(bufnr, 'OmniSharp_metadata_filename', a:response.SourceName)
-  let location = {
-  \ 'filename': temp_file,
-  \ 'lnum': a:metadata.Line,
-  \ 'col': a:metadata.Column
-  \}
-  call a:callback(location, 1)
 endfunction
 
 let &cpoptions = s:save_cpo
