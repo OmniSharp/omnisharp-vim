@@ -16,9 +16,9 @@ function! OmniSharp#actions#definition#Find(...) abort
   if a:0 > 1 && type(a:2) == type(function('tr'))
     let opts.Callback = a:2
   endif
-  if a:0 && type(a:1) == type('') && a:1 !=# ''
-    let opts.editcommand = a:1
-  endif
+    if a:0 && type(a:1) == type('') && a:1 !=# ''
+      let opts.editcommand = a:1
+    endif
   if a:0 > 1 && type(a:2) == type('') && a:1 !=# ''
     let opts.editcommand = a:2
   endif
@@ -71,7 +71,7 @@ function! s:CBGotoDefinition(opts, location, metadata) abort
     if g:OmniSharp_lookup_metadata
     \ && type(a:metadata) == type({})
     \ && type(a:metadata.MetadataSource) == type({})
-      let found = OmniSharp#actions#metadata#Find(0, a:metadata, a:opts)
+      let found = s:MetadataFind(0, a:metadata, a:opts)
       let went_to_metadata = 1
     else
       echo 'Not found'
@@ -91,13 +91,69 @@ function! s:CBPreviewDefinition(opts, location, metadata) abort
     if g:OmniSharp_lookup_metadata
     \ && type(a:metadata) == type({})
     \ && type(a:metadata.MetadataSource) == type({})
-      let found = OmniSharp#actions#metadata#Find(1, a:metadata, a:opts)
+      let found = s:MetadataFind(1, a:metadata, a:opts)
     else
       echo 'Not found'
     endif
   else
     call OmniSharp#locations#Preview(a:location)
     echo OmniSharp#locations#Modify(a:location).filename
+  endif
+endfunction
+
+function! s:MetadataFind(open_in_preview, metadata, opts) abort
+  if g:OmniSharp_server_stdio
+    let Callback = function('s:CBGotoMetadata', [a:open_in_preview, a:opts])
+    call s:StdioMetadataFind(Callback, a:metadata)
+    return 1
+  else
+    echomsg 'GotoMetadata is not supported with the HTTP OmniSharp server. '
+    \ . 'Please consider upgrading to the stdio version.'
+    return 0
+  endif
+endfunction
+
+function! s:StdioMetadataFind(Callback, metadata) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:StdioMetadataFindRH', [a:Callback, a:metadata]),
+  \ 'Parameters': a:metadata.MetadataSource
+  \}
+  call OmniSharp#stdio#Request('/metadata', opts)
+endfunction
+
+function! s:StdioMetadataFindRH(Callback, metadata, response) abort
+  if !a:response.Success || a:response.Body.Source == v:null | return 0 | endif
+  call a:Callback(a:response.Body, a:metadata)
+endfunction
+
+function! s:CBGotoMetadata(open_in_preview, opts, response, metadata) abort
+  let host = OmniSharp#GetHost()
+  let metadata_filename = fnamemodify(
+  \ OmniSharp#util#TranslatePathForClient(a:response.SourceName), ':t')
+  let temp_file = OmniSharp#util#TempDir() . '/' . metadata_filename
+  let lines = split(a:response.Source, "\n", 1)
+  let lines = map(lines, {i,v -> substitute(v, '\r', '', 'g')})
+  call writefile(lines, temp_file, 'b')
+  let bufnr = bufadd(temp_file)
+  call setbufvar(bufnr, 'OmniSharp_host', host)
+  call setbufvar(bufnr, 'OmniSharp_metadata_filename', a:response.SourceName)
+  let jumped_from_preview = &previewwindow
+  let location = {
+  \ 'filename': temp_file,
+  \ 'lnum': a:metadata.Line,
+  \ 'col': a:metadata.Column
+  \}
+  if a:open_in_preview
+    call OmniSharp#locations#Preview(location)
+  else
+    call OmniSharp#locations#Navigate(location, get(a:opts, 'editcommand', 'edit'))
+    setlocal nomodifiable readonly
+  endif
+  if a:open_in_preview && !jumped_from_preview && &previewwindow
+    silent wincmd p
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(1) " found
   endif
 endfunction
 
