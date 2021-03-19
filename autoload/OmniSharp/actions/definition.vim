@@ -4,26 +4,24 @@ set cpoptions&vim
 " Navigate to the definition of the symbol under the cursor.
 " Optional arguments:
 " Callback: When a callback is passed in, it is called after the response is
-"           returned (synchronously or asynchronously) with a boolean 'found'
-"           result.
+"           returned (synchronously or asynchronously) with the found
+"           location and a flag for whether it is in a file in the project or
+"           from the metadata. This is done instead of navigating to the found
+"           location.
 " editcommand: The command to use to open buffers, e.g. 'split', 'vsplit',
 "              'tabedit' or 'edit' (default).
 function! OmniSharp#actions#definition#Find(...) abort
-  let opts = { 'editcommand': 'edit' }
   if a:0 && type(a:1) == type(function('tr'))
-    let opts.Callback = a:1
-  endif
-  if a:0 > 1 && type(a:2) == type(function('tr'))
-    let opts.Callback = a:2
-  endif
+    let Callback = a:1
+  else
+    let opts = { 'editcommand': 'edit' }
     if a:0 && type(a:1) == type('') && a:1 !=# ''
       let opts.editcommand = a:1
     endif
-  if a:0 > 1 && type(a:2) == type('') && a:1 !=# ''
-    let opts.editcommand = a:2
-  endif
-  if g:OmniSharp_server_stdio
     let Callback = function('s:CBGotoDefinition', [opts])
+  endif
+
+  if g:OmniSharp_server_stdio
     call s:StdioFind(Callback)
   else
     let loc = OmniSharp#py#Eval('gotoDefinition()')
@@ -33,8 +31,7 @@ function! OmniSharp#actions#definition#Find(...) abort
   endif
 endfunction
 
-function! OmniSharp#actions#definition#Preview(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
+function! OmniSharp#actions#definition#Preview() abort
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBPreviewDefinition')
     call s:StdioFind(Callback)
@@ -114,9 +111,6 @@ function! s:CBGotoDefinition(opts, location, fromMetadata) abort
     if found && a:fromMetadata
       setlocal nomodifiable readonly
     endif
-  endif
-  if has_key(a:opts, 'Callback')
-    call a:opts.Callback(found)
   endif
   return found
 endfunction
