@@ -187,7 +187,7 @@ Please note that if your distro has a "dev" package (`libuv1-dev`, `libuv-devel`
 **Note:** This is **not** necessary for the default stdio version of OmniSharp-roslyn.
 
 ### Install Python (HTTP only)
-Install the latest version of python 3 ([Python 3.7](https://www.python.org/downloads/release/python-370/)) or 2 ([Python 2.7.15](https://www.python.org/downloads/release/python-2715/)).
+Install python 3 or 2: [python downloads](https://www.python.org/downloads/).
 Make sure that you pick correct version of Python to match your vim's architecture (32-bit python for 32-bit vim, 64-bit python for 64-bit vim).
 
 Verify that Python is working inside Vim with
