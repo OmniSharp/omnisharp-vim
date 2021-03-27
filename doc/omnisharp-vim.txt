@@ -464,9 +464,16 @@ convenient user re-mapping. These can be used like so: >
 <
                                                        *:OmniSharpGotoDefinition*
                                              *<Plug>(omnisharp_go_to_definition)*
-:OmniSharpGotoDefinition
-    Navigates to the definition of the symbol under the cursor
+:OmniSharpGotoDefinition [{cmd}]
+    Navigates to the definition of the symbol under the cursor.
+    By default the definition is opened in the current window. To open it in a
+    new window or tab, pass a relevant command to use to open the buffer: >
 
+    :OmniSharpGotoDefinition
+    :OmniSharpGotoDefinition split
+    :OmniSharpGotoDefinition vsplit
+    :OmniSharpGotoDefinition tabedit
+<
                                                   *:OmniSharpFindImplementations*
                                          *<Plug>(omnisharp_find_implementations)*
 :OmniSharpFindImplementations
