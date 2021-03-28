@@ -395,11 +395,11 @@ Default: 0 >
     let g:OmniSharp_want_snippet = 0
 <
                                        *g:OmniSharp_completion_without_overloads*
-Use this option to get completion results without method arguments. Consequently,
-overloads will not be part of the completion results. For this feature to be 
-enabled it is required that g:OmniSharp_want_snippet is set to 0; the two options
-contradict each other and if both are enabled, g:OmniSharp_want_snippet takes
-precedence.
+Use this option to get completion results without method arguments.
+Consequently, overloads will not be part of the completion results. For this
+feature to be enabled it is required that g:OmniSharp_want_snippet is set to
+0; the two options contradict each other and if both are enabled,
+g:OmniSharp_want_snippet takes precedence.
 Default: 0 >
     let g:OmniSharp_completion_without_overloads = 0
 <
@@ -498,8 +498,8 @@ convenient user re-mapping. These can be used like so: >
 :OmniSharpFindSymbol
     Fuzzy-search through symbols
 
-                                                           *:OmniSharpFindType*
-                                                 *<Plug>(omnisharp_find_type)*
+                                                             *:OmniSharpFindType*
+                                                    *<Plug>(omnisharp_find_type)*
 :OmniSharpFindType
     Fuzzy-search through types. Better performance than OmniSharpFindSymbol in
     a large codebase.
