@@ -474,7 +474,7 @@ convenient user re-mapping. These can be used like so: >
     implementations is echoed.
 
                                                            *:OmniSharpFindSymbol*
-                                                 *<Plug>(omnisharp_find_symbols)*
+                                                  *<Plug>(omnisharp_find_symbol)*
 :OmniSharpFindSymbol
     Fuzzy-search through symbols
 
