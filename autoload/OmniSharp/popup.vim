@@ -225,9 +225,11 @@ endfunction
 " Neovim scrolling works by giving focus to the popup and running normal-mode
 " commands
 function! s:NvimPopupNormal(commands)
-  call nvim_set_current_win(s:lastwinid)
+  " Ensure that the OmniSharp_popup_close autocmds are not triggered to close
+  " the floating window before scrolling
+  noautocmd call nvim_set_current_win(s:lastwinid)
   execute 'normal!' eval(printf('"\<C-%s>"', a:commands))
-  call nvim_set_current_win(s:parentwinid)
+  noautocmd call nvim_set_current_win(s:parentwinid)
 endfunction
 
 " Editing buffers is not allowed from <expr> mappings. The popup mappings are
