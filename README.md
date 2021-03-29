@@ -360,15 +360,16 @@ let g:OmniSharp_popup = 0
 
 Apart from the insert-completion documentation window, all popups are closeable/scrollable using these mappings:
 
-| Action name    | Default mapping |
-|----------------|-----------------|
-| `close`        | `<Esc>`         |
-| `lineDown`     | `<C-e>`         |
-| `lineUp`       | `<C-y>`         |
-| `halfPageDown` | `<C-d>`         |
-| `halfPageUp`   | `<C-u>`         |
-| `pageDown`     | `<C-f>`         |
-| `pageUp`       | `<C-b>`         |
+| Action name               | Default mapping |
+|---------------------------|-----------------|
+| `close` (Gvim, neovim)    | `<Esc>`, `gq`   |
+| `close` (terminal Vim) \* | `gq`            |
+| `lineDown`                | `<C-e>`         |
+| `lineUp`                  | `<C-y>`         |
+| `halfPageDown`            | `<C-d>`         |
+| `halfPageUp`              | `<C-u>`         |
+| `pageDown`                | `<C-f>`         |
+| `pageUp`                  | `<C-b>`         |
 
 Additionally, the signature-help popup window provides the following mappings for navigating through method signatures and selected parameters:
 
@@ -391,7 +392,17 @@ let g:OmniSharp_popup_mappings = {
 \}
 ```
 
-Popups can be closed by using the `close` action mapping (`<Esc>` by default), and also by simply navigating to another line.
+Popups can be closed by using the `close` action mapping (`gq` or `<Esc>` by default), and also by simply navigating to another line.
+
+\* **NOTE:** Vim in the terminal does _not_ have a default `<Esc>` `close` mapping, because `<Esc>` mappings interfere with escape codes in terminal Vim, meaning that key-codes such as arrow keys and `<PageUp>`/`<PageDown>` do not work as expected.
+Therefore, terminal Vim only has the `gq` mapping.
+Gvim and neovim handle escape codes differently, so are not affected, and have both `gq` and `<Esc>` as default `close` mappings.
+
+If you are happy with this limitation and prefer to use `<Esc>` anyway, configure it in `g:OmniSharp_popup_mappings`:
+
+```vim
+let g:OmniSharp_popup_mappings.close = '<Esc>'
+```
 
 ### Popup options
 

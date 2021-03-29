@@ -136,9 +136,10 @@ function s:Open(what, opts) abort
     call OmniSharp#popup#Map(mode, 'pageDown',     '<C-f>', '<SID>VimPopupScrollPage(1)')
     call OmniSharp#popup#Map(mode, 'pageUp',       '<C-b>', '<SID>VimPopupScrollPage(-1)')
   endif
-  call OmniSharp#popup#Map(mode, 'close', '<Esc>', '<SID>CloseLast(1)')
+  let defaultClose = has('nvim') || has('gui_running') ? ['<Esc>', 'gq'] : 'gq'
+  call OmniSharp#popup#Map(mode, 'close', defaultClose, '<SID>CloseLast(1)')
   if mode !=# 'n'
-    call OmniSharp#popup#Map('n', 'close', '<Esc>', '<SID>CloseLast(1)')
+    call OmniSharp#popup#Map('n', 'close', defaultClose, '<SID>CloseLast(1)')
   endif
   augroup OmniSharp_popup_close
     autocmd!

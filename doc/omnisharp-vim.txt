@@ -267,7 +267,7 @@ Default: 1 >
 Dictionary of popup action mappings.
 Defaults: >
     let g:OmniSharp_popup_mappings = {
-    \ 'close': '<Esc>',
+    \ 'close': ['<Esc>', 'gq']
     \ 'lineDown': '<C-e>',
     \ 'lineUp': '<C-y>',
     \ 'halfPageDown': '<C-d>',
@@ -285,6 +285,17 @@ Apply multiple mappings by providing a list of mappings instead of a string: >
 <
 Disable individual mappings by assigning an empty array: >
     let g:OmniSharp_popup_mappings = { 'sigNext': [] }
+<
+Note that Vim in the terminal does not have a default "<Esc>" "close" mapping,
+because "<Esc>" mappings interfere with escape codes in terminal Vim, meaning
+that key-codes such as arrow keys and "<PageUp>"/"<PageDown>" do not work as
+expected. Therefore, terminal Vim only has the "gq" mapping.
+Gvim and neovim handle escape codes differently, so are not affected, and have
+both "gq" and "<Esc>" as default "close" mappings.
+
+If you are happy with this limitation and prefer to use "<Esc>" anyway,
+configure it explicitly in |g:OmniSharp_popup_mappings|: >
+    let g:OmniSharp_popup_mappings.close = '<Esc>'
 <
                                                       *g:OmniSharp_popup_options*
 Dictionary of popup display options. Note that these are different in Vim and
