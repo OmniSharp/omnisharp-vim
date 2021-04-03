@@ -1,19 +1,28 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#actions#navigate#Down() abort
-  call s:Navigate(1)
+function! OmniSharp#actions#navigate#Down(...) abort
+  if a:0 > 0
+    let Callback = a:1
+    call s:Navigate(1, Callback)
+  else
+    call s:Navigate(1)
+  endif
 endfunction
 
-function! OmniSharp#actions#navigate#Up() abort
-  call s:Navigate(0)
+function! OmniSharp#actions#navigate#Up(...) abort
+  if a:0 > 0
+    let Callback = a:1
+    call s:Navigate(0, Callback)
+  else
+    call s:Navigate(0)
+  endif
 endfunction
 
-function! s:Navigate(down) abort
+function! s:Navigate(down, ...) abort
   if g:OmniSharp_server_stdio
-    let opts = {
-    \ 'ResponseHandler': function('s:NavigateRH')
-    \}
+    let Callback = a:0 ? a:1 : function('s:NavigateRH')
+    let opts = { 'ResponseHandler': Callback }
     call OmniSharp#stdio#Request(a:down ? '/navigatedown' : '/navigateup', opts)
   else
     call OmniSharp#py#Eval(a:down ? 'navigateDown()' : 'navigateUp()')
