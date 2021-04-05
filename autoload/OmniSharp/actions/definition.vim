@@ -27,7 +27,7 @@ function! OmniSharp#actions#definition#Find(...) abort
     let loc = OmniSharp#py#Eval('gotoDefinition()')
     if OmniSharp#py#CheckForError() | return 0 | endif
     " We never come from metadata here
-    return s:CBGotoDefinition(opts, loc, 0)
+    return Callback(loc, 0)
   endif
 endfunction
 
