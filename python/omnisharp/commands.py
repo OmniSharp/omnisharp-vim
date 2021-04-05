@@ -266,17 +266,25 @@ def findHighlightTypes():
 
 @vimcmd
 def navigateUp():
-    get_navigate_response('/navigateup')
+    return get_navigate_response('/navigateup')
 
 
 @vimcmd
 def navigateDown():
-    get_navigate_response('/navigatedown')
+    return get_navigate_response('/navigatedown')
 
 
 def get_navigate_response(endpoint):
     response = getResponse(ctx, endpoint, json=True)
-    vim.current.window.cursor = (response['Line'], response['Column'] - 1)
+    if response.get('Line'):
+        return {
+            'filename': formatPathForServer(ctx, ctx.buffer_name),
+            'text': '',
+            'lnum': response['Line'],
+            'col': response['Column'],
+            'vcol': 0
+        }
+    return None
 
 
 @vimcmd

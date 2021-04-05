@@ -21,8 +21,9 @@ function! s:Navigate(down, Callback) abort
     let opts = { 'ResponseHandler': RH }
     call OmniSharp#stdio#Request(a:down ? '/navigatedown' : '/navigateup', opts)
   else
-    call OmniSharp#py#Eval(a:down ? 'navigateDown()' : 'navigateUp()')
-    call OmniSharp#py#CheckForError()
+    let loc = OmniSharp#py#Eval(a:down ? 'navigateDown()' : 'navigateUp()')
+    if OmniSharp#py#CheckForError() | return | endif
+    call a:Callback(loc)
   endif
 endfunction
 
