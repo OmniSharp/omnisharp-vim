@@ -1,28 +1,24 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+" Navigate to the next member definition in the class.
+" Optional arguments:
+" Callback: When a callback is passed in, it is called after the response is
+"           returned with the member location. No navigation is performed when a
+"           callback is passed in.
 function! OmniSharp#actions#navigate#Down(...) abort
-  if a:0 > 0
-    let Callback = a:1
-    call s:Navigate(1, Callback)
-  else
-    call s:Navigate(1)
-  endif
+  call s:Navigate(1, a:0 ? a:1 : function('OmniSharp#locations#Navigate'))
 endfunction
 
+" See OmniSharp#actions#navigate#Down
 function! OmniSharp#actions#navigate#Up(...) abort
-  if a:0 > 0
-    let Callback = a:1
-    call s:Navigate(0, Callback)
-  else
-    call s:Navigate(0)
-  endif
+  call s:Navigate(0, a:0 ? a:1 : function('OmniSharp#locations#Navigate'))
 endfunction
 
-function! s:Navigate(down, ...) abort
+function! s:Navigate(down, Callback) abort
   if g:OmniSharp_server_stdio
-    let Callback = a:0 ? a:1 : function('s:NavigateRH')
-    let opts = { 'ResponseHandler': Callback }
+    let RH = function('s:StdioNavigateRH', [a:Callback])
+    let opts = { 'ResponseHandler': RH }
     call OmniSharp#stdio#Request(a:down ? '/navigatedown' : '/navigateup', opts)
   else
     call OmniSharp#py#Eval(a:down ? 'navigateDown()' : 'navigateUp()')
@@ -30,10 +26,9 @@ function! s:Navigate(down, ...) abort
   endif
 endfunction
 
-function! s:NavigateRH(response) abort
+function! s:StdioNavigateRH(Callback, response) abort
   if !a:response.Success | return | endif
-  normal! m'
-  call cursor(a:response.Body.Line, a:response.Body.Column)
+  call a:Callback(OmniSharp#locations#Parse([a:response.Body])[0])
 endfunction
 
 let &cpoptions = s:save_cpo
