@@ -188,6 +188,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
   endif
 
   if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
+    let command = insert(command, '--assembly-loader=strict')
     let command = insert(command, 'mono')
   endif
 
