@@ -15,5 +15,8 @@ Given cs():
 Execute (go to definition):
   call OmniSharpTestInitializeBuffer('GotoDefinition')
   call search("i = 0")
-  call OmniSharpTestAwait('OmniSharp#actions#definition#Find', [])
+  " Cannot use OmniSharpTestAwait, as the callback prevents the default
+  " navigation behaviour
+  call OmniSharp#actions#definition#Find()
+  sleep 5
   AssertEqual 3, line(".")

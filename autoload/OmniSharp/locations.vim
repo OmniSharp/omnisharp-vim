@@ -1,33 +1,88 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#locations#Navigate(location, silentedit) abort
-  if a:location.filename !=# ''
-    " Update the ' mark, adding this location to the jumplist.
-    normal! m'
-    if fnamemodify(a:location.filename, ':p') !=# expand('%:p')
-      let editcommand = get(g:, 'OmniSharp_edit_command', 'edit')
-      if a:silentedit
+let s:dir_separator = fnamemodify('.', ':p')[-1 :]
+
+function! OmniSharp#locations#Modify(locations) abort
+  " a:locations may be either a single 'quickfix' location, or list of locations
+  let locs = copy(type(a:locations) == type([]) ? a:locations : [a:locations])
+  for location in locs
+    let location.filename = OmniSharp#locations#ModifyPath(location.filename)
+  endfor
+  return type(a:locations) == type([]) ? locs : locs[0]
+endfunction
+
+function! OmniSharp#locations#ModifyPath(filename) abort
+  let modifiers = get(g:, 'OmniSharp_filename_modifiers', ':.')
+
+  if modifiers ==# 'relative'
+    let filename = fnamemodify(a:filename, ':p')
+    let common = escape(getcwd(), '\')
+    let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
+    let relprefix = ''
+    while relpath ==# filename && common !=# fnamemodify(common, ':h')
+      let common = fnamemodify(common, ':h')
+      let relpath = substitute(filename, '^' . common . s:dir_separator, '', '')
+      let relprefix .= '..' . s:dir_separator
+    endwhile
+    if common !=# fnamemodify(common, ':h')
+      return relprefix . relpath
+    endif
+    let modifiers = ':p'
+  endif
+
+  return fnamemodify(a:filename, modifiers)
+endfunction
+
+" Navigate to location.
+" a:location: A location dict, or list of location dicts. The location or
+"             locations have the same format as a quickfix list entry.
+"             See :help setqflist-what
+" Optional argument:
+" editcommand: The command to use to open buffers, e.g. 'split', 'vsplit',
+"              'tabedit' or 'edit' (default).
+"              Pass 'silent' to perform a silent navigation, with no autocmds
+"              executed.
+function! OmniSharp#locations#Navigate(location, ...) abort
+  let locations = type(a:location) == type([]) ? a:location : [a:location]
+  let navigated = 0
+  for loc in locations
+    if loc.filename !=# ''
+      " Update the ' mark, adding this location to the jumplist.
+      normal! m'
+      let editcommand = 'edit'
+      if a:0
+        if type(a:1) == type(0)
+          let editcommand = a:1 ? 'silent' : 'edit'
+        else
+          let editcommand = a:1
+        endif
+      endif
+      let noautocmd = editcommand ==# 'silent'
+      if noautocmd
         let editcommand = 'edit'
       endif
-      if &modified && !&hidden && editcommand ==# 'edit'
-        let editcommand = 'split'
+      let changebuffer = fnamemodify(loc.filename, ':p') !=# expand('%:p')
+      if changebuffer || editcommand !=# 'edit'
+        if &modified && !&hidden && editcommand ==# 'edit'
+          let editcommand = 'split'
+        endif
+        if noautocmd
+          let editcommand = 'noautocmd ' . editcommand
+        endif
+        execute editcommand fnameescape(loc.filename)
       endif
-      if a:silentedit
-        let editcommand = 'noautocmd ' . editcommand
+      if get(loc, 'lnum', 0) > 0
+        let col = get(loc, 'vcol', 0)
+        \ ? OmniSharp#util#CharToByteIdx(loc.filename, loc.lnum, loc.col)
+        \ : loc.col
+        call cursor(loc.lnum, col)
+        redraw
       endif
-      execute editcommand fnameescape(a:location.filename)
+      let navigated = 1
     endif
-    if get(a:location, 'lnum', 0) > 0
-      let col = get(a:location, 'vcol', 0)
-      \ ? OmniSharp#util#CharToByteIdx(
-      \     a:location.filename, a:location.lnum, a:location.col)
-      \ : a:location.col
-      call cursor(a:location.lnum, col)
-      redraw
-    endif
-    return 1
-  endif
+  endfor
+  return navigated
 endfunction
 
 function! OmniSharp#locations#Parse(quickfixes) abort

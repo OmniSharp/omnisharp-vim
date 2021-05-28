@@ -74,7 +74,7 @@ function! ctrlp#OmniSharp#findsymbols#accept(mode, str) abort
     endif
   endfor
   echo quickfix.filename
-  call  OmniSharp#locations#Navigate(quickfix, 0)
+  call  OmniSharp#locations#Navigate(quickfix)
 endfunction
 
 " Give the extension an ID

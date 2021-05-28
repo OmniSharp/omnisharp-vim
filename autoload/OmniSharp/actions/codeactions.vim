@@ -21,11 +21,12 @@ set cpoptions&vim
 " \ 'CallbackCount': function('PlaceSign')
 " \}
 function! OmniSharp#actions#codeactions#Count(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if a:0 && type(a:1) == type(function('tr'))
     let opts = { 'CallbackCleanup': a:1 }
   elseif a:0 && type(a:1) == type({})
     let opts = a:1
+  else
+    let opts = {}
   endif
   if g:OmniSharp_server_stdio
     let Callback = function('s:CBCountCodeActions', [opts])
