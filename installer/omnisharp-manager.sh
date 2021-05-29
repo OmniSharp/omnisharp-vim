@@ -69,44 +69,52 @@ if [ -z "$mono" ]; then
     case "$(uname -m)" in
         "x86_64")   machine="x64";;
         "i368")     machine="x86";;
+        "arm64")    machine="arm64";;
         *)
-            echo "Error: OmniSharp-Roslyn only works on x86 CPU architecture"
+            echo "Error: architecture not supported"
             exit 1
             ;;
     esac
 fi
 
-# Check the operating system
-case "$(uname -s)" in
-    "Linux")    os="linux-${machine}";;
-    "Darwin")   os="osx";;
-    *)
-        if [ "$(uname -o)" = "Cygwin" ]; then
-            os="win-${machine}"
-
-            if command -v unzip >/dev/null 2>&1 ; then
-                ext="zip"
-            else
-                echo "Error: the installer requires 'unzip' to work on Cygwin"
+if [ -n "$mono" ]; then
+    os="mono"
+else
+    case "$(uname -s)" in
+        "Linux")
+            if [ "$machine" = "arm64" ]; then
+                echo "Error: OmniSharp-Roslyn only works on x86 CPU architecture on Linux"
                 exit 1
             fi
-        elif [ "$(uname -o)" = "Msys" ]; then
-            os="win-${machine}"
+            os="linux-${machine}"
+            ;;
+        "Darwin")   os="osx";;
+        *)
+            if [ "$(uname -o)" = "Cygwin" ]; then
+                os="win-${machine}"
 
-            if command -v unzip >/dev/null 2>&1 ; then
-                ext="zip"
+                if command -v unzip >/dev/null 2>&1 ; then
+                    ext="zip"
+                else
+                    echo "Error: the installer requires 'unzip' to work on Cygwin"
+                    exit 1
+                fi
+            elif [ "$(uname -o)" = "Msys" ]; then
+                os="win-${machine}"
+
+                if command -v unzip >/dev/null 2>&1 ; then
+                    ext="zip"
+                else
+                    echo "Error: the installer requires 'unzip' to work on MinGW"
+                    exit 1
+                fi
             else
-                echo "Error: the installer requires 'unzip' to work on MinGW"
+                printf "Error: unknown system: %s\\n" "$(uname -s)"
                 exit 1
             fi
-        else
-            printf "Error: unknown system: %s\\n" "$(uname -s)"
-            exit 1
-        fi
-        ;;
-esac
-
-[ -n "$mono" ] && os="mono"
+            ;;
+    esac
+fi
 
 if [ -n "$windows" ]; then
   os="win-${machine}"
