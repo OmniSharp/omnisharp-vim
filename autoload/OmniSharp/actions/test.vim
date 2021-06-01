@@ -157,6 +157,9 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
         " check :messages for details.
         let location.noStackTrace = 1
       endif
+    elseif result.Outcome =~? 'skipped'
+      let location.type = 'W'
+      let location.text = location.name . ': ' . result.Outcome
     else
       let location.text = location.name . ': ' . result.Outcome
     endif
