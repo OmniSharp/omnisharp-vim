@@ -22,7 +22,7 @@ function! s:CBRunTest(summary) abort
   if a:summary.pass
     if len(a:summary.locations) == 0
       echomsg 'No tests were run'
-    elseif a:summary.locations[0].type ==# 'W'
+    elseif get(a:summary.locations[0], 'type', '') ==# 'W'
       echohl WarningMsg
       echomsg a:summary.locations[0].name . ': skipped'
       echohl None
