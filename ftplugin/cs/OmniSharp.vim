@@ -72,7 +72,7 @@ nnoremap <buffer> <Plug>(omnisharp_preview_definition) :OmniSharpPreviewDefiniti
 nnoremap <buffer> <Plug>(omnisharp_preview_implementation) :OmniSharpPreviewImplementation<CR>
 nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_server) :OmniSharpRestartServer<CR>
-nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) OmniSharpRestartAllServers<CR>
+nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) :OmniSharpRestartAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_run_test) :OmniSharpRunTest<CR>
 nnoremap <buffer> <Plug>(omnisharp_run_tests_in_file) :OmniSharpRunTestsInFile<CR>
 nnoremap <buffer> <Plug>(omnisharp_signature_help) :OmniSharpSignatureHelp<CR>
