@@ -4,8 +4,8 @@ set cpoptions&vim
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the results
 function! OmniSharp#actions#diagnostics#Check(...) abort
-  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
+  let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if pumvisible() || !OmniSharp#IsServerRunning()
     let b:codecheck = get(b:, 'codecheck', [])
     if has_key(opts, 'Callback')
@@ -23,11 +23,18 @@ function! OmniSharp#actions#diagnostics#Check(...) abort
   endif
 endfunction
 
+" Find all solution/project diagnostics and populate the quickfix list.
+" Optional argument:
+" Callback: When a callback is passed in, the diagnostics will be sent to
+"           the callback *instead of* to the quickfix list.
 function! OmniSharp#actions#diagnostics#CheckGlobal(...) abort
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
-  " Place the results in the quickfix window, if possible
-  if g:OmniSharp_server_stdio
+  if a:0 && a:1 isnot 0
+    let Callback = a:1
+  else
     let Callback = function('s:CBGlobalCodeCheck')
+  endif
+  if g:OmniSharp_server_stdio
     let opts = {
     \ 'ResponseHandler': function('s:StdioCheckRH', [Callback])
     \}
@@ -36,7 +43,7 @@ function! OmniSharp#actions#diagnostics#CheckGlobal(...) abort
   else
     let quickfixes = OmniSharp#py#Eval('globalCodeCheck()')
     if OmniSharp#py#CheckForError() | return | endif
-    call s:CBGlobalCodeCheck(quickfixes)
+    call Callback(quickfixes)
   endif
 endfunction
 
