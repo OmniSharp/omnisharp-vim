@@ -1,0 +1,33 @@
+name: tox
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [2.7, 3.9]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@main
+
+    - name: Setup Python
+      uses: actions/setup-python@main
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        pip install tox
+
+    - name: Run Test
+      run: |
+        cd $GITHUB_WORKSPACE/python
+        tox -e py
