@@ -1,7 +1,7 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-function! OmniSharp#preview#Display(content, title)
+function! OmniSharp#preview#Display(content, title) abort
   execute 'silent pedit' a:title
   silent wincmd P
   setlocal modifiable noreadonly

@@ -134,7 +134,7 @@ endfunction
 
 " :echoerr will throw if inside a try conditional, or function labeled 'abort'
 " This function will do the same thing without throwing
-function! OmniSharp#util#EchoErr(msg)
+function! OmniSharp#util#EchoErr(msg) abort
   let v:errmsg = a:msg
   echohl ErrorMsg | echomsg a:msg | echohl None
 endfunction

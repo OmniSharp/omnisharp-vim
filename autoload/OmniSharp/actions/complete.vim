@@ -31,7 +31,7 @@ function! OmniSharp#actions#complete#Get(partial, ...) abort
   endif
 endfunction
 
-function! OmniSharp#actions#complete#ExpandSnippet()
+function! OmniSharp#actions#complete#ExpandSnippet() abort
   if !g:OmniSharp_want_snippet
     return
   endif

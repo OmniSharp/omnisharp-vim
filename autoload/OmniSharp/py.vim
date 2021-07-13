@@ -28,7 +28,7 @@ else
   endfunction
 endif
 
-function! OmniSharp#py#Bootstrap()
+function! OmniSharp#py#Bootstrap() abort
   if exists('s:bootstrap_complete') | return | endif
   exec s:pycmd "sys.path.append(r'" . g:OmniSharp_python_path . "')"
   exec s:pyfile fnameescape(OmniSharp#util#PathJoin(['python', 'bootstrap.py']))
@@ -46,7 +46,7 @@ function! OmniSharp#py#CheckAlive(sln_or_dir) abort
   return alive
 endfunction
 
-function! OmniSharp#py#CheckForError(...)
+function! OmniSharp#py#CheckForError(...) abort
   let should_print = a:0 ? a:1 : 1
   if !empty(g:OmniSharp_py_err)
     if should_print
