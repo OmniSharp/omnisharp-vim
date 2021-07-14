@@ -1,5 +1,0 @@
-install:
-  - python -m pip install tox
-build: false  # Not a C# project, build stuff at the test step instead.
-test_script:
-  - python -m tox -c python\tox-appveyor.ini

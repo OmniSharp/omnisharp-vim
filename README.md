@@ -3,7 +3,6 @@
 </h1>
 
 ![Test status](https://github.com/OmniSharp/omnisharp-vim/actions/workflows/vader.yml/badge.svg)
-[![AppVeyor status](https://ci.appveyor.com/api/projects/status/github/OmniSharp/omnisharp-vim?svg=true)](https://ci.appveyor.com/project/nickspoons/omnisharp-vim)
 
 OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#.
 
