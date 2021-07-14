@@ -9,47 +9,11 @@ OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#.
 
 OmniSharp works on Windows, and on Linux and OS X with Mono.
 
-The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code, Emacs, Atom and others.
-
-## New! Popups
-
-Use Vim's popup windows and neovim's floating windows to display code/documentation without disrupting your window layouts: see [Popups](#popups) section for details and configuration options.
+The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code and Emacs.
 
 ![Popup Demo](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/omnisharp-popup-demo.gif)
 
  _(see the wiki [example config](https://github.com/OmniSharp/omnisharp-vim/wiki/Example-config) for a similar configuration to this demo)_
-
-## New! Run unit tests
-
-It is now possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
-
-```vim
-" Run the current unit test (the cursor should be on/inside the test method)
-:OmniSharpRunTest
-
-" Run all unit tests in the current file
-:OmniSharpRunTestsInFile
-
-" Run all unit tests in the current file, and file `tests/test1.cs`
-:OmniSharpRunTestsInFile % tests/test1.cs
-```
-
-**Note:** this is only available using the stdio server, and unfortunately does _not_ work in translated WSL, due to the way OmniSharp-roslyn runs the tests.
-
-## Asynchronous server interactions over stdio
-
-For vim8 and neovim, OmniSharp-vim uses the OmniSharp-roslyn stdio server instead of the older HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
-
-**Note:** neovim on Windows has been unable to communicate with the stdio server until a (very) recent neovim patch.
-If you are using nvim-qt _or_ terminal neovim on Windows, you will require a neovim [nightly build](https://github.com/neovim/neovim/releases/nightly) `NVIM v0.5.0-556` (2020-06-11) or newer, or will need to wait for neovim 0.5 to be released.
-
-To use the HTTP server instead, add this to your .vimrc:
-
-```vim
-let g:OmniSharp_server_stdio = 0
-```
-
-Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-installed with `:OmniSharpInstall`.
 
 ## Features
 
@@ -78,21 +42,17 @@ Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-insta
 * Code formatter
 * Run unit tests and navigate to failing assertions
 
-## Screenshots
-#### Auto Complete
-![OmniSharp screenshot](https://f.cloud.github.com/assets/667194/514371/dc03e2bc-be56-11e2-9745-c3202335e5ab.png)
+## Asynchronous server interactions over stdio
 
-#### Find Symbols
-![Find Symbols screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindTypes.png)
+For vim8 and neovim, OmniSharp-vim uses the OmniSharp-roslyn stdio server instead of the older HTTP server, using pure vimscript (no python dependency!). All server operations are asynchronous and this results in a much smoother coding experience.
 
-#### Find Usages
-![Find Usages screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/FindUsages.png)
+To use the HTTP server instead, add this to your .vimrc:
 
-#### Code Actions
-![Code Actions screenshot](https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/CodeActions.png)
+```vim
+let g:OmniSharp_server_stdio = 0
+```
 
-#### Code Actions Available (see [wiki](https://github.com/OmniSharp/omnisharp-vim/wiki/Code-Actions-Available-flag) for details)
-![Code Actions Available](https://user-images.githubusercontent.com/5274565/38906320-1aa2d7c0-430a-11e8-9ee3-40790b7e600e.png)
+Any time `g:OmniSharp_server_stdio` is modified, the server needs to be re-installed with `:OmniSharpInstall`.
 
 ## Installation
 ### Plugin
@@ -444,6 +404,24 @@ However "buffer" popups (previewing definitions and implementations) may be conf
 - `atcursor`: (default) Next to the cursor. Height expands to display as much as possible, so this may result in a very high window.
 - `peek`: Opens below or above the cursor, with the full width of the current window. Looks like a split, without altering window layout.
 - `center`: Centered in the Vim window, filling the entire workspace.
+
+
+## Run unit tests
+
+It is possible to run unit tests via OmniSharp-roslyn, with success/failures listed in the quickfix window for easy navigation:
+
+```vim
+" Run the current unit test (the cursor should be on/inside the test method)
+:OmniSharpRunTest
+
+" Run all unit tests in the current file
+:OmniSharpRunTestsInFile
+
+" Run all unit tests in the current file, and file `tests/test1.cs`
+:OmniSharpRunTestsInFile % tests/test1.cs
+```
+
+**Note:** this is only available using the stdio server, and unfortunately does _not_ work in translated WSL, due to the way OmniSharp-roslyn runs the tests.
 
 
 ## Configuration
