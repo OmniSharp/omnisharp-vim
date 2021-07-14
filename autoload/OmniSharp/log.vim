@@ -75,7 +75,7 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
   endif
 endfunction
 
-function! OmniSharp#log#Open(...)
+function! OmniSharp#log#Open(...) abort
   if g:OmniSharp_server_stdio
     let logfile = s:stdiologfile
     if exists('b:OmniSharp_host')
