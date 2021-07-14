@@ -2,7 +2,8 @@
   <img alt="OmniSharp" src="https://raw.github.com/OmniSharp/omnisharp-vim/gh-pages/omnisharp-logo-light.png">
 </h1>
 
-![Test status](https://github.com/OmniSharp/omnisharp-vim/actions/workflows/vader.yml/badge.svg)
+![Vader status](https://github.com/OmniSharp/omnisharp-vim/actions/workflows/vader.yml/badge.svg)
+![Vint status](https://github.com/OmniSharp/omnisharp-vim/actions/workflows/vint.yml/badge.svg)
 
 OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#.
 
