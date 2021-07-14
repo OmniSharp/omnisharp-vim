@@ -2,7 +2,7 @@ After():
   call OmniSharpTestCleanupBuffer()
 
 Execute (set up async helper):
-  function! s:Callback(...)
+  function! s:CallbackStopWaiting(...)
     let g:OmniSharp_test_waiting = 0
   endfunction
 
@@ -13,7 +13,7 @@ Execute (set up async helper):
   function! OmniSharpTestAwait(funcname, args, ...) abort
     let warmup = a:0 ? a:1 : 0
     let g:OmniSharp_test_waiting = 1
-    call function(a:funcname, a:args + [function('s:Callback')])()
+    call function(a:funcname, a:args + [function('s:CallbackStopWaiting')])()
     let starttime = reltime()
     while g:OmniSharp_test_waiting
     \ && reltime(starttime)[0] < g:OmniSharp_test_timeout
