@@ -85,12 +85,13 @@ Execute (should return ambiguous usings to Callback):
   call OmniSharpTestInitializeBuffer('FixUsings4')
   call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
   let g:OmniSharp_test_locations = []
-  function! s:Callback(locations)
+  function! s:CallbackFixUsings(locations)
     let g:OmniSharp_test_waiting = 0
     let g:OmniSharp_test_locations = a:locations
   endfunction
+  let Callback = function('s:CallbackFixUsings')
   let g:OmniSharp_test_waiting = 1
-  call function('OmniSharp#actions#usings#Fix', [function('s:Callback')])()
+  call function('OmniSharp#actions#usings#Fix', [Callback])()
   let starttime = reltime()
   while g:OmniSharp_test_waiting
   \ && reltime(starttime)[0] < g:OmniSharp_test_timeout

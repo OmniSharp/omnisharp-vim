@@ -12,11 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        vim:
-        - 'v8.2.0000'
-        - 'v8.1.0000'
-        - 'v8.0.0000'
-        - 'v7.4'
+        cfg:
+          - { editor: vim, neovim: false, version: nightly }
+          - { editor: vim, neovim: false, version: stable }
+          - { editor: neovim, neovim: true, version: stable }
 
     steps:
     - name: Checkout code
@@ -30,7 +29,8 @@ jobs:
     - name: Setup Vim
       uses: rhysd/action-setup-vim@v1
       with:
-        vim_version: ${{ matrix.vim }}
+        neovim: ${{ matrix.cfg.neovim }}
+        version: ${{ matrix.cfg.version }}
 
     - name: Install Dependencies
       run: |
@@ -41,4 +41,12 @@ jobs:
       run: |
         cd test
         vim -esNu vimrc -c 'Vader! *'
-      if: ${{ always() }}
+      if: matrix.cfg.editor == 'vim'
+
+    - name: Run Test
+      run: |
+        cd test
+        nvim --headless -Nu vimrc -c 'Vader! *'
+      env:
+        VADER_OUTPUT_FILE: /dev/stderr 
+      if: matrix.cfg.editor == 'neovim'
