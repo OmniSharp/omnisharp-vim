@@ -5,7 +5,6 @@ on:
     branches:
       - master
   pull_request:
-    branches:
 
 jobs:
   vint:
@@ -18,4 +17,4 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           level: error
-          reporter: github-pr-check
+          reporter: github-pr-review
