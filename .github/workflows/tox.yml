@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -28,19 +28,7 @@ jobs:
       run: |
         pip install tox
 
-    - name: Run Windows Test
-      if: runner.os == 'Windows'
-      run: |
-        python -m tox -c python/tox_windows.ini
-
-    - name: Run Linux Test
-      if: runner.os != 'Linux'
-      run: |
-        cd $GITHUB_WORKSPACE/python
-        tox -e py
-
-    - name: Run MacOS Test
-      if: runner.os != 'macOS'
+    - name: Run Test
       run: |
         cd $GITHUB_WORKSPACE/python
         tox -e py
