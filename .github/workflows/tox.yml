@@ -9,9 +9,10 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
         python-version: [2.7, 3.9]
 
     steps:
@@ -29,5 +30,5 @@ jobs:
 
     - name: Run Test
       run: |
-        cd $GITHUB_WORKSPACE/python
+        cd python
         tox -e py
