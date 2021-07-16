@@ -172,7 +172,7 @@ to update ALE as these are received. This can be particularly useful on
 startup, when the initial diagnostics received from the server may not reflect
 the full state of the buffer, as the project has not been fully leaded by the
 server.
-However in some environments, server analysers may continue to send
+However in some environments, server analyzers may continue to send
 conflicting diagnostics, so in this situation diagnostic listening should be
 disabled.
 Note: disabling diagnostic listening does _not_ disable all diagnostics.
