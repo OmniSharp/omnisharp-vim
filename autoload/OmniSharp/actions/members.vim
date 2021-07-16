@@ -74,20 +74,19 @@ function! s:ComputeItemSignature(item) abort
   if textBeforeDisplayName !~# '^\(private\|internal\|protected\|public\)'
     let textBeforeDisplayName = a:item.Properties.accessibility . ' ' . textBeforeDisplayName
   endif
-  return ReduceToOneCharacter(textBeforeDisplayName) . a:item.DisplayName
+  return s:ReduceToOneCharacter(textBeforeDisplayName) . a:item.DisplayName
 endfunction
 
 let s:SingleCharacterSymbolByAccessModifier = {
- \ 'public': '+',
- \ 'private': '-',
- \ 'internal': '&',
- \ 'protected': '|'
-\}
+      \ 'public': '+',
+      \ 'private': '-',
+      \ 'internal': '&',
+      \ 'protected': '|'
+      \}
 
-function! ReduceToOneCharacter(textBeforeDisplayName) abort
+function! s:ReduceToOneCharacter(textBeforeDisplayName) abort
   let accessModifier = matchlist(a:textBeforeDisplayName, '\w\+')[0]
-  let accessModifierLen = len(accessModifier)
-  return s:SingleCharacterSymbolByAccessModifier[accessModifier] . a:textBeforeDisplayName[accessModifierLen:]
+  return s:SingleCharacterSymbolByAccessModifier[accessModifier] . a:textBeforeDisplayName[len(accessModifier):]
 endfunction
 
 function! s:CBFindMembers(locations) abort
