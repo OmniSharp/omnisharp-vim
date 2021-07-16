@@ -24,7 +24,7 @@ command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServer
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
-command! -buffer -bar OmniSharpStopServer call OmniSharp#StopServer()
+command! -buffer -bar -nargs=? -bang -complete=customlist,OmniSharp#CompleteRunningSln OmniSharpStopServer call OmniSharp#StopServer(<bang>0, <q-args>)
 
 command! -buffer -bar OmniSharpCodeFormat call OmniSharp#actions#format#Format()
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()

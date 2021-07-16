@@ -57,6 +57,12 @@ function! OmniSharp#Complete(findstart, base) abort
 endfunction
 
 
+function! OmniSharp#CompleteRunningSln(arglead, cmdline, cursorpos) abort
+  let jobs = OmniSharp#proc#ListRunningJobs()
+  return filter(jobs, {_,job -> job =~? a:arglead})
+endfunction
+
+
 function! OmniSharp#IsAnyServerRunning() abort
   return !empty(OmniSharp#proc#ListRunningJobs())
 endfunction
@@ -208,7 +214,7 @@ endfunction
 
 function! OmniSharp#StopServer(...) abort
   let force = a:0 ? a:1 : 0
-  let sln_or_dir = a:0 > 1 ? a:2 : OmniSharp#FindSolutionOrDir()
+  let sln_or_dir = a:0 > 1 && len(a:2) > 0 ? a:2 : OmniSharp#FindSolutionOrDir()
   if force || OmniSharp#proc#IsJobRunning(sln_or_dir)
     if !g:OmniSharp_server_stdio
       call OmniSharp#py#Uncache(sln_or_dir)
