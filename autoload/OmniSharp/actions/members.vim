@@ -77,17 +77,16 @@ function! s:ComputeItemSignature(item) abort
   return s:ReduceToOneCharacter(textBeforeDisplayName) . a:item.DisplayName
 endfunction
 
+let s:SingleCharacterSymbolByAccessModifier = {
+      \ 'public': '+',
+      \ 'private': '-',
+      \ 'internal': '&',
+      \ 'protected': '|'
+      \}
 
 function! s:ReduceToOneCharacter(textBeforeDisplayName) abort
-  let l:SingleCharacterSymbolByAccessModifier = {
-        \ 'public': '+',
-        \ 'private': '-',
-        \ 'internal': '&',
-        \ 'protected': '|'
-        \}
-
   let accessModifier = matchlist(a:textBeforeDisplayName, '\w\+')[0]
-  return l:SingleCharacterSymbolByAccessModifier[accessModifier] . a:textBeforeDisplayName[len(accessModifier):]
+  return s:SingleCharacterSymbolByAccessModifier[accessModifier] . a:textBeforeDisplayName[len(accessModifier):]
 endfunction
 
 function! s:CBFindMembers(locations) abort
