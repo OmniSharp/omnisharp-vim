@@ -106,10 +106,13 @@ endfunction
 function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnr = a:0 > 1 ? a:2 : bufnr('%')
-  if empty(getbufvar(bufnr, 'OmniSharp_buf_server'))
+  let cache = getbufvar(bufnr, 'OmniSharp_buf_server')
+  if empty(cache) || index(OmniSharp#proc#ListJobs(), cache) < 0
     try
       let sln = s:FindSolution(interactive, bufnr)
+      if sln != cache
       call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
+      endif
     catch
       return ''
     endtry
@@ -247,11 +250,11 @@ endfunction
 
 
 function! s:FindSolution(interactive, bufnr) abort
-  let solution_files = s:FindSolutionsFiles(a:bufnr)
-  if empty(solution_files)
-    " This file has no parent solution, so check for running solutions
-    return s:FindRunningServerForBuffer(a:bufnr)
+  let running_server_for_buffer = s:FindRunningServerForBuffer(a:bufnr)
+  if !empty(running_server_for_buffer)
+    return running_server_for_buffer
   endif
+  let solution_files = s:FindSolutionsFiles(a:bufnr)
 
   if len(solution_files) == 1
     return solution_files[0]
