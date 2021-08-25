@@ -431,8 +431,8 @@ function! OmniSharp#Install(...) abort
   let l:location = shellescape(OmniSharp#util#ServerDir())
 
   if has('win32')
-    if exists('g:OmniSharp_vim_log_dir')
-      let l:log_dir = g:OmniSharp_vim_log_dir
+    if exists('g:OmniSharp_log_dir')
+      let l:log_dir = g:OmniSharp_log_dir
     else
       let l:log_dir = s:plugin_root_dir . '\log'
     end
@@ -445,8 +445,8 @@ function! OmniSharp#Install(...) abort
     \ 'powershell -ExecutionPolicy Bypass -File %s %s -l %s %s',
     \ l:script, l:http, l:location, l:version)
   else
-    if exists('g:OmniSharp_vim_log_dir')
-      let l:log_dir = g:OmniSharp_vim_log_dir
+    if exists('g:OmniSharp_log_dir')
+      let l:log_dir = g:OmniSharp_log_dir
     else
       let l:log_dir = s:plugin_root_dir . '/log'
     end

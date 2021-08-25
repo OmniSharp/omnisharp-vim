@@ -1,8 +1,8 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-if exists('g:OmniSharp_vim_log_dir')
-  let s:stdiologfile = g:OmniSharp_vim_log_dir . '/stdio.log'
+if exists('g:OmniSharp_log_dir')
+  let s:stdiologfile = g:OmniSharp_log_dir . '/stdio.log'
 else
   let s:stdiologfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
 end
