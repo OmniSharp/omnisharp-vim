@@ -1,7 +1,11 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:stdiologfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
+if exists('g:OmniSharp_vim_log_dir')
+  let s:stdiologfile = g:OmniSharp_vim_log_dir . '/stdio.log'
+else
+  let s:stdiologfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
+end
 
 " Log from OmniSharp-vim
 function! OmniSharp#log#Log(job, message, ...) abort
