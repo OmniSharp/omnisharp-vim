@@ -441,7 +441,6 @@ function! OmniSharp#Install(...) abort
     \ l:script, l:http, l:location, l:version)
   else
     let l:logfile = g:OmniSharp_log_dir . '/install.log'
-    let l:logfile = l:log_dir . '/install.log'
     let l:script = shellescape(
     \ s:plugin_root_dir . '/installer/omnisharp-manager.sh')
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
