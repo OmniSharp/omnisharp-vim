@@ -30,6 +30,13 @@ let g:OmniSharp_start_without_solution = get(g:, 'OmniSharp_start_without_soluti
 " Automatically start server
 let g:OmniSharp_start_server = get(g:, 'OmniSharp_start_server', get(g:, 'Omnisharp_start_server', 1))
 
+if has('win32')
+  let default_log_dir = expand('<sfile>:p:h:h') . '\log'
+else
+  let default_log_dir = expand('<sfile>:p:h:h') . '/log'
+end
+let g:OmniSharp_log_dir = get(g:, 'OmniSharp_log_dir', default_log_dir)
+
 let defaultlevel = g:OmniSharp_server_stdio ? 'info' : 'warning'
 let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 
@@ -129,5 +136,10 @@ if g:OmniSharp_selector_ui ==? 'ctrlp'
     let g:ctrlp_extensions += ['findsymbols', 'findcodeactions']
   endif
 endif
+
+" Make the log directory if it doesn't exist
+if !isdirectory(g:OmniSharp_log_dir)
+  call mkdir(g:OmniSharp_log_dir, "p")
+end
 
 " vim:et:sw=2:sts=2
