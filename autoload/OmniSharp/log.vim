@@ -1,7 +1,23 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:stdiologfile = expand('<sfile>:p:h:h:h') . '/log/stdio.log'
+if has('win32')
+  let default_log_dir = expand('<sfile>:p:h:h:h') . '\log'
+else
+  let default_log_dir = expand('<sfile>:p:h:h:h') . '/log'
+end
+
+let s:logdir = get(g:, 'OmniSharp_log_dir', default_log_dir)
+let s:stdiologfile = s:logdir . '/stdio.log'
+
+" Make the log directory if it doesn't exist
+if !isdirectory(g:OmniSharp_log_dir)
+  call mkdir(g:OmniSharp_log_dir, 'p')
+end
+
+function! OmniSharp#log#GetLogDir() abort
+  return s:logdir
+endfunction
 
 " Log from OmniSharp-vim
 function! OmniSharp#log#Log(job, message, ...) abort

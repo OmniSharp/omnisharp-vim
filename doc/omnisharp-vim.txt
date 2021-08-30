@@ -107,6 +107,16 @@ and back.
 Default: 0 >
     let g:OmniSharp_translate_cygwin_wsl = 1
 <
+                                                            *g:OmniSharp_log_dir*
+Sets the log directory.
+
+Use this option to specify the directory log files will be written to. If the
+directory specified does not exist, it will be created. When no log directory is
+specified, logs are written to the log directory in the Omnisharp-vim plugin
+directory.
+Default: /omnisharp-vim/log >
+    let g:OmniSharp_log_dir = '/omnisharp-vim/log'
+<
                                                            *g:OmniSharp_loglevel*
 Sets the log level.
 

@@ -431,7 +431,7 @@ function! OmniSharp#Install(...) abort
   let l:location = shellescape(OmniSharp#util#ServerDir())
 
   if has('win32')
-    let l:logfile = s:plugin_root_dir . '\log\install.log'
+    let l:logfile = OmniSharp#log#GetLogDir() . '\install.log'
     let l:script = shellescape(
     \ s:plugin_root_dir . '\installer\omnisharp-manager.ps1')
     let l:version_file_location = l:location . '\OmniSharpInstall-version.txt'
@@ -440,7 +440,7 @@ function! OmniSharp#Install(...) abort
     \ 'powershell -ExecutionPolicy Bypass -File %s %s -l %s %s',
     \ l:script, l:http, l:location, l:version)
   else
-    let l:logfile = s:plugin_root_dir . '/log/install.log'
+    let l:logfile = OmniSharp#log#GetLogDir() . '/install.log'
     let l:script = shellescape(
     \ s:plugin_root_dir . '/installer/omnisharp-manager.sh')
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
