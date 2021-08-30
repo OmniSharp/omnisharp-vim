@@ -11,8 +11,8 @@ let s:logdir = get(g:, 'OmniSharp_log_dir', default_log_dir)
 let s:stdiologfile = s:logdir . '/stdio.log'
 
 " Make the log directory if it doesn't exist
-if !isdirectory(g:OmniSharp_log_dir)
-  call mkdir(g:OmniSharp_log_dir, 'p')
+if !isdirectory(s:logdir)
+  call mkdir(s:logdir, 'p')
 end
 
 function! OmniSharp#log#GetLogDir() abort
