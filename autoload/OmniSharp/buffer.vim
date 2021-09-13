@@ -88,6 +88,7 @@ function! OmniSharp#buffer#Update(responseBody) abort
   let changes = get(a:responseBody, 'Changes', [])
   if type(changes) == type(v:null) | let changes = [] | endif
 
+  let virtualedit = &virtualedit ==? 'all'
   if len(changes)
     for change in changes
       let text = join(split(change.NewText, '\r\?\n', 1), "\n")
@@ -98,7 +99,7 @@ function! OmniSharp#buffer#Update(responseBody) abort
       let start = [change.StartLine, startCol]
       let end = [change.EndLine, endCol]
       call cursor(start)
-      if startCol > len(getline('.'))
+      if startCol > len(getline('.')) && !virtualedit
         " We can't set a mark after the last character of the line, so add an
         " extra charaqcter which will be immediately deleted again
         noautocmd normal! a<
