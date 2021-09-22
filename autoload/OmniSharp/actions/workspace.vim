@@ -23,7 +23,7 @@ function! s:ProjectsRH(job, response) abort
   " are no projects and the job can be marked as ready
   let projects = get(get(a:response.Body, 'MsBuild', {}), 'Projects', {})
   let a:job.projects = map(projects,
-  \ {_,project -> {"name": project.AssemblyName, "path": project.Path}})
+  \ {_,project -> {"name": project.AssemblyName, "path": project.Path, "target": project.TargetPath}})
   if get(a:job, 'projects_total', 0) > 0
     call OmniSharp#log#Log(a:job, 'Workspace complete: ' . a:job.projects_total . ' project(s)')
   else
