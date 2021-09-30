@@ -563,6 +563,14 @@ convenient user re-mapping. These can be used like so: >
     Run the current unit test. The cursor can be anywhere in the test method.
     If the test fails, the failure message and location will be displayed in
     the quickfix list.
+                                                              *:OmniSharpDebugTest*
+                                                     *<Plug>(omnisharp_debug_test)*
+:OmniSharpDebugTest
+    Debug the current unit test. The cursor can be anywhere in the test method.
+    This uses the Vimspector plugin. You must have Vimpsector installed and 
+    have the +python3 vim feature.
+    When debugging a test, the quickfix list is not populated with the result of
+    the test.
 
                                                        *:OmniSharpRunTestsInFile*
                                             *<Plug>(omnisharp_run_tests_in_file)*
