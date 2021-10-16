@@ -47,7 +47,6 @@ Expect cs(should add required using):
 
 
 Given cs():
-<<<<<<< HEAD
   using System;
 
   public class Test
@@ -107,8 +106,6 @@ Expect cs(should add another required using):
 
 
 Given cs():
-=======
->>>>>>> 37fa24e (feature  (sln_scope_handling): stop running job only if completely covered by newly started job. Use g:OmniSharp_stop_redundant_servers to change that default behavior)
   public class test {
       class1 ns1 = new class1();
   }
@@ -124,11 +121,7 @@ Given cs():
   }
 
 Execute (run fix usings):
-<<<<<<< HEAD
   call OmniSharpTestInitializeBuffer('FixUsings5')
-=======
-  call OmniSharpTestInitializeBuffer('FixUsings3')
->>>>>>> 37fa24e (feature  (sln_scope_handling): stop running job only if completely covered by newly started job. Use g:OmniSharp_stop_redundant_servers to change that default behavior)
   call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
   call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
 
@@ -148,11 +141,7 @@ Expect cs(should not add ambiguous using):
   }
 
 Execute (should return ambiguous usings to Callback):
-<<<<<<< HEAD
   call OmniSharpTestInitializeBuffer('FixUsings6')
-=======
-  call OmniSharpTestInitializeBuffer('FixUsings4')
->>>>>>> 37fa24e (feature  (sln_scope_handling): stop running job only if completely covered by newly started job. Use g:OmniSharp_stop_redundant_servers to change that default behavior)
   call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
   let g:OmniSharp_test_locations = []
   function! s:CallbackFixUsings(locations)
@@ -173,11 +162,7 @@ Execute (should return ambiguous usings to Callback):
   AssertEqual g:OmniSharp_test_locations[0].lnum, 2
 
 Execute (should add ambiguous usings to quickfix):
-<<<<<<< HEAD
   call OmniSharpTestInitializeBuffer('FixUsings7')
-=======
-  call OmniSharpTestInitializeBuffer('FixUsings5')
->>>>>>> 37fa24e (feature  (sln_scope_handling): stop running job only if completely covered by newly started job. Use g:OmniSharp_stop_redundant_servers to change that default behavior)
   call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
   " Cannot use OmniSharpTestAwait, as the callback prevents the default quickfix
   " behaviour
