@@ -31,7 +31,7 @@ function! s:ProjectsRH(job, response) abort
     call OmniSharp#project#RegisterLoaded(a:job)
   endif
 
-  let projectFolders = mapnew(projects, {_,p -> fnamemodify(p.path, ':p:h') })
+  let projectFolders = map(copy(projects), {_,p -> fnamemodify(p.path, ':p:h') })
   for i in filter(range(1, bufnr('$')), {_,x -> bufexists(x) && !empty(getbufvar(x, "OmniSharp_host")) && getbufvar(x, "OmniSharp_host").sln_or_dir != a:job.sln_or_dir})
     let host = getbufvar(i, "OmniSharp_host")
     let filePath = fnamemodify(bufname(i), ':p')
@@ -46,7 +46,7 @@ function! s:ProjectsRH(job, response) abort
   if a:job.sln_or_dir =~ '\.sln$' && get(g:, 'OmniSharp_stop_redundant_servers', 1)
     for runningJob in OmniSharp#proc#ListRunningJobs()
       let isCompletelyCoveredByNewestSolution = 1
-      let runningJobProjectsPaths = mapnew(OmniSharp#proc#GetJob(runningJob).projects, "fnamemodify(v:val.path, ':p:h')")
+      let runningJobProjectsPaths = map(copy(OmniSharp#proc#GetJob(runningJob).projects), "fnamemodify(v:val.path, ':p:h')")
       for i in range(len(runningJobProjectsPaths))
         let isProjectCoveredByNewestSolution = 0
         for j in range(len(projects))
