@@ -25,6 +25,7 @@ command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
 command! -buffer -bar -nargs=? -bang -complete=customlist,OmniSharp#CompleteRunningSln OmniSharpStopServer call OmniSharp#StopServer(<bang>0, <q-args>)
+command! -buffer -bar -nargs=? -complete=customlist,OmniSharp#CompleteOtherRunningSlnOrDirCoveringCurrentFile OmniSharpPickRunningServer call OmniSharp#PickRunningServer(<q-args>)
 
 command! -buffer -bar OmniSharpCodeFormat call OmniSharp#actions#format#Format()
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
@@ -68,6 +69,7 @@ nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR
 nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_up) :OmniSharpNavigateUp<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_down) :OmniSharpNavigateDown<CR>
+nnoremap <buffer> <Plug>(omnisharp_pick_running_server) :OmniSharpPickRunningServer
 nnoremap <buffer> <Plug>(omnisharp_preview_definition) :OmniSharpPreviewDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_implementation) :OmniSharpPreviewImplementation<CR>
 nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
@@ -114,6 +116,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpHighlightTypes
 \| delcommand OmniSharpNavigateUp
 \| delcommand OmniSharpNavigateDown
+\| delcommand OmniSharpPickRunningServer
 \| delcommand OmniSharpPreviewDefinition
 \| delcommand OmniSharpPreviewImplementation
 \| delcommand OmniSharpRename

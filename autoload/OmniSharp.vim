@@ -62,6 +62,20 @@ function! OmniSharp#CompleteRunningSln(arglead, cmdline, cursorpos) abort
   return filter(jobs, {_,job -> job =~? a:arglead})
 endfunction
 
+function! OmniSharp#CompleteOtherRunningSlnOrDirCoveringCurrentFile(arglead, cmdline, cursorpos) abort
+  let slnsOrDirsCoveringCurrentFile = []
+  let filePath = fnamemodify(expand('%'), ':p')
+  let currentlyAssignedJob = get(OmniSharp#GetHost(), 'sln_or_dir')
+  for runningJob in filter(OmniSharp#proc#ListRunningJobs(), {_,x -> x != currentlyAssignedJob})
+    for runningJobProjectPath in mapnew(OmniSharp#proc#GetJob(runningJob).projects, "fnamemodify(v:val.path, ':p:h')")
+      if stridx(filePath, runningJobProjectPath) == 0
+        call add(slnsOrDirsCoveringCurrentFile, runningJob)
+        break
+      endif
+    endfor
+  endfor
+  return filter(slnsOrDirsCoveringCurrentFile, {_,sln_or_dir -> sln_or_dir =~? a:arglead})
+endfunction
 
 function! OmniSharp#IsAnyServerRunning() abort
   return !empty(OmniSharp#proc#ListRunningJobs())
@@ -248,6 +262,10 @@ function! OmniSharp#RestartAllServers() abort
   endfor
 endfunction
 
+function! OmniSharp#PickRunningServer(server) abort
+  let host = get(b:, 'OmniSharp_host', {})
+  let host.sln_or_dir = a:server
+endfunction
 
 function! s:FindSolution(interactive, bufnr) abort
   let running_server_for_buffer = s:FindRunningServerForBuffer(a:bufnr)

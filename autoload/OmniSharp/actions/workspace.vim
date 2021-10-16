@@ -45,12 +45,12 @@ function! s:ProjectsRH(job, response) abort
 
   if a:job.sln_or_dir =~ '\.sln$' && get(g:, 'OmniSharp_stop_redundant_servers', 1)
     for runningJob in OmniSharp#proc#ListRunningJobs()
-      let runningJobProjects = OmniSharp#proc#GetJob(running).projects
       let isCompletelyCoveredByNewestSolution = 1
-      for i in range(1, len(runningJobProjects))
+      let runningJobProjectsPaths = mapnew(OmniSharp#proc#GetJob(runningJob).projects, "fnamemodify(v:val.path, ':p:h')")
+      for i in range(len(runningJobProjectsPaths))
         let isProjectCoveredByNewestSolution = 0
-        for j in range(1, len(projects))
-          if runningJobProjects[i].path == projects[j].path
+        for j in range(len(projects))
+          if runningJobProjectsPaths[i] == projects[j].path
             let isProjectCoveredByNewestSolution = 1
             break
           endif
