@@ -43,7 +43,7 @@ function! s:ProjectsRH(job, response) abort
     endfor
   endfor
 
-  if a:job.sln_or_dir =~ '\.sln$' && get(g:, 'OmniSharp_stop_redundant_servers', 0)
+  if a:job.sln_or_dir =~ '\.sln$' && get(g:, 'OmniSharp_stop_redundant_servers', 1)
     for runningJob in OmniSharp#proc#ListRunningJobs()
       let runningJobProjects = OmniSharp#proc#GetJob(running).projects
       let isCompletelyCoveredByNewestSolution = 1
