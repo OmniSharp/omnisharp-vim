@@ -67,7 +67,7 @@ function! OmniSharp#CompleteOtherRunningSlnOrDirCoveringCurrentFile(arglead, cmd
   let filePath = fnamemodify(expand('%'), ':p')
   let currentlyAssignedJob = get(OmniSharp#GetHost(), 'sln_or_dir')
   for runningJob in filter(OmniSharp#proc#ListRunningJobs(), {_,x -> x != currentlyAssignedJob})
-    for runningJobProjectPath in mapnew(OmniSharp#proc#GetJob(runningJob).projects, "fnamemodify(v:val.path, ':p:h')")
+    for runningJobProjectPath in map(copy(OmniSharp#proc#GetJob(runningJob).projects), "fnamemodify(v:val.path, ':p:h')")
       if stridx(filePath, runningJobProjectPath) == 0
         call add(slnsOrDirsCoveringCurrentFile, runningJob)
         break
