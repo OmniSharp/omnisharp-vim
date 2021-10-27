@@ -3,19 +3,34 @@ set cpoptions&vim
 
 let s:runningTest = 0
 
-function! OmniSharp#actions#test#Run(...) abort
+function! s:BindTest(bufnr, Callback) abort
   if !s:CheckCapabilities() | return | endif
-  let bufnr = a:0 ? a:1 : bufnr('%')
-  if !has_key(OmniSharp#GetHost(bufnr), 'project')
+  if !has_key(OmniSharp#GetHost(a:bufnr), 'project')
     " Initialize the test by fetching the project for the buffer - then call
     " this function again in the callback
-    call OmniSharp#actions#project#Get(bufnr,
-    \ function('OmniSharp#actions#test#Run', [bufnr]))
+    call OmniSharp#actions#project#Get(a:bufnr,
+    \ function('s:BindTest', [a:bufnr, a:Callback]))
     return
   endif
   let s:runningTest = 1
-  call OmniSharp#actions#codestructure#Get(bufnr,
-  \ function('s:RunTest', [function('s:CBRunTest')]))
+  call OmniSharp#actions#codestructure#Get(a:bufnr,
+  \ a:Callback)
+endfunction
+
+function! OmniSharp#actions#test#Run(...) abort
+  let bufnr = a:0 ? a:1 : bufnr('%')
+  call s:BindTest(bufnr, function('s:RunTest', [function('s:CBRunTest')]))
+endfunction
+
+function! OmniSharp#actions#test#Debug(...) abort
+  if !exists('g:vimspector_home')
+    echohl WarningMsg
+    echomsg 'Vimspector required to debug tests'
+    echohl None
+    return
+  endif
+  let bufnr = a:0 ? a:1 : bufnr('%')
+  call s:BindTest(bufnr, function('s:DebugTest', [function('s:CBDebugTest')]))
 endfunction
 
 function! s:CBRunTest(summary) abort
@@ -35,6 +50,15 @@ function! s:CBRunTest(summary) abort
     echomsg a:summary.locations[0].name . ': failed'
     let title = 'Test failure: ' . a:summary.locations[0].name
     call OmniSharp#locations#SetQuickfix(a:summary.locations, title)
+  endif
+endfunction
+
+function! s:CBDebugTest(response) abort
+  if !a:response.Success
+    echohl WarningMsg
+    echomsg 'Error debugging unit test'
+    echomsg a:response.Message
+    echohl None
   endif
 endfunction
 
@@ -181,6 +205,66 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
   call a:Callback(summary)
 endfunction
 
+function! s:DebugTest(Callback, bufnr, codeElements) abort
+  let tests = s:FindTests(a:codeElements)
+  let currentTest = s:FindTest(tests)
+  if type(currentTest) != type({})
+    echohl WarningMsg | echom 'No test found' | echohl None
+    let s:runningTest = 0
+    return
+  endif
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let targetFramework = project.MsBuildProject.TargetFramework
+  let opts = {
+  \ 'ResponseHandler': function('s:DebugTestsRH', [a:Callback, a:bufnr, tests]),
+  \ 'Parameters': {
+  \   'MethodName': currentTest.name,
+  \   'TestFrameworkName': currentTest.framework,
+  \   'TargetFrameworkVersion': targetFramework
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  echomsg 'Debugging test ' . currentTest.name
+  call OmniSharp#stdio#Request('/v2/debugtest/getstartinfo', opts)
+endfunction
+
+function! s:DebugTestsRH(Callback, bufnr, tests, response) abort
+  let testhost = [a:response.Body.FileName] + split(substitute(a:response.Body.Arguments, '\"', '', 'g'), ' ')
+  let testhost_job_pid = s:StartTestProcess(testhost)
+  let g:testhost_job_pid = testhost_job_pid
+
+  let host = OmniSharp#GetHost()
+  let s:omnisharp_pre_debug_cwd = getcwd()
+  let new_cwd = fnamemodify(host.sln_or_dir, ':p:h')
+  call vimspector#LaunchWithConfigurations({
+  \  'attach': {
+  \    'adapter': 'netcoredbg',
+  \    'configuration': {
+  \      'request': 'attach',
+  \      'processId': testhost_job_pid
+  \    }
+  \  }
+  \})
+  execute 'tcd '.new_cwd
+
+  call s:LaunchDebuggedTest(a:Callback, testhost_job_pid)
+endfunction
+
+function! s:LaunchDebuggedTest(Callback, pid) abort
+  let opts = {
+  \ 'ResponseHandler': function('s:LaunchDebuggedTestRH', [a:Callback, a:pid]),
+  \ 'Parameters': {
+  \   'TargetProcessId': a:pid
+  \ }
+  \}
+  echomsg 'Launching debugged test'
+  call OmniSharp#stdio#Request('/v2/debugtest/launch', opts)
+endfunction
+
+function! s:LaunchDebuggedTestRH(Callback, pid, response) abort
+  call a:Callback(a:response)
+endfunction
+
 function! s:FindTestsInFiles(Callback, buffers, ...) abort
   call OmniSharp#util#AwaitParallel(
   \ map(copy(a:buffers), {i,b -> function('OmniSharp#actions#codestructure#Get', [b])}),
@@ -282,6 +366,29 @@ function! s:CheckCapabilities() abort
     return 0
   endif
   return 1
+endfunction
+
+function! s:TestProcessClosed(...) abort
+  call OmniSharp#stdio#Request('/v2/debugtest/stop', {})
+  let s:runningTest = 0
+  call vimspector#Reset()
+  execute 'tcd '.s:omnisharp_pre_debug_cwd
+  unlet s:omnisharp_pre_debug_cwd
+endfunction
+
+function! s:StartTestProcess(command) abort
+  if OmniSharp#proc#supportsNeovimJobs()
+    let job = jobpid(jobstart(a:command, {
+      \ 'on_exit': function('s:TestProcessClosed')
+    \ }))
+  elseif OmniSharp#proc#supportsVimJobs()
+    let job = split(job_start(a:command, {
+      \ 'close_cb': function('s:TestProcessClosed')
+    \ }), ' ',)[1]
+  else
+    echohl WarningMsg | echomsg 'Cannot launch test process.' | echohl None
+  endif
+  return job
 endfunction
 
 let &cpoptions = s:save_cpo

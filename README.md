@@ -414,6 +414,9 @@ It is possible to run unit tests via OmniSharp-roslyn, with success/failures lis
 " Run the current unit test (the cursor should be on/inside the test method)
 :OmniSharpRunTest
 
+" Debug the current unit test (This will not populate the quickfix list with the result)
+:OmniSharpDebugTest
+
 " Run all unit tests in the current file
 :OmniSharpRunTestsInFile
 
