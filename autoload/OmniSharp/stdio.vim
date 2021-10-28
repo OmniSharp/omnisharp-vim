@@ -129,7 +129,13 @@ function! OmniSharp#stdio#Request(command, opts) abort
   else
     let bufnr = bufnr('%')
     let lnum = get(a:opts, 'LineNum', line('.'))
-    let cnum = get(a:opts, 'ColNum', charcol('.'))
+    if exists('*charcol')
+      " charcol() gives the character index of the cursor column, instead of the
+      " byte index. The OmniSharp-roslyn server uses character-based indices.
+      let cnum = get(a:opts, 'ColNum', charcol('.'))
+    else
+      let cnum = get(a:opts, 'ColNum', col('.'))
+    endif
   endif
   let host = OmniSharp#GetHost(bufnr)
   let job = host.job
