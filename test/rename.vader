@@ -11,13 +11,34 @@ Given cs():
 
 Execute (rename constructor):
   call OmniSharpTestInitializeBuffer('RenameTo')
-  call search("TestRenameTo()")
+  call search('TestRenameTo()')
   call OmniSharpTestAwait('OmniSharp#actions#rename#To', ['Renamed'])
 
 Expect cs(should rename class):
   public class Renamed
   {
     public Renamed()
+    {
+    }
+  }
+
+Given cs():
+  public class TestOmdøbAnother
+  {
+    public TestOmdøbAnother()
+    {
+    }
+  }
+
+Execute (rename after multi-byte characters):
+  call OmniSharpTestInitializeBuffer('RenameAnother')
+  call search('TestOmdøbAnother\ze()', 'e')
+  call OmniSharpTestAwait('OmniSharp#actions#rename#To', ['RenamedAnother'])
+
+Expect cs(should rename class):
+  public class RenamedAnother
+  {
+    public RenamedAnother()
     {
     }
   }

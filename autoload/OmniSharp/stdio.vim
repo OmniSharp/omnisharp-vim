@@ -129,7 +129,7 @@ function! OmniSharp#stdio#Request(command, opts) abort
   else
     let bufnr = bufnr('%')
     let lnum = get(a:opts, 'LineNum', line('.'))
-    let cnum = get(a:opts, 'ColNum', col('.'))
+    let cnum = get(a:opts, 'ColNum', charcol('.'))
   endif
   let host = OmniSharp#GetHost(bufnr)
   let job = host.job
