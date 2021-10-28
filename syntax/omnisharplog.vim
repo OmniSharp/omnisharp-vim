@@ -18,7 +18,7 @@ syn match oslCritical "^\[crit\]"ms=s+1,me=e-1 contained
 syn match oslEndpoint "^Request: .*$"hs=s+9
 syn match oslServerEndpoint "^Server \%(Request\|Response\): .*$"hs=s+16
 
-syn region oslRequestResponse start="\*\{12\}\s\+\%(Request\|Response\)\s\+\*\{12\}" end="^}" transparent fold
+syn region oslRequestResponse start="\*\{12}\s\+\%(Request\|Response\)\%(\s(.\{-})\)\?\s\+\*\{12}" end="^}" transparent fold
 
 hi def link oslName Comment
 
