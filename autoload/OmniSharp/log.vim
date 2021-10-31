@@ -59,7 +59,7 @@ function! OmniSharp#log#LogServer(job, raw, msg) abort
       " full debugging requests and responses plus debugging messages, but
       " OmniSharp-vim will not log the requests and responses - just record
       " their commands
-      let prefix = matchstr(lines[0], '\*\s\+\zs\S\+\ze\s\+\*')
+      let prefix = matchstr(lines[0], '\*\s\+\zs\S\+\ze\%(\s(.\{-})\)\?\s\+\*')
       let num_lines = len(lines)
       let commands = filter(lines, "v:val =~# '^\\s*\"Command\":'")
       if len(commands)
