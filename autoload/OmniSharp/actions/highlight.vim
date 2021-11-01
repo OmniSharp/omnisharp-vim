@@ -26,6 +26,7 @@ function! s:StdioHighlight(bufnr) abort
   let opts = {
   \ 'ResponseHandler': function('s:HighlightRH', [a:bufnr, buftick]),
   \ 'BufNum': a:bufnr,
+  \ 'SendBuffer': 0,
   \ 'ReplayOnLoad': 1
   \}
   call OmniSharp#stdio#Request('/v2/highlight', opts)
