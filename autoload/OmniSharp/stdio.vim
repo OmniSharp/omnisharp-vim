@@ -174,18 +174,6 @@ function! OmniSharp#stdio#Request(command, opts) abort
     \ fnamemodify(bufname(bufnr), ':p'))
     let send_buffer = get(a:opts, 'SendBuffer', 1)
   endif
-  let lines = getbufline(bufnr, 1, '$')
-  if has_key(a:opts, 'OverrideBuffer')
-    let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
-    let cnum = a:opts.OverrideBuffer.Col
-  endif
-  let tmp = join(lines, '')
-  " Unique string separator which must not exist in the buffer
-  let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
-  while stridx(tmp, sep) >= 0
-    let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
-  endwhile
-  let buffer = join(lines, sep)
 
   let body = {
   \ 'Arguments': {
@@ -195,7 +183,20 @@ function! OmniSharp#stdio#Request(command, opts) abort
   \ }
   \}
   if send_buffer
-    let body.Arguments.Buffer = buffer
+    let lines = getbufline(bufnr, 1, '$')
+    if has_key(a:opts, 'OverrideBuffer')
+      let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
+      let cnum = a:opts.OverrideBuffer.Col
+    endif
+    let tmp = join(lines, '')
+    " Unique string separator which must not exist in the buffer
+    let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
+    while stridx(tmp, sep) >= 0
+      let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
+    endwhile
+    let body.Arguments.Buffer = join(lines, sep)
+  else
+    let sep = ''
   endif
 
   call s:Request(job, body, a:command, a:opts, sep)
