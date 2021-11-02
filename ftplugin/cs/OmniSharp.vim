@@ -3,10 +3,19 @@ if !OmniSharp#util#CheckCapabilities() | finish | endif
 if get(b:, 'OmniSharp_ftplugin_loaded', 0) | finish | endif
 let b:OmniSharp_ftplugin_loaded = 1
 
+if get(g:, 'OmniSharp_start_server', 0)
+  call OmniSharp#StartServerIfNotRunning()
+endif
+
+call OmniSharp#actions#buffer#Update()
+if g:OmniSharp_highlighting
+  call OmniSharp#actions#highlight#Buffer()
+endif
+
 augroup OmniSharp_FileType
   autocmd! * <buffer>
 
-  autocmd BufLeave <buffer>
+  autocmd BufEnter,BufLeave <buffer>
   \ if !pumvisible() |
   \   call OmniSharp#actions#buffer#Update() |
   \ endif
@@ -14,15 +23,23 @@ augroup OmniSharp_FileType
   autocmd CompleteDone <buffer> call OmniSharp#actions#complete#ExpandSnippet()
 
   autocmd TextChanged <buffer> call OmniSharp#actions#buffer#Update()
+
+  if g:OmniSharp_highlighting
+    autocmd BufEnter <buffer> call OmniSharp#actions#highlight#Buffer()
+  endif
+  if g:OmniSharp_highlighting >= 2
+    autocmd InsertLeave,TextChanged <buffer> call OmniSharp#actions#highlight#Buffer()
+  endif
+  if g:OmniSharp_highlighting >= 3
+    autocmd TextChangedI <buffer> call OmniSharp#actions#highlight#Buffer()
+    if exists('##TextChangedP')
+      autocmd TextChangedP <buffer> call OmniSharp#actions#highlight#Buffer()
+    endif
+  endif
+
 augroup END
 
 setlocal omnifunc=OmniSharp#Complete
-
-if get(g:, 'OmniSharp_start_server', 0)
-  call OmniSharp#StartServerIfNotRunning()
-endif
-
-call OmniSharp#actions#buffer#Update()
 
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
