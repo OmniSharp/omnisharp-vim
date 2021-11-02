@@ -54,6 +54,7 @@ function! OmniSharp#actions#diagnostics#StdioCheck(bufnr, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:StdioCheckRH', [a:Callback]),
   \ 'BufNum': a:bufnr,
+  \ 'SendBuffer': 0,
   \ 'ReplayOnLoad': 1
   \}
   call OmniSharp#stdio#Request('/codecheck', opts)
