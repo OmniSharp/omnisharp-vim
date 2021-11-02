@@ -12,6 +12,8 @@ augroup OmniSharp_FileType
   \ endif
 
   autocmd CompleteDone <buffer> call OmniSharp#actions#complete#ExpandSnippet()
+
+  autocmd TextChanged <buffer> call OmniSharp#actions#buffer#Update()
 augroup END
 
 setlocal omnifunc=OmniSharp#Complete
@@ -19,6 +21,8 @@ setlocal omnifunc=OmniSharp#Complete
 if get(g:, 'OmniSharp_start_server', 0)
   call OmniSharp#StartServerIfNotRunning()
 endif
+
+call OmniSharp#actions#buffer#Update()
 
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
