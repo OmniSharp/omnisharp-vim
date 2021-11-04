@@ -53,13 +53,6 @@ command! -bar -bang OmniSharpStatus call OmniSharp#Status(<bang>0)
 " Preserve backwards compatibility with older version g:OmniSharp_highlight_types
 let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 2))
 
-function! s:ALEWantResults() abort
-  if !g:OmniSharp_server_stdio | return | endif
-  if getbufvar(g:ale_want_results_buffer, '&filetype') ==# 'cs'
-    call ale#sources#OmniSharp#WantResults(g:ale_want_results_buffer)
-  endif
-endfunction
-
 augroup OmniSharp_Integrations
   autocmd!
 
@@ -82,7 +75,7 @@ augroup OmniSharp_Integrations
   \})
 
   " Listen for ALE requests
-  autocmd User ALEWantResults call s:ALEWantResults()
+  autocmd User ALEWantResults call ale#sources#OmniSharp#WantResults()
 augroup END
 
 if !exists('g:OmniSharp_selector_ui')

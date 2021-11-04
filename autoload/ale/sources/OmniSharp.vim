@@ -1,10 +1,13 @@
-function! ale#sources#OmniSharp#WantResults(buffer) abort
-  let g:OmniSharp_diagnostics_requested = 1
+function! ale#sources#OmniSharp#WantResults() abort
+  if !g:OmniSharp_server_stdio | return | endif
+  let bufnr = g:ale_want_results_buffer
+  if getbufvar(bufnr, '&filetype') !=# 'cs' | return | endif
   if OmniSharp#FugitiveCheck() | return | endif
-  call ale#other_source#StartChecking(a:buffer, 'OmniSharp')
-  let opts = { 'BufNum': a:buffer }
+  let g:OmniSharp_diagnostics_requested = 1
+  call ale#other_source#StartChecking(bufnr, 'OmniSharp')
+  let opts = { 'BufNum': bufnr }
   let Callback = function('ale#sources#OmniSharp#ProcessResults', [opts])
-  call OmniSharp#actions#diagnostics#StdioCheck(a:buffer, Callback)
+  call OmniSharp#actions#diagnostics#StdioCheck(bufnr, Callback)
 endfunction
 
 function! ale#sources#OmniSharp#ProcessResults(opts, locations) abort
