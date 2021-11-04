@@ -24,17 +24,23 @@ augroup OmniSharp_FileType
 
   autocmd TextChanged <buffer> call OmniSharp#actions#buffer#Update()
 
-  if g:OmniSharp_highlighting
-    autocmd BufEnter <buffer> call OmniSharp#actions#highlight#Buffer()
-  endif
-  if g:OmniSharp_highlighting >= 2
-    autocmd InsertLeave,TextChanged <buffer> call OmniSharp#actions#highlight#Buffer()
-  endif
-  if g:OmniSharp_highlighting >= 3
-    autocmd TextChangedI <buffer> call OmniSharp#actions#highlight#Buffer()
-    if exists('##TextChangedP')
-      autocmd TextChangedP <buffer> call OmniSharp#actions#highlight#Buffer()
-    endif
+  autocmd BufEnter <buffer>
+  \ if g:OmniSharp_highlighting |
+  \   call OmniSharp#actions#highlight#Buffer() |
+  \ endif
+  autocmd InsertLeave,TextChanged <buffer>
+  \ if g:OmniSharp_highlighting >= 2 |
+  \   call OmniSharp#actions#highlight#Buffer() |
+  \ endif
+  autocmd TextChangedI <buffer>
+  \ if g:OmniSharp_highlighting >= 3 |
+  \   call OmniSharp#actions#highlight#Buffer() |
+  \ endif
+  if exists('##TextChangedP')
+    autocmd TextChangedP <buffer>
+    \ if g:OmniSharp_highlighting >= 3 |
+    \   call OmniSharp#actions#highlight#Buffer() |
+    \ endif
   endif
 
 augroup END
