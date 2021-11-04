@@ -10,8 +10,10 @@ function! OmniSharp#buffer#Initialize(job, bufnr, command, opts) abort
   let a:job.pending_requests[a:bufnr][a:command] = a:opts
   if has_key(OmniSharp#GetHost(a:bufnr), 'initializing') | return | endif
   let host.initializing = 1
-  let Callback = function('s:CBInitialize', [a:job, a:bufnr, host])
-  call OmniSharp#actions#buffer#Update(Callback, 1)
+  call OmniSharp#actions#buffer#Update({
+  \ 'Callback': function('s:CBInitialize', [a:job, a:bufnr, host]),
+  \ 'Initializing': 1
+  \})
 endfunction
 
 function! s:CBInitialize(job, bufnr, host) abort

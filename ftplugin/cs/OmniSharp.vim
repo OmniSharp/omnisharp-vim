@@ -15,7 +15,11 @@ endif
 augroup OmniSharp_FileType
   autocmd! * <buffer>
 
-  autocmd BufEnter,BufLeave <buffer>
+  autocmd BufEnter <buffer>
+  \ if !pumvisible() |
+  \   call OmniSharp#actions#buffer#Update({'SendBuffer': 1}) |
+  \ endif
+  autocmd BufLeave <buffer>
   \ if !pumvisible() |
   \   call OmniSharp#actions#buffer#Update() |
   \ endif
