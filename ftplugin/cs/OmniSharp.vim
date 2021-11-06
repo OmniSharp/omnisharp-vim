@@ -124,6 +124,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpRestartAllServers
 \| delcommand OmniSharpRestartServer
 \| delcommand OmniSharpRunTest
+\| delcommand OmniSharpDebugTest
 \| delcommand OmniSharpRunTestsInFile
 \| delcommand OmniSharpSignatureHelp
 \| delcommand OmniSharpStartServer
