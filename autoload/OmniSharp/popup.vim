@@ -80,6 +80,12 @@ endfunction
 function s:CloseLast(redraw) abort
   if exists('s:lastwinid')
     if has('nvim')
+      try
+        let options = s:nvim_window_options[s:lastwinid]
+        for opt in keys(options)
+          call nvim_win_set_option(s:lastwinid, opt, s:nvim_window_options[s:lastwinid][opt])
+        endfor
+      catch | endtry
       call nvim_win_close(s:lastwinid, v:true)
       if exists('#OmniSharp_nvim_popup')
         autocmd! OmniSharp_nvim_popup
@@ -198,7 +204,10 @@ function! s:NvimOpen(what, opts) abort
   let s:parentwinid = win_getid(winnr())
   let winid = nvim_open_win(bufnr, v:false, config)
   let options = s:NvimGetOptions()
+  let s:nvim_window_options = get(s:, 'nvim_window_options', {})
+  let s:nvim_window_options[winid] = {}
   for opt in keys(options)
+    let s:nvim_window_options[winid][opt] = nvim_win_get_option(winid, opt)
     call nvim_win_set_option(winid, opt, options[opt])
   endfor
   call nvim_set_current_win(winid)
