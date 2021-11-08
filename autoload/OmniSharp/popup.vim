@@ -172,8 +172,7 @@ function! s:NvimOpen(what, opts) abort
   let content_height = len(lines)
   let position = get(g:, 'OmniSharp_popup_position', 'atcursor')
   let config = {
-  \ 'focusable': v:false,
-  \ 'style': 'minimal'
+  \ 'focusable': v:false
   \}
   " Positions 'peek' and 'full' only apply to file buffers, not documentation
   " buffers
@@ -207,8 +206,10 @@ function! s:NvimOpen(what, opts) abort
   let s:nvim_window_options = get(s:, 'nvim_window_options', {})
   let s:nvim_window_options[winid] = {}
   for opt in keys(options)
-    let s:nvim_window_options[winid][opt] = nvim_win_get_option(winid, opt)
-    call nvim_win_set_option(winid, opt, options[opt])
+    if nvim_win_get_option(winid, opt) != options[opt]
+      let s:nvim_window_options[winid][opt] = nvim_win_get_option(winid, opt)
+      call nvim_win_set_option(winid, opt, options[opt])
+    endif
   endfor
   call nvim_set_current_win(winid)
   if exists('calculatingHeight')
