@@ -80,6 +80,12 @@ endfunction
 function s:CloseLast(redraw) abort
   if exists('s:lastwinid')
     if has('nvim')
+      try
+        let options = s:nvim_window_options[s:lastwinid]
+        for opt in keys(options)
+          call nvim_win_set_option(s:lastwinid, opt, s:nvim_window_options[s:lastwinid][opt])
+        endfor
+      catch | endtry
       call nvim_win_close(s:lastwinid, v:true)
       if exists('#OmniSharp_nvim_popup')
         autocmd! OmniSharp_nvim_popup
@@ -155,6 +161,9 @@ function s:NvimGetOptions() abort
 endfunction
 
 function! s:NvimOpen(what, opts) abort
+  let config = {
+  \ 'focusable': v:false
+  \}
   if type(a:what) == v:t_number
     let bufnr = a:what
     let lines = getbufline(bufnr, 1, '$')
@@ -162,13 +171,10 @@ function! s:NvimOpen(what, opts) abort
     let bufnr = nvim_create_buf(v:false, v:true)
     call setbufline(bufnr, 1, a:what)
     let lines = a:what
+    let config.style = 'minimal'
   endif
   let content_height = len(lines)
   let position = get(g:, 'OmniSharp_popup_position', 'atcursor')
-  let config = {
-  \ 'focusable': v:false,
-  \ 'style': 'minimal'
-  \}
   " Positions 'peek' and 'full' only apply to file buffers, not documentation
   " buffers
   if type(a:what) == v:t_number && position ==? 'peek'
@@ -198,8 +204,13 @@ function! s:NvimOpen(what, opts) abort
   let s:parentwinid = win_getid(winnr())
   let winid = nvim_open_win(bufnr, v:false, config)
   let options = s:NvimGetOptions()
+  let s:nvim_window_options = get(s:, 'nvim_window_options', {})
+  let s:nvim_window_options[winid] = {}
   for opt in keys(options)
-    call nvim_win_set_option(winid, opt, options[opt])
+    if nvim_win_get_option(winid, opt) != options[opt]
+      let s:nvim_window_options[winid][opt] = nvim_win_get_option(winid, opt)
+      call nvim_win_set_option(winid, opt, options[opt])
+    endif
   endfor
   call nvim_set_current_win(winid)
   if exists('calculatingHeight')
