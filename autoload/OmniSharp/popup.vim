@@ -161,6 +161,9 @@ function s:NvimGetOptions() abort
 endfunction
 
 function! s:NvimOpen(what, opts) abort
+  let config = {
+  \ 'focusable': v:false
+  \}
   if type(a:what) == v:t_number
     let bufnr = a:what
     let lines = getbufline(bufnr, 1, '$')
@@ -168,12 +171,10 @@ function! s:NvimOpen(what, opts) abort
     let bufnr = nvim_create_buf(v:false, v:true)
     call setbufline(bufnr, 1, a:what)
     let lines = a:what
+    let config.style = 'minimal'
   endif
   let content_height = len(lines)
   let position = get(g:, 'OmniSharp_popup_position', 'atcursor')
-  let config = {
-  \ 'focusable': v:false
-  \}
   " Positions 'peek' and 'full' only apply to file buffers, not documentation
   " buffers
   if type(a:what) == v:t_number && position ==? 'peek'
