@@ -133,7 +133,7 @@ function! s:RunTest(Callback, bufnr, codeElements) abort
   let tests = s:FindTests(a:codeElements)
   let currentTest = s:FindTest(tests)
   if type(currentTest) != type({})
-    echohl WarningMsg | echom 'No test found' | echohl None
+    echohl WarningMsg | echomsg 'No test found' | echohl None
     let s:runningTest = 0
     return
   endif
@@ -157,7 +157,7 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
   if !a:response.Success | return | endif
   if type(a:response.Body.Results) != type([])
     echohl WarningMsg
-    echom 'Error: "'  . a:response.Body.Failure .
+    echomsg 'Error: "'  . a:response.Body.Failure .
     \ '"   - this may indicate a failed build'
     echohl None
     return
@@ -172,6 +172,15 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
     \ 'filename': bufname(a:bufnr),
     \ 'name': substitute(result.MethodName, '^.*\.', '', '')
     \}
+    " Write any standard output to message-history
+    if len(get(result, 'StandardOutput', []))
+      echomsg 'Standard output from test ' . location.name . ':'
+      for output in result.StandardOutput
+        for line in split(trim(output), '\r\?\n', 1)
+          echomsg '  ' . line
+        endfor
+      endfor
+    endif
     if result.Outcome =~? 'failed'
       let location.type = 'E'
       let location.text = location.name . ': ' . result.ErrorMessage
@@ -209,7 +218,7 @@ function! s:DebugTest(Callback, bufnr, codeElements) abort
   let tests = s:FindTests(a:codeElements)
   let currentTest = s:FindTest(tests)
   if type(currentTest) != type({})
-    echohl WarningMsg | echom 'No test found' | echohl None
+    echohl WarningMsg | echomsg 'No test found' | echohl None
     let s:runningTest = 0
     return
   endif
@@ -282,7 +291,7 @@ function! s:RunTestsInFiles(Callback, bufferCodeStructures) abort
     endif
   endfor
   if len(Requests) == 0
-    echohl WarningMsg | echom 'No tests found' | echohl None
+    echohl WarningMsg | echomsg 'No tests found' | echohl None
     let s:runningTest = 0
     return
   endif
