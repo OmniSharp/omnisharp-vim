@@ -1,32 +1,34 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-" Optional arguments:
-" - callback: funcref to be called after the response is returned (synchronously
+" Synchronize the buffer contents with the server. By default, contents are only
+" sent when there have been changes since the last run.
+" Optional argument: A dict containing the following optional items:
+"  Callback: funcref to be called after the response is returned (synchronously
 "   or asynchronously)
-" - initializing: flag indicating that this is the first request for this buffer
-" - sendBuffer: flag indicating that the buffer contents should be sent,
+"  Initializing: flag indicating that this is the first request for this buffer
+"  SendBuffer: flag indicating that the buffer contents should be sent,
 "   regardless of &modified status or b:changedtick
 function! OmniSharp#actions#buffer#Update(...) abort
-  let cb = a:0 && type(a:1) == type(function('tr')) ? { 'Callback': a:1 } : {}
-  let initializing = a:0 > 1 && a:2 is 1
-  let sendBuffer = initializing || (a:0 > 2 ? a:3 : 0)
+  let opts = a:0 ? a:1 : {}
+  let opts.Initializing = get(opts, 'Initializing', 0)
+  let opts.SendBuffer = opts.Initializing || get(opts, 'SendBuffer', 0)
   if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   let lasttick = get(b:, 'OmniSharp_UpdateChangeTick', -1)
-  if initializing || sendBuffer || b:changedtick != lasttick
+  if opts.SendBuffer || b:changedtick != lasttick
     let b:OmniSharp_UpdateChangeTick = b:changedtick
     if g:OmniSharp_server_stdio
-      let opts = {
-      \ 'ResponseHandler': function('s:StdioUpdateRH', [cb]),
-      \ 'Initializing': initializing
+      let requestOpts = {
+      \ 'ResponseHandler': function('s:StdioUpdateRH', [opts]),
+      \ 'Initializing': opts.Initializing
       \}
-      call OmniSharp#stdio#Request('/updatebuffer', opts)
+      call OmniSharp#stdio#Request('/updatebuffer', requestOpts)
     else
       if !OmniSharp#IsServerRunning() | return | endif
       call OmniSharp#py#Eval('updateBuffer()')
       call OmniSharp#py#CheckForError()
-      if has_key(cb, 'Callback')
-        call cb.Callback()
+      if has_key(opts, 'Callback')
+        call opts.Callback()
       endif
     endif
   endif

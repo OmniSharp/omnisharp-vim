@@ -123,8 +123,6 @@ function! OmniSharp#util#CheckCapabilities() abort
   endif
 
   if !s:capable
-    " Clear BufEnter and InsertLeave autocmds
-    silent! autocmd! OmniSharp_HighlightTypes
     " Clear plugin integration autocmds
     silent! autocmd! OmniSharp_Integrations
   endif

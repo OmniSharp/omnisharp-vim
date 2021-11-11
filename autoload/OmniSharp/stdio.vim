@@ -174,18 +174,6 @@ function! OmniSharp#stdio#Request(command, opts) abort
     \ fnamemodify(bufname(bufnr), ':p'))
     let send_buffer = get(a:opts, 'SendBuffer', 1)
   endif
-  let lines = getbufline(bufnr, 1, '$')
-  if has_key(a:opts, 'OverrideBuffer')
-    let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
-    let cnum = a:opts.OverrideBuffer.Col
-  endif
-  let tmp = join(lines, '')
-  " Unique string separator which must not exist in the buffer
-  let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
-  while stridx(tmp, sep) >= 0
-    let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
-  endwhile
-  let buffer = join(lines, sep)
 
   let body = {
   \ 'Arguments': {
@@ -195,10 +183,23 @@ function! OmniSharp#stdio#Request(command, opts) abort
   \ }
   \}
   if send_buffer
-    let body.Arguments.Buffer = buffer
+    let lines = getbufline(bufnr, 1, '$')
+    if has_key(a:opts, 'OverrideBuffer')
+      let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
+      let cnum = a:opts.OverrideBuffer.Col
+    endif
+    let tmp = join(lines, '')
+    " Unique string separator which must not exist in the buffer
+    let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
+    while stridx(tmp, sep) >= 0
+      let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
+    endwhile
+    let body.Arguments.Buffer = join(lines, sep)
+  else
+    let sep = ''
   endif
 
-  call s:Request(job, body, a:command, a:opts, sep)
+  call s:Request(job, body, a:command, a:opts, sep, bufnr)
 
   if has_key(a:opts, 'ReplayOnLoad')
     let replay_opts = filter(copy(a:opts), 'v:key !=# "ReplayOnLoad"')
@@ -209,10 +210,10 @@ function! OmniSharp#stdio#Request(command, opts) abort
 endfunction
 
 function! OmniSharp#stdio#RequestGlobal(job, command, opts) abort
-  call s:Request(a:job, {}, a:command, a:opts)
+  call s:Request(a:job, {}, a:command, a:opts, '', -1)
 endfunction
 
-function! s:Request(job, body, command, opts, ...) abort
+function! s:Request(job, body, command, opts, sep, bufnr) abort
   call OmniSharp#log#Log(a:job, 'Request: ' . a:command, 1)
 
   let a:body['Command'] = a:command
@@ -221,14 +222,14 @@ function! s:Request(job, body, command, opts, ...) abort
   if has_key(a:opts, 'Parameters')
     call extend(a:body.Arguments, a:opts.Parameters, 'force')
   endif
-  let sep = a:0 ? a:1 : ''
-  if sep !=# ''
-    let encodedBody = substitute(json_encode(a:body), sep, '\\r\\n', 'g')
+  if a:sep !=# ''
+    let encodedBody = substitute(json_encode(a:body), a:sep, '\\r\\n', 'g')
   else
     let encodedBody = json_encode(a:body)
   endif
 
   let s:requests[s:nextseq] = {
+  \ 'BufNum': a:bufnr,
   \ 'Command': a:command,
   \ 'Seq': s:nextseq,
   \ 'StartTime': reltime()

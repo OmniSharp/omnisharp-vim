@@ -50,46 +50,8 @@ command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 command! -bar -bang OmniSharpStatus call OmniSharp#Status(<bang>0)
 
-" Initialise automatic type and interface highlighting
 " Preserve backwards compatibility with older version g:OmniSharp_highlight_types
 let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 2))
-if g:OmniSharp_highlighting
-  augroup OmniSharp_HighlightTypes
-    autocmd!
-    autocmd BufEnter *.cs,*.csx
-    \ if !pumvisible() && OmniSharp#util#CheckCapabilities() |
-    \   call OmniSharp#actions#highlight#Buffer() |
-    \ endif
-
-    if g:OmniSharp_highlighting >= 2
-      autocmd InsertLeave,TextChanged *.cs,*.csx
-      \ if OmniSharp#util#CheckCapabilities() |
-      \   call OmniSharp#actions#highlight#Buffer() |
-      \ endif
-    endif
-
-    if g:OmniSharp_highlighting >= 3
-      autocmd TextChangedI *.cs,*.csx
-      \ if OmniSharp#util#CheckCapabilities() |
-      \   call OmniSharp#actions#highlight#Buffer() |
-      \ endif
-
-      if exists('##TextChangedP')
-        autocmd TextChangedP *.cs,*.csx
-        \ if OmniSharp#util#CheckCapabilities() |
-        \   call OmniSharp#actions#highlight#Buffer() |
-        \ endif
-      endif
-    endif
-  augroup END
-endif
-
-function! s:ALEWantResults() abort
-  if !g:OmniSharp_server_stdio | return | endif
-  if getbufvar(g:ale_want_results_buffer, '&filetype') ==# 'cs'
-    call ale#sources#OmniSharp#WantResults(g:ale_want_results_buffer)
-  endif
-endfunction
 
 augroup OmniSharp_Integrations
   autocmd!
@@ -113,7 +75,7 @@ augroup OmniSharp_Integrations
   \})
 
   " Listen for ALE requests
-  autocmd User ALEWantResults call s:ALEWantResults()
+  autocmd User ALEWantResults call ale#sources#OmniSharp#WantResults()
 augroup END
 
 if !exists('g:OmniSharp_selector_ui')
