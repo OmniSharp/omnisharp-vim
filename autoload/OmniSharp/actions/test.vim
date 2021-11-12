@@ -23,7 +23,7 @@ function! OmniSharp#actions#test#Run(...) abort
 endfunction
 
 function! OmniSharp#actions#test#Debug(...) abort
-  if !exists('g:vimspector_home')
+  if !OmniSharp#util#HasVimspector()
     echohl WarningMsg
     echomsg 'Vimspector required to debug tests'
     echohl None

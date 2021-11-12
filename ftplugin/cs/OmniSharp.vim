@@ -82,6 +82,8 @@ command! -buffer -bar OmniSharpDebugTest call OmniSharp#actions#test#Debug()
 command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<f-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
+command! -buffer -bar -nargs=* -bang OmniSharpDebugProject call OmniSharp#actions#project#DebugProject(<bang>0, <f-args>)
+command! -buffer -bar -nargs=* -bang OmniSharpCreateDebugConfig call OmniSharp#actions#project#CreateDebugConfig(<bang>0, <f-args>)
 
 nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
 nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
@@ -114,6 +116,8 @@ nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_all_servers) :OmniSharpStopAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_stop_server) :OmniSharpStopServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_type_lookup) :OmniSharpTypeLookup<CR>
+nnoremap <buffer> <Plug>(omnisharp_debug_project) :OmniSharpDebugProject<CR>
+nnoremap <buffer> <Plug>(omnisharp_create_debug_config) :OmniSharpCreateDebugConfig<CR>
 
 " The following commands and mappings have been renamed, but the old versions
 " are kept here for backwards compatibility
@@ -162,6 +166,8 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpStopAllServers
 \| delcommand OmniSharpStopServer
 \| delcommand OmniSharpTypeLookup
+\| delcommand OmniSharpDebugProject
+\| delcommand OmniSharpCreateDebugConfig
 \
 \| setlocal omnifunc<'
 
