@@ -623,6 +623,25 @@ convenient user re-mapping. These can be used like so: >
 :OmniSharpCodeFormat
     Formats code
 
+                                                    *:OmniSharpDebugProject*
+                                          *<Plug>(omnisharp_debug_project)*
+:OmniSharpDebugProject
+    Run vimspector with an ad-hoc config on the current project.
+    Running this with a bang (OmniSharpDebugProject!) will break on entry in the 
+    debugger.
+    The command takes optional arguments that will be passed to the debugged 
+    process as args.
+
+                                                    *:OmniSharpCreateDebugConfig*
+                                          *<Plug>(omnisharp_create_debug_config)*
+:OmniSharpCreateDebugConfig
+    Creates a .vimspector config next to the open sln file. Or at the root of the
+    open directory if a directory is being used.
+    For example, use this command to dump a configuration to disk when it gets to
+    complicated to run using OmniSharpDebugProject.
+    The command takes optional arguments that will be inserted into the generated
+    config as args.
+
                                                     *:OmniSharpRestartAllServers*
                                           *<Plug>(omnisharp_restart_all_servers)*
 :OmniSharpRestartAllServers

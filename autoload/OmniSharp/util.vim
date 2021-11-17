@@ -33,6 +33,10 @@ function! s:is_wsl() abort
   return s:is_wsl_val
 endfunction
 
+function! OmniSharp#util#HasVimspector() abort
+  return exists('g:vimspector_home')
+endfunction
+
 " Call a list of async functions in parallel, and wait for them all to complete
 " before calling the OnAllComplete function.
 function! OmniSharp#util#AwaitParallel(Funcs, OnAllComplete) abort
