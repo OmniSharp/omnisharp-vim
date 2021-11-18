@@ -429,7 +429,7 @@ It is possible to run unit tests via OmniSharp-roslyn, with success/failures lis
 ## Debugging
 
 Using Vimspector, you can debug C# projects and tests.
-For debugging tests see the [Run unit tests](##Run unit tests) section.
+For debugging tests see the [Run unit tests](#run-unit-tests) section.
 
 ```vim
 " Starts vimspector with an ad-hoc config that will debug the current project
