@@ -161,6 +161,8 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     \ || g:OmniSharp_translate_cygwin_wsl
     \ || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
+    elseif g:OmniSharp_server_use_net6
+      let parts += ['OmniSharp']
     else
       let parts += ['run']
     endif

@@ -81,12 +81,21 @@ Default: None >
     let g:OmniSharp_server_path = '/home/username/omnisharp/OmniSharp.exe'
 <
                                                     *g:OmniSharp_server_use_mono*
-The roslyn server must be run with mono on Linux and OSX. The roslyn server
-binaries usually come with an embedded mono, but this can be overridden to use
-the installed mono with this option. Note that mono must be in the $PATH.
+By default, the roslyn server is run with mono on Linux and OSX. The roslyn
+server binaries usually come with an embedded mono, but this can be overridden
+to use the installed mono with this option. Note that mono must be in the
+$PATH.
 Note: changes require server reinstall: |:OmniSharpInstall|
 Default: 0 >
     let g:OmniSharp_server_use_mono = 1
+<
+                                                    *g:OmniSharp_server_use_net6*
+This variable tells OmniSharp-vim to use the new native dotnet net6.0 version
+of OmniSharp-roslyn, which does not require mono.
+Note: |g:OmniSharp_server_use_mono| must be set to 0
+Note: changes require server reinstall: |:OmniSharpInstall|
+Default: 0 >
+    let g:OmniSharp_server_use_net6 = 1
 <
                                                        *g:OmniSharp_start_server*
 Use this option to specify whether OmniSharp will start automatically upon
