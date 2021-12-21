@@ -33,12 +33,14 @@ function! OmniSharp#actions#project#DebugProject(stopAtEntry, ...) abort
     let project = getbufvar(a:bufnr, 'OmniSharp_host').project
     " Make sure we're not running on a csx script
     if project.ScriptProject is v:null
+      let programPath = project.MsBuildProject.TargetPath
+      if has('win32') | let programPath = substitute(programPath, '\', '/', 'g') | endif
       call vimspector#LaunchWithConfigurations({
       \  'launch': {
       \    'adapter': 'netcoredbg',
       \    'configuration': {
-      \      'request': 'launch', 
-      \      'program': project.MsBuildProject.TargetPath,
+      \      'request': 'launch',
+      \      'program': programPath,
       \      'args': a:args,
       \      'stopAtEntry': a:stopAtEntry ? v:true : v:false
       \    }
@@ -57,6 +59,8 @@ function! OmniSharp#actions#project#CreateDebugConfig(stopAtEntry, ...) abort
   let bufnr = bufnr('%')
   function! CreateDebugConfigCb(bufnr, stopAtEntry, args) abort
     let host = getbufvar(a:bufnr, 'OmniSharp_host')
+    let programPath = host.project.MsBuildProject.TargetPath
+    if has('win32') | let programPath = substitute(programPath, '\', '/', 'g') | endif
     let contents = [
           \' {',
           \'   "configurations": {',
@@ -71,7 +75,7 @@ function! OmniSharp#actions#project#CreateDebugConfig(stopAtEntry, ...) abort
           \'       "adapter": "netcoredbg",',
           \'       "configuration": {',
           \'         "request": "launch",',
-          \'         "program": "'.host.project.MsBuildProject.TargetPath.'",',
+          \'         "program": "'.programPath.'",',
           \'         "args": ' . json_encode(a:args) . ',',
           \'         "stopAtEntry": ' . (a:stopAtEntry ? 'true' : 'false'),
           \'       }',
