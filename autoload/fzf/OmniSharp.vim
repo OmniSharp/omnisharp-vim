@@ -99,4 +99,17 @@ function! fzf#OmniSharp#FindUsages(quickfixes, target) abort
   \ 'sink': function('s:location_sink')})))
 endfunction
 
+function! fzf#OmniSharp#FindMembers(quickfixes, target) abort
+  let s:quickfixes = a:quickfixes
+  let usages = []
+  for quickfix in s:quickfixes
+    call add(usages, s:format_line(quickfix))
+  endfor
+  let fzf_options = copy(get(g:, 'OmniSharp_fzf_options', { 'down': '40%' }))
+  call fzf#run(fzf#wrap(
+  \ extend(fzf_options, {
+  \ 'source': usages,
+  \ 'sink': function('s:location_sink')})))
+endfunction
+
 " vim:et:sw=2:sts=2
