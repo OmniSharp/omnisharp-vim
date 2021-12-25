@@ -92,7 +92,11 @@ endfunction
 function! s:CBFindMembers(locations) abort
   let numMembers = len(a:locations)
   if numMembers > 0
-    call OmniSharp#locations#SetQuickfixWithVerticalAlign(a:locations, 'Members')
+    if get(g:, 'OmniSharp_selector_findmembers', '') == 'fzf'
+      call fzf#OmniSharp#FindMembers(a:locations, 'Members')
+    else
+      call OmniSharp#locations#SetQuickfixWithVerticalAlign(a:locations, 'Members')
+    endif
   endif
   return numMembers
 endfunction

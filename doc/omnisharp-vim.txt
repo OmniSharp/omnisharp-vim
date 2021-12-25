@@ -395,6 +395,10 @@ Default: '' >
 <or >
     let g:OmniSharp_selector_findusages = 'clap'
 <
+                                               *g:OmniSharp_selector_findmembers*
+Use this to allow fzf to control :OmniSharpFindMembers >
+    let g:OmniSharp_selector_findmembers = 'fzf'
+<
                                                         *g:OmniSharp_fzf_options*
 Use this to pass custom options to fzf >
     let g:OmniSharp_fzf_options = { 'right': '50%' }
