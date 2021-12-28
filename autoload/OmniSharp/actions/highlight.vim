@@ -69,8 +69,17 @@ function! s:HighlightRH(bufnr, buftick, response) abort
         let endCol = OmniSharp#util#CharToByteIdx(
         \ a:bufnr, span.EndLine, span.EndColumn)
         if !hasNvim
+          let endLine = span.EndLine
+          if endCol == 1 && endLine > span.StartLine
+            " When a span runs to the end of the line, OmniSharp-roslyn returns
+            " this span as ending at character 1 of the following line. However,
+            " Vim will then display this highlight on the first character of the
+            " line, which is incorrect.
+            let endLine = endLine - 1
+            let endCol = 9999
+          endif
           call prop_add(span.StartLine, startCol, {
-          \ 'end_lnum': span.EndLine,
+          \ 'end_lnum': endLine,
           \ 'end_col': endCol,
           \ 'type': 'OSHighlight' . shc.name,
           \ 'bufnr': a:bufnr
