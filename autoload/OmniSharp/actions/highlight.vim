@@ -3,7 +3,7 @@ set cpoptions&vim
 
 function! OmniSharp#actions#highlight#Buffer(...) abort
   let bufnr = a:0 ? a:1 : bufnr('%')
-  if bufname(bufnr) ==# '' || OmniSharp#FugitiveCheck() | return | endif
+  if !OmniSharp#buffer#Valid(bufnr) | return | endif
   if getbufvar(bufnr, 'OmniSharp_debounce_highlight', 0)
     call timer_stop(getbufvar(bufnr, 'OmniSharp_debounce_highlight'))
   endif

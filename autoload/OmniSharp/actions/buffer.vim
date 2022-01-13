@@ -10,10 +10,10 @@ set cpoptions&vim
 "  SendBuffer: flag indicating that the buffer contents should be sent,
 "   regardless of &modified status or b:changedtick
 function! OmniSharp#actions#buffer#Update(...) abort
+  if !OmniSharp#buffer#Valid() | return | endif
   let opts = a:0 ? a:1 : {}
   let opts.Initializing = get(opts, 'Initializing', 0)
   let opts.SendBuffer = opts.Initializing || get(opts, 'SendBuffer', 0)
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
   let lasttick = get(b:, 'OmniSharp_UpdateChangeTick', -1)
   if opts.SendBuffer || b:changedtick != lasttick
     let b:OmniSharp_UpdateChangeTick = b:changedtick

@@ -4,7 +4,7 @@ set cpoptions&vim
 " Accepts a Funcref callback argument, to be called after the response is
 " returned (synchronously or asynchronously) with the results
 function! OmniSharp#actions#diagnostics#Check(...) abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
+  if !OmniSharp#buffer#Valid() | return [] | endif
   let opts = a:0 && a:1 isnot 0 ? { 'Callback': a:1 } : {}
   if pumvisible() || !OmniSharp#IsServerRunning()
     let b:codecheck = get(b:, 'codecheck', [])
@@ -28,7 +28,7 @@ endfunction
 " Callback: When a callback is passed in, the diagnostics will be sent to
 "           the callback *instead of* to the quickfix list.
 function! OmniSharp#actions#diagnostics#CheckGlobal(...) abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return [] | endif
+  if !OmniSharp#buffer#Valid() | return [] | endif
   if a:0 && a:1 isnot 0
     let Callback = a:1
   else

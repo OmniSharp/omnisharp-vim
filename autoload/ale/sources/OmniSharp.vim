@@ -2,7 +2,7 @@ function! ale#sources#OmniSharp#WantResults() abort
   if !g:OmniSharp_server_stdio | return | endif
   let bufnr = g:ale_want_results_buffer
   if getbufvar(bufnr, '&filetype') !=# 'cs' | return | endif
-  if OmniSharp#FugitiveCheck() | return | endif
+  if !OmniSharp#buffer#Valid(bufnr) | return | endif
   let g:OmniSharp_diagnostics_requested = 1
   call ale#other_source#StartChecking(bufnr, 'OmniSharp')
   let opts = { 'BufNum': bufnr }

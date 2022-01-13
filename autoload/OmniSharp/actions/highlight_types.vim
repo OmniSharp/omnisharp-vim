@@ -10,7 +10,7 @@ set cpoptions&vim
 "
 " Use OmniSharp#actions#highlight#Buffer() for full semantic highlighting.
 function! OmniSharp#actions#highlight_types#Buffer() abort
-  if bufname('%') ==# '' || OmniSharp#FugitiveCheck() | return | endif
+  if !OmniSharp#buffer#Valid() | return | endif
   call OmniSharp#actions#highlight_types#Initialise()
   let bufnr = bufnr('%')
   if g:OmniSharp_server_stdio
