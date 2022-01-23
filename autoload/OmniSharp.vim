@@ -466,7 +466,7 @@ function! OmniSharp#Install(...) abort
     echomsg 'Failed to install the OmniSharp-Roslyn server'
 
     " Display extra error information for Unix users
-    if !has('win32')
+    if !has('win32') && len(l:error_msgs) > 0
       echomsg l:error_msgs[-1]
     endif
 
