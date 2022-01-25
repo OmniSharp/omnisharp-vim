@@ -172,6 +172,7 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
     \ 'filename': bufname(a:bufnr),
     \ 'name': substitute(result.MethodName, '^.*\.', '', '')
     \}
+    let locations = [location]
     " Write any standard output to message-history
     if len(get(result, 'StandardOutput', []))
       echomsg 'Standard output from test ' . location.name . ':'
@@ -184,9 +185,28 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
     if result.Outcome =~? 'failed'
       let location.type = 'E'
       let location.text = location.name . ': ' . result.ErrorMessage
-      let parsed = matchlist(result.ErrorStackTrace, ' in \(.\+\):line \(\d\+\)')
+      let st = result.ErrorStackTrace
+      let parsed = matchlist(st, '.* in \(.\+\):line \(\d\+\)')
       if len(parsed) > 0
         let location.lnum = parsed[2]
+        " When a single test is run, include the stack trace as quickfix entries
+        if a:response.Command ==# '/v2/runtest'
+          " Parse the stack trace and create quickfix locations
+          let st = substitute(st, '.*\zs at .\+ in .\+:line \d\+.*', '', '')
+          let parsed = matchlist(st, '.*\( at .\+\) in \(.\+\):line \(\d\+\)')
+          let tracelevel = 1
+          while len(parsed) > 0
+            call add(locations, {
+            \ 'filename': parsed[2],
+            \ 'lnum': parsed[3],
+            \ 'type': 'E',
+            \ 'text': parsed[1]
+            \})
+            let tracelevel += 1
+            let st = substitute(st, '.*\zs at .\+ in .\+:line \d\+.*', '', '')
+            let parsed = matchlist(st, '.*\( at .\+\) in \(.\+\):line \(\d\+\)')
+          endwhile
+        endif
       else
         " An error occurred outside the test. This can occur with .e.g. nunit
         " when the class constructor throws an exception.
@@ -209,7 +229,9 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
         let location.vcol = 0
       endif
     endif
-    call add(summary.locations, location)
+    for loc in locations
+      call add(summary.locations, loc)
+    endfor
   endfor
   call a:Callback(summary)
 endfunction
