@@ -444,10 +444,11 @@ function! OmniSharp#Install(...) abort
     let l:script = shellescape(
     \ s:plugin_root_dir . '/installer/omnisharp-manager.sh')
     let l:mono = g:OmniSharp_server_use_mono ? '-M' : ''
+    let l:net6 = g:OmniSharp_server_use_net6 ? '-6' : ''
     let l:version_file_location = l:location . '/OmniSharpInstall-version.txt'
 
-    let l:command = printf('/bin/sh %s %s %s -l %s %s',
-    \ l:script, l:http, l:mono, l:location, l:version)
+    let l:command = printf('/bin/sh %s %s %s %s -l %s %s',
+    \ l:script, l:http, l:mono, l:net6, l:location, l:version)
 
     if g:OmniSharp_translate_cygwin_wsl
       let l:command .= ' -W'

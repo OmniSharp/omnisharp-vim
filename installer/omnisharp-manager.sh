@@ -14,6 +14,7 @@ $(usage)
 Options:
     -v <version>  | Version to install (if omitted, fetch latest)
     -l <location> | Directory to install the server to (upon install, this directory will be cleared)
+    -6            | Use the net6.0 server version
     -u            | Usage info
     -h            | Help message
     -H            | Install the HTTP version of the server
@@ -32,11 +33,12 @@ get_latest_version() {
 
 location="$HOME/.omnisharp/"
 
-while getopts v:l:HMWuh o "$@"
+while getopts v:l:6HMWuh o "$@"
 do
     case "$o" in
         v)      version="$OPTARG";;
         l)      location="$OPTARG";;
+        6)      net6=1;;
         H)      http=".http";;
         M)      mono=1;;
         W)      windows=1;;
@@ -82,13 +84,19 @@ if [ -n "$mono" ]; then
 else
     case "$(uname -s)" in
         "Linux")
-            if [ "$machine" = "arm64" ]; then
-                echo "Error: OmniSharp-Roslyn only works on x86 CPU architecture on Linux"
-                exit 1
+            if [ -n "$net6" ]; then
+                os="linux-${machine}-net6.0"
+            else
+                os="linux-${machine}"
             fi
-            os="linux-${machine}"
             ;;
-        "Darwin")   os="osx";;
+        "Darwin")
+            if [ -n "$net6" ]; then
+                os="osx-${machine}-net6.0"
+            else
+                os="osx"
+            fi
+            ;;
         *)
             if [ "$(uname -o)" = "Cygwin" ]; then
                 os="win-${machine}"

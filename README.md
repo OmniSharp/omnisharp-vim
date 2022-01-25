@@ -7,7 +7,7 @@
 
 OmniSharp-vim is a plugin for Vim to provide IDE like abilities for C#.
 
-OmniSharp works on Windows, and on Linux and OS X with Mono.
+OmniSharp works on Windows, Linux and MacOS.
 
 The plugin relies on the [OmniSharp-Roslyn](https://github.com/OmniSharp/omnisharp-roslyn) server, a .NET development platform used by several editors including Visual Studio Code and Emacs.
 
@@ -103,7 +103,9 @@ let g:OmniSharp_server_stdio = 0
 ```
 
 #### Manual installation
-To install the server manually, first decide which version (stdio or HTTP) you wish to use, as described above. Download the latest release for your platform from the [OmniSharp-roslyn releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page. For stdio on a 64-bit Windows system, the `omnisharp.win-x64.zip` package should be downloaded, whereas Mac users wanting to use the HTTP version should select `omnisharp.http-osx.tar.gz` etc.
+To install the server manually, first decide which version (stdio or HTTP) you wish to use, as described above.
+Download the latest release for your platform from the [OmniSharp-roslyn releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) page.
+For stdio on a 64-bit Windows system, the `omnisharp.win-x64.zip` package should be downloaded, whereas Mac users wanting to use the HTTP version should select `omnisharp.http-osx.tar.gz` etc.
 
 Extract the binaries and configure your vimrc with the path to the `run` script (Linux and Mac) or `OmniSharp.exe` file (Window), e.g.:
 
@@ -130,14 +132,24 @@ The automatic installation script for cygwin downloads the *Windows* OmniSharp-r
 
 **Note:** The Windows stdio server unfortunately does not work from cygwin, so when cygwin is detected (`has('win32unix')`) the HTTP server is used by default.
 
-#### Linux and Mac
-OmniSharp-Roslyn requires Mono on Linux and OSX. The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) come with an embedded Mono, but this can be overridden to use the installed Mono by setting `g:OmniSharp_server_use_mono` in your vimrc. See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
+#### Linux and MacOS
+The default version of OmniSharp-roslyn requires `mono` on Linux and MacOS.
+The roslyn server [releases](https://github.com/OmniSharp/omnisharp-roslyn/releases) come with an embedded `mono`, but this can be overridden to use the installed `mono` by setting `g:OmniSharp_server_use_mono` in your vimrc.
+See [The Mono Project](https://www.mono-project.com/download/stable/) for installation details.
 
 ```vim
     let g:OmniSharp_server_use_mono = 1
 ```
 
 Any time `g:OmniSharp_server_use_mono` is modified, the server needs to be re-installed with `:OmniSharpInstall`.
+
+#### Native net6.0
+From version 1.38.0 of OmniSharp-roslyn, a dotnet native net6.0 server version is available.
+To use this version, set `g:OmniSharp_server_use_net6` in your vimrc before installing the server.
+
+```vim
+    let g:OmniSharp_server_use_net6 = 1
+```
 
 ##### libuv
 For the HTTP server, OmniSharp-Roslyn also requires [libuv](http://libuv.org/) on Linux and Mac. This is typically a simple install step, e.g. `brew install libuv` on Mac, `apt-get install libuv1-dev` on debian/Ubuntu, `pacman -S libuv` on arch linux, `dnf install libuv libuv-devel` on Fedora/CentOS, etc.

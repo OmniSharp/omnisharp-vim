@@ -12,6 +12,9 @@ let g:OmniSharp_server_loading_timeout = get(g:, 'OmniSharp_server_loading_timeo
 " Use mono to start the roslyn server on *nix
 let g:OmniSharp_server_use_mono = get(g:, 'OmniSharp_server_use_mono', 0)
 
+" Use the native net6.0 server build
+let g:OmniSharp_server_use_net6 = get(g:, 'OmniSharp_server_use_net6', 0)
+
 let g:OmniSharp_open_quickfix = get(g:, 'OmniSharp_open_quickfix', 1)
 
 let g:OmniSharp_timeout = get(g:, 'OmniSharp_timeout', 1)
