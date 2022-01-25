@@ -170,7 +170,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
       \ 'The OmniSharp server does not appear to be installed.',
       \ 'Would you like to install it?'
       \]
-      if confirm(join(msg), "&Yes\n&No", 2) == 1
+      unsilent if confirm(join(msg), "&Yes\n&No", 2) == 1
         call OmniSharp#Install()
       else
         redraw
