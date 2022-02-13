@@ -72,6 +72,7 @@ if [ -z "$mono" ]; then
         "x86_64")   machine="x64";;
         "i368")     machine="x86";;
         "arm64")    machine="arm64";;
+        "aarch64")    machine="arm64";;
         *)
             echo "Error: architecture not supported"
             exit 1
