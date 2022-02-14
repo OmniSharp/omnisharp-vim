@@ -143,6 +143,7 @@ function! s:RunTest(Callback, bufnr, codeElements) abort
   \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, a:bufnr, tests]),
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
+  \   'NoBuild': get(g:, 'OmniSharp_runtests_nobuild', 1),
   \   'TestFrameworkName': currentTest.framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },
@@ -250,6 +251,7 @@ function! s:DebugTest(Callback, bufnr, codeElements) abort
   \ 'ResponseHandler': function('s:DebugTestsRH', [a:Callback, a:bufnr, tests]),
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
+  \   'NoBuild': get(g:, 'OmniSharp_runtests_nobuild', 1),
   \   'TestFrameworkName': currentTest.framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },
@@ -338,6 +340,7 @@ function! s:RunTestsInFile(bufnr, tests, Callback) abort
   \ 'BufNum': a:bufnr,
   \ 'Parameters': {
   \   'MethodNames': map(copy(a:tests), {i,t -> t.name}),
+  \   'NoBuild': get(g:, 'OmniSharp_runtests_nobuild', 1),
   \   'TestFrameworkName': a:tests[0].framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },

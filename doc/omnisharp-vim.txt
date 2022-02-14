@@ -366,6 +366,11 @@ echo all test runner output to the |message-history|, so it can be viewed with
 |:messages|.
 Default: 1
 
+                                                   *g:OmniSharp_runtests_nobuild*
+When running and debugging unit tests, pass the `--no-build` flag to the
+`dotnet test` command.
+Default: 1
+
                                                   *g:OmniSharp_runtests_parallel*
 When running multiple unit test files with |:OmniSharpRunTestsInFile|, run
 tests in all files simultaneously - this is the fastest way to run multiple
