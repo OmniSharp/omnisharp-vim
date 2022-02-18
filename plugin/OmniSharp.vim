@@ -49,6 +49,8 @@ let g:OmniSharp_completion_without_overloads = get(g:, 'OmniSharp_completion_wit
 
 let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 1)
 
+let g:OmniSharp_stop_redundant_servers = get(g:, 'OmniSharp_stop_redundant_servers', 1)
+
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 command! -bar -bang OmniSharpStatus call OmniSharp#Status(<bang>0)

@@ -62,6 +62,20 @@ function! OmniSharp#CompleteRunningSln(arglead, cmdline, cursorpos) abort
   return filter(jobs, {_,job -> job =~? a:arglead})
 endfunction
 
+function! OmniSharp#CompleteOtherRunningSlnOrDirCoveringCurrentFile(arglead, cmdline, cursorpos) abort
+  let slnsOrDirsCoveringCurrentFile = []
+  let filePath = fnamemodify(expand('%'), ':p')
+  let currentlyAssignedJob = get(OmniSharp#GetHost(), 'sln_or_dir')
+  for runningJob in filter(OmniSharp#proc#ListRunningJobs(), {_,x -> x != currentlyAssignedJob})
+    for runningJobProjectPath in map(copy(OmniSharp#proc#GetJob(runningJob).projects), "fnamemodify(v:val.path, ':p:h')")
+      if stridx(filePath, runningJobProjectPath) == 0
+        call add(slnsOrDirsCoveringCurrentFile, runningJob)
+        break
+      endif
+    endfor
+  endfor
+  return filter(slnsOrDirsCoveringCurrentFile, {_,sln_or_dir -> sln_or_dir =~? a:arglead})
+endfunction
 
 function! OmniSharp#IsAnyServerRunning() abort
   return !empty(OmniSharp#proc#ListRunningJobs())
@@ -106,10 +120,13 @@ endfunction
 function! OmniSharp#FindSolutionOrDir(...) abort
   let interactive = a:0 ? a:1 : 1
   let bufnr = a:0 > 1 ? a:2 : bufnr('%')
-  if empty(getbufvar(bufnr, 'OmniSharp_buf_server'))
+  let cache = getbufvar(bufnr, 'OmniSharp_buf_server')
+  if empty(cache) || index(OmniSharp#proc#ListJobs(), cache) < 0
     try
       let sln = s:FindSolution(interactive, bufnr)
+      if sln != cache
       call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
+      endif
     catch
       return ''
     endtry
@@ -245,13 +262,17 @@ function! OmniSharp#RestartAllServers() abort
   endfor
 endfunction
 
+function! OmniSharp#PickRunningServer(server) abort
+  let host = get(b:, 'OmniSharp_host', {})
+  let host.sln_or_dir = a:server
+endfunction
 
 function! s:FindSolution(interactive, bufnr) abort
-  let solution_files = s:FindSolutionsFiles(a:bufnr)
-  if empty(solution_files)
-    " This file has no parent solution, so check for running solutions
-    return s:FindRunningServerForBuffer(a:bufnr)
+  let running_server_for_buffer = s:FindRunningServerForBuffer(a:bufnr)
+  if !empty(running_server_for_buffer)
+    return running_server_for_buffer
   endif
+  let solution_files = s:FindSolutionsFiles(a:bufnr)
 
   if len(solution_files) == 1
     return solution_files[0]
