@@ -31,6 +31,9 @@ function! OmniSharp#actions#buffer#Update(...) abort
         call opts.Callback()
       endif
     endif
+  elseif has_key(opts, 'Callback')
+    " If the buffer does not need to be updated, call the Callback immediately
+    call opts.Callback()
   endif
 endfunction
 
