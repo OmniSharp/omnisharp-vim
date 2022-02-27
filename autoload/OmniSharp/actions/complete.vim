@@ -16,7 +16,7 @@ function! OmniSharp#actions#complete#Get(partial, ...) abort
       " No callback has been passed in, so this function should return
       " synchronously, so it can be used as an omnifunc
       let starttime = reltime()
-      while s:complete_pending && reltime(starttime)[0] < g:OmniSharp_timeout
+      while s:complete_pending && reltimefloat(reltime(starttime)) < g:OmniSharp_timeout
         sleep 50m
       endwhile
       if s:complete_pending | return [] | endif
