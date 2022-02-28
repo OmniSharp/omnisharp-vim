@@ -47,13 +47,19 @@ function! OmniSharp#actions#diagnostics#CheckGlobal(...) abort
   endif
 endfunction
 
-" Normally this function would be named 's:StdioCheck`, but it is accessed
-" directly from autoload/ale/sources/OmniSharp.vim so requires a full autoload
-" function name.
 function! OmniSharp#actions#diagnostics#StdioCheck(bufnr, Callback) abort
   " OmniSharp#actions#buffer#Update only updates the server state when the
-  " buffer has been modified since the last server update
-  call OmniSharp#actions#buffer#Update()
+  " buffer has been modified since the last server update.
+  " When the buffer has been modified, the `/codecheck` request is performed
+  " after the buffer update is complete. When the buffer has not been modified
+  " and does not need to be updated, the `/codecheck` request occurs
+  " immediately.
+  call OmniSharp#actions#buffer#Update({
+  \ 'Callback': function('s:StdioCheck', [a:bufnr, a:Callback])
+  \})
+endfunction
+
+function! s:StdioCheck(bufnr, Callback) abort
   let opts = {
   \ 'ResponseHandler': function('s:StdioCheckRH', [a:Callback]),
   \ 'BufNum': a:bufnr,
