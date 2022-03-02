@@ -17,20 +17,20 @@ function! s:BindTest(bufnr, Callback) abort
   \ a:Callback)
 endfunction
 
-function! OmniSharp#actions#test#Run(...) abort
-  let bufnr = a:0 ? a:1 : bufnr('%')
-  call s:BindTest(bufnr, function('s:RunTest', [function('s:CBRunTest')]))
+function! OmniSharp#actions#test#Run(nobuild) abort
+  let s:nobuild = a:nobuild
+  call s:BindTest(bufnr('%'), function('s:RunTest', [function('s:CBRunTest')]))
 endfunction
 
-function! OmniSharp#actions#test#Debug(...) abort
+function! OmniSharp#actions#test#Debug(nobuild) abort
+  let s:nobuild = a:nobuild
   if !OmniSharp#util#HasVimspector()
     echohl WarningMsg
     echomsg 'Vimspector required to debug tests'
     echohl None
     return
   endif
-  let bufnr = a:0 ? a:1 : bufnr('%')
-  call s:BindTest(bufnr, function('s:DebugTest', [function('s:CBDebugTest')]))
+  call s:BindTest(bufnr('%'), function('s:DebugTest', [function('s:CBDebugTest')]))
 endfunction
 
 function! s:CBRunTest(summary) abort
@@ -62,7 +62,8 @@ function! s:CBDebugTest(response) abort
   endif
 endfunction
 
-function! OmniSharp#actions#test#RunInFile(...) abort
+function! OmniSharp#actions#test#RunInFile(nobuild, ...) abort
+  let s:nobuild = a:nobuild
   if !s:CheckCapabilities() | return | endif
   if a:0 && type(a:1) == type([])
     let files = a:1
@@ -143,7 +144,7 @@ function! s:RunTest(Callback, bufnr, codeElements) abort
   \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, a:bufnr, tests]),
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
-  \   'NoBuild': get(g:, 'OmniSharp_runtests_nobuild', 1),
+  \   'NoBuild': get(s:, 'nobuild', 0),
   \   'TestFrameworkName': currentTest.framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },
@@ -251,7 +252,7 @@ function! s:DebugTest(Callback, bufnr, codeElements) abort
   \ 'ResponseHandler': function('s:DebugTestsRH', [a:Callback, a:bufnr, tests]),
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
-  \   'NoBuild': get(g:, 'OmniSharp_runtests_nobuild', 1),
+  \   'NoBuild': get(s:, 'nobuild', 0),
   \   'TestFrameworkName': currentTest.framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },
@@ -340,7 +341,7 @@ function! s:RunTestsInFile(bufnr, tests, Callback) abort
   \ 'BufNum': a:bufnr,
   \ 'Parameters': {
   \   'MethodNames': map(copy(a:tests), {i,t -> t.name}),
-  \   'NoBuild': get(g:, 'OmniSharp_runtests_nobuild', 1),
+  \   'NoBuild': get(s:, 'nobuild', 0),
   \   'TestFrameworkName': a:tests[0].framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },

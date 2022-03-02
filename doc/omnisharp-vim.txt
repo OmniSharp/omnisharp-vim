@@ -366,11 +366,6 @@ echo all test runner output to the |message-history|, so it can be viewed with
 |:messages|.
 Default: 1
 
-                                                   *g:OmniSharp_runtests_nobuild*
-When running and debugging unit tests, pass the `--no-build` flag to the
-`dotnet test` command.
-Default: 1
-
                                                   *g:OmniSharp_runtests_parallel*
 When running multiple unit test files with |:OmniSharpRunTestsInFile|, run
 tests in all files simultaneously - this is the fastest way to run multiple
@@ -577,22 +572,29 @@ convenient user re-mapping. These can be used like so: >
 
                                                               *:OmniSharpRunTest*
                                                      *<Plug>(omnisharp_run_test)*
-:OmniSharpRunTest
+                                            *<Plug>(omnisharp_run_test_no_build)*
+:OmniSharpRunTest[!]
     Run the current unit test. The cursor can be anywhere in the test method.
     If the test fails, the failure message and location will be displayed in
-    the quickfix list.
+    the quickfix list, along with the error stack trace, if one exists.
+
+    When called with ! or the |<Plug>(omnisharp_run_test_no_build)| mapping, the
+    project is not built before running the test.
+
                                                               *:OmniSharpDebugTest*
                                                      *<Plug>(omnisharp_debug_test)*
-:OmniSharpDebugTest
-    Debug the current unit test. The cursor can be anywhere in the test method.
-    This uses the Vimspector plugin. You must have Vimpsector installed and 
-    have the +python3 vim feature.
-    When debugging a test, the quickfix list is not populated with the result of
-    the test.
+                                            *<Plug>(omnisharp_debug_test_no_build)*
+:OmniSharpDebugTest[!]
+    Debug the current unit test with Vimspector. The cursor can be anywhere in
+    the test method. The quickfix list is not populated with the test result.
+
+    When called with ! or the |<Plug>(omnisharp_debug_test_no_build)| mapping,
+    the project is not built before starting the debugger.
 
                                                        *:OmniSharpRunTestsInFile*
                                             *<Plug>(omnisharp_run_tests_in_file)*
-:OmniSharpRunTestsInFile
+                                   *<Plug>(omnisharp_run_tests_in_file_no_build)*
+:OmniSharpRunTestsInFile[!]
     Run all unit tests in the current file. The quickfix list will be
     populated with the test results of all tests.
     Optionally accepts one or more filenames of files to run tests for.
@@ -603,6 +605,9 @@ convenient user re-mapping. These can be used like so: >
     " Run all unit tests in the current file, and file `tests/test1.cs`
     :OmniSharpRunTestsInFile % tests/test1.cs
 <
+    When called with ! or the |<Plug>(omnisharp_run_tests_in_file_no_build)|
+    mapping, the project is not built before running the tests.
+
                                                               *:OmniSharpOpenLog*
                                                      *<Plug>(omnisharp_open_log)*
 :OmniSharpOpenLog [{cmd}]
@@ -645,9 +650,9 @@ convenient user re-mapping. These can be used like so: >
                                           *<Plug>(omnisharp_debug_project)*
 :OmniSharpDebugProject
     Run vimspector with an ad-hoc config on the current project.
-    Running this with a bang (OmniSharpDebugProject!) will break on entry in the 
+    Running this with a bang (OmniSharpDebugProject!) will break on entry in the
     debugger.
-    The command takes optional arguments that will be passed to the debugged 
+    The command takes optional arguments that will be passed to the debugged
     process as args.
 
                                                     *:OmniSharpCreateDebugConfig*
@@ -780,5 +785,9 @@ Note that completion is asynchronous only when using the stdio server, see
 
 A source is provided for the Deoplete completion framework. - no further
 configuration is required.
+
+6.6 Vimspector~
+
+Vimspector is used for debugging. It requires the +python3 vim feature.
 
 ===============================================================================

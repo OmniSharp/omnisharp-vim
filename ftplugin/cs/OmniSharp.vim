@@ -55,7 +55,7 @@ command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServer
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
 command! -buffer -bar OmniSharpStopAllServers call OmniSharp#StopAllServers()
-command! -buffer -bar -nargs=? -bang -complete=customlist,OmniSharp#CompleteRunningSln OmniSharpStopServer call OmniSharp#StopServer(<bang>0, <q-args>)
+command! -buffer -bar -bang -nargs=? -complete=customlist,OmniSharp#CompleteRunningSln OmniSharpStopServer call OmniSharp#StopServer(<bang>0, <q-args>)
 
 command! -buffer -bar OmniSharpCodeFormat call OmniSharp#actions#format#Format()
 command! -buffer -bar OmniSharpDocumentation call OmniSharp#actions#documentation#Documentation()
@@ -77,13 +77,13 @@ command! -buffer -bar OmniSharpPreviewImplementation call OmniSharp#actions#impl
 command! -buffer -bar OmniSharpRename call OmniSharp#actions#rename#Prompt()
 command! -buffer -nargs=1 OmniSharpRenameTo call OmniSharp#actions#rename#To(<q-args>)
 command! -buffer -bar OmniSharpRepeatCodeAction call OmniSharp#actions#codeactions#Repeat('normal')
-command! -buffer -bar OmniSharpRunTest call OmniSharp#actions#test#Run()
-command! -buffer -bar OmniSharpDebugTest call OmniSharp#actions#test#Debug()
-command! -buffer -bar -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<f-args>)
+command! -buffer -bar -bang OmniSharpRunTest call OmniSharp#actions#test#Run(<bang>0)
+command! -buffer -bar -bang OmniSharpDebugTest call OmniSharp#actions#test#Debug(<bang>0)
+command! -buffer -bar -bang -nargs=* -complete=file OmniSharpRunTestsInFile call OmniSharp#actions#test#RunInFile(<bang>0, <f-args>)
 command! -buffer -bar OmniSharpSignatureHelp call OmniSharp#actions#signature#SignatureHelp()
 command! -buffer -bar OmniSharpTypeLookup call OmniSharp#actions#documentation#TypeLookup()
-command! -buffer -bar -nargs=* -bang OmniSharpDebugProject call OmniSharp#actions#project#DebugProject(<bang>0, <f-args>)
-command! -buffer -bar -nargs=* -bang OmniSharpCreateDebugConfig call OmniSharp#actions#project#CreateDebugConfig(<bang>0, <f-args>)
+command! -buffer -bar -bang -nargs=* OmniSharpDebugProject call OmniSharp#actions#project#DebugProject(<bang>0, <f-args>)
+command! -buffer -bar -bang -nargs=* OmniSharpCreateDebugConfig call OmniSharp#actions#project#CreateDebugConfig(<bang>0, <f-args>)
 
 nnoremap <buffer> <Plug>(omnisharp_code_format) :OmniSharpCodeFormat<CR>
 nnoremap <buffer> <Plug>(omnisharp_documentation) :OmniSharpDocumentation<CR>
@@ -108,8 +108,11 @@ nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_server) :OmniSharpRestartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) :OmniSharpRestartAllServers<CR>
 nnoremap <buffer> <Plug>(omnisharp_run_test) :OmniSharpRunTest<CR>
+nnoremap <buffer> <Plug>(omnisharp_run_test_no_build) :OmniSharpRunTest!<CR>
 nnoremap <buffer> <Plug>(omnisharp_debug_test) :OmniSharpDebugTest<CR>
+nnoremap <buffer> <Plug>(omnisharp_debug_test_no_build) :OmniSharpDebugTest!<CR>
 nnoremap <buffer> <Plug>(omnisharp_run_tests_in_file) :OmniSharpRunTestsInFile<CR>
+nnoremap <buffer> <Plug>(omnisharp_run_tests_in_file_no_build) :OmniSharpRunTestsInFile!<CR>
 nnoremap <buffer> <Plug>(omnisharp_signature_help) :OmniSharpSignatureHelp<CR>
 inoremap <buffer> <Plug>(omnisharp_signature_help) <C-o>:OmniSharpSignatureHelp<CR>
 nnoremap <buffer> <Plug>(omnisharp_start_server) :OmniSharpStartServer<CR>
