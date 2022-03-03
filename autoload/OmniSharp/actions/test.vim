@@ -49,7 +49,11 @@ function! s:CBRunTest(summary) abort
   else
     echomsg a:summary.locations[0].name . ': failed'
     let title = 'Test failure: ' . a:summary.locations[0].name
-    call OmniSharp#locations#SetQuickfix(a:summary.locations, title)
+    let what = {}
+    if len(a:summary.locations) > 1
+      let what = {'quickfixtextfunc': function('s:QuickfixTextFuncStackTrace')}
+    endif
+    call OmniSharp#locations#SetQuickfix(a:summary.locations, title, what)
   endif
 endfunction
 
@@ -195,8 +199,7 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
         if a:response.Command ==# '/v2/runtest'
           " Parse the stack trace and create quickfix locations
           let st = substitute(st, '.*\zs at .\+ in .\+:line \d\+.*', '', '')
-          let parsed = matchlist(st, '.*\( at .\+\) in \(.\+\):line \(\d\+\)')
-          let tracelevel = 1
+          let parsed = matchlist(st, '.*\( at .\+ in \(.\+\):line \(\d\+\)\)')
           while len(parsed) > 0
             call add(locations, {
             \ 'filename': parsed[2],
@@ -204,9 +207,8 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
             \ 'type': 'E',
             \ 'text': parsed[1]
             \})
-            let tracelevel += 1
             let st = substitute(st, '.*\zs at .\+ in .\+:line \d\+.*', '', '')
-            let parsed = matchlist(st, '.*\( at .\+\) in \(.\+\):line \(\d\+\)')
+            let parsed = matchlist(st, '.*\( at .\+ in \(.\+\):line \(\d\+\)\)')
           endwhile
         endif
       else
@@ -424,6 +426,11 @@ function! s:StartTestProcess(command) abort
     echohl WarningMsg | echomsg 'Cannot launch test process.' | echohl None
   endif
   return job
+endfunction
+
+function! s:QuickfixTextFuncStackTrace(info) abort
+  let items = getqflist({'id' : a:info.id, 'items' : 1}).items
+  return map(items, {_,i -> i.text})
 endfunction
 
 let &cpoptions = s:save_cpo

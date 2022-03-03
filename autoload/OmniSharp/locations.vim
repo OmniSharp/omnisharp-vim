@@ -117,8 +117,12 @@ function! OmniSharp#locations#Preview(location) abort
   endif
 endfunction
 
-function! OmniSharp#locations#SetQuickfix(list, title) abort
-  call s:SetQuickfixFromDict(a:list, {'title': a:title})
+function! OmniSharp#locations#SetQuickfix(list, title, ...) abort
+  let what = {'title': a:title}
+  if a:0
+    call extend(what, a:1)
+  endif
+  call s:SetQuickfixFromDict(a:list, what)
 endfunction
 
 function! OmniSharp#locations#SetQuickfixWithVerticalAlign(list, title) abort
