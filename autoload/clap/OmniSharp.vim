@@ -18,18 +18,19 @@ function! s:location_sink(str) abort
   call OmniSharp#locations#Navigate(quickfix)
 endfunction
 
+function! s:symbols_source() abort
+  return map(copy(s:quickfixes), 's:format_line(v:val)')
+endfunction
+
 function! clap#OmniSharp#FindSymbols(quickfixes) abort
   let s:quickfixes = a:quickfixes
-  let symbols = []
-  for quickfix in s:quickfixes
-    call add(symbols, s:format_line(quickfix))
-  endfor
-  let g:clap_provider_symbols = {
-  \ 'source': symbols,
-  \ 'sink': function('s:location_sink')
-  \}
   Clap symbols
 endfunction
+
+let g:clap_provider_symbols = {
+\ 'source': function('s:symbols_source'),
+\ 'sink': function('s:location_sink')
+\}
 
 function! s:action_sink(str) abort
   if s:match_on_prefix
@@ -56,9 +57,8 @@ function! s:action_sink(str) abort
   endif
 endfunction
 
-function! clap#OmniSharp#GetCodeActions(mode, actions) abort
+function! s:actions_source() abort
   let s:match_on_prefix = 0
-  let s:actions = a:actions
 
   if has('win32')
     " Check whether any actions contain non-ascii characters. These are not
@@ -76,26 +76,32 @@ function! clap#OmniSharp#GetCodeActions(mode, actions) abort
     endif
   endif
 
+  return map(copy(s:actions), 'v:val.Name')
+endfunction
+
+function! clap#OmniSharp#GetCodeActions(mode, actions) abort
+  let s:actions = a:actions
   let s:mode = a:mode
-  let actionNames = map(copy(s:actions), 'v:val.Name')
-  let g:clap_provider_actions = {
-  \ 'source': actionNames,
-  \ 'sink': function('s:action_sink')
-  \}
   Clap actions
+endfunction
+
+let g:clap_provider_actions = {
+\ 'source': function('s:actions_source'),
+\ 'sink': function('s:action_sink')
+\}
+
+function! s:usages_source() abort
+  return map(copy(s:quickfixes), 's:format_line(v:val)')
 endfunction
 
 function! clap#OmniSharp#FindUsages(quickfixes, target) abort
   let s:quickfixes = a:quickfixes
-  let usages = []
-  for quickfix in s:quickfixes
-    call add(usages, s:format_line(quickfix))
-  endfor
-  let g:clap_provider_usages = {
-  \ 'source': usages,
-  \ 'sink': function('s:location_sink')
-  \}
   Clap usages
 endfunction
+
+let g:clap_provider_usages = {
+\ 'source': function('s:usages_source'),
+\ 'sink': function('s:location_sink')
+\}
 
 " vim:et:sw=2:sts=2
