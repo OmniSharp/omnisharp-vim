@@ -149,9 +149,12 @@ function! OmniSharp#buffer#Update(responseBody) abort
 endfunction
 
 function! OmniSharp#buffer#Valid(...) abort
-  let bn = fnamemodify(bufname(a:0 ? a:1 : '%'), ':p')
-  let bt = a:0 ? getbufvar(a:1, '&buftype') : &buftype
-  return bt !=# 'nofile' && bn !=# '' && match(bn, '\vfugitive:(///|\\\\)') != 0
+  let bufnr = bufnr(a:0 ? a:1 : '%')
+  let bufname = fnamemodify(bufname(bufnr), ':p')
+  let buftype = a:0 ? getbufvar(a:1, '&buftype') : &buftype
+  return buftype !=# 'nofile' && bufname !=# ''
+  \ && match(bufname, '\vfugitive:(///|\\\\)') != 0
+  \ && (!exists('*g:OmniSharp_buffer_valid') || g:OmniSharp_buffer_valid(bufnr))
 endfunction
 
 let &cpoptions = s:save_cpo

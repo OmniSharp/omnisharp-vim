@@ -145,8 +145,16 @@ Open the log file with |:OmniSharpOpenLog|
 When multiple .sln files are available, OmniSharp-vim will prompt you to
 select one when opening a new .cs file. Use this option to re-select the
 previously selected .sln for subsequent .cs files.
-Default: 0
+Default: 0 >
     let g:OmniSharp_autoselect_existing_sln = 1
+<
+                                                       *g:OmniSharp_buffer_valid*
+A custom function which can be used to prevent OmniSharp launching for
+specific files or paths, for example under /tmp: >
+    function OSBufferValid(bufnr)
+      return match(bufname(a:bufnr), '^/tmp/') != 0
+    endfunction
+    let g:OmniSharp_buffer_valid = function('OSBufferValid')
 <
                                              *g:OmniSharp_server_display_loading*
                                                                      Stdio only
