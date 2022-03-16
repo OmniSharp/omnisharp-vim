@@ -40,6 +40,7 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
     let bufnr = bufnr('%')
     let unload_bufnrs = []
     let hidden_bak = &hidden | set hidden
+    let fileencoding = &fileencoding
     for change in changes
       let modificationType = get(change, 'ModificationType', 0)
       if modificationType == 0 " Modified
@@ -48,7 +49,16 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
         \}, 'silent')
         call OmniSharp#buffer#Update(change)
         if bufnr('%') != bufnr
-          silent write | silent edit
+          let c = get(change, 'Changes', [])
+          if len(c) == 1 && &fileencoding != fileencoding
+          \ && c[0].StartLine == 1 && c[0].StartColumn == 1
+          \ && c[0].EndLine == 1 && c[0].EndColumn == 1
+            " New file with different file encoding
+            execute 'silent write ++enc=' . fileencoding
+          else
+            silent write
+          endif
+          silent edit
         endif
       elseif modificationType == 1 " Opened
         " ModificationType 1 is typically done in conjunction with a rename
