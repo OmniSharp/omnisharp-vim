@@ -182,7 +182,10 @@ function! OmniSharp#stdio#Request(command, opts) abort
   \   'Column': cnum,
   \ }
   \}
-  if send_buffer
+  if has_key(a:opts, 'EmptyBuffer')
+    let body.Arguments.Buffer = ''
+    let sep = ''
+  elseif send_buffer
     let lines = getbufline(bufnr, 1, '$')
     if has_key(a:opts, 'OverrideBuffer')
       let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
