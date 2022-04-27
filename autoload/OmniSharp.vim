@@ -491,7 +491,6 @@ function! s:FindSolutionsFiles(bufnr) abort
 
   while dir !=# lastfolder
     let solution_files += s:globpath(dir, '*.sln')
-    let solution_files += s:globpath(dir, 'project.json')
 
     call filter(solution_files, 'filereadable(v:val)')
 
