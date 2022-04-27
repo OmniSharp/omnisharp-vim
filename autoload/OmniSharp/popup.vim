@@ -202,8 +202,12 @@ function! s:NvimOpen(what, opts) abort
     let config.width = max([50, min([available, content_width])])
   endif
   let s:parentwinid = win_getid(winnr())
+  let options = copy(s:NvimGetOptions())
+  if has_key(options, 'border')
+    let config.border = options.border
+    unlet options.border
+  endif
   let winid = nvim_open_win(bufnr, v:false, config)
-  let options = s:NvimGetOptions()
   let s:nvim_window_options = get(s:, 'nvim_window_options', {})
   let s:nvim_window_options[winid] = {}
   for opt in keys(options)

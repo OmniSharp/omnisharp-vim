@@ -378,19 +378,22 @@ let g:OmniSharp_popup_mappings.close = '<Esc>'
 
 ### Popup options
 
-Vim and neovim have different options for styling popups.
+Vim and neovim have different options for styling popups, due to the different ways the editors have implemented this feature.
 
 #### Popup styling for Vim
 
 The popup options from [:help popup_create-arguments](http://vimhelp.appspot.com/popup.txt.html#popup_create-arguments) can be used to style Vim popups.
 By default, Vim uses the `Pmenu` highlight group, with no border or padding.
-Add a border and padding, and use the `Normal` highlight group like this:
+
+Add a rounded border and padding, and use the `Normal` highlight group for the window and the `Special` highlight group for the border like this:
 
 ```vim
 let g:OmniSharp_popup_options = {
 \ 'highlight': 'Normal',
 \ 'padding': [1],
-\ 'border': [1]
+\ 'border': [1],
+\ 'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+\ 'borderhighlight': ['Special']
 \}
 ```
 
@@ -399,12 +402,15 @@ See the `:help` link above for options for border characters, border highlight g
 #### Popup styling for neovim
 
 The `g:OmniSharp_popup_options` dictionary is a set of window options which can be set for the popup.
-Enable pseudo-transparency and change the highlight group from the default `NormalFloat` to `Normal` like this:
+The dictionary may also contain an additional property, `'border'`, which is used as the `config.border` property passed to [:help nvim_open_win()](https://neovim.io/doc/user/api.html#nvim_open_win()).
+
+Enable pseudo-transparency, add a rounded border and change the highlight groups from the default `NormalFloat` with `FloatBorder` border to `Normal` and `Special` border like this:
 
 ```vim
 let g:OmniSharp_popup_options = {
 \ 'winblend': 30,
-\ 'winhl': 'Normal:Normal'
+\ 'winhl': 'Normal:Normal,FloatBorder:Special',
+\ 'border': 'rounded'
 \}
 ```
 
