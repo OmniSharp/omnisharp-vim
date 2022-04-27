@@ -2,7 +2,6 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 let s:dir_separator = fnamemodify('.', ':p')[-1 :]
-let s:roslyn_server_files = 'project.json'
 let s:plugin_root_dir = expand('<sfile>:p:h:h:h')
 
 function! s:is_msys() abort
@@ -146,12 +145,7 @@ function! OmniSharp#util#GetServerPath() abort
 endfunction
 
 function! OmniSharp#util#GetStartCmd(solution_file) abort
-  let solution_path = a:solution_file
-  if fnamemodify(solution_path, ':t') ==? s:roslyn_server_files
-    let solution_path = fnamemodify(solution_path, ':h')
-  endif
-
-  let solution_path = OmniSharp#util#TranslatePathForServer(solution_path)
+  let solution_path = OmniSharp#util#TranslatePathForServer(a:solution_file)
 
   if exists('g:OmniSharp_server_path')
     let s:server_path = g:OmniSharp_server_path
