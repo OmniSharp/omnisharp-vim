@@ -348,6 +348,10 @@ the highlight group from the default |hl-NormalFloat| to |hl-Normal| like this: 
     \ 'winhl': 'Normal:Normal'
     \}
 <
+Additionally, a "border" property can be used with neovim, which corresponds
+to the config.border value passed to |nvim_open_win()|: >
+    let g:OmniSharp_popup_options = { 'border': 'rounded' }
+<
                                                      *g:OmniSharp_popup_position*
 How popups displaying file buffers (definition, implementation and metadata)
 should be positioned. Note that this does not include documentation and
