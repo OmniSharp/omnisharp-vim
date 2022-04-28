@@ -106,6 +106,76 @@ Expect cs(should add another required using):
 
 
 Given cs():
+  using System;
+
+  using System.Text;
+
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine(Encoding.UTF8.ToString());
+        Console.WriteLine(DateTime.Parse("1999-01-01T00:01:01Z", CultureInfo.InvariantCulture));
+    }
+  }
+
+Execute (run fix usings with empty line and virtualedit=):
+  call OmniSharpTestInitializeBuffer('FixUsings4')
+  set virtualedit=
+  call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
+  call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
+
+Expect cs(should add another required using between the others):
+  using System;
+  using System.Globalization;
+  using System.Text;
+
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine(Encoding.UTF8.ToString());
+        Console.WriteLine(DateTime.Parse("1999-01-01T00:01:01Z", CultureInfo.InvariantCulture));
+    }
+  }
+
+
+Given cs():
+  using System;
+
+  using System.Text;
+
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine(Encoding.UTF8.ToString());
+        Console.WriteLine(DateTime.Parse("1999-01-01T00:01:01Z", CultureInfo.InvariantCulture));
+    }
+  }
+
+Execute (run fix usings with empty line and virtualedit=all):
+  call OmniSharpTestInitializeBuffer('FixUsings4')
+  set virtualedit=all
+  call OmniSharpWarmup('OmniSharp#actions#usings#Fix', [])
+  call OmniSharpTestAwait('OmniSharp#actions#usings#Fix', [])
+
+Expect cs(should add another required using between the others):
+  using System;
+  using System.Globalization;
+  using System.Text;
+
+  public class Test
+  {
+    public Test()
+    {
+        Console.WriteLine(Encoding.UTF8.ToString());
+        Console.WriteLine(DateTime.Parse("1999-01-01T00:01:01Z", CultureInfo.InvariantCulture));
+    }
+  }
+
+
+Given cs():
   public class test {
       class1 ns1 = new class1();
   }
