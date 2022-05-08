@@ -41,6 +41,7 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
     let unload_bufnrs = []
     let hidden_bak = &hidden | set hidden
     let fileencoding = &fileencoding
+    let bomb = &bomb
     for change in changes
       let modificationType = get(change, 'ModificationType', 0)
       if modificationType == 0 " Modified
@@ -50,6 +51,9 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
         call OmniSharp#buffer#Update(change)
         if bufnr('%') != bufnr
           let c = get(change, 'Changes', [])
+          if &bomb != bomb
+            let &bomb = bomb
+          endif
           if len(c) == 1 && &fileencoding != fileencoding
           \ && c[0].StartLine == 1 && c[0].StartColumn == 1
           \ && c[0].EndLine == 1 && c[0].EndColumn == 1
