@@ -191,6 +191,12 @@ function! OmniSharp#stdio#Request(command, opts) abort
       let lines[a:opts.OverrideBuffer.LineNr - 1] = a:opts.OverrideBuffer.Line
       let cnum = a:opts.OverrideBuffer.Col
     endif
+    if &endofline
+      " Ensure that the final trailing <EOL> is included, so that EOL analyzers
+      " won't complain about missing <EOL> on the final line when it does
+      " actually exist, it just isn't displayed by vim.
+      call add(lines, '')
+    endif
     let tmp = join(lines, '')
     " Unique string separator which must not exist in the buffer
     let sep = '@' . matchstr(reltimestr(reltime()), '\v\.@<=\d+') . '@'
