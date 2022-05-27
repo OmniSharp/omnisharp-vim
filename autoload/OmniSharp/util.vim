@@ -46,7 +46,11 @@ function! OmniSharp#util#AwaitParallel(Funcs, OnAllComplete) abort
   \ 'OnAllComplete': a:OnAllComplete
   \}
   for Func in a:Funcs
-    call Func(function('s:AwaitFuncComplete', [state]))
+    " If the Func has been declared as a dictionary function, then it must be
+    " called as a dictionary function:
+    " function s:run.test()
+    let dict = { 'f': Func }
+    call dict.f(function('s:AwaitFuncComplete', [state]))
   endfor
 endfunction
 
