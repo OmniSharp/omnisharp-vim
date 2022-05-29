@@ -10,6 +10,7 @@ let s:run.running = 0
 let s:run.single = {}
 let s:run.multiple = {}
 let s:utils = {}
+let s:utils.init = {}
 let s:utils.log = {}
 
 function! OmniSharp#actions#test#Debug(nobuild) abort
@@ -21,10 +22,9 @@ function! OmniSharp#actions#test#Debug(nobuild) abort
   call s:utils.initialize([bufnr('%')], s:debug.prepare)
 endfunction
 
-function! s:debug.prepare(bufferCodeStructures) abort
-  let bufnr = a:bufferCodeStructures[0][0]
-  let codeElements = a:bufferCodeStructures[0][1]
-  let tests = s:utils.extractTests(codeElements)
+function! s:debug.prepare(bufferTests) abort
+  let bufnr = a:bufferTests[0].bufnr
+  let tests = a:bufferTests[0].tests
   let currentTest = s:utils.findTest(tests)
   if type(currentTest) != type({})
     return s:utils.log.warn('No test found')
@@ -51,9 +51,7 @@ function! s:debug.launch(bufnr, tests, response) abort
   let testhost = [cmd] + args
   if !s:debug.process.start(testhost) | return | endif
   let s:run.running = 1
-  let host = OmniSharp#GetHost()
   let s:omnisharp_pre_debug_cwd = getcwd()
-  let new_cwd = fnamemodify(host.sln_or_dir, ':p:h')
   call vimspector#LaunchWithConfigurations({
   \ 'attach': {
   \   'adapter': 'netcoredbg',
@@ -63,7 +61,8 @@ function! s:debug.launch(bufnr, tests, response) abort
   \   }
   \ }
   \})
-  execute 'tcd' new_cwd
+  let project_dir = fnamemodify(OmniSharp#GetHost(a:bufnr).sln_or_dir, ':p:h')
+  execute 'tcd' project_dir
   let opts = {
   \ 'ResponseHandler': s:debug.complete,
   \ 'Parameters': {
@@ -108,10 +107,9 @@ function! OmniSharp#actions#test#Run(nobuild) abort
   call s:utils.initialize([bufnr('%')], s:run.single.test)
 endfunction
 
-function! s:run.single.test(bufferCodeStructures) abort
-  let bufnr = a:bufferCodeStructures[0][0]
-  let codeElements = a:bufferCodeStructures[0][1]
-  let tests = s:utils.extractTests(codeElements)
+function! s:run.single.test(bufferTests) abort
+  let bufnr = a:bufferTests[0].bufnr
+  let tests = a:bufferTests[0].tests
   let currentTest = s:utils.findTest(tests)
   if type(currentTest) != type({})
     return s:utils.log.warn('No test found')
@@ -184,12 +182,11 @@ function! OmniSharp#actions#test#RunInFile(nobuild, ...) abort
   call s:utils.initialize(buffers, s:run.multiple.prepare)
 endfunction
 
-function! s:run.multiple.prepare(bufferCodeStructures) abort
+function! s:run.multiple.prepare(bufferTests) abort
   let Requests = []
-  for bcs in a:bufferCodeStructures
-    let bufnr = bcs[0]
-    let codeElements = bcs[1]
-    let tests = s:utils.extractTests(codeElements)
+  for btests in a:bufferTests
+    let bufnr = btests.bufnr
+    let tests = btests.tests
     if len(tests)
       call add(Requests, funcref('s:run.multiple.inBuffer', [bufnr, tests]))
     endif
@@ -398,14 +395,22 @@ endfunction
 " code structures. All operations are performed asynchronously, and the
 " a:Callback is called when all buffer code structures have been fetched.
 function! s:utils.initialize(buffers, Callback) abort
-  function! s:AwaitForBuffers(buffers, functionName, AwaitCallback, ...) abort
-    call OmniSharp#util#AwaitParallel(
-    \ map(copy(a:buffers), {i,b -> function(a:functionName, [b])}),
-    \ a:AwaitCallback)
-  endfunction
-  call s:AwaitForBuffers(a:buffers, 'OmniSharp#actions#project#Get',
-  \ function('s:AwaitForBuffers',
-  \   [a:buffers, 'OmniSharp#actions#codestructure#Get', a:Callback]))
+  call s:utils.init.await(a:buffers, 'OmniSharp#actions#project#Get',
+  \ funcref('s:utils.init.await', [a:buffers, 'OmniSharp#actions#codestructure#Get',
+  \   funcref('s:utils.init.extract', [a:Callback])]))
+endfunction
+
+function! s:utils.init.await(buffers, functionName, Callback, ...) abort
+  let Funcs = map(copy(a:buffers), {i,b -> function(a:functionName, [b])})
+  call OmniSharp#util#AwaitParallel(Funcs, a:Callback)
+endfunction
+
+function! s:utils.init.extract(Callback, codeStructures) abort
+  let bufferTests = map(a:codeStructures, {i, cs -> {
+  \ 'bufnr': cs[0],
+  \ 'tests': s:utils.extractTests(cs[1])
+  \}})
+  call a:Callback(bufferTests)
 endfunction
 
 function! s:utils.log.echo(highlightGroup, message) abort
