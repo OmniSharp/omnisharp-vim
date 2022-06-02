@@ -410,6 +410,7 @@ function! s:utils.init.extract(Callback, codeStructures) abort
   \ 'bufnr': cs[0],
   \ 'tests': s:utils.extractTests(cs[1])
   \}})
+  call OmniSharp#testrunner#SetTests(bufferTests)
   call a:Callback(bufferTests)
 endfunction
 

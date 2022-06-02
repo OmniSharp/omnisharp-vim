@@ -6,10 +6,10 @@ function! OmniSharp#preview#Display(content, title) abort
   silent wincmd P
   setlocal modifiable noreadonly
   setlocal nobuflisted buftype=nofile bufhidden=wipe
-  0,$d
+  0,$delete
   silent put =a:content
-  0d_
-  setfiletype omnisharpdoc
+  0delete _
+  set filetype=omnisharpdoc
   setlocal conceallevel=3
   setlocal nomodifiable readonly
   let winid = winnr()
