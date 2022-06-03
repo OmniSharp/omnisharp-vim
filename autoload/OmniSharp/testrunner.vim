@@ -1,6 +1,13 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+let s:state2char = {
+\ 'Not run': '|',
+\ 'Running': '-',
+\ 'Passed': '*',
+\ 'Failed': '#'
+\}
+
 function! OmniSharp#testrunner#Open() abort
   if !OmniSharp#actions#test#Validate() | return | endif
   call s:Open()
@@ -30,7 +37,7 @@ function s:Open() abort
     botright new
   endif
 
-  silent setlocal noswapfile signcolumn=no
+  silent setlocal noswapfile signcolumn=no conceallevel=3 concealcursor=nv
   set bufhidden=hide
   let &filetype = ft
   execute 'file' title
@@ -51,8 +58,9 @@ function! s:Paint() abort
     if !has_key(job, 'tests') | continue | endif
     for testfile in keys(job.tests)
       put ='  ' . fnamemodify(testfile, ':.')
-      for test in job.tests[testfile]
-        put ='    ' . test.name
+      for name in keys(job.tests[testfile])
+        let test = job.tests[testfile][name]
+        put =printf('%s    %s', s:state2char[test.state], name)
       endfor
     endfor
     put =''
@@ -68,7 +76,14 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
     let job = OmniSharp#GetHost(buffer.bufnr).job
     let job.tests = get(job, 'tests', {})
     let filename = fnamemodify(bufname(buffer.bufnr), ':p')
-    let job.tests[filename] = buffer.tests
+    let existing = get(job.tests, filename, {})
+    let job.tests[filename] = existing
+    for test in buffer.tests
+      let extest = get(existing, test.name, { 'state': 'Not run' })
+      let existing[test.name] = extest
+      let extest.framework = test.framework
+      let extest.lnum = test.nameRange.Start.Line
+    endfor
   endfor
   call s:Open()
   call win_gotoid(winid)
