@@ -5,11 +5,16 @@ endif
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+syn region ostIntro start="\%1l" end="^$" contains=ostIntroDelim transparent
+syn match ostIntroDelim "^=\+$" contained
+
 syn match ostStateNotRun "^|.*" contains=ostStateChar
 syn match ostStateRunning "^-.*" contains=ostStateChar
 syn match ostStatePassed "^\*.*" contains=ostStateChar
-syn match ostStateFailed "^#.*" contains=ostStateChar
-syn match ostStateChar "^[|\*#-]" conceal contained
+syn match ostStateFailed "^!.*" contains=ostStateChar
+syn match ostStateChar "^[|\*!-]" conceal contained
+
+hi def link ostIntroDelim PreProc
 
 hi def link ostStateNotRun Comment
 hi def link ostStateRunning Identifier
