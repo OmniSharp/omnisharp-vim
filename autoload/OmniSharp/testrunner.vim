@@ -45,8 +45,7 @@ function s:Open() abort
   call s:Paint()
 endfunction
 
-function! OmniSharp#testrunner#Repaint() abort
-  " Check that the test runner has been initialised and is still a loaded buffer
+function! s:Repaint() abort
   if !exists('s:testrunner_bufnr') | return | endif
   if getbufvar(s:testrunner_bufnr, '&ft') !=# 'omnisharptest' | return | endif
   " If the buffer is listed in a window in the current tab, then focus it
@@ -110,6 +109,39 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
   endfor
   call s:Open()
   call win_gotoid(winid)
+endfunction
+
+function! s:UpdateState(bufnr, testnames, state) abort
+  let job = OmniSharp#GetHost(a:bufnr).job
+  let filename = fnamemodify(bufname(a:bufnr), ':p')
+  let tests = get(job.tests, filename, {})
+  for testname in a:testnames
+    if has_key(tests, testname)
+      let tests[testname].state = a:state
+    endif
+  endfor
+  call s:Repaint()
+endfunction
+
+function! OmniSharp#testrunner#StateRunning(bufnr, testnames) abort
+  let testnames = type(a:testnames) == type([]) ? a:testnames : [a:testnames]
+  let s:lasttestnames = testnames
+  call s:UpdateState(a:bufnr, testnames, 'Running')
+endfunction
+
+function! OmniSharp#testrunner#StateSkipped(bufnr, ...) abort
+  let testnames = a:0 ? (type(a:1) == type([]) ? a:1 : [a:1]) : s:lasttestnames
+  call s:UpdateState(a:bufnr, testnames, 'Not run')
+endfunction
+
+function! OmniSharp#testrunner#StatePassed(bufnr, ...) abort
+  let testnames = a:0 ? (type(a:1) == type([]) ? a:1 : [a:1]) : s:lasttestnames
+  call s:UpdateState(a:bufnr, testnames, 'Passed')
+endfunction
+
+function! OmniSharp#testrunner#StateFailed(bufnr, ...) abort
+  let testnames = a:0 ? (type(a:1) == type([]) ? a:1 : [a:1]) : s:lasttestnames
+  call s:UpdateState(a:bufnr, testnames, 'Failed')
 endfunction
 
 let &cpoptions = s:save_cpo
