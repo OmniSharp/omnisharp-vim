@@ -115,6 +115,7 @@ function! s:run.single.test(bufferTests) abort
     return s:utils.log.warn('No test found')
   endif
   let s:run.running = 1
+  call OmniSharp#testrunner#StateRunning(bufnr, currentTest.name)
   let project = OmniSharp#GetHost(bufnr).project
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
@@ -132,17 +133,22 @@ function! s:run.single.test(bufferTests) abort
 endfunction
 
 function! s:run.single.complete(summary) abort
+  if a:summary.pass && len(a:summary.locations) == 0
+    echomsg 'No tests were run'
+    " Do we ever reach here?
+    " call OmniSharp#testrunner#StateSkipped(bufnr)
+  endif
+  let location = a:summary.locations[0]
+  call s:run.updatestate(location)
   if a:summary.pass
-    if len(a:summary.locations) == 0
-      echomsg 'No tests were run'
-    elseif get(a:summary.locations[0], 'type', '') ==# 'W'
-      call s:utils.log.warn(a:summary.locations[0].name . ': skipped')
+    if get(location, 'type', '') ==# 'W'
+      call s:utils.log.warn(location.name . ': skipped')
     else
-      call s:utils.log.emphasize(a:summary.locations[0].name . ': passed')
+      call s:utils.log.emphasize(location.name . ': passed')
     endif
   else
-    echomsg a:summary.locations[0].name . ': failed'
-    let title = 'Test failure: ' . a:summary.locations[0].name
+    echomsg location.name . ': failed'
+    let title = 'Test failure: ' . location.name
     let what = {}
     if len(a:summary.locations) > 1
       let what.quickfixtextfunc = {info->
@@ -187,7 +193,9 @@ function! s:run.multiple.prepare(bufferTests) abort
   for btests in a:bufferTests
     let bufnr = btests.bufnr
     let tests = btests.tests
+    let testnames = map(copy(tests), {_,t -> t.name})
     if len(tests)
+      call OmniSharp#testrunner#StateRunning(bufnr, testnames)
       call add(Requests, funcref('s:run.multiple.inBuffer', [bufnr, tests]))
     endif
   endfor
@@ -232,6 +240,9 @@ function! s:run.multiple.complete(summary) abort
       let pass = 0
     endif
   endfor
+  for location in locations
+    call s:run.updatestate(location)
+  endfor
   if pass
     let title = len(locations) . ' tests passed'
     call s:utils.log.emphasize(title)
@@ -271,6 +282,8 @@ function! s:run.process(Callback, bufnr, tests, response) abort
   for result in a:response.Body.Results
     " Strip namespace and classname from test method name
     let location = {
+    \ 'bufnr': a:bufnr,
+    \ 'fullname': result.MethodName,
     \ 'filename': bufname(a:bufnr),
     \ 'name': substitute(result.MethodName, '^.*\.', '', '')
     \}
@@ -334,6 +347,16 @@ function! s:run.process(Callback, bufnr, tests, response) abort
     endfor
   endfor
   call a:Callback(summary)
+endfunction
+
+function! s:run.updatestate(location) abort
+  if get(a:location, 'type', '') ==# 'E'
+    call OmniSharp#testrunner#StateFailed(a:location.bufnr, a:location.fullname)
+  elseif get(a:location, 'type', '') ==# 'W'
+    call OmniSharp#testrunner#StateSkipped(a:location.bufnr, a:location.fullname)
+  else
+    call OmniSharp#testrunner#StatePassed(a:location.bufnr, a:location.fullname)
+  endif
 endfunction
 
 
