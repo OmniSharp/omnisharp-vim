@@ -32,7 +32,7 @@ function! s:debug.prepare(bufferTests) abort
   let project = OmniSharp#GetHost(bufnr).project
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
-  \ 'ResponseHandler': funcref('s:debug.launch', [bufnr, tests]),
+  \ 'ResponseHandler': funcref('s:debug.launch', [bufnr, currentTest.name]),
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
   \   'NoBuild': get(s:, 'nobuild', 0),
@@ -45,12 +45,14 @@ function! s:debug.prepare(bufferTests) abort
   call OmniSharp#stdio#Request('/v2/debugtest/getstartinfo', opts)
 endfunction
 
-function! s:debug.launch(bufnr, tests, response) abort
+function! s:debug.launch(bufnr, testname, response) abort
   let args = split(substitute(a:response.Body.Arguments, '\"', '', 'g'), ' ')
   let cmd = a:response.Body.FileName
   let testhost = [cmd] + args
   if !s:debug.process.start(testhost) | return | endif
   let s:run.running = 1
+  call OmniSharp#testrunner#StateRunning(a:bufnr, a:testname)
+  let s:debug.bufnr = a:bufnr
   let s:omnisharp_pre_debug_cwd = getcwd()
   call vimspector#LaunchWithConfigurations({
   \ 'attach': {
@@ -77,6 +79,7 @@ function! s:debug.complete(response) abort
   if !a:response.Success
     call s:utils.log.warn(['Error debugging unit test', a:response.Message])
   endif
+  call OmniSharp#testrunner#StateSkipped(s:debug.bufnr)
 endfunction
 
 function! s:debug.process.start(command) abort
