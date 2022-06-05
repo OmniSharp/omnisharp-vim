@@ -123,6 +123,7 @@ function! s:SpinnerSpin(test, lnum, timer) abort
   call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
   call setbufline(s:testrunner_bufnr, a:lnum, line)
   call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
+  call setbufvar(s:testrunner_bufnr, '&modified', 0)
 endfunction
 
 function! s:SpinnerStart(test, lnum) abort
