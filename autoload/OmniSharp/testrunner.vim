@@ -77,7 +77,11 @@ function! s:Paint() abort
       call add(lines, '  ' . fnamemodify(testfile, ':.'))
       for name in keys(job.tests[testfile])
         let test = job.tests[testfile][name]
-        call add(lines, printf('%s    %s', s:state2char[test.state], name))
+        let state =  s:state2char[test.state]
+        call add(lines, printf('%s    %s', state, name))
+        if state ==# '-' && !has_key(test, 'spintimer')
+          call s:SpinnerStart(test, len(lines))
+        endif
       endfor
     endfor
     call add(lines, '')
@@ -90,6 +94,42 @@ function! s:Paint() abort
   call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
   call setbufvar(s:testrunner_bufnr, '&modified', 0)
   if bufnr() == s:testrunner_bufnr |call winrestview(winview) | endif
+endfunction
+
+function! s:SpinnerSpin(test, lnum, timer) abort
+  if s:state2char[a:test.state] !=# '-'
+    call timer_stop(a:timer)
+    return
+  endif
+  let lines = getbufline(s:testrunner_bufnr, a:lnum)
+  if len(lines) == 0
+    call timer_stop(a:timer)
+    return
+  endif
+  let line = lines[0]
+  let steps = get(g:, 'OmniSharp_testrunner_spinnersteps', [
+  \ '<*---->', '<-*--->', '<--*-->', '<---*->',
+  \ '<----*>', '<---*->', '<--*-->', '<-*--->'])
+  if !has_key(a:test.spinner, 'index')
+    let line .= '  -- ' . steps[0]
+    let a:test.spinner.index = 0
+  else
+    let a:test.spinner.index += 1
+    if a:test.spinner.index >= len(steps)
+      let a:test.spinner.index = 0
+    endif
+    let line = substitute(line, '  -- \zs.*$', steps[a:test.spinner.index], '')
+  endif
+  call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
+  call setbufline(s:testrunner_bufnr, a:lnum, line)
+  call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
+endfunction
+
+function! s:SpinnerStart(test, lnum) abort
+  let a:test.spinner = {}
+  let a:test.spinner.timer = timer_start(300,
+  \ funcref('s:SpinnerSpin', [a:test, a:lnum]),
+  \ {'repeat': -1})
 endfunction
 
 function! OmniSharp#testrunner#SetTests(bufferTests) abort
