@@ -1,8 +1,6 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-
-" Function dict for debug-test functions
 let s:debug = {}
 let s:debug.process = {}
 let s:run = {}
@@ -142,7 +140,7 @@ function! s:run.single.complete(summary) abort
     " call OmniSharp#testrunner#StateSkipped(bufnr)
   endif
   let location = a:summary.locations[0]
-  call s:run.updatestate(location)
+  call OmniSharp#testrunner#StateComplete(location)
   if a:summary.pass
     if get(location, 'type', '') ==# 'W'
       call s:utils.log.warn(location.name . ': skipped')
@@ -245,7 +243,7 @@ function! s:run.multiple.complete(summary) abort
     endif
   endfor
   for location in locations
-    call s:run.updatestate(location)
+    call OmniSharp#testrunner#StateComplete(location)
   endfor
   if pass
     let title = len(locations) . ' tests passed'
@@ -295,9 +293,11 @@ function! s:run.process(Callback, bufnr, tests, response) abort
     let locations = [location]
     " Write any standard output to message-history
     if len(get(result, 'StandardOutput', []))
+      let location.output = []
       echomsg 'Standard output from test ' . location.name . ':'
       for output in result.StandardOutput
         for line in split(trim(output), '\r\?\n', 1)
+          call add(location.output, line)
           echomsg '  ' . line
         endfor
       endfor
@@ -352,16 +352,6 @@ function! s:run.process(Callback, bufnr, tests, response) abort
     endfor
   endfor
   call a:Callback(summary)
-endfunction
-
-function! s:run.updatestate(location) abort
-  if get(a:location, 'type', '') ==# 'E'
-    call OmniSharp#testrunner#StateFailed(a:location.bufnr, a:location.fullname)
-  elseif get(a:location, 'type', '') ==# 'W'
-    call OmniSharp#testrunner#StateSkipped(a:location.bufnr, a:location.fullname)
-  else
-    call OmniSharp#testrunner#StatePassed(a:location.bufnr, a:location.fullname)
-  endif
 endfunction
 
 
