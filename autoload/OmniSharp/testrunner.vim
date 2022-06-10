@@ -1,13 +1,6 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:state2char = {
-\ 'Not run': '|',
-\ 'Running': '-',
-\ 'Passed': '*',
-\ 'Failed': '!'
-\}
-
 function! OmniSharp#testrunner#Open() abort
   if !OmniSharp#actions#test#Validate() | return | endif
   call s:Open()
@@ -37,9 +30,6 @@ function s:Open() abort
     botright new
   endif
   let s:testrunner_bufnr = bufnr()
-  silent setlocal noswapfile signcolumn=no conceallevel=3 concealcursor=nv
-  setlocal comments=:# commentstring=#\ %s
-  set bufhidden=hide
   let &filetype = ft
   execute 'file' title
   call s:Paint()
@@ -70,18 +60,28 @@ function! s:Paint() abort
   call add(lines, '')
 
   for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-    call add(lines, fnamemodify(sln_or_dir, ':t'))
     let job = OmniSharp#proc#GetJob(sln_or_dir)
     if !has_key(job, 'tests') | continue | endif
-    for testfile in keys(job.tests)
-      call add(lines, '  ' . fnamemodify(testfile, ':.'))
-      for name in keys(job.tests[testfile])
-        let test = job.tests[testfile][name]
-        let state =  s:state2char[test.state]
-        call add(lines, printf('%s    %s', state, name))
-        if state ==# '-' && !has_key(test, 'spintimer')
-          call s:SpinnerStart(test, len(lines))
-        endif
+    for testproject in sort(keys(job.tests))
+      call add(lines, testproject)
+      for testfile in sort(keys(job.tests[testproject]))
+        call add(lines, '  ' . fnamemodify(testfile, ':.'))
+        let tests = job.tests[testproject][testfile]
+        for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
+          let test = tests[name]
+          let state =  s:utils.state2char[test.state]
+          call add(lines, printf('%s       %s', state, name))
+          if state ==# '-' && !has_key(test, 'spintimer')
+            call s:spinner.start(test, len(lines))
+          endif
+          let output = get(test, 'output', [])
+          if len(output)
+            for outputline in output
+              call add(lines, '//          ' . outputline)
+            endfor
+          endif
+        endfor
+        call add(lines, '__')
       endfor
     endfor
     call add(lines, '')
@@ -93,54 +93,24 @@ function! s:Paint() abort
   call setbufline(s:testrunner_bufnr, 1, lines)
   call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
   call setbufvar(s:testrunner_bufnr, '&modified', 0)
-  if bufnr() == s:testrunner_bufnr |call winrestview(winview) | endif
+  if bufnr() == s:testrunner_bufnr
+    call winrestview(winview)
+    syn sync fromstart
+  endif
 endfunction
 
-function! s:SpinnerSpin(test, lnum, timer) abort
-  if s:state2char[a:test.state] !=# '-'
-    call timer_stop(a:timer)
-    return
-  endif
-  let lines = getbufline(s:testrunner_bufnr, a:lnum)
-  if len(lines) == 0
-    call timer_stop(a:timer)
-    return
-  endif
-  let line = lines[0]
-  let steps = get(g:, 'OmniSharp_testrunner_spinnersteps', [
-  \ '<*---->', '<-*--->', '<--*-->', '<---*->',
-  \ '<----*>', '<---*->', '<--*-->', '<-*--->'])
-  if !has_key(a:test.spinner, 'index')
-    let line .= '  -- ' . steps[0]
-    let a:test.spinner.index = 0
-  else
-    let a:test.spinner.index += 1
-    if a:test.spinner.index >= len(steps)
-      let a:test.spinner.index = 0
-    endif
-    let line = substitute(line, '  -- \zs.*$', steps[a:test.spinner.index], '')
-  endif
-  call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
-  call setbufline(s:testrunner_bufnr, a:lnum, line)
-  call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
-  call setbufvar(s:testrunner_bufnr, '&modified', 0)
-endfunction
-
-function! s:SpinnerStart(test, lnum) abort
-  let a:test.spinner = {}
-  let a:test.spinner.timer = timer_start(300,
-  \ funcref('s:SpinnerSpin', [a:test, a:lnum]),
-  \ {'repeat': -1})
-endfunction
 
 function! OmniSharp#testrunner#SetTests(bufferTests) abort
   let winid = win_getid()
   for buffer in a:bufferTests
     let job = OmniSharp#GetHost(buffer.bufnr).job
     let job.tests = get(job, 'tests', {})
+    let projectname = s:utils.getProjectName(buffer.bufnr)
+    let testproject = get(job.tests, projectname, {})
+    let job.tests[projectname] = testproject
     let filename = fnamemodify(bufname(buffer.bufnr), ':p')
-    let existing = get(job.tests, filename, {})
-    let job.tests[filename] = existing
+    let existing = get(testproject, filename, {})
+    let testproject[filename] = existing
     for test in buffer.tests
       let extest = get(existing, test.name, { 'state': 'Not run' })
       let existing[test.name] = extest
@@ -152,13 +122,14 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
   call win_gotoid(winid)
 endfunction
 
-function! s:UpdateState(bufnr, testnames, state) abort
-  let job = OmniSharp#GetHost(a:bufnr).job
+function! s:UpdateState(bufnr, testnames, state, output) abort
+  let projectname = s:utils.getProjectName(a:bufnr)
   let filename = fnamemodify(bufname(a:bufnr), ':p')
-  let tests = get(job.tests, filename, {})
+  let tests = OmniSharp#GetHost(a:bufnr).job.tests[projectname][filename]
   for testname in a:testnames
     if has_key(tests, testname)
       let tests[testname].state = a:state
+      let tests[testname].output = a:output
     endif
   endfor
   call s:Repaint()
@@ -167,23 +138,89 @@ endfunction
 function! OmniSharp#testrunner#StateRunning(bufnr, testnames) abort
   let testnames = type(a:testnames) == type([]) ? a:testnames : [a:testnames]
   let s:lasttestnames = testnames
-  call s:UpdateState(a:bufnr, testnames, 'Running')
+  call s:UpdateState(a:bufnr, testnames, 'Running', [])
 endfunction
 
-function! OmniSharp#testrunner#StateSkipped(bufnr, ...) abort
-  let testnames = a:0 ? (type(a:1) == type([]) ? a:1 : [a:1]) : s:lasttestnames
-  call s:UpdateState(a:bufnr, testnames, 'Not run')
+function! OmniSharp#testrunner#StateComplete(location) abort
+  if get(a:location, 'type', '') ==# 'E'
+    let state = 'Failed'
+  elseif get(a:location, 'type', '') ==# 'W'
+    let state = 'Not run'
+  else
+    let state = 'Passed'
+  endif
+  let output = get(a:location, 'output', [])
+  call s:UpdateState(a:.location.bufnr, [a:location.fullname], state, output)
 endfunction
 
-function! OmniSharp#testrunner#StatePassed(bufnr, ...) abort
-  let testnames = a:0 ? (type(a:1) == type([]) ? a:1 : [a:1]) : s:lasttestnames
-  call s:UpdateState(a:bufnr, testnames, 'Passed')
+function! OmniSharp#testrunner#StateSkipped(bufnr) abort
+  call s:UpdateState(a:bufnr, s:lasttestnames, 'Not run', [])
 endfunction
 
-function! OmniSharp#testrunner#StateFailed(bufnr, ...) abort
-  let testnames = a:0 ? (type(a:1) == type([]) ? a:1 : [a:1]) : s:lasttestnames
-  call s:UpdateState(a:bufnr, testnames, 'Failed')
+
+let s:spinner = {}
+let s:spinner.steps = get(g:, 'OmniSharp_testrunner_spinnersteps', [
+\ '<*---->',
+\ '<-*--->',
+\ '<--*-->',
+\ '<---*->',
+\ '<----*>',
+\ '<---*->',
+\ '<--*-->',
+\ '<-*--->'])
+
+function! s:spinner.spin(test, lnum, timer) abort
+  if s:utils.state2char[a:test.state] !=# '-'
+    call timer_stop(a:timer)
+    return
+  endif
+  let lines = getbufline(s:testrunner_bufnr, a:lnum)
+  if len(lines) == 0
+    call timer_stop(a:timer)
+    return
+  endif
+  let line = lines[0]
+  if !has_key(a:test.spinner, 'index')
+    let line .= '  -- ' . s:spinner.steps[0]
+    let a:test.spinner.index = 0
+  else
+    let a:test.spinner.index += 1
+    if a:test.spinner.index >= len(s:spinner.steps)
+      let a:test.spinner.index = 0
+    endif
+    let step = s:spinner.steps[a:test.spinner.index]
+    let line = substitute(line, '  -- \zs.*$', step, '')
+  endif
+  call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
+  call setbufline(s:testrunner_bufnr, a:lnum, line)
+  call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
+  call setbufvar(s:testrunner_bufnr, '&modified', 0)
 endfunction
+
+function! s:spinner.start(test, lnum) abort
+  if !get(g:, 'OmniSharp_testrunner_spinner', 1) | return | endif
+  let a:test.spinner = {}
+  let a:test.spinner.timer = timer_start(300,
+  \ funcref('s:spinner.spin', [a:test, a:lnum], self),
+  \ {'repeat': -1})
+endfunction
+
+
+let s:utils = {}
+
+let s:utils.state2char = {
+\ 'Not run': '|',
+\ 'Running': '-',
+\ 'Passed': '*',
+\ 'Failed': '!'
+\}
+
+function! s:utils.getProjectName(bufnr) abort
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let msbuildproject = get(project, 'MsBuildProject', {})
+  return get(msbuildproject, 'AssemblyName', '_Default')
+endfunction
+
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
