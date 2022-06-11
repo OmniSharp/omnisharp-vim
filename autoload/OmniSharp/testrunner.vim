@@ -1,3 +1,4 @@
+scriptencoding utf-8
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
@@ -178,7 +179,7 @@ endfunction
 
 
 let s:spinner = {}
-let s:spinner.steps = get(g:, 'OmniSharp_testrunner_spinnersteps', [
+let s:spinner.steps_ascii = [
 \ '<*---->',
 \ '<-*--->',
 \ '<--*-->',
@@ -186,7 +187,14 @@ let s:spinner.steps = get(g:, 'OmniSharp_testrunner_spinnersteps', [
 \ '<----*>',
 \ '<---*->',
 \ '<--*-->',
-\ '<-*--->'])
+\ '<-*--->']
+let s:spinner.steps_utf8 = [
+\ '∙∙∙',
+\ '●∙∙',
+\ '∙●∙',
+\ '∙∙●',
+\ '∙∙∙'
+\]
 
 function! s:spinner.spin(test, lnum, timer) abort
   if s:utils.state2char[a:test.state] !=# '-'
@@ -199,15 +207,18 @@ function! s:spinner.spin(test, lnum, timer) abort
     return
   endif
   let line = lines[0]
+  let steps = get(g:, 'OmniSharp_testrunner_spinnersteps',
+  \ get(g:, 'OmniSharp_testrunner_spinner_ascii')
+  \   ? self.steps_ascii : self.steps_utf8)
   if !has_key(a:test.spinner, 'index')
-    let line .= '  -- ' . s:spinner.steps[0]
+    let line .= '  -- ' . steps[0]
     let a:test.spinner.index = 0
   else
     let a:test.spinner.index += 1
-    if a:test.spinner.index >= len(s:spinner.steps)
+    if a:test.spinner.index >= len(steps)
       let a:test.spinner.index = 0
     endif
-    let step = s:spinner.steps[a:test.spinner.index]
+    let step = steps[a:test.spinner.index]
     let line = substitute(line, '  -- \zs.*$', step, '')
   endif
   call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
