@@ -22,6 +22,8 @@ syn match ostRunningSuffix "  -- .*" contained contains=ostRunningSpinner,ostRun
 syn match ostRunningSuffixDivider "  \zs--" conceal contained
 syn match ostRunningSpinner "  -- \zs.*" contained
 
+syn region ostFailure start="^>" end="^[^>]"me=s-1 contains=ostFailurePrefix fold
+syn match ostFailurePrefix "^>" conceal contained
 syn region ostOutput start="^//" end="^[^/]"me=s-1 contains=ostOutputPrefix fold
 syn match ostOutputPrefix "^//" conceal contained
 

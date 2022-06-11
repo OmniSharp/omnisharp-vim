@@ -69,15 +69,27 @@ function! s:Paint() abort
         let tests = job.tests[testproject][testfile]
         for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
           let test = tests[name]
-          let state =  s:utils.state2char[test.state]
+          let state = s:utils.state2char[test.state]
           call add(lines, printf('%s       %s', state, name))
           if state ==# '-' && !has_key(test, 'spintimer')
             call s:spinner.start(test, len(lines))
           endif
+          let message = get(test, 'message', [])
+          if len(message)
+            for messageline in message
+              call add(lines, '>           ' . trim(messageline, ' ', 2))
+            endfor
+          endif
+          let stacktrace = get(test, 'stacktrace', [])
+          if len(stacktrace)
+            for stacktraceline in stacktrace
+              call add(lines, '>           ' . trim(stacktraceline, ' ', 2))
+            endfor
+          endif
           let output = get(test, 'output', [])
           if len(output)
             for outputline in output
-              call add(lines, '//          ' . outputline)
+              call add(lines, '//          ' . trim(outputline, ' ', 2))
             endfor
           endif
         endfor
@@ -122,14 +134,19 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
   call win_gotoid(winid)
 endfunction
 
-function! s:UpdateState(bufnr, testnames, state, output) abort
+function! s:UpdateState(bufnr, testnames, state, ...) abort
+  let message = a:0 ? a:1 : []
+  let stacktrace = a:0 > 1 ? a:2 : []
+  let output = a:0 > 2 ? a:3 : []
   let projectname = s:utils.getProjectName(a:bufnr)
   let filename = fnamemodify(bufname(a:bufnr), ':p')
   let tests = OmniSharp#GetHost(a:bufnr).job.tests[projectname][filename]
   for testname in a:testnames
     if has_key(tests, testname)
       let tests[testname].state = a:state
-      let tests[testname].output = a:output
+      let tests[testname].message = message
+      let tests[testname].stacktrace = stacktrace
+      let tests[testname].output = output
     endif
   endfor
   call s:Repaint()
@@ -138,7 +155,7 @@ endfunction
 function! OmniSharp#testrunner#StateRunning(bufnr, testnames) abort
   let testnames = type(a:testnames) == type([]) ? a:testnames : [a:testnames]
   let s:lasttestnames = testnames
-  call s:UpdateState(a:bufnr, testnames, 'Running', [])
+  call s:UpdateState(a:bufnr, testnames, 'Running')
 endfunction
 
 function! OmniSharp#testrunner#StateComplete(location) abort
@@ -149,12 +166,14 @@ function! OmniSharp#testrunner#StateComplete(location) abort
   else
     let state = 'Passed'
   endif
-  let output = get(a:location, 'output', [])
-  call s:UpdateState(a:.location.bufnr, [a:location.fullname], state, output)
+  call s:UpdateState(a:.location.bufnr, [a:location.fullname], state,
+  \ get(a:location, 'message', []),
+  \ get(a:location, 'stacktrace', []),
+  \ get(a:location, 'output', []))
 endfunction
 
 function! OmniSharp#testrunner#StateSkipped(bufnr) abort
-  call s:UpdateState(a:bufnr, s:lasttestnames, 'Not run', [])
+  call s:UpdateState(a:bufnr, s:lasttestnames, 'Not run')
 endfunction
 
 

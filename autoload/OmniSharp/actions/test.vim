@@ -305,6 +305,8 @@ function! s:run.process(Callback, bufnr, tests, response) abort
     if result.Outcome =~? 'failed'
       let location.type = 'E'
       let location.text = location.name . ': ' . result.ErrorMessage
+      let location.message = split(result.ErrorMessage, '\r\?\n')
+      let location.stacktrace = split(result.ErrorStackTrace, '\r\?\n')
       let st = result.ErrorStackTrace
       let parsed = matchlist(st, '.* in \(.\+\):line \(\d\+\)')
       if len(parsed) > 0
