@@ -66,25 +66,34 @@ function! s:Paint() abort
     for testproject in sort(keys(job.tests))
       call add(lines, testproject)
       for testfile in sort(keys(job.tests[testproject]))
-        call add(lines, '  ' . fnamemodify(testfile, ':.'))
+        call add(lines, '    ' . fnamemodify(testfile, ':.'))
         let tests = job.tests[testproject][testfile]
         for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
           let test = tests[name]
           let state = s:utils.state2char[test.state]
-          call add(lines, printf('%s       %s', state, name))
+          call add(lines, printf('%s        %s', state, name))
           if state ==# '-' && !has_key(test, 'spintimer')
             call s:spinner.start(test, len(lines))
           endif
           let message = get(test, 'message', [])
           if len(message)
             for messageline in message
-              call add(lines, '>           ' . trim(messageline, ' ', 2))
+              call add(lines, '>            ' . trim(messageline, ' ', 2))
             endfor
           endif
           let stacktrace = get(test, 'stacktrace', [])
           if len(stacktrace)
-            for stacktraceline in stacktrace
-              call add(lines, '>           ' . trim(stacktraceline, ' ', 2))
+            for st in stacktrace
+              let line = trim(st.text)
+              if has_key(st, 'filename')
+                let line = '__ ' . line . ' __'
+              else
+                let line = '_._ ' . line . ' _._'
+              endif
+              if has_key(st, 'lnum')
+                let line .= ' line ' . st.lnum
+              endif
+              call add(lines, '>              ' . line)
             endfor
           endif
           let output = get(test, 'output', [])
@@ -137,13 +146,32 @@ endfunction
 
 function! s:UpdateState(bufnr, testnames, state, ...) abort
   let message = a:0 ? a:1 : []
-  let stacktrace = a:0 > 1 ? a:2 : []
+  let stacktraceraw = a:0 > 1 ? a:2 : []
   let output = a:0 > 2 ? a:3 : []
   let projectname = s:utils.getProjectName(a:bufnr)
   let filename = fnamemodify(bufname(a:bufnr), ':p')
   let tests = OmniSharp#GetHost(a:bufnr).job.tests[projectname][filename]
   for testname in a:testnames
     if has_key(tests, testname)
+      let stacktrace = []
+      for st in stacktraceraw
+        let parsed = matchlist(st, 'at \(.\+\) in \([^:]\+\)\(:line \(\d\+\)\)\?')
+        if len(parsed)
+          call add(stacktrace, {
+          \ 'text': parsed[1],
+          \ 'filename': parsed[2],
+          \ 'lnum': str2nr(parsed[4])
+          \})
+        else
+          let parsed = matchlist(st, 'at \(.\+\)')
+          if len(parsed)
+            call add(stacktrace, {'text': parsed[1]})
+          else
+            call add(stacktrace, {'text': st})
+          endif
+        endif
+      endfor
+
       let tests[testname].state = a:state
       let tests[testname].message = message
       let tests[testname].stacktrace = stacktrace
