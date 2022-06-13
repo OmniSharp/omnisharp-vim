@@ -6,8 +6,8 @@ let s:save_cpo = &cpoptions
 set cpoptions&vim
 
 syn region ostBanner start="\%1l" end="\%8l$" contains=ostBannerDelim,ostBannerTitle,ostBannerHelp transparent keepend
-syn match ostBannerHelp "^   .\+$" contained contains=ostBannerMap,ostBannerLink
-syn match ostBannerMap "^    \S\+" contained
+syn match ostBannerHelp "^    .*$" contained contains=ostBannerMap,ostBannerLink
+syn match ostBannerMap  "^    \S\+" contained
 syn match ostBannerLink ":help [[:alnum:]-]\+" contained
 syn match ostBannerTitle "\%2l^.\+$" contained
 syn match ostBannerDelim "\%1l^.*$" contained
@@ -46,7 +46,7 @@ hi def link ostBannerDelim PreProc
 hi def link ostBannerTitle Normal
 hi def link ostBannerHelp Comment
 hi def link ostBannerMap PreProc
-hi def link ostBannerLink helpHyperTextJump
+hi def link ostBannerLink Identifier
 hi def link ostProjectName Identifier
 hi def link ostFileName TypeDef
 hi def link ostStateNotRun Comment
