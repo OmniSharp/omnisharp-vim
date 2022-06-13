@@ -213,6 +213,12 @@ function! OmniSharp#testrunner#StateSkipped(bufnr) abort
 endfunction
 
 
+function! OmniSharp#testrunner#toggleBanner() abort
+  let g:OmniSharp_testrunner_banner = 1 - get(g:, 'OmniSharp_testrunner_banner', 1)
+  call s:Paint()
+endfunction
+
+
 let s:spinner = {}
 let s:spinner.steps_ascii = [
 \ '<*---->',
@@ -237,7 +243,8 @@ function! s:spinner.spin(test, lnum, timer) abort
     call timer_stop(a:timer)
     return
   endif
-  let lines = getbufline(s:testrunner_bufnr, a:lnum)
+  let lnum = a:lnum + (get(g:, 'OmniSharp_testrunner_banner', 1) ? 8 : 0)
+  let lines = getbufline(s:testrunner_bufnr, lnum)
   if len(lines) == 0
     call timer_stop(a:timer)
     return
@@ -258,16 +265,17 @@ function! s:spinner.spin(test, lnum, timer) abort
     let line = substitute(line, '  -- \zs.*$', step, '')
   endif
   call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
-  call setbufline(s:testrunner_bufnr, a:lnum, line)
+  call setbufline(s:testrunner_bufnr, lnum, line)
   call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
   call setbufvar(s:testrunner_bufnr, '&modified', 0)
 endfunction
 
 function! s:spinner.start(test, lnum) abort
   if !get(g:, 'OmniSharp_testrunner_spinner', 1) | return | endif
+  let lnum = a:lnum - (get(g:, 'OmniSharp_testrunner_banner', 1) ? 8 : 0)
   let a:test.spinner = {}
   let a:test.spinner.timer = timer_start(300,
-  \ funcref('s:spinner.spin', [a:test, a:lnum], self),
+  \ funcref('s:spinner.spin', [a:test, lnum], self),
   \ {'repeat': -1})
 endfunction
 
