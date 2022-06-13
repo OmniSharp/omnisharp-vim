@@ -55,10 +55,17 @@ endfunction
 
 function! s:Paint() abort
   let lines = []
-  call add(lines, repeat('=', 80))
-  call add(lines, '   OmniSharp Test Runner')
-  call add(lines, repeat('=', 80))
-  call add(lines, '')
+  if get(g:, 'OmniSharp_testrunner_banner', 1)
+    let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
+    call add(lines, repeat(delimiter, 80))
+    call add(lines, '    OmniSharp Test Runner')
+    call add(lines, '  ' . repeat(delimiter, 76))
+    call add(lines, '    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
+    call add(lines, '    <F5> Run test or tests in file under cursor')
+    call add(lines, '    <F6> Debug test under cursor')
+    call add(lines, '    <CR> Navigate to test or stack trace')
+    call add(lines, repeat(delimiter, 80))
+  endif
 
   for sln_or_dir in OmniSharp#proc#ListRunningJobs()
     let job = OmniSharp#proc#GetJob(sln_or_dir)
@@ -215,7 +222,8 @@ let s:spinner.steps_ascii = [
 \ '<----*>',
 \ '<---*->',
 \ '<--*-->',
-\ '<-*--->']
+\ '<-*--->'
+\]
 let s:spinner.steps_utf8 = [
 \ '∙∙∙',
 \ '●∙∙',

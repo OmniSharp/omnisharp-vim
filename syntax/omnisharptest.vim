@@ -5,8 +5,14 @@ endif
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-syn region ostIntro start="\%1l" end="^$" contains=ostIntroDelim transparent
-syn match ostIntroDelim "^=\+$" contained
+syn region ostBanner start="\%1l" end="\%8l$" contains=ostBannerDelim,ostBannerTitle,ostBannerHelp transparent keepend
+syn match ostBannerHelp "^   .\+$" contained contains=ostBannerMap,ostBannerLink
+syn match ostBannerMap "^    \S\+" contained
+syn match ostBannerLink ":help [[:alnum:]-]\+" contained
+syn match ostBannerTitle "\%2l^.\+$" contained
+syn match ostBannerDelim "\%1l^.*$" contained
+syn match ostBannerDelim "\%3l^.*$" contained
+syn match ostBannerDelim "\%8l^.*$" contained
 
 syn region ostProject matchgroup=ostProjectName start="^\a.*" end="^$"me=s-1 contains=TOP transparent fold
 syn region ostFile start="^    \S.*" end="^__$"me=s-1 contains=TOP transparent fold
@@ -36,7 +42,11 @@ syn match ostStackFileNamespace "\%(\w\+\.\)*\ze\w\+\.\w\+(" conceal contained
 syn region ostOutput start="^//" end="^[^/]"me=s-1 contains=ostOutputPrefix fold
 syn match ostOutputPrefix "^//" conceal contained
 
-hi def link ostIntroDelim PreProc
+hi def link ostBannerDelim PreProc
+hi def link ostBannerTitle Normal
+hi def link ostBannerHelp Comment
+hi def link ostBannerMap PreProc
+hi def link ostBannerLink helpHyperTextJump
 hi def link ostProjectName Identifier
 hi def link ostFileName TypeDef
 hi def link ostStateNotRun Comment
