@@ -14,10 +14,12 @@ syn match ostBannerDelim "\%1l^.*$" contained
 syn match ostBannerDelim "\%3l^.*$" contained
 syn match ostBannerDelim "\%8l^.*$" contained
 
-syn region ostProject matchgroup=ostProjectName start="^\a.*" end="^$"me=s-1 contains=TOP transparent fold
+syn region ostProject start="^\a.*" end="^$"me=s-1 contains=TOP transparent fold
+syn match ostProjectName "^\a.*" contains=ostProjectError
+syn match ostProjectError " - ERROR$"hs=s+2 contained
 syn region ostFile start="^    \S.*" end="^__$"me=s-1 contains=TOP transparent fold
 syn match ostFileName "^    \S.*" contains=ostFilePath,ostFileExt
-syn match ostFilePath "^    \zs\%(\%(\w\+\.\)*\w\+\/\)*\ze\w\+\." conceal contained
+syn match ostFilePath "^    \zs\%(\%(\f\+\.\)*\f\+\/\)*\ze\f\+\." conceal contained
 syn match ostFileExt "\%(\.\w\+\)\+" conceal contained
 syn match ostFileDivider "^__$" conceal
 
@@ -32,6 +34,8 @@ syn match ostRunningSuffix "  -- .*" contained contains=ostRunningSpinner,ostRun
 syn match ostRunningSuffixDivider "  \zs--" conceal contained
 syn match ostRunningSpinner "  -- \zs.*" contained
 
+syn region ostError start="^<" end="^[^<]"me=s-1 contains=ostErrorPrefix,ostStackFile,ostStackFileNoLoc
+syn match ostErrorPrefix "^<" conceal contained
 syn region ostFailure start="^>" end="^[^>]"me=s-1 contains=ostFailurePrefix,ostStackFile,ostStackFileNoLoc fold
 syn match ostFailurePrefix "^>" conceal contained
 syn region ostStackFile start=" __ "hs=e+1 end=" __" contains=ostStackFileDelimiter,ostStackFileNamespace contained keepend
@@ -48,6 +52,7 @@ hi def link ostBannerHelp Comment
 hi def link ostBannerMap PreProc
 hi def link ostBannerLink Identifier
 hi def link ostProjectName Identifier
+hi def link ostProjectError WarningMsg
 hi def link ostFileName TypeDef
 hi def link ostStateNotRun Comment
 hi def link ostStateRunning Identifier

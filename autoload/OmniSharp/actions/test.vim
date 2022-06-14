@@ -76,8 +76,11 @@ endfunction
 function! s:debug.complete(response) abort
   if !a:response.Success
     call s:utils.log.warn(['Error debugging unit test', a:response.Message])
+    call OmniSharp#testrunner#StateError(s:debug.bufnr,
+    \ split(trim(a:response.Message), '\r\?\n', 1))
+  else
+    call OmniSharp#testrunner#StateSkipped(s:debug.bufnr)
   endif
-  call OmniSharp#testrunner#StateSkipped(s:debug.bufnr)
 endfunction
 
 function! s:debug.process.start(command) abort
@@ -273,8 +276,14 @@ endfunction
 " Response handler used when running a single test, or multiple tests in files
 function! s:run.process(Callback, bufnr, tests, response) abort
   let s:run.running = 0
-  if !a:response.Success | return | endif
+  if !a:response.Success
+    call OmniSharp#testrunner#StateError(a:bufnr,
+    \ split(trim(eval(a:response.Message)), '\r\?\n', 1))
+    return s:utils.log.warn('An error has occurred. This may indicate a failed build')
+  endif
   if type(a:response.Body.Results) != type([])
+    call OmniSharp#testrunner#StateError(a:bufnr,
+    \ split(trim(a:response.Body.Failure), '\r\?\n', 1))
     return s:utils.log.warn('Error: "' . a:response.Body.Failure .
     \ '"   - this may indicate a failed build')
   endif
