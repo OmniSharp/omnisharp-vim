@@ -2,6 +2,19 @@ scriptencoding utf-8
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
+let s:current = get(s:, 'current', {})
+let s:runner = get(s:, 'runner', {})
+
+function! OmniSharp#testrunner#Init(buffers) abort
+  let s:current.log = []
+  let s:current.singlebuffer = len(a:buffers) == 1 ? a:buffers[0] : -1
+  let s:current.testnames = {}
+endfunction
+
+function! OmniSharp#testrunner#Log(message) abort
+  call extend(s:current.log, a:message)
+endfunction
+
 function! OmniSharp#testrunner#Open() abort
   if !OmniSharp#actions#test#Validate() | return | endif
   call s:Open()
@@ -30,18 +43,18 @@ function s:Open() abort
   if &filetype !=# ft
     botright new
   endif
-  let s:testrunner_bufnr = bufnr()
+  let s:runner.bufnr = bufnr()
   let &filetype = ft
   execute 'file' title
   call s:Paint()
 endfunction
 
 function! s:Repaint() abort
-  if !exists('s:testrunner_bufnr') | return | endif
-  if getbufvar(s:testrunner_bufnr, '&ft') !=# 'omnisharptest' | return | endif
+  if !has_key(s:runner, 'bufnr') | return | endif
+  if getbufvar(s:runner.bufnr, '&ft') !=# 'omnisharptest' | return | endif
   " If the buffer is listed in a window in the current tab, then focus it
   for winnr in range(1, winnr('$'))
-    if winbufnr(winnr) == s:testrunner_bufnr
+    if winbufnr(winnr) == s:runner.bufnr
       let l:winid = win_getid()
       call win_gotoid(win_getid(winnr))
       break
@@ -76,6 +89,16 @@ function! s:Paint() abort
       for errorline in errors
         call add(lines, '<  ' . trim(errorline, ' ', 2))
       endfor
+      " The diagnostic logs (build output) are only displayed when a single file
+      " is tested, otherwise multiple build outputs are intermingled
+      if OmniSharp#GetHost(s:current.singlebuffer).sln_or_dir ==# sln_or_dir
+        if len(errors) > 0 && len(s:current.log) > 1
+          call add(lines, '<  ' . repeat(delimiter, 10))
+        endif
+        for log in s:current.log
+          call add(lines, '<  ' . trim(log, ' ', 2))
+        endfor
+      endif
       for testfile in sort(keys(job.tests[testproject]))
         call add(lines, '    ' . fnamemodify(testfile, ':.'))
         let tests = job.tests[testproject][testfile]
@@ -111,13 +134,13 @@ function! s:Paint() abort
     call add(lines, '')
   endfor
 
-  if bufnr() == s:testrunner_bufnr | let winview = winsaveview() | endif
-  call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
-  call deletebufline(s:testrunner_bufnr, 1, '$')
-  call setbufline(s:testrunner_bufnr, 1, lines)
-  call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
-  call setbufvar(s:testrunner_bufnr, '&modified', 0)
-  if bufnr() == s:testrunner_bufnr
+  if bufnr() == s:runner.bufnr | let winview = winsaveview() | endif
+  call setbufvar(s:runner.bufnr, '&modifiable', 1)
+  call deletebufline(s:runner.bufnr, 1, '$')
+  call setbufline(s:runner.bufnr, 1, lines)
+  call setbufvar(s:runner.bufnr, '&modifiable', 0)
+  call setbufvar(s:runner.bufnr, '&modified', 0)
+  if bufnr() == s:runner.bufnr
     call winrestview(winview)
     syn sync fromstart
   endif
@@ -152,10 +175,9 @@ function! s:UpdateState(bufnr, state, ...) abort
   let projectname = s:utils.getProjectName(a:bufnr)
   let job.testerrors = get(job, 'testerrors', {})
   let job.testerrors[projectname] = get(opts, 'errors', [])
-  " TODO: parse errors like the stacktrace
   let filename = fnamemodify(bufname(a:bufnr), ':p')
   let tests = job.tests[projectname][filename]
-  for testname in get(opts, 'testnames', s:lasttestnames)
+  for testname in get(opts, 'testnames', s:current.testnames[a:bufnr])
     if has_key(tests, testname)
       let stacktrace = []
       for st in get(opts, 'stacktrace', [])
@@ -207,7 +229,7 @@ endfunction
 
 function! OmniSharp#testrunner#StateRunning(bufnr, testnames) abort
   let testnames = type(a:testnames) == type([]) ? a:testnames : [a:testnames]
-  let s:lasttestnames = testnames
+  let s:current.testnames[a:bufnr] = testnames
   call s:UpdateState(a:bufnr, 'Running', {'testnames': testnames})
 endfunction
 
@@ -216,7 +238,7 @@ function! OmniSharp#testrunner#StateSkipped(bufnr) abort
 endfunction
 
 
-function! OmniSharp#testrunner#toggleBanner() abort
+function! OmniSharp#testrunner#ToggleBanner() abort
   let g:OmniSharp_testrunner_banner = 1 - get(g:, 'OmniSharp_testrunner_banner', 1)
   call s:Paint()
 endfunction
@@ -247,7 +269,7 @@ function! s:spinner.spin(test, lnum, timer) abort
     return
   endif
   let lnum = a:lnum + (get(g:, 'OmniSharp_testrunner_banner', 1) ? 8 : 0)
-  let lines = getbufline(s:testrunner_bufnr, lnum)
+  let lines = getbufline(s:runner.bufnr, lnum)
   if len(lines) == 0
     call timer_stop(a:timer)
     return
@@ -267,10 +289,10 @@ function! s:spinner.spin(test, lnum, timer) abort
     let step = steps[a:test.spinner.index]
     let line = substitute(line, '  -- \zs.*$', step, '')
   endif
-  call setbufvar(s:testrunner_bufnr, '&modifiable', 1)
-  call setbufline(s:testrunner_bufnr, lnum, line)
-  call setbufvar(s:testrunner_bufnr, '&modifiable', 0)
-  call setbufvar(s:testrunner_bufnr, '&modified', 0)
+  call setbufvar(s:runner.bufnr, '&modifiable', 1)
+  call setbufline(s:runner.bufnr, lnum, line)
+  call setbufvar(s:runner.bufnr, '&modifiable', 0)
+  call setbufvar(s:runner.bufnr, '&modified', 0)
 endfunction
 
 function! s:spinner.start(test, lnum) abort

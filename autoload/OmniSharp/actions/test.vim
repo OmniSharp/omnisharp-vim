@@ -424,6 +424,7 @@ endfunction
 " code structures. All operations are performed asynchronously, and the
 " a:Callback is called when all buffer code structures have been fetched.
 function! s:utils.initialize(buffers, Callback) abort
+  call OmniSharp#testrunner#Init(a:buffers)
   call s:utils.init.await(a:buffers, 'OmniSharp#actions#project#Get',
   \ funcref('s:utils.init.await', [a:buffers, 'OmniSharp#actions#codestructure#Get',
   \   funcref('s:utils.init.extract', [a:Callback])]))

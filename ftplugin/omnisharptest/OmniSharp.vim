@@ -6,4 +6,4 @@ set foldlevel=2
 set foldmethod=syntax
 set signcolumn=no
 
-nnoremap <silent> <buffer> <F1> :call OmniSharp#testrunner#toggleBanner()<CR>
+nnoremap <silent> <buffer> <F1> :call OmniSharp#testrunner#ToggleBanner()<CR>
