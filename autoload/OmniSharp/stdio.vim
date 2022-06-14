@@ -106,7 +106,8 @@ function! s:HandleServerEvent(job, res) abort
 
     " Diagnostics received while running tests
     if get(a:res, 'Event', '') ==# 'TestMessage'
-      let lines = split(body.Message, '\n')
+      let lines = split(body.Message, '\r\?\n')
+      call OmniSharp#testrunner#Log(lines)
       for line in lines
         if get(body, 'MessageLevel', '') ==# 'error'
           echohl WarningMsg | echomsg line | echohl None
