@@ -68,8 +68,8 @@ endfunction
 
 function! s:Paint() abort
   let lines = []
+  let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
   if get(g:, 'OmniSharp_testrunner_banner', 1)
-    let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
     call add(lines, repeat(delimiter, 80))
     call add(lines, '    OmniSharp Test Runner')
     call add(lines, '  ' . repeat(delimiter, 76))
@@ -89,15 +89,18 @@ function! s:Paint() abort
       for errorline in errors
         call add(lines, '<  ' . trim(errorline, ' ', 2))
       endfor
-      " The diagnostic logs (build output) are only displayed when a single file
-      " is tested, otherwise multiple build outputs are intermingled
-      if OmniSharp#GetHost(s:current.singlebuffer).sln_or_dir ==# sln_or_dir
-        if len(errors) > 0 && len(s:current.log) > 1
-          call add(lines, '<  ' . repeat(delimiter, 10))
+      let loglevel = get(g:, 'OmniSharp_testrunner_loglevel', 'error')
+      if loglevel ==? 'all' || (loglevel ==? 'error' && len(errors))
+        " The diagnostic logs (build output) are only displayed when a single file
+        " is tested, otherwise multiple build outputs are intermingled
+        if OmniSharp#GetHost(s:current.singlebuffer).sln_or_dir ==# sln_or_dir
+          if len(errors) > 0 && len(s:current.log) > 1
+            call add(lines, '<  ' . repeat(delimiter, 10))
+          endif
+          for log in s:current.log
+            call add(lines, '<  ' . trim(log, ' ', 2))
+          endfor
         endif
-        for log in s:current.log
-          call add(lines, '<  ' . trim(log, ' ', 2))
-        endfor
       endif
       for testfile in sort(keys(job.tests[testproject]))
         call add(lines, '    ' . fnamemodify(testfile, ':.'))
