@@ -5,15 +5,101 @@ set cpoptions&vim
 let s:current = get(s:, 'current', {})
 let s:runner = get(s:, 'runner', {})
 
+
+function! OmniSharp#testrunner#Debug() abort
+endfunction
+
+
 function! OmniSharp#testrunner#Init(buffers) abort
   let s:current.log = []
   let s:current.singlebuffer = len(a:buffers) == 1 ? a:buffers[0] : -1
   let s:current.testnames = {}
 endfunction
 
+
 function! OmniSharp#testrunner#Log(message) abort
   call extend(s:current.log, a:message)
 endfunction
+
+
+function! OmniSharp#testrunner#Run() abort
+endfunction
+
+
+function! OmniSharp#testrunner#Navigate() abort
+  if &filetype !=# 'omnisharptest' | return | endif
+  let bufnr = -1
+  let filename = ''
+  let lnum = -1
+  let col = -1
+  let line = getline('.')
+  if line =~# '^\a'
+    " Project selected - do nothing
+  elseif line =~# '^    \f'
+    " File selected
+    let filename = trim(line)
+    let bufnr = bufnr(filename)
+  else
+    " Stack trace with valid location (filename and possible line number)
+    let parsed = matchlist(line, '^> \+__ .* ___ \(.*\) __ \%(line \(\d\+\)\)\?$')
+    if len(parsed)
+      let filename = parsed[1]
+      if parsed[2] !=# ''
+        let lnum = str2nr(parsed[2])
+      endif
+    endif
+    if filename ==# ''
+      " Search for test
+      let testpattern = '[-|*!]        \S'
+      if line =~# testpattern
+        let testline = line('.')
+      else
+        let testline = search(testpattern, 'bcnWz')
+      endif
+      if testline > 0
+        let testname = matchlist(getline(testline), '[-|*!]        \zs.*$')[0]
+        let projectline = search('^\a', 'bcnWz')
+        let projectname = matchlist(getline(projectline), '^\S\+')[0]
+        let fileline = search('^    \f', 'bcnWz')
+        let filename = matchlist(getline(fileline), '^    \zs.*$')[0]
+        let filename = fnamemodify(filename, ':p')
+        for sln_or_dir in OmniSharp#proc#ListRunningJobs()
+          let job = OmniSharp#proc#GetJob(sln_or_dir)
+          if has_key(job, 'tests') && has_key(job.tests, projectname)
+            let lnum = job.tests[projectname][filename][testname].lnum
+            break
+          endif
+        endfor
+      endif
+    endif
+  endif
+  if bufnr == -1
+    if filename !=# ''
+      let bufnr = bufnr(filename)
+      if bufnr == -1
+        let bufnr = bufadd(filename)
+        call bufload(bufnr)
+      endif
+    endif
+    if bufnr == -1 | return | endif
+  endif
+  for winnr in range(1, winnr('$'))
+    if winbufnr(winnr) == bufnr
+      call win_gotoid(win_getid(winnr))
+      break
+    endif
+  endfor
+  if bufnr() != bufnr
+    execute 'aboveleft split' filename
+  endif
+  if lnum != -1
+    call cursor(lnum, max([col, 0]))
+    if col == -1
+      normal! ^
+    endif
+  endif
+endfunction
+
 
 function! OmniSharp#testrunner#Open() abort
   if !OmniSharp#actions#test#Validate() | return | endif
