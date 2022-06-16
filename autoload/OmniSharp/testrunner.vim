@@ -118,12 +118,12 @@ function! s:Paint() abort
           for stacktraceline in get(test, 'stacktrace', [])
             let line = trim(stacktraceline.text)
             if has_key(stacktraceline, 'filename')
-              let line = '__ ' . line . ' __'
+              let line = '__ ' . line . ' ___ ' . stacktraceline.filename . ' __ '
             else
-              let line = '_._ ' . line . ' _._'
+              let line = '_._ ' . line . ' _._ '
             endif
             if has_key(stacktraceline, 'lnum')
-              let line .= ' line ' . stacktraceline.lnum
+              let line .= 'line ' . stacktraceline.lnum
             endif
             call add(lines, '>              ' . line)
           endfor
@@ -171,6 +171,7 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
   call s:Open()
   call win_gotoid(winid)
 endfunction
+
 
 function! s:UpdateState(bufnr, state, ...) abort
   let opts = a:0 ? a:1 : {}

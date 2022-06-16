@@ -36,13 +36,15 @@ syn match ostRunningSuffix "  -- .*" contained contains=ostRunningSpinner,ostRun
 syn match ostRunningSuffixDivider "  \zs--" conceal contained
 syn match ostRunningSpinner "  -- \zs.*" contained
 
-syn region ostFailure start="^>" end="^[^>]"me=s-1 contains=ostFailurePrefix,ostStackFile,ostStackFileNoLoc fold
+syn region ostFailure start="^>" end="^[^>]"me=s-1 contains=ostFailurePrefix,ostStackLoc,ostStackNoLoc fold
 syn match ostFailurePrefix "^>" conceal contained
-syn region ostStackFile start=" __ "hs=e+1 end=" __" contains=ostStackFileDelimiter,ostStackFileNamespace contained keepend
-syn match ostStackFileDelimiter " __" conceal contained
-syn region ostStackFileNoLoc start=" _._ "hs=e+1 end=" _._" contains=ostStackFileNoLocDelimiter,ostStackFileNamespace contained keepend
-syn match ostStackFileNoLocDelimiter " _._" conceal contained
-syn match ostStackFileNamespace "\%(\w\+\.\)*\ze\w\+\.\w\+(" conceal contained
+syn region ostStackLoc start=" __ "hs=e+1 end=" __ "he=e-1 contains=ostStackFile,ostStackDelimiter,ostStackNamespace contained keepend
+syn region ostStackFile start=" ___ " end=" __ "he=e-1 contains=ostStackFileDelimiter,ostStackDelimiter conceal contained
+syn match ostStackDelimiter " __ "he=e-1 conceal contained
+syn match ostStackFileDelimiter " ___ " conceal contained
+syn region ostStackNoLoc start=" _._ "hs=e+1 end=" _._" contains=ostStackNoLocDelimiter,ostStackNamespace contained keepend
+syn match ostStackNoLocDelimiter " _._" conceal contained
+syn match ostStackNamespace "\%(\w\+\.\)*\ze\w\+\.\w\+(" conceal contained
 syn region ostOutput start="^//" end="^[^/]"me=s-1 contains=ostOutputPrefix fold
 syn match ostOutputPrefix "^//" conceal contained
 
@@ -59,8 +61,20 @@ hi def link ostStateRunning Identifier
 hi def link ostRunningSpinner Normal
 hi def link ostStatePassed Title
 hi def link ostStateFailed WarningMsg
-hi def link ostStackFile Underlined
+hi def link ostStackLoc Identifier
 hi def link ostOutput Comment
+
+" Highlights for normally concealed elements
+hi def link ostErrorPrefix NonText
+hi def link ostFileDivider NonText
+hi def link ostStatePrefix NonText
+hi def link ostFailurePrefix NonText
+hi def link ostRunningSuffixDivider NonText
+hi def link ostStackDelimiter NonText
+hi def link ostStackFileDelimiter NonText
+hi def link ostStackNoLocDelimiter NonText
+hi def link ostOutputPrefix NonText
+hi def link ostStackFile WarningMsg
 
 let b:current_syntax = 'omnisharptest'
 
