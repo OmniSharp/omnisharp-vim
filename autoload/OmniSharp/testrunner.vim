@@ -219,8 +219,8 @@ function! s:Paint() abort
         endfor
         call add(lines, '__')
       endfor
+      call add(lines, '')
     endfor
-    call add(lines, '')
   endfor
 
   if bufnr() == s:runner.bufnr | let winview = winsaveview() | endif
