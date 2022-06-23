@@ -23,7 +23,7 @@ endfunction
 function! s:debug.prepare(bufferTests) abort
   let bufnr = a:bufferTests[0].bufnr
   let tests = a:bufferTests[0].tests
-  let currentTest = s:utils.findTest(tests)
+  let currentTest = s:utils.findTest(tests, '')
   if type(currentTest) != type({})
     return s:utils.log.warn('No test found')
   endif
@@ -105,16 +105,18 @@ function! s:debug.process.closed(...) abort
 endfunction
 
 
-function! OmniSharp#actions#test#Run(nobuild) abort
+function! OmniSharp#actions#test#Run(nobuild, ...) abort
   if !s:utils.capabilities() | return | endif
   let s:nobuild = a:nobuild
-  call s:utils.initialize([bufnr('%')], s:run.single.test)
+  let bufnr = a:0 ? (type(a:1) == type('') ? bufnr(a:1) : a:1) : bufnr('%')
+  let RunTest = funcref('s:run.single.test', [a:0 > 1 ? a:2 : ''])
+  call s:utils.initialize([bufnr], RunTest)
 endfunction
 
-function! s:run.single.test(bufferTests) abort
+function! s:run.single.test(testName, bufferTests) abort
   let bufnr = a:bufferTests[0].bufnr
   let tests = a:bufferTests[0].tests
-  let currentTest = s:utils.findTest(tests)
+  let currentTest = s:utils.findTest(tests, a:testName)
   if type(currentTest) != type({})
     return s:utils.log.warn('No test found')
   endif
@@ -124,6 +126,7 @@ function! s:run.single.test(bufferTests) abort
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
   \ 'ResponseHandler': funcref('s:run.process', [s:run.single.complete, bufnr, tests]),
+  \ 'BufNum': bufnr,
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
   \   'NoBuild': get(s:, 'nobuild', 0),
@@ -405,10 +408,10 @@ function! s:utils.extractTests(codeElements) abort
 endfunction
 
 " Find the test in a list of tests that matches the current cursor position
-function! s:utils.findTest(tests, ...) abort
+function! s:utils.findTest(tests, testName) abort
   for test in a:tests
-    if a:0
-      if test.name ==# a:1
+    if a:testName !=# ''
+      if test.name ==# a:testName
         return test
       endif
     else
@@ -441,7 +444,8 @@ function! s:utils.init.extract(Callback, codeStructures) abort
   \ 'tests': s:utils.extractTests(cs[1])
   \}})
   call OmniSharp#testrunner#SetTests(bufferTests)
-  call a:Callback(bufferTests)
+  let dict = { 'f': a:Callback }
+  call dict.f(bufferTests)
 endfunction
 
 function! s:utils.log.echo(highlightGroup, message) abort

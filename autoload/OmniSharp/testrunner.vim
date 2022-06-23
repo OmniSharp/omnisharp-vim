@@ -23,6 +23,28 @@ endfunction
 
 
 function! OmniSharp#testrunner#Run() abort
+  let filename = ''
+  let line = getline('.')
+  if line =~# '^\a'
+    " Project selected - run all tests
+    let projectname = getline('.')
+    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
+      let job = OmniSharp#proc#GetJob(sln_or_dir)
+      if has_key(job, 'tests') && has_key(job.tests, projectname)
+        call OmniSharp#actions#test#RunInFile(1, keys(job.tests[projectname]))
+      endif
+    endfor
+  elseif line =~# '^    \f'
+    " File selected
+    let filename = trim(line)
+    call OmniSharp#actions#test#RunInFile(0, filename)
+    return
+  else
+    let test = s:utils.findTest()
+    if has_key(test, 'filename')
+      call OmniSharp#actions#test#Run(0, test.filename, test.name)
+    endif
+  endif
 endfunction
 
 
@@ -49,27 +71,10 @@ function! OmniSharp#testrunner#Navigate() abort
       endif
     endif
     if filename ==# ''
-      " Search for test
-      let testpattern = '[-|*!]        \S'
-      if line =~# testpattern
-        let testline = line('.')
-      else
-        let testline = search(testpattern, 'bcnWz')
-      endif
-      if testline > 0
-        let testname = matchlist(getline(testline), '[-|*!]        \zs.*$')[0]
-        let projectline = search('^\a', 'bcnWz')
-        let projectname = matchlist(getline(projectline), '^\S\+')[0]
-        let fileline = search('^    \f', 'bcnWz')
-        let filename = matchlist(getline(fileline), '^    \zs.*$')[0]
-        let filename = fnamemodify(filename, ':p')
-        for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-          let job = OmniSharp#proc#GetJob(sln_or_dir)
-          if has_key(job, 'tests') && has_key(job.tests, projectname)
-            let lnum = job.tests[projectname][filename][testname].lnum
-            break
-          endif
-        endfor
+      let test = s:utils.findTest()
+      if has_key(test, 'filename')
+        let filename = test.filename
+        let lnum = test.lnum
       endif
     endif
   endif
@@ -245,13 +250,15 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
     let testproject = get(job.tests, projectname, {})
     let job.tests[projectname] = testproject
     let filename = fnamemodify(bufname(buffer.bufnr), ':p')
-    let existing = get(testproject, filename, {})
-    let testproject[filename] = existing
-    for test in buffer.tests
-      let extest = get(existing, test.name, { 'state': 'Not run' })
-      let existing[test.name] = extest
-      let extest.framework = test.framework
-      let extest.lnum = test.nameRange.Start.Line
+    let filetests = get(testproject, filename, {})
+    let testproject[filename] = filetests
+    for buffertest in buffer.tests
+      let test = get(filetests, buffertest.name, { 'state': 'Not run' })
+      let filetests[buffertest.name] = test
+      let test.name = buffertest.name
+      let test.filename = filename
+      let test.framework = buffertest.framework
+      let test.lnum = buffertest.nameRange.Start.Line
     endfor
   endfor
   call s:Open()
@@ -403,6 +410,32 @@ let s:utils.state2char = {
 \ 'Passed': '*',
 \ 'Failed': '!'
 \}
+
+function! s:utils.findTest() abort
+  if &filetype !=# 'omnisharptest' | return {} | endif
+  let testpattern = '[-|*!]        \S'
+  let line = getline('.')
+  if line =~# testpattern
+    let testline = line('.')
+  else
+    let testline = search(testpattern, 'bcnWz')
+  endif
+  if testline > 0
+    let testname = matchlist(getline(testline), '[-|*!]        \zs.*$')[0]
+    let projectline = search('^\a', 'bcnWz')
+    let projectname = matchlist(getline(projectline), '^\S\+')[0]
+    let fileline = search('^    \f', 'bcnWz')
+    let filename = matchlist(getline(fileline), '^    \zs.*$')[0]
+    let filename = fnamemodify(filename, ':p')
+    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
+      let job = OmniSharp#proc#GetJob(sln_or_dir)
+      if has_key(job, 'tests') && has_key(job.tests, projectname)
+        return job.tests[projectname][filename][testname]
+      endif
+    endfor
+  endif
+  return {}
+endfunction
 
 function! s:utils.getProjectName(bufnr) abort
   let project = OmniSharp#GetHost(a:bufnr).project
