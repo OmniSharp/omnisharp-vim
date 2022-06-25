@@ -248,6 +248,14 @@ function! OmniSharp#testrunner#SetBreakpoints() abort
     echohl None
     return
   endif
+  let line = getline('.')
+  " Stack trace with valid location (filename and possible line number)
+  let parsed = matchlist(line, '^> \+__ .* ___ \(.*\) __ \%(line \(\d\+\)\)\?$')
+  if len(parsed) && parsed[2] !=# ''
+    call vimspector#SetLineBreakpoint(parsed[1], str2nr(parsed[2]))
+    echomsg 'Break point set'
+    return
+  endif
   let test = s:utils.findTest()
   if !has_key(test, 'stacktrace')
     echo 'No breakpoints added'
