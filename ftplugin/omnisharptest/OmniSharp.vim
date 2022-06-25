@@ -9,6 +9,7 @@ set signcolumn=no
 nnoremap <buffer> <Plug>(omnisharp_testrunner_togglebanner) :call OmniSharp#testrunner#ToggleBanner()<CR>
 nnoremap <buffer> <Plug>(omnisharp_testrunner_run) :call OmniSharp#testrunner#Run()<CR>
 nnoremap <buffer> <Plug>(omnisharp_testrunner_debug) :call OmniSharp#testrunner#Debug()<CR>
+nnoremap <buffer> <Plug>(omnisharp_testrunner_set_breakpoints) :call OmniSharp#testrunner#SetBreakpoints()<CR>
 nnoremap <buffer> <Plug>(omnisharp_testrunner_navigate) :call OmniSharp#testrunner#Navigate()<CR>
 
 function! s:map(mode, lhs, plug) abort
@@ -21,4 +22,5 @@ endfunction
 call s:map('n', '<F1>', 'omnisharp_testrunner_togglebanner')
 call s:map('n', '<F5>', 'omnisharp_testrunner_run')
 call s:map('n', '<F6>', 'omnisharp_testrunner_debug')
+call s:map('n', '<F9>', 'omnisharp_testrunner_set_breakpoints')
 call s:map('n', '<CR>', 'omnisharp_testrunner_navigate')
