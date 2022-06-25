@@ -241,6 +241,29 @@ function! s:Paint() abort
 endfunction
 
 
+function! OmniSharp#testrunner#SetBreakpoints() abort
+  if !OmniSharp#util#HasVimspector()
+    echohl WarningMsg
+    echomsg 'Vimspector required to set breakpoints'
+    echohl None
+    return
+  endif
+  let test = s:utils.findTest()
+  if !has_key(test, 'stacktrace')
+    echo 'No breakpoints added'
+    return
+  endif
+  let bps = filter(copy(test.stacktrace),
+  \ "has_key(v:val, 'filename') && has_key(v:val, 'lnum')")
+  for bp in bps
+    call vimspector#SetLineBreakpoint(bp.filename, bp.lnum)
+  endfor
+  let n = len(bps)
+  let message = printf('%d break point%s set', n, n == 1 ? '' : 's')
+  echomsg message
+endfunction
+
+
 function! OmniSharp#testrunner#SetTests(bufferTests) abort
   let winid = win_getid()
   for buffer in a:bufferTests
