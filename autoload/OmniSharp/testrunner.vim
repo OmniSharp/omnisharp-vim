@@ -7,6 +7,16 @@ let s:runner = get(s:, 'runner', {})
 
 
 function! OmniSharp#testrunner#Debug() abort
+  let filename = ''
+  let line = getline('.')
+  if line =~# '^\a' || line =~# '^    \f'
+    return s:utils.log.warn('Select a test to debug')
+  else
+    let test = s:utils.findTest()
+    if has_key(test, 'filename')
+      call OmniSharp#actions#test#Debug(0, test.filename, test.name)
+    endif
+  endif
 endfunction
 
 
@@ -243,23 +253,18 @@ endfunction
 
 function! OmniSharp#testrunner#SetBreakpoints() abort
   if !OmniSharp#util#HasVimspector()
-    echohl WarningMsg
-    echomsg 'Vimspector required to set breakpoints'
-    echohl None
-    return
+    return s:utils.log.warn('Vimspector required to set breakpoints')
   endif
   let line = getline('.')
   " Stack trace with valid location (filename and possible line number)
   let parsed = matchlist(line, '^> \+__ .* ___ \(.*\) __ \%(line \(\d\+\)\)\?$')
   if len(parsed) && parsed[2] !=# ''
     call vimspector#SetLineBreakpoint(parsed[1], str2nr(parsed[2]))
-    echomsg 'Break point set'
-    return
+    return s:utils.log.emphasize('Break point set')
   endif
   let test = s:utils.findTest()
   if !has_key(test, 'stacktrace')
-    echo 'No breakpoints added'
-    return
+    return s:utils.log.emphasize('No breakpoints added')
   endif
   let bps = filter(copy(test.stacktrace),
   \ "has_key(v:val, 'filename') && has_key(v:val, 'lnum')")
@@ -268,7 +273,7 @@ function! OmniSharp#testrunner#SetBreakpoints() abort
   endfor
   let n = len(bps)
   let message = printf('%d break point%s set', n, n == 1 ? '' : 's')
-  echomsg message
+  return s:utils.log.emphasize(message)
 endfunction
 
 
@@ -434,6 +439,7 @@ endfunction
 
 
 let s:utils = {}
+let s:utils.log = {}
 
 let s:utils.state2char = {
 \ 'Not run': '|',
@@ -474,6 +480,24 @@ function! s:utils.getProjectName(bufnr) abort
   return get(msbuildproject, 'AssemblyName', '_Default')
 endfunction
 
+function! s:utils.log.echo(highlightGroup, message) abort
+  let messageLines = type(a:message) == type([]) ? a:message : [a:message]
+  execute 'echohl' a:highlightGroup
+  for messageLine in messageLines
+    echomsg messageLine
+  endfor
+  echohl None
+endfunction
+
+function! s:utils.log.emphasize(message) abort
+  call self.echo('Title', a:message)
+  return 1
+endfunction
+
+function! s:utils.log.warn(message) abort
+  call self.echo('WarningMsg', a:message)
+  return 0
+endfunction
 
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
