@@ -11,19 +11,21 @@ let s:utils = {}
 let s:utils.init = {}
 let s:utils.log = {}
 
-function! OmniSharp#actions#test#Debug(nobuild) abort
+function! OmniSharp#actions#test#Debug(nobuild, ...) abort
   if !s:utils.capabilities() | return | endif
   let s:nobuild = a:nobuild
   if !OmniSharp#util#HasVimspector()
     return s:utils.log.warn('Vimspector required to debug tests')
   endif
-  call s:utils.initialize([bufnr('%')], s:debug.prepare)
+  let bufnr = a:0 ? (type(a:1) == type('') ? bufnr(a:1) : a:1) : bufnr('%')
+  let DebugTest = funcref('s:debug.prepare', [a:0 > 1 ? a:2 : ''])
+  call s:utils.initialize([bufnr], DebugTest)
 endfunction
 
-function! s:debug.prepare(bufferTests) abort
+function! s:debug.prepare(testName, bufferTests) abort
   let bufnr = a:bufferTests[0].bufnr
   let tests = a:bufferTests[0].tests
-  let currentTest = s:utils.findTest(tests, '')
+  let currentTest = s:utils.findTest(tests, a:testName)
   if type(currentTest) != type({})
     return s:utils.log.warn('No test found')
   endif
@@ -31,6 +33,7 @@ function! s:debug.prepare(bufferTests) abort
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
   \ 'ResponseHandler': funcref('s:debug.launch', [bufnr, currentTest.name]),
+  \ 'BufNum': bufnr,
   \ 'Parameters': {
   \   'MethodName': currentTest.name,
   \   'NoBuild': get(s:, 'nobuild', 0),
