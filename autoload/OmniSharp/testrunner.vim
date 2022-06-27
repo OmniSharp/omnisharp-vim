@@ -41,7 +41,9 @@ function! OmniSharp#testrunner#Run() abort
     for sln_or_dir in OmniSharp#proc#ListRunningJobs()
       let job = OmniSharp#proc#GetJob(sln_or_dir)
       if has_key(job, 'tests') && has_key(job.tests, projectname)
-        call OmniSharp#actions#test#RunInFile(1, keys(job.tests[projectname]))
+        let filenames = filter(keys(job.tests[projectname]),
+        \ {_,f -> !get(job.tests[projectname][f], '__OmniSharp__removed')})
+        call OmniSharp#actions#test#RunInFile(1, filenames)
       endif
     endfor
   elseif line =~# '^    \f'
@@ -55,6 +57,39 @@ function! OmniSharp#testrunner#Run() abort
       call OmniSharp#actions#test#Run(0, test.filename, test.name)
     endif
   endif
+endfunction
+
+
+function! OmniSharp#testrunner#Remove() abort
+  let filename = ''
+  let line = getline('.')
+  if line =~# '^\a'
+    " Project selected - run all tests
+    let projectname = getline('.')
+    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
+      let job = OmniSharp#proc#GetJob(sln_or_dir)
+      if has_key(job, 'tests') && has_key(job.tests, projectname)
+        let job.tests[projectname].__OmniSharp__removed = 1
+        break
+      endif
+    endfor
+  elseif line =~# '^    \f'
+    " File selected
+    let filename = fnamemodify(trim(line), ':p')
+    let projectline = search('^\a', 'bcnWz')
+    let projectname = matchlist(getline(projectline), '^\S\+')[0]
+    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
+      let job = OmniSharp#proc#GetJob(sln_or_dir)
+      if has_key(job, 'tests') && has_key(job.tests, projectname)
+        let job.tests[projectname][filename].__OmniSharp__removed = 1
+        break
+      endif
+    endfor
+  else
+    let test = s:utils.findTest()
+    let test.__OmniSharp__removed = 1
+  endif
+  call s:Paint()
 endfunction
 
 
@@ -185,6 +220,7 @@ function! s:Paint() abort
     let job = OmniSharp#proc#GetJob(sln_or_dir)
     if !has_key(job, 'tests') | continue | endif
     for testproject in sort(keys(job.tests))
+      if get(job.tests[testproject], '__OmniSharp__removed') | continue | endif
       let errors = get(get(job, 'testerrors', {}), testproject, [])
       call add(lines, testproject . (len(errors) ? ' - ERROR' : ''))
       for errorline in errors
@@ -204,10 +240,12 @@ function! s:Paint() abort
         endif
       endif
       for testfile in sort(keys(job.tests[testproject]))
-        call add(lines, '    ' . fnamemodify(testfile, ':.'))
         let tests = job.tests[testproject][testfile]
+        if get(tests, '__OmniSharp__removed') | continue | endif
+        call add(lines, '    ' . fnamemodify(testfile, ':.'))
         for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
           let test = tests[name]
+          if get(test, '__OmniSharp__removed') | continue | endif
           let state = s:utils.state2char[test.state]
           call add(lines, printf('%s        %s', state, name))
           if state ==# '-' && !has_key(test, 'spintimer')
@@ -284,15 +322,25 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
     let job.tests = get(job, 'tests', {})
     let projectname = s:utils.getProjectName(buffer.bufnr)
     let testproject = get(job.tests, projectname, {})
+    if has_key(testproject, '__OmniSharp__removed')
+      unlet testproject.__OmniSharp__removed
+    endif
     let job.tests[projectname] = testproject
     let filename = fnamemodify(bufname(buffer.bufnr), ':p')
     let filetests = get(testproject, filename, {})
+    if has_key(testproject, '__OmniSharp__removed')
+      unlet testproject.__OmniSharp__removed
+    endif
     let testproject[filename] = filetests
     for buffertest in buffer.tests
       let test = get(filetests, buffertest.name, { 'state': 'Not run' })
+      if has_key(test, '__OmniSharp__removed')
+        unlet test.__OmniSharp__removed
+      endif
       let filetests[buffertest.name] = test
       let test.name = buffertest.name
       let test.filename = filename
+      let test.projectname = projectname
       let test.framework = buffertest.framework
       let test.lnum = buffertest.nameRange.Start.Line
     endfor
