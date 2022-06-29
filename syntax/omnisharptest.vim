@@ -14,14 +14,18 @@ syn match ostBannerDelim "\%1l^.*$" contained
 syn match ostBannerDelim "\%3l^.*$" contained
 syn match ostBannerDelim "\%8l^.*$" contained
 
-syn match ostProjectName "^\a.*" contains=ostProjectError
-syn match ostProjectError " - ERROR$"hs=s+2 contained
-syn region ostProject start="^\a.*" end="^$"me=s-1 contains=TOP transparent fold
+syn match ostProjectKey ";[^;]*;[^;]*;.*" contains=ostSolution,ostAssembly,ostProjectDelimiter,ostProjectError
+syn match ostSolution "\%(^;[^;]\+;\)\@<=[^;]\+" contained conceal
+syn match ostAssembly "\%(^;\)\@<=[^;]\+\ze;[^;]\+;" contained
+syn match ostProjectDelimiter ";" contained conceal
+syn match ostProjectError "ERROR$" contained
+syn region ostProject start="^;" end="^$"me=s-1 contains=TOP transparent fold
+
 syn region ostError start="^<" end="^[^<]"me=s-1 contains=ostErrorPrefix,ostStackFile,ostStackFileNoLoc fold
 syn match ostErrorPrefix "^<" conceal contained
 syn match ostFileName "^    \S.*" contains=ostFilePath,ostFileExt
-syn match ostFilePath "^    \zs\%(\%(\f\+\.\)*\f\+\/\)*\ze\f\+\." conceal contained
-syn match ostFileExt "\%(\.\w\+\)\+" conceal contained
+syn match ostFilePath "\%(^    \)\@<=\f\{-}\ze[^/\\]\+\.csx\?$" conceal contained
+syn match ostFileExt "\.csx\?$" conceal contained
 syn region ostFile start="^    \S.*" end="^__$"me=s-1 contains=TOP transparent fold
 syn match ostFileDivider "^__$" conceal
 
@@ -53,7 +57,8 @@ hi def link ostBannerTitle Normal
 hi def link ostBannerHelp Comment
 hi def link ostBannerMap PreProc
 hi def link ostBannerLink Identifier
-hi def link ostProjectName Identifier
+hi def link ostAssembly Identifier
+hi def link ostSolution Normal
 hi def link ostProjectError WarningMsg
 hi def link ostFileName TypeDef
 hi def link ostStateNotRun Comment
@@ -65,6 +70,7 @@ hi def link ostStackLoc Identifier
 hi def link ostOutput Comment
 
 " Highlights for normally concealed elements
+hi def link ostProjectDelimiter NonText
 hi def link ostErrorPrefix NonText
 hi def link ostFileDivider NonText
 hi def link ostStatePrefix NonText
