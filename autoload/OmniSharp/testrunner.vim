@@ -4,12 +4,18 @@ set cpoptions&vim
 
 let s:current = get(s:, 'current', {})
 let s:runner = get(s:, 'runner', {})
+let s:tests = get(s:, 'tests', {})
+
+" Expose s:tests for custom scripting
+function! OmniSharp#testrunner#GetTests() abort
+  return s:tests
+endfunction
 
 
 function! OmniSharp#testrunner#Debug() abort
   let filename = ''
   let line = getline('.')
-  if line =~# '^\a' || line =~# '^    \f'
+  if line =~# '^;' || line =~# '^    \f'
     return s:utils.log.warn('Select a test to debug')
   else
     let test = s:utils.findTest()
@@ -35,17 +41,12 @@ endfunction
 function! OmniSharp#testrunner#Run() abort
   let filename = ''
   let line = getline('.')
-  if line =~# '^\a'
+  if line =~# '^;'
     " Project selected - run all tests
-    let projectname = getline('.')
-    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-      let job = OmniSharp#proc#GetJob(sln_or_dir)
-      if has_key(job, 'tests') && has_key(job.tests, projectname)
-        let filenames = filter(keys(job.tests[projectname]),
-        \ {_,f -> !get(job.tests[projectname][f], '__OmniSharp__removed')})
-        call OmniSharp#actions#test#RunInFile(1, filenames)
-      endif
-    endfor
+    let projectname = matchlist(getline('.'), '^\S\+')[0]
+    let filenames = filter(keys(s:tests[projectname].files),
+    \ {_,f -> s:tests[projectname].files[f].visible})
+    call OmniSharp#actions#test#RunInFile(1, filenames)
   elseif line =~# '^    \f'
     " File selected
     let filename = trim(line)
@@ -63,31 +64,19 @@ endfunction
 function! OmniSharp#testrunner#Remove() abort
   let filename = ''
   let line = getline('.')
-  if line =~# '^\a'
+  if line =~# '^;'
     " Project selected - run all tests
-    let projectname = getline('.')
-    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-      let job = OmniSharp#proc#GetJob(sln_or_dir)
-      if has_key(job, 'tests') && has_key(job.tests, projectname)
-        let job.tests[projectname].__OmniSharp__removed = 1
-        break
-      endif
-    endfor
+    let projectname = matchlist(getline('.'), '^\S\+')[0]
+    let s:tests[projectname].visible = 0
   elseif line =~# '^    \f'
     " File selected
     let filename = fnamemodify(trim(line), ':p')
-    let projectline = search('^\a', 'bcnWz')
+    let projectline = search('^;', 'bcnWz')
     let projectname = matchlist(getline(projectline), '^\S\+')[0]
-    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-      let job = OmniSharp#proc#GetJob(sln_or_dir)
-      if has_key(job, 'tests') && has_key(job.tests, projectname)
-        let job.tests[projectname][filename].__OmniSharp__removed = 1
-        break
-      endif
-    endfor
+    let s:tests[projectname].files[filename].visible = 0
   else
     let test = s:utils.findTest()
-    let test.__OmniSharp__removed = 1
+    let test.state = 'hidden'
   endif
   call s:Paint()
 endfunction
@@ -100,7 +89,7 @@ function! OmniSharp#testrunner#Navigate() abort
   let lnum = -1
   let col = -1
   let line = getline('.')
-  if line =~# '^\a'
+  if line =~# '^;'
     " Project selected - do nothing
   elseif line =~# '^    \f'
     " File selected
@@ -216,22 +205,21 @@ function! s:Paint() abort
     call add(lines, repeat(delimiter, 80))
   endif
 
-  for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-    let job = OmniSharp#proc#GetJob(sln_or_dir)
-    if !has_key(job, 'tests') | continue | endif
-    for testproject in sort(keys(job.tests))
-      if get(job.tests[testproject], '__OmniSharp__removed') | continue | endif
-      let errors = get(get(job, 'testerrors', {}), testproject, [])
-      call add(lines, testproject . (len(errors) ? ' - ERROR' : ''))
-      for errorline in errors
-        call add(lines, '<  ' . trim(errorline, ' ', 2))
-      endfor
-      let loglevel = get(g:, 'OmniSharp_testrunner_loglevel', 'error')
-      if loglevel ==? 'all' || (loglevel ==? 'error' && len(errors))
-        " The diagnostic logs (build output) are only displayed when a single file
-        " is tested, otherwise multiple build outputs are intermingled
-        if OmniSharp#GetHost(s:current.singlebuffer).sln_or_dir ==# sln_or_dir
-          if len(errors) > 0 && len(s:current.log) > 1
+  for key in sort(keys(s:tests))
+    let [assembly, sln] = split(key, ';')
+    if !s:tests[key].visible | continue | endif
+    call add(lines, key . (len(s:tests[key].errors) ? ' ERROR' : ''))
+    for errorline in s:tests[key].errors
+      call add(lines, '<  ' . trim(errorline, ' ', 2))
+    endfor
+    let loglevel = get(g:, 'OmniSharp_testrunner_loglevel', 'error')
+    if loglevel ==? 'all' || (loglevel ==? 'error' && len(s:tests[key].errors))
+      " The diagnostic logs (build output) are only displayed when a single file
+      " is tested, otherwise multiple build outputs are intermingled
+      if s:current.singlebuffer != -1
+        let [ssln, sass, _] = s:utils.getProject(s:current.singlebuffer)
+        if ssln ==# sln && sass ==# assembly
+          if len(s:tests[key].errors) > 0 && len(s:current.log) > 1
             call add(lines, '<  ' . repeat(delimiter, 10))
           endif
           for log in s:current.log
@@ -239,41 +227,41 @@ function! s:Paint() abort
           endfor
         endif
       endif
-      for testfile in sort(keys(job.tests[testproject]))
-        let tests = job.tests[testproject][testfile]
-        if get(tests, '__OmniSharp__removed') | continue | endif
-        call add(lines, '    ' . fnamemodify(testfile, ':.'))
-        for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
-          let test = tests[name]
-          if get(test, '__OmniSharp__removed') | continue | endif
-          let state = s:utils.state2char[test.state]
-          call add(lines, printf('%s        %s', state, name))
-          if state ==# '-' && !has_key(test, 'spintimer')
-            call s:spinner.start(test, len(lines))
-          endif
-          for messageline in get(test, 'message', [])
-            call add(lines, '>            ' . trim(messageline, ' ', 2))
-          endfor
-          for stacktraceline in get(test, 'stacktrace', [])
-            let line = trim(stacktraceline.text)
-            if has_key(stacktraceline, 'filename')
-              let line = '__ ' . line . ' ___ ' . stacktraceline.filename . ' __ '
-            else
-              let line = '_._ ' . line . ' _._ '
-            endif
-            if has_key(stacktraceline, 'lnum')
-              let line .= 'line ' . stacktraceline.lnum
-            endif
-            call add(lines, '>              ' . line)
-          endfor
-          for outputline in get(test, 'output', [])
-            call add(lines, '//          ' . trim(outputline, ' ', 2))
-          endfor
+    endif
+    for testfile in sort(keys(s:tests[key].files))
+      if !s:tests[key].files[testfile].visible | continue | endif
+      let tests = s:tests[key].files[testfile].tests
+      call add(lines, '    ' . fnamemodify(testfile, ':.'))
+      for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
+        let test = tests[name]
+        if test.state ==# 'hidden' | continue | endif
+        let state = s:utils.state2char[test.state]
+        call add(lines, printf('%s        %s', state, name))
+        if state ==# '-' && !has_key(test, 'spintimer')
+          call s:spinner.start(test, len(lines))
+        endif
+        for messageline in get(test, 'message', [])
+          call add(lines, '>            ' . trim(messageline, ' ', 2))
         endfor
-        call add(lines, '__')
+        for stacktraceline in get(test, 'stacktrace', [])
+          let line = trim(stacktraceline.text)
+          if has_key(stacktraceline, 'filename')
+            let line = '__ ' . line . ' ___ ' . stacktraceline.filename . ' __ '
+          else
+            let line = '_._ ' . line . ' _._ '
+          endif
+          if has_key(stacktraceline, 'lnum')
+            let line .= 'line ' . stacktraceline.lnum
+          endif
+          call add(lines, '>              ' . line)
+        endfor
+        for outputline in get(test, 'output', [])
+          call add(lines, '//          ' . trim(outputline, ' ', 2))
+        endfor
       endfor
-      call add(lines, '')
+      call add(lines, '__')
     endfor
+    call add(lines, '')
   endfor
 
   if bufnr() == s:runner.bufnr | let winview = winsaveview() | endif
@@ -318,29 +306,22 @@ endfunction
 function! OmniSharp#testrunner#SetTests(bufferTests) abort
   let winid = win_getid()
   for buffer in a:bufferTests
-    let job = OmniSharp#GetHost(buffer.bufnr).job
-    let job.tests = get(job, 'tests', {})
-    let projectname = s:utils.getProjectName(buffer.bufnr)
-    let testproject = get(job.tests, projectname, {})
-    if has_key(testproject, '__OmniSharp__removed')
-      unlet testproject.__OmniSharp__removed
-    endif
-    let job.tests[projectname] = testproject
+    let [sln, assembly, key] = s:utils.getProject(buffer.bufnr)
+    let project = get(s:tests, key, { 'files': {}, 'errors': [] })
+    let project.visible = 1
+    let s:tests[key] = project
     let filename = fnamemodify(bufname(buffer.bufnr), ':p')
-    let filetests = get(testproject, filename, {})
-    if has_key(testproject, '__OmniSharp__removed')
-      unlet testproject.__OmniSharp__removed
-    endif
-    let testproject[filename] = filetests
+    let testfile = get(project.files, filename, { 'tests': {} })
+    let testfile.visible = 1
+    let project.files[filename] = testfile
     for buffertest in buffer.tests
-      let test = get(filetests, buffertest.name, { 'state': 'Not run' })
-      if has_key(test, '__OmniSharp__removed')
-        unlet test.__OmniSharp__removed
-      endif
-      let filetests[buffertest.name] = test
-      let test.name = buffertest.name
+      let name = buffertest.name
+      let test = get(testfile.tests, name, { 'state': 'Not run' })
+      let testfile.tests[name] = test
+      let test.name = name
       let test.filename = filename
-      let test.projectname = projectname
+      let test.assembly = assembly
+      let test.sln = sln
       let test.framework = buffertest.framework
       let test.lnum = buffertest.nameRange.Start.Line
     endfor
@@ -352,12 +333,10 @@ endfunction
 
 function! s:UpdateState(bufnr, state, ...) abort
   let opts = a:0 ? a:1 : {}
-  let job = OmniSharp#GetHost(a:bufnr).job
-  let projectname = s:utils.getProjectName(a:bufnr)
-  let job.testerrors = get(job, 'testerrors', {})
-  let job.testerrors[projectname] = get(opts, 'errors', [])
+  let [sln, assembly, key] = s:utils.getProject(a:bufnr)
+  let s:tests[key].errors = get(opts, 'errors', [])
   let filename = fnamemodify(bufname(a:bufnr), ':p')
-  let tests = job.tests[projectname][filename]
+  let tests = s:tests[key].files[filename].tests
   for testname in get(opts, 'testnames', s:current.testnames[a:bufnr])
     if has_key(tests, testname)
       let stacktrace = []
@@ -507,25 +486,22 @@ function! s:utils.findTest() abort
   endif
   if testline > 0
     let testname = matchlist(getline(testline), '[-|*!]        \zs.*$')[0]
-    let projectline = search('^\a', 'bcnWz')
+    let projectline = search('^;', 'bcnWz')
     let projectname = matchlist(getline(projectline), '^\S\+')[0]
     let fileline = search('^    \f', 'bcnWz')
     let filename = matchlist(getline(fileline), '^    \zs.*$')[0]
     let filename = fnamemodify(filename, ':p')
-    for sln_or_dir in OmniSharp#proc#ListRunningJobs()
-      let job = OmniSharp#proc#GetJob(sln_or_dir)
-      if has_key(job, 'tests') && has_key(job.tests, projectname)
-        return job.tests[projectname][filename][testname]
-      endif
-    endfor
+    return s:tests[projectname].files[filename].tests[testname]
   endif
   return {}
 endfunction
 
-function! s:utils.getProjectName(bufnr) abort
-  let project = OmniSharp#GetHost(a:bufnr).project
-  let msbuildproject = get(project, 'MsBuildProject', {})
-  return get(msbuildproject, 'AssemblyName', '_Default')
+function! s:utils.getProject(bufnr) abort
+  let host = OmniSharp#GetHost(a:bufnr)
+  let msbuildproject = get(host.project, 'MsBuildProject', {})
+  let sln = host.sln_or_dir
+  let assembly = get(msbuildproject, 'AssemblyName', '_Default')
+  return [sln, assembly, printf(';%s;%s;', assembly, sln)]
 endfunction
 
 function! s:utils.log.echo(highlightGroup, message) abort
