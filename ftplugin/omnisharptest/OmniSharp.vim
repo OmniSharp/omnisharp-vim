@@ -26,3 +26,5 @@ call s:map('n', '<F6>', 'omnisharp_testrunner_debug')
 call s:map('n', '<F9>', 'omnisharp_testrunner_set_breakpoints')
 call s:map('n', '<CR>', 'omnisharp_testrunner_navigate')
 call s:map('n', 'dd', 'omnisharp_testrunner_remove')
+
+set foldtext=OmniSharp#testrunner#FoldText()

@@ -33,6 +33,42 @@ function! OmniSharp#testrunner#Init(buffers) abort
 endfunction
 
 
+function! OmniSharp#testrunner#FoldText() abort
+  let line = getline(v:foldstart)
+  if line =~# '^;'
+    " Project
+    let projectkey = matchlist(line, '^\S\+')[0]
+    let [assembly, _] = split(projectkey, ';')
+    let ntests = 0
+    for filename in keys(s:tests[projectkey].files)
+      let ntests += len(s:tests[projectkey].files[filename].tests)
+    endfor
+    let err = match(line, '; ERROR$') == -1 ? '' : ' ERROR'
+    return printf('%s [%d]%s', assembly, ntests, err)
+  elseif line =~# '^    \f'
+    " File
+    let filename = trim(line)
+    let fullpath = fnamemodify(filename, ':p')
+    let displayname = matchlist(filename, '^\f\{-}\([^/\\]\+\)\.csx\?$')[1]
+    " Position the cursor so that search() is relative to the fold, not the
+    " actual cursor position
+    let winview = winsaveview()
+    call cursor(v:foldstart, 0)
+    let projectline = search('^;', 'bcnWz')
+    call winrestview(winview)
+    let projectkey = matchlist(getline(projectline), '^\S\+')[0]
+    let ntests = len(s:tests[projectkey].files[fullpath].tests)
+    return printf('    %s [%d]', displayname, ntests)
+  elseif line =~# '^<'
+    return printf('  Error details (%d lines)', v:foldend - v:foldstart + 1)
+  elseif line =~# '^>'
+    return printf('            Results (%d lines)', v:foldend - v:foldstart + 1)
+  elseif line =~# '^//'
+    return printf('          Output (%d lines)', v:foldend - v:foldstart + 1)
+  endif
+  return printf('%s (%d lines)', line, v:foldend - v:foldstart + 1)
+endfunction
+
 function! OmniSharp#testrunner#Log(message) abort
   call extend(s:current.log, a:message)
 endfunction
@@ -43,9 +79,9 @@ function! OmniSharp#testrunner#Run() abort
   let line = getline('.')
   if line =~# '^;'
     " Project selected - run all tests
-    let projectname = matchlist(getline('.'), '^\S\+')[0]
-    let filenames = filter(keys(s:tests[projectname].files),
-    \ {_,f -> s:tests[projectname].files[f].visible})
+    let projectkey = matchlist(getline('.'), '^\S\+')[0]
+    let filenames = filter(keys(s:tests[projectkey].files),
+    \ {_,f -> s:tests[projectkey].files[f].visible})
     call OmniSharp#actions#test#RunInFile(1, filenames)
   elseif line =~# '^    \f'
     " File selected
@@ -66,14 +102,14 @@ function! OmniSharp#testrunner#Remove() abort
   let line = getline('.')
   if line =~# '^;'
     " Project selected - run all tests
-    let projectname = matchlist(getline('.'), '^\S\+')[0]
-    let s:tests[projectname].visible = 0
+    let projectkey = matchlist(getline('.'), '^\S\+')[0]
+    let s:tests[projectkey].visible = 0
   elseif line =~# '^    \f'
     " File selected
     let filename = fnamemodify(trim(line), ':p')
     let projectline = search('^;', 'bcnWz')
-    let projectname = matchlist(getline(projectline), '^\S\+')[0]
-    let s:tests[projectname].files[filename].visible = 0
+    let projectkey = matchlist(getline(projectline), '^\S\+')[0]
+    let s:tests[projectkey].files[filename].visible = 0
   else
     let test = s:utils.findTest()
     let test.state = 'hidden'
@@ -487,11 +523,11 @@ function! s:utils.findTest() abort
   if testline > 0
     let testname = matchlist(getline(testline), '[-|*!]        \zs.*$')[0]
     let projectline = search('^;', 'bcnWz')
-    let projectname = matchlist(getline(projectline), '^\S\+')[0]
+    let projectkey = matchlist(getline(projectline), '^\S\+')[0]
     let fileline = search('^    \f', 'bcnWz')
     let filename = matchlist(getline(fileline), '^    \zs.*$')[0]
     let filename = fnamemodify(filename, ':p')
-    return s:tests[projectname].files[filename].tests[testname]
+    return s:tests[projectkey].files[filename].tests[testname]
   endif
   return {}
 endfunction
