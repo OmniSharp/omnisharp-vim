@@ -42,7 +42,7 @@ function! OmniSharp#actions#project#DebugProject(stopAtEntry, ...) abort
       \      'request': 'launch',
       \      'program': programPath,
       \      'args': a:args,
-      \      'stopAtEntry': a:stopAtEntry ? v:true : v:false
+      \      'stopAtEntry#json': a:stopAtEntry ? 'true' : 'false'
       \    }
       \  }
       \})
