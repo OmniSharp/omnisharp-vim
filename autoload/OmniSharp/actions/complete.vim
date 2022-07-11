@@ -41,11 +41,7 @@ function! OmniSharp#actions#complete#ExpandSnippet() abort
     return
   endif
 
-  let line = strpart(getline('.'), 0, col('.')-1)
-  let remove_whitespace_regex = '^\s*\(.\{-}\)\s*$'
-
-  let completion = matchstr(line, '.*\zs\s\W.\+(.*)')
-  let completion = substitute(completion, remove_whitespace_regex, '\1', '')
+  let completion = strpart(getline('.'), s:last_startcol, col('.') - 1)
 
   let should_expand_completion = len(completion) != 0
 
@@ -74,6 +70,7 @@ function! s:StdioGetCompletions(partial, Callback) abort
   let wantDoc = wantDocPopup ? 'false'
   \ : g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
   let wantSnippet = g:OmniSharp_want_snippet ? 'true' : 'false'
+  let s:last_startcol = col('.') - len(a:partial) - 1
   let parameters = {
   \ 'WordToComplete': a:partial,
   \ 'WantDocumentationForEveryCompletionResult': wantDoc,
