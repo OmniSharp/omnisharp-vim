@@ -7,7 +7,8 @@ Given cs():
 Execute ():
   " Need to set a filename for OmniSharp-roslyn
   call OmniSharpTestInitializeBuffer('Complete')
-  call OmniSharpWarmup('OmniSharp#actions#complete#Get', ['usi'])
+  let opts = { 'startcol': 0 }
+  call OmniSharpWarmup('OmniSharp#actions#complete#Get', ['usi'], opts)
 
 Do (invoke omnicomplete on 'usi'):
   A\<c-x>\<c-o>

@@ -7,8 +7,12 @@ function! asyncomplete#sources#OmniSharp#completor(opt, ctx) abort
 
   let startcol = column - kwlen
 
-  call OmniSharp#actions#complete#Get(kw, {results->
-  \ asyncomplete#complete(a:opt['name'], a:ctx, startcol, results)})
+  let opts = {
+  \ 'startcol': startcol - 1,
+  \ 'Callback': {results->
+  \   asyncomplete#complete(a:opt['name'], a:ctx, startcol, results)}
+  \}
+  call OmniSharp#actions#complete#Get(kw, opts)
 endfunction
 
 " vim:et:sw=2:sts=2

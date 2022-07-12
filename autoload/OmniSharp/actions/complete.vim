@@ -4,15 +4,14 @@ set cpoptions&vim
 let s:generated_snippets = get(s:, 'generated_snippets', {})
 let s:last_completion_dictionary = get(s:, 'last_completion_dictionary', {})
 
-function! OmniSharp#actions#complete#Get(partial, ...) abort
-  let opts = a:0 ? { 'Callback': a:1 } : {}
+function! OmniSharp#actions#complete#Get(partial, opts) abort
   if !OmniSharp#IsServerRunning()
     return []
   endif
   if g:OmniSharp_server_stdio
     let s:complete_pending = 1
-    call s:StdioGetCompletions(a:partial, function('s:CBGet', [opts]))
-    if !has_key(opts, 'Callback')
+    call s:StdioGetCompletions(a:partial, a:opts, function('s:CBGet', [a:opts]))
+    if !has_key(a:opts, 'Callback')
       " No callback has been passed in, so this function should return
       " synchronously, so it can be used as an omnifunc
       let starttime = reltime()
@@ -27,7 +26,7 @@ function! OmniSharp#actions#complete#Get(partial, ...) abort
     let completions = OmniSharp#py#Eval(
     \ printf('getCompletions(%s)', string(a:partial)))
     if OmniSharp#py#CheckForError() | let completions = [] | endif
-    return s:CBGet(opts, completions)
+    return s:CBGet(a:opts, completions)
   endif
 endfunction
 
@@ -63,14 +62,16 @@ function! OmniSharp#actions#complete#ExpandSnippet() abort
 endfunction
 
 
-function! s:StdioGetCompletions(partial, Callback) abort
+function! s:StdioGetCompletions(partial, opts, Callback) abort
   let wantDocPopup = OmniSharp#popup#Enabled()
   \ && g:omnicomplete_fetch_full_documentation
   \ && &completeopt =~# 'popup'
   let wantDoc = wantDocPopup ? 'false'
   \ : g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
   let wantSnippet = g:OmniSharp_want_snippet ? 'true' : 'false'
-  let s:last_startcol = col('.') - len(a:partial) - 1
+  let s:last_startcol = has_key(a:opts, 'startcol')
+  \ ? a:opts.startcol
+  \ : col('.') - len(a:partial) - 1
   let parameters = {
   \ 'WordToComplete': a:partial,
   \ 'WantDocumentationForEveryCompletionResult': wantDoc,
