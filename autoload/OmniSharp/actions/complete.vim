@@ -8,10 +8,11 @@ function! OmniSharp#actions#complete#Get(partial, opts) abort
   if !OmniSharp#IsServerRunning()
     return []
   endif
+  let opts = type(a:opts) == type({}) ? a:opts : { 'Callback': a:opts }
   if g:OmniSharp_server_stdio
     let s:complete_pending = 1
-    call s:StdioGetCompletions(a:partial, a:opts, function('s:CBGet', [a:opts]))
-    if !has_key(a:opts, 'Callback')
+    call s:StdioGetCompletions(a:partial, opts, function('s:CBGet', [opts]))
+    if !has_key(opts, 'Callback')
       " No callback has been passed in, so this function should return
       " synchronously, so it can be used as an omnifunc
       let starttime = reltime()
@@ -26,7 +27,7 @@ function! OmniSharp#actions#complete#Get(partial, opts) abort
     let completions = OmniSharp#py#Eval(
     \ printf('getCompletions(%s)', string(a:partial)))
     if OmniSharp#py#CheckForError() | let completions = [] | endif
-    return s:CBGet(a:opts, completions)
+    return s:CBGet(opts, completions)
   endif
 endfunction
 
