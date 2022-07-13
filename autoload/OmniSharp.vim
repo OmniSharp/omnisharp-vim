@@ -52,7 +52,8 @@ function! OmniSharp#Complete(findstart, base) abort
     endwhile
     return start
   else
-    return OmniSharp#actions#complete#Get(a:base)
+    let opts = { 'startcol': col('.') - 1 }
+    return OmniSharp#actions#complete#Get(a:base, opts)
   endif
 endfunction
 

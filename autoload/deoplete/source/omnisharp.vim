@@ -12,5 +12,8 @@ endfunction
 function! deoplete#source#omnisharp#sendRequest(lhs, partial) abort
   let s:currentLhsRequest = a:lhs
   let g:deoplete#source#omnisharp#_results = v:null
-  call OmniSharp#actions#complete#Get(a:partial, {results -> s:onReceivedResponse(a:lhs, results)})
+  let opts = {
+  \ 'Callback': {results -> s:onReceivedResponse(a:lhs, results)}
+  \}
+  call OmniSharp#actions#complete#Get(a:partial, opts)
 endfunction
