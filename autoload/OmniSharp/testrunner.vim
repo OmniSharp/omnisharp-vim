@@ -114,7 +114,7 @@ function! OmniSharp#testrunner#Remove() abort
     let test = s:utils.findTest()
     let test.state = 'hidden'
   endif
-  call s:Paint()
+  call s:buffer.paint()
 endfunction
 
 
@@ -207,40 +207,44 @@ function s:Open() abort
   let s:runner.bufnr = bufnr()
   let &filetype = ft
   execute 'file' title
-  call s:Paint()
+  call s:buffer.paint()
 endfunction
 
-function! s:Repaint() abort
+
+let s:buffer = {}
+function! s:buffer.focus() abort
   if !has_key(s:runner, 'bufnr') | return | endif
   if getbufvar(s:runner.bufnr, '&ft') !=# 'omnisharptest' | return | endif
   " If the buffer is listed in a window in the current tab, then focus it
   for winnr in range(1, winnr('$'))
     if winbufnr(winnr) == s:runner.bufnr
-      let l:winid = win_getid()
       call win_gotoid(win_getid(winnr))
-      break
+      return v:true
     endif
   endfor
-  call s:Paint()
-  if exists('l:winid')
-    call win_gotoid(l:winid)
-  endif
+  return v:false
 endfunction
 
-function! s:Paint() abort
+function! s:buffer.bannerlines() abort
   let lines = []
   let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
-  if get(g:, 'OmniSharp_testrunner_banner', 1)
-    call add(lines, repeat(delimiter, 80))
-    call add(lines, '    OmniSharp Test Runner')
-    call add(lines, '  ' . repeat(delimiter, 76))
-    call add(lines, '    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
-    call add(lines, '    <F5> Run test or tests in file under cursor')
-    call add(lines, '    <F6> Debug test under cursor')
-    call add(lines, '    <CR> Navigate to test or stack trace')
-    call add(lines, repeat(delimiter, 80))
-  endif
+  call add(lines, '`' . repeat(delimiter, 80))
+  call add(lines, '`    OmniSharp Test Runner')
+  call add(lines, '`  ' . repeat(delimiter, 76))
+  call add(lines, '`    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
+  call add(lines, '`    <F5> Run test or tests in file under cursor')
+  call add(lines, '`    <F6> Debug test under cursor')
+  call add(lines, '`    <CR> Navigate to test or stack trace')
+  call add(lines, '`' . repeat(delimiter, 80))
+  return lines
+endfunction
 
+function! s:buffer.paint() abort
+  if get(g:, 'OmniSharp_testrunner_banner', 1)
+    let lines = self.bannerlines()
+  else
+    let lines = []
+  endif
   for key in sort(keys(s:tests))
     let [assembly, sln] = split(key, ';')
     if !s:tests[key].visible | continue | endif
@@ -400,7 +404,12 @@ function! s:UpdateState(bufnr, state, ...) abort
       let tests[testname].output = get(opts, 'output', [])
     endif
   endfor
-  call s:Repaint()
+  let l:winid = win_getid()
+  let l:focused = s:buffer.focus()
+  call s:buffer.paint()
+  if l:focused
+    call win_gotoid(l:winid)
+  endif
 endfunction
 
 function! OmniSharp#testrunner#StateComplete(location) abort
@@ -436,7 +445,17 @@ endfunction
 
 function! OmniSharp#testrunner#ToggleBanner() abort
   let g:OmniSharp_testrunner_banner = 1 - get(g:, 'OmniSharp_testrunner_banner', 1)
-  call s:Paint()
+  if s:buffer.focus()
+    let displayed = getline(1) =~# '`'
+    call setbufvar(s:runner.bufnr, '&modifiable', 1)
+    if g:OmniSharp_testrunner_banner && !displayed
+      call appendbufline(s:runner.bufnr, 0, s:buffer.bannerlines())
+    elseif !g:OmniSharp_testrunner_banner && displayed
+      call deletebufline(s:runner.bufnr, 1, len(s:buffer.bannerlines()))
+    endif
+    call setbufvar(s:runner.bufnr, '&modifiable', 0)
+    call setbufvar(s:runner.bufnr, '&modified', 0)
+  endif
 endfunction
 
 
