@@ -5,6 +5,7 @@ set concealcursor=nv
 set foldlevel=2
 set foldmethod=syntax
 set signcolumn=no
+set synmaxcol=3000
 
 nnoremap <buffer> <Plug>(omnisharp_testrunner_togglebanner) :call OmniSharp#testrunner#ToggleBanner()<CR>
 nnoremap <buffer> <Plug>(omnisharp_testrunner_run) :call OmniSharp#testrunner#Run()<CR>
