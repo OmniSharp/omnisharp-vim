@@ -48,7 +48,6 @@ function! OmniSharp#testrunner#FoldText() abort
   elseif line =~# '^    \f'
     " File
     let filename = trim(line)
-    let fullpath = fnamemodify(filename, ':p')
     let displayname = matchlist(filename, '^\f\{-}\([^/\\]\+\)\.csx\?$')[1]
     " Position the cursor so that search() is relative to the fold, not the
     " actual cursor position
@@ -57,7 +56,7 @@ function! OmniSharp#testrunner#FoldText() abort
     let projectline = search('^;', 'bcnWz')
     call winrestview(winview)
     let projectkey = matchlist(getline(projectline), '^\S\+')[0]
-    let ntests = len(s:tests[projectkey].files[fullpath].tests)
+    let ntests = len(s:tests[projectkey].files[filename].tests)
     return printf('    %s [%d]', displayname, ntests)
   elseif line =~# '^<'
     return printf('  Error details (%d lines)', v:foldend - v:foldstart + 1)
@@ -106,7 +105,7 @@ function! OmniSharp#testrunner#Remove() abort
     let s:tests[projectkey].visible = 0
   elseif line =~# '^    \f'
     " File selected
-    let filename = fnamemodify(trim(line), ':p')
+    let filename = trim(line)
     let projectline = search('^;', 'bcnWz')
     let projectkey = matchlist(getline(projectline), '^\S\+')[0]
     let s:tests[projectkey].files[filename].visible = 0
@@ -225,23 +224,9 @@ function! s:buffer.focus() abort
   return v:false
 endfunction
 
-function! s:buffer.bannerlines() abort
-  let lines = []
-  let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
-  call add(lines, '`' . repeat(delimiter, 80))
-  call add(lines, '`    OmniSharp Test Runner')
-  call add(lines, '`  ' . repeat(delimiter, 76))
-  call add(lines, '`    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
-  call add(lines, '`    <F5> Run test or tests in file under cursor')
-  call add(lines, '`    <F6> Debug test under cursor')
-  call add(lines, '`    <CR> Navigate to test or stack trace')
-  call add(lines, '`' . repeat(delimiter, 80))
-  return lines
-endfunction
-
 function! s:buffer.paint() abort
   if get(g:, 'OmniSharp_testrunner_banner', 1)
-    let lines = self.bannerlines()
+    let lines = self.paintbanner()
   else
     let lines = []
   endif
@@ -271,33 +256,10 @@ function! s:buffer.paint() abort
     for testfile in sort(keys(s:tests[key].files))
       if !s:tests[key].files[testfile].visible | continue | endif
       let tests = s:tests[key].files[testfile].tests
-      call add(lines, '    ' . fnamemodify(testfile, ':.'))
+      call add(lines, '    ' . testfile)
       for name in sort(keys(tests), {a,b -> tests[a].lnum > tests[b].lnum})
         let test = tests[name]
-        if test.state ==# 'hidden' | continue | endif
-        let state = s:utils.state2char[test.state]
-        call add(lines, printf('%s        %s', state, name))
-        if state ==# '-' && !has_key(test, 'spintimer')
-          call s:spinner.start(test, len(lines))
-        endif
-        for messageline in get(test, 'message', [])
-          call add(lines, '>            ' . trim(messageline, ' ', 2))
-        endfor
-        for stacktraceline in get(test, 'stacktrace', [])
-          let line = trim(stacktraceline.text)
-          if has_key(stacktraceline, 'filename')
-            let line = '__ ' . line . ' ___ ' . stacktraceline.filename . ' __ '
-          else
-            let line = '_._ ' . line . ' _._ '
-          endif
-          if has_key(stacktraceline, 'lnum')
-            let line .= 'line ' . stacktraceline.lnum
-          endif
-          call add(lines, '>              ' . line)
-        endfor
-        for outputline in get(test, 'output', [])
-          call add(lines, '//          ' . trim(outputline, ' ', 2))
-        endfor
+        call extend(lines, self.painttest(test, len(lines) + 1))
       endfor
       call add(lines, '__')
     endfor
@@ -314,6 +276,51 @@ function! s:buffer.paint() abort
     call winrestview(winview)
     syn sync fromstart
   endif
+endfunction
+
+function! s:buffer.paintbanner() abort
+  let lines = []
+  let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
+  call add(lines, '`' . repeat(delimiter, 80))
+  call add(lines, '`    OmniSharp Test Runner')
+  call add(lines, '`  ' . repeat(delimiter, 76))
+  call add(lines, '`    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
+  call add(lines, '`    <F5> Run test or tests in file under cursor')
+  call add(lines, '`    <F6> Debug test under cursor')
+  call add(lines, '`    <CR> Navigate to test or stack trace')
+  call add(lines, '`' . repeat(delimiter, 80))
+  return lines
+endfunction
+
+function! s:buffer.painttest(test, lnum) abort
+  if a:test.state ==# 'hidden'
+    return []
+  endif
+  let lines = []
+  let state = s:utils.state2char[a:test.state]
+  call add(lines, printf('%s        %s', state, a:test.name))
+  if state ==# '-' && !has_key(a:test, 'spintimer')
+    call s:spinner.start(a:test, a:lnum)
+  endif
+  for messageline in get(a:test, 'message', [])
+    call add(lines, '>            ' . trim(messageline, ' ', 2))
+  endfor
+  for stacktraceline in get(a:test, 'stacktrace', [])
+    let line = trim(stacktraceline.text)
+    if has_key(stacktraceline, 'filename')
+      let line = '__ ' . line . ' ___ ' . stacktraceline.filename . ' __ '
+    else
+      let line = '_._ ' . line . ' _._ '
+    endif
+    if has_key(stacktraceline, 'lnum')
+      let line .= 'line ' . stacktraceline.lnum
+    endif
+    call add(lines, '>              ' . line)
+  endfor
+  for outputline in get(a:test, 'output', [])
+    call add(lines, '//          ' . trim(outputline, ' ', 2))
+  endfor
+  return lines
 endfunction
 
 
@@ -397,19 +404,33 @@ function! s:UpdateState(bufnr, state, ...) abort
           endif
         endif
       endfor
+      let test = tests[testname]
+      let test.state = a:state
+      let test.message = get(opts, 'message', [])
+      let test.stacktrace = stacktrace
+      let test.output = get(opts, 'output', [])
 
-      let tests[testname].state = a:state
-      let tests[testname].message = get(opts, 'message', [])
-      let tests[testname].stacktrace = stacktrace
-      let tests[testname].output = get(opts, 'output', [])
+      call setbufvar(s:runner.bufnr, '&modifiable', 1)
+      let lines = getbufline(s:runner.bufnr, 1, '$')
+      let pattern = '^    ' . substitute(filename, '/', '\\/', 'g')
+      let fileline = match(lines, pattern) + 1
+      let pattern = '^[-|*!]        ' . testname
+      let testline = match(lines, pattern, fileline) + 1
+
+      let patterns = ['^[-|*!]        \S', '^__$', '^$']
+      let endline = min(
+      \ filter(
+      \   map(
+      \     patterns,
+      \     {_,pattern -> match(lines, pattern, testline)}),
+      \   {_,matchline -> matchline >= testline}))
+      let testlines = s:buffer.painttest(test, testline)
+      call deletebufline(s:runner.bufnr, testline, endline)
+      call appendbufline(s:runner.bufnr, testline - 1, testlines)
+      call setbufvar(s:runner.bufnr, '&modifiable', 0)
+      call setbufvar(s:runner.bufnr, '&modified', 0)
     endif
   endfor
-  let l:winid = win_getid()
-  let l:focused = s:buffer.focus()
-  call s:buffer.paint()
-  if l:focused
-    call win_gotoid(l:winid)
-  endif
 endfunction
 
 function! OmniSharp#testrunner#StateComplete(location) abort
@@ -449,9 +470,9 @@ function! OmniSharp#testrunner#ToggleBanner() abort
     let displayed = getline(1) =~# '`'
     call setbufvar(s:runner.bufnr, '&modifiable', 1)
     if g:OmniSharp_testrunner_banner && !displayed
-      call appendbufline(s:runner.bufnr, 0, s:buffer.bannerlines())
+      call appendbufline(s:runner.bufnr, 0, s:buffer.paintbanner())
     elseif !g:OmniSharp_testrunner_banner && displayed
-      call deletebufline(s:runner.bufnr, 1, len(s:buffer.bannerlines()))
+      call deletebufline(s:runner.bufnr, 1, len(s:buffer.paintbanner()))
     endif
     call setbufvar(s:runner.bufnr, '&modifiable', 0)
     call setbufvar(s:runner.bufnr, '&modified', 0)
@@ -481,7 +502,6 @@ let s:spinner.steps_utf8 = [
 function! s:spinner.spin(test, lnum, timer) abort
   if s:utils.state2char[a:test.state] !=# '-'
     call timer_stop(a:timer)
-    return
   endif
   let lnum = a:lnum + (get(g:, 'OmniSharp_testrunner_banner', 1) ? 8 : 0)
   let lines = getbufline(s:runner.bufnr, lnum)
@@ -489,14 +509,20 @@ function! s:spinner.spin(test, lnum, timer) abort
     call timer_stop(a:timer)
     return
   endif
+  " TODO: find the test by name, instead of line number
   let line = lines[0]
   let steps = get(g:, 'OmniSharp_testrunner_spinnersteps',
   \ get(g:, 'OmniSharp_testrunner_spinner_ascii')
   \   ? self.steps_ascii : self.steps_utf8)
   if !has_key(a:test.spinner, 'index')
+    " Starting
     let line .= '  -- ' . steps[0]
     let a:test.spinner.index = 0
+  elseif s:utils.state2char[a:test.state] !=# '-'
+    " Stopping
+    let line = substitute(line, '  -- .*$', '', '')
   else
+    " Stepping
     let a:test.spinner.index += 1
     if a:test.spinner.index >= len(steps)
       let a:test.spinner.index = 0
@@ -545,7 +571,6 @@ function! s:utils.findTest() abort
     let projectkey = matchlist(getline(projectline), '^\S\+')[0]
     let fileline = search('^    \f', 'bcnWz')
     let filename = matchlist(getline(fileline), '^    \zs.*$')[0]
-    let filename = fnamemodify(filename, ':p')
     return s:tests[projectkey].files[filename].tests[testname]
   endif
   return {}
