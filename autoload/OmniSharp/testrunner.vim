@@ -351,18 +351,27 @@ endfunction
 
 
 function! OmniSharp#testrunner#SetTests(bufferTests) abort
-  let winid = win_getid()
+  let hasNew = v:false
   for buffer in a:bufferTests
     let [sln, assembly, key] = s:utils.getProject(buffer.bufnr)
+    if !has_key(s:tests, key) || !s:tests[key].visible
+      let hasNew = v:true
+    endif
     let project = get(s:tests, key, { 'files': {}, 'errors': [] })
     let project.visible = 1
     let s:tests[key] = project
     let filename = fnamemodify(bufname(buffer.bufnr), ':p')
     let testfile = get(project.files, filename, { 'tests': {} })
+    if !get(testfile, 'visible', 0)
+      let hasNew = v:true
+    endif
     let testfile.visible = 1
     let project.files[filename] = testfile
     for buffertest in buffer.tests
       let name = buffertest.name
+      if !has_key(testfile.tests, name)
+        let hasNew = v:true
+      endif
       let test = get(testfile.tests, name, { 'state': 'Not run' })
       let testfile.tests[name] = test
       let test.name = name
@@ -373,8 +382,19 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
       let test.lnum = buffertest.nameRange.Start.Line
     endfor
   endfor
-  call s:Open()
-  call win_gotoid(winid)
+  let winid = win_getid()
+  if hasNew
+    call s:Open()
+    call win_gotoid(winid)
+  elseif s:buffer.focus()
+    for buffer in a:bufferTests
+      let filename = fnamemodify(bufname(buffer.bufnr), ':p')
+      let pattern = '^    ' . substitute(filename, '/', '\\/', 'g')
+      call search(pattern, 'cw')
+      normal! 5zo
+    endfor
+    call win_gotoid(winid)
+  endif
 endfunction
 
 
@@ -431,6 +451,11 @@ function! s:UpdateState(bufnr, state, ...) abort
       call setbufvar(s:runner.bufnr, '&modified', 0)
     endif
   endfor
+  let winid = win_getid()
+  if s:buffer.focus()
+    syn sync fromstart
+    call win_gotoid(winid)
+  endif
 endfunction
 
 function! OmniSharp#testrunner#StateComplete(location) abort
