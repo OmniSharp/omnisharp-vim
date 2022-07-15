@@ -71,6 +71,7 @@ hi def link ostStackLoc Identifier
 hi def link ostOutput Comment
 
 " Highlights for normally concealed elements
+hi def link ostBannerPrefix NonText
 hi def link ostProjectDelimiter NonText
 hi def link ostErrorPrefix NonText
 hi def link ostFileDivider NonText
