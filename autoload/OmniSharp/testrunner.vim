@@ -298,7 +298,16 @@ function! s:buffer.painttest(test, lnum) abort
   endif
   let lines = []
   let state = s:utils.state2char[a:test.state]
-  call add(lines, printf('%s        %s', state, a:test.name))
+  let glyph = ''
+  if state ==# '*' && get(g:, 'OmniSharp_testrunner_glyph', 1)
+    let glyph = get(g:, 'OmniSharp_testrunner_glyph_passed', '✔')
+  elseif state ==# '!' && get(g:, 'OmniSharp_testrunner_glyph', 1)
+    let glyph = get(g:, 'OmniSharp_testrunner_glyph_failed', '✘')
+  endif
+  if glyph !=# ''
+    let glyph = printf('|| %s || ', glyph)
+  endif
+  call add(lines, printf('%s        %s%s', state, glyph, a:test.name))
   if state ==# '-' && !has_key(a:test, 'spintimer')
     call s:spinner.start(a:test, a:lnum)
   endif
@@ -434,7 +443,7 @@ function! s:UpdateState(bufnr, state, ...) abort
       let lines = getbufline(s:runner.bufnr, 1, '$')
       let pattern = '^    ' . substitute(filename, '/', '\\/', 'g')
       let fileline = match(lines, pattern) + 1
-      let pattern = '^[-|*!]        ' . testname
+      let pattern = '^[-|*!]        \%(|| .\{-} || \)\?' . testname
       let testline = match(lines, pattern, fileline) + 1
 
       let patterns = ['^[-|*!]        \S', '^__$', '^$']
@@ -591,7 +600,8 @@ function! s:utils.findTest() abort
     let testline = search(testpattern, 'bcnWz')
   endif
   if testline > 0
-    let testname = matchlist(getline(testline), '[-|*!]        \zs.*$')[0]
+    let line = getline(testline)
+    let testname = matchlist(line, '[-|*!]        \%(|| .\{-} || \)\?\zs.*$')[0]
     let projectline = search('^;', 'bcnWz')
     let projectkey = matchlist(getline(projectline), '^\S\+')[0]
     let fileline = search('^    \f', 'bcnWz')
