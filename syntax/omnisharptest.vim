@@ -32,14 +32,18 @@ syn match ostFileDivider "^__$" conceal
 
 syn match ostStateNotRun "^|.*" contains=ostStatePrefix,ostTestNamespace
 syn match ostStateRunning "^-.*" contains=ostStatePrefix,ostTestNamespace,ostRunningSuffix
-syn match ostStatePassed "^\*.*" contains=ostStatePrefix,ostTestNamespace
-syn match ostStateFailed "^!.*" contains=ostStatePrefix,ostTestNamespace
+syn match ostStatePassed "^\*.*" contains=ostStatePrefix,ostTestNamespace,ostStatePassedGlyph,ostCompletePrefixDivider
+syn match ostStateFailed "^!.*" contains=ostStatePrefix,ostTestNamespace,ostStateFailedGlyph,ostCompletePrefixDivider
 syn match ostStatePrefix "^[|\*!-]" conceal contained
 syn match ostTestNamespace "\%(\w\+\.\)*\ze\w\+" conceal contained
 
 syn match ostRunningSuffix "  -- .*" contained contains=ostRunningSpinner,ostRunningSuffixDivider
 syn match ostRunningSuffixDivider "  \zs--" conceal contained
 syn match ostRunningSpinner "  -- \zs.*" contained
+
+syn match ostStatePassedGlyph "\%(|| \)\@<=.\{-}\ze || " contained
+syn match ostStateFailedGlyph "\%(|| \)\@<=.\{-}\ze || " contained
+syn match ostCompletePrefixDivider "|| " conceal contained
 
 syn region ostFailure start="^>" end="^[^>]"me=s-1 contains=ostFailurePrefix,ostStackLoc,ostStackNoLoc fold
 syn match ostFailurePrefix "^>" conceal contained
@@ -66,7 +70,9 @@ hi def link ostStateNotRun Comment
 hi def link ostStateRunning Identifier
 hi def link ostRunningSpinner Normal
 hi def link ostStatePassed Title
+hi def link ostStatePassedGlyph Title
 hi def link ostStateFailed WarningMsg
+hi def link ostStateFailedGlyph WarningMsg
 hi def link ostStackLoc Identifier
 hi def link ostOutput Comment
 
@@ -78,6 +84,7 @@ hi def link ostFileDivider NonText
 hi def link ostStatePrefix NonText
 hi def link ostFailurePrefix NonText
 hi def link ostRunningSuffixDivider NonText
+hi def link ostCompletePrefixDivider NonText
 hi def link ostStackDelimiter NonText
 hi def link ostStackFileDelimiter NonText
 hi def link ostStackNoLocDelimiter NonText
