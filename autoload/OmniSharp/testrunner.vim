@@ -391,6 +391,7 @@ function! OmniSharp#testrunner#SetTests(bufferTests) abort
       let test.lnum = buffertest.nameRange.Start.Line
     endfor
   endfor
+  if !get(g:, 'OmniSharp_testrunner', 1) | return | endif
   let winid = win_getid()
   if hasNew
     call s:Open()
@@ -439,6 +440,7 @@ function! s:UpdateState(bufnr, state, ...) abort
       let test.stacktrace = stacktrace
       let test.output = get(opts, 'output', [])
 
+      if !has_key(s:runner, 'bufnr') | continue | endif
       call setbufvar(s:runner.bufnr, '&modifiable', 1)
       let lines = getbufline(s:runner.bufnr, 1, '$')
       let pattern = '^    ' . substitute(filename, '/', '\\/', 'g')
@@ -460,6 +462,7 @@ function! s:UpdateState(bufnr, state, ...) abort
       call setbufvar(s:runner.bufnr, '&modified', 0)
     endif
   endfor
+  if !get(g:, 'OmniSharp_testrunner', 1) | return | endif
   let winid = win_getid()
   if s:buffer.focus()
     syn sync fromstart
