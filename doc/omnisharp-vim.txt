@@ -390,10 +390,10 @@ Default: atcursor >
 3.5 TESTS                                                *omnisharp-test-options*
 
                                                *g:OmniSharp_runtests_echo_output*
-When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|,
-echo all test runner output to the |message-history|, so it can be viewed with
-|:messages|.
-Default: 1
+When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|
+or from the test runner, echo all test runner output to the |message-history|,
+so it can be viewed with |:messages|.
+Default: 0
 
                                                   *g:OmniSharp_runtests_parallel*
 When running multiple unit test files with |:OmniSharpRunTestsInFile|, run
