@@ -416,6 +416,10 @@ failed test locations point to the failed assertion; successful test locations
 point to the test method declaration.
 Default: 0
 
+                                                         *g:OmniSharp_testrunner*
+Open the |omnisharp-testrunner| automatically when running tests.
+Default: 1
+
 -------------------------------------------------------------------------------
 3.6 INTEGRATIONS                                  *omnisharp-integration-options*
 
