@@ -159,7 +159,7 @@ function! s:run.single.complete(summary) abort
   else
     echomsg location.name . ': failed'
     let title = 'Test failure: ' . location.name
-    if get(g:, 'OmniSharp_test_quickfix', 1) == 0 | return | endif
+    if get(g:, 'OmniSharp_runtests_quickfix', 0) == 0 | return | endif
     let what = {}
     if len(a:summary.locations) > 1
       let what.quickfixtextfunc = {info->
@@ -274,7 +274,7 @@ function! s:run.multiple.complete(summary) abort
     endif
     call s:utils.log.warn(title)
   endif
-  if get(g:, 'OmniSharp_test_quickfix', 1) == 0 | return | endif
+  if get(g:, 'OmniSharp_runtests_quickfix', 0) == 0 | return | endif
   call OmniSharp#locations#SetQuickfix(locations, title)
 endfunction
 
