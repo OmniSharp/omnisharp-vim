@@ -68,9 +68,12 @@ function! OmniSharp#util#AwaitSequence(Funcs, OnAllComplete, ...) abort
     \}
   endif
 
-  let Func = remove(a:Funcs, 0)
+  " If the Func has been declared as a dictionary function, then it must be
+  " called as a dictionary function:
+  " function s:run.test()
+  let dict = { 'f': remove(a:Funcs, 0) }
   let state.OnComplete = function('OmniSharp#util#AwaitSequence', [a:Funcs, a:OnAllComplete])
-  call Func(function('s:AwaitFuncComplete', [state]))
+  call dict.f(function('s:AwaitFuncComplete', [state]))
 endfunction
 
 function! s:AwaitFuncComplete(state, ...) abort
