@@ -405,6 +405,17 @@ test files in sequence instead, resulting in readable output in the
 |message-history|.
 Default: 1
 
+                                                  *g:OmniSharp_runtests_quickfix*
+When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|
+or from the |omnisharp-testrunner|, populate the quickfix list with test
+results.
+When a single test is run and an exception occurs, the quickfix will be
+populated with the exception stack trace.
+When multiple tests are run then each test will get a quickfix location:
+failed test locations point to the failed assertion; successful test locations
+point to the test method declaration.
+Default: 0
+
 -------------------------------------------------------------------------------
 3.6 INTEGRATIONS                                  *omnisharp-integration-options*
 
