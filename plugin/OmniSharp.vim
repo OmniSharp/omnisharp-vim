@@ -39,7 +39,7 @@ let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 let g:OmniSharp_diagnostic_listen = get(g:, 'OmniSharp_diagnostic_listen', 2)
 
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
-let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 1)
+let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 0)
 
 " Set to 1 when ultisnips is installed
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
