@@ -211,6 +211,10 @@ endfunction
 
 
 let s:buffer = {}
+function! s:buffer.delimiter() abort
+  return get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
+endfunction
+
 function! s:buffer.focus() abort
   if !has_key(s:runner, 'bufnr') | return | endif
   if getbufvar(s:runner.bufnr, '&ft') !=# 'omnisharptest' | return | endif
@@ -231,28 +235,7 @@ function! s:buffer.paint() abort
     let lines = []
   endif
   for key in sort(keys(s:tests))
-    let [assembly, sln] = split(key, ';')
-    if !s:tests[key].visible | continue | endif
-    call add(lines, key . (len(s:tests[key].errors) ? ' ERROR' : ''))
-    for errorline in s:tests[key].errors
-      call add(lines, '<  ' . trim(errorline, ' ', 2))
-    endfor
-    let loglevel = get(g:, 'OmniSharp_testrunner_loglevel', 'error')
-    if loglevel ==? 'all' || (loglevel ==? 'error' && len(s:tests[key].errors))
-      " The diagnostic logs (build output) are only displayed when a single file
-      " is tested, otherwise multiple build outputs are intermingled
-      if s:current.singlebuffer != -1
-        let [ssln, sass, _] = s:utils.getProject(s:current.singlebuffer)
-        if ssln ==# sln && sass ==# assembly
-          if len(s:tests[key].errors) > 0 && len(s:current.log) > 1
-            call add(lines, '<  ' . repeat(delimiter, 10))
-          endif
-          for log in s:current.log
-            call add(lines, '<  ' . trim(log, ' ', 2))
-          endfor
-        endif
-      endif
-    endif
+    call extend(lines, self.paintproject(key))
     for testfile in sort(keys(s:tests[key].files))
       if !s:tests[key].files[testfile].visible | continue | endif
       let tests = s:tests[key].files[testfile].tests
@@ -280,16 +263,59 @@ endfunction
 
 function! s:buffer.paintbanner() abort
   let lines = []
-  let delimiter = get(g:, 'OmniSharp_testrunner_banner_delimeter', '─')
-  call add(lines, '`' . repeat(delimiter, 80))
+  call add(lines, '`' . repeat(self.delimiter(), 80))
   call add(lines, '`    OmniSharp Test Runner')
-  call add(lines, '`  ' . repeat(delimiter, 76))
+  call add(lines, '`  ' . repeat(self.delimiter(), 76))
   call add(lines, '`    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
   call add(lines, '`    <F5> Run test or tests in file under cursor')
   call add(lines, '`    <F6> Debug test under cursor')
   call add(lines, '`    <CR> Navigate to test or stack trace')
-  call add(lines, '`' . repeat(delimiter, 80))
+  call add(lines, '`' . repeat(self.delimiter(), 80))
   return lines
+endfunction
+
+function! s:buffer.paintproject(key) abort
+  let [assembly, sln] = split(a:key, ';')
+  if !s:tests[a:key].visible
+    return []
+  endif
+  let lines = []
+  call add(lines, a:key . (len(s:tests[a:key].errors) ? ' ERROR' : ''))
+  for errorline in s:tests[a:key].errors
+    call add(lines, '<  ' . trim(errorline, ' ', 2))
+  endfor
+  let loglevel = get(g:, 'OmniSharp_testrunner_loglevel', 'error')
+  if loglevel ==? 'all' || (loglevel ==? 'error' && len(s:tests[a:key].errors))
+    " The diagnostic logs (build output) are only displayed when a single file
+    " is tested, otherwise multiple build outputs are intermingled
+    if s:current.singlebuffer != -1
+      let [ssln, sass, _] = s:utils.getProject(s:current.singlebuffer)
+      if ssln ==# sln && sass ==# assembly
+        if len(s:tests[a:key].errors) > 0 && len(s:current.log) > 1
+          call add(lines, '<  ' . repeat(self.delimiter(), 10))
+        endif
+        for log in s:current.log
+          call add(lines, '<  ' . trim(log, ' ', 2))
+        endfor
+      endif
+    endif
+  endif
+  return lines
+endfunction
+
+function! s:buffer.repaintproject(key) abort
+  if !has_key(s:runner, 'bufnr') | return | endif
+  let projectlines = s:buffer.paintproject(a:key)
+  call setbufvar(s:runner.bufnr, '&modifiable', 1)
+  let lines = getbufline(s:runner.bufnr, 1, '$')
+  let pattern = '^' . substitute(a:key, '/', '\\/', 'g')
+  let projectline = match(lines, pattern) + 1
+  let pattern = '^ '
+  let endline = match(lines, '^ ', projectline)
+  call deletebufline(s:runner.bufnr, projectline, endline)
+  call appendbufline(s:runner.bufnr, projectline - 1, projectlines)
+  call setbufvar(s:runner.bufnr, '&modifiable', 0)
+  call setbufvar(s:runner.bufnr, '&modified', 0)
 endfunction
 
 function! s:buffer.painttest(test, lnum) abort
@@ -330,6 +356,27 @@ function! s:buffer.painttest(test, lnum) abort
     call add(lines, '//          ' . trim(outputline, ' ', 2))
   endfor
   return lines
+endfunction
+
+function! s:buffer.repainttest(filename, testname, test) abort
+  if !has_key(s:runner, 'bufnr') | return | endif
+  call setbufvar(s:runner.bufnr, '&modifiable', 1)
+  let lines = getbufline(s:runner.bufnr, 1, '$')
+  let pattern = '^    ' . substitute(a:filename, '/', '\\/', 'g')
+  let fileline = match(lines, pattern) + 1
+  let pattern = '^[-|*!]        \%(|| .\{-} || \)\?' . a:testname
+  let testline = match(lines, pattern, fileline) + 1
+  let endline = min(
+  \ filter(
+  \   map(
+  \     ['^[-|*!]        \S', '^__$', '^$'],
+  \     {_,pattern -> match(lines, pattern, testline)}),
+  \   {_,matchline -> matchline >= testline}))
+  let testlines = s:buffer.painttest(a:test, testline)
+  call deletebufline(s:runner.bufnr, testline, endline)
+  call appendbufline(s:runner.bufnr, testline - 1, testlines)
+  call setbufvar(s:runner.bufnr, '&modifiable', 0)
+  call setbufvar(s:runner.bufnr, '&modified', 0)
 endfunction
 
 
@@ -439,27 +486,8 @@ function! s:UpdateState(bufnr, state, ...) abort
       let test.message = get(opts, 'message', [])
       let test.stacktrace = stacktrace
       let test.output = get(opts, 'output', [])
-
-      if !has_key(s:runner, 'bufnr') | continue | endif
-      call setbufvar(s:runner.bufnr, '&modifiable', 1)
-      let lines = getbufline(s:runner.bufnr, 1, '$')
-      let pattern = '^    ' . substitute(filename, '/', '\\/', 'g')
-      let fileline = match(lines, pattern) + 1
-      let pattern = '^[-|*!]        \%(|| .\{-} || \)\?' . testname
-      let testline = match(lines, pattern, fileline) + 1
-
-      let patterns = ['^[-|*!]        \S', '^__$', '^$']
-      let endline = min(
-      \ filter(
-      \   map(
-      \     patterns,
-      \     {_,pattern -> match(lines, pattern, testline)}),
-      \   {_,matchline -> matchline >= testline}))
-      let testlines = s:buffer.painttest(test, testline)
-      call deletebufline(s:runner.bufnr, testline, endline)
-      call appendbufline(s:runner.bufnr, testline - 1, testlines)
-      call setbufvar(s:runner.bufnr, '&modifiable', 0)
-      call setbufvar(s:runner.bufnr, '&modified', 0)
+      call s:buffer.repaintproject(key)
+      call s:buffer.repainttest(filename, testname, test)
     endif
   endfor
   if !get(g:, 'OmniSharp_testrunner', 1) | return | endif
