@@ -235,6 +235,7 @@ function! s:buffer.paint() abort
     let lines = []
   endif
   for key in sort(keys(s:tests))
+    if !s:tests[key].visible | continue | endif
     call extend(lines, self.paintproject(key))
     for testfile in sort(keys(s:tests[key].files))
       if !s:tests[key].files[testfile].visible | continue | endif
@@ -276,9 +277,6 @@ endfunction
 
 function! s:buffer.paintproject(key) abort
   let [assembly, sln] = split(a:key, ';')
-  if !s:tests[a:key].visible
-    return []
-  endif
   let lines = []
   call add(lines, a:key . (len(s:tests[a:key].errors) ? ' ERROR' : ''))
   for errorline in s:tests[a:key].errors
