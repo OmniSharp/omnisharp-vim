@@ -264,7 +264,7 @@ endfunction
 function! s:buffer.paintbanner() abort
   let lines = []
   call add(lines, '`' . repeat(self.delimiter(), 80))
-  call add(lines, '`    OmniSharp Test Runner')
+  call add(lines, '`                             OmniSharp Test Runner')
   call add(lines, '`  ' . repeat(self.delimiter(), 76))
   call add(lines, '`    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
   call add(lines, '`    <F5> Run test or tests in file under cursor')
