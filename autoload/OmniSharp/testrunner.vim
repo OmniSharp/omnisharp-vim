@@ -630,7 +630,7 @@ function! s:utils.findTest() abort
   endif
   if testline > 0
     let line = getline(testline)
-    let testname = matchlist(line, '[-|*!]        \%(|| .\{-} || \)\?\zs.*$')[0]
+    let testname = matchlist(line, '[-|*!]        \%(|| .\{-} || \)\?\zs\S*')[0]
     let projectline = search('^;', 'bcnWz')
     let projectkey = matchlist(getline(projectline), '^\S\+')[0]
     let fileline = search('^    \f', 'bcnWz')
