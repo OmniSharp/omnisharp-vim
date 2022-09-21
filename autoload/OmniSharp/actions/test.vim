@@ -298,12 +298,15 @@ function! s:run.process(Callback, bufnr, tests, response) abort
   \ 'locations': []
   \}
   for result in a:response.Body.Results
+    " Strip method signature from test method fullname
+    let fullname = substitute(result.MethodName, '(.*)$', '', '')
     " Strip namespace and classname from test method name
+    let name = substitute(result.MethodName, '^.*\.', '', '')
     let location = {
     \ 'bufnr': a:bufnr,
-    \ 'fullname': result.MethodName,
+    \ 'fullname': fullname,
     \ 'filename': bufname(a:bufnr),
-    \ 'name': substitute(result.MethodName, '^.*\.', '', '')
+    \ 'name': name
     \}
     let locations = [location]
     " Write any standard output to message-history
