@@ -504,7 +504,7 @@ function! OmniSharp#testrunner#StateComplete(location) abort
   else
     let state = 'Passed'
   endif
-  call s:UpdateState(a:.location.bufnr, state, {
+  call s:UpdateState(a:location.bufnr, state, {
   \ 'testnames': [a:location.fullname],
   \ 'message': get(a:location, 'message', []),
   \ 'stacktrace': get(a:location, 'stacktrace', []),
