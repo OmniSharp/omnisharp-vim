@@ -12,6 +12,49 @@ function! OmniSharp#testrunner#GetTests() abort
 endfunction
 
 
+" Discover all tests in the project.
+" Optional argument: A dict containing the following optional items:
+"  Callback: funcref to be called after the response is returned
+"  Display: flag indicating that the tests should immediately be displayed in
+"   the testrunner
+function! OmniSharp#testrunner#Discover(bufnr, ...) abort
+  if a:0 && type(a:1) == type(function('tr'))
+    let opts = { 'Callback': a:1 }
+  else
+    let opts = a:0 ? a:1 : {}
+  endif
+  let opts.Display = get(opts, 'Display', 1)
+  if !has_key(OmniSharp#GetHost(a:bufnr), 'project')
+    " Fetch the project structure, then call this function again
+    call OmniSharp#actions#project#Get(a:bufnr,
+    \ function('OmniSharp#testrunner#Discover', [a:bufnr, opts]))
+    return
+  endif
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let opts = {
+  \ 'ResponseHandler': function('s:DiscoverRH', [a:bufnr, opts]),
+  \ 'BufNum': a:bufnr,
+  \ 'Parameters': {
+  \   'TargetFrameworkVersion': project['MsBuildProject']['TargetFramework']
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  call OmniSharp#stdio#Request('/v2/discovertests', opts)
+endfunction
+
+function! s:DiscoverRH(bufnr, opts, response) abort
+  if !a:response.Success | return | endif
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let project.tests = a:response.Body.Tests
+  if a:opts.Display
+    " TODO: add tests to testrunner display
+  endif
+  if has_key(a:opts, 'Callback')
+    call a:opts.Callback(a:response)
+  endif
+endfunction
+
+
 function! OmniSharp#testrunner#Debug() abort
   let filename = ''
   let line = getline('.')
