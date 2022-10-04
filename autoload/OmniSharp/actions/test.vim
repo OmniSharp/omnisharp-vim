@@ -26,9 +26,10 @@ function! s:debug.prepare(testName, bufferTests) abort
   let bufnr = a:bufferTests[0].bufnr
   let tests = a:bufferTests[0].tests
   let currentTest = s:utils.findTest(tests, a:testName)
-  if type(currentTest) != type({})
+  if type(currentTest) != type([]) || len(currentTest) == 0
     return s:utils.log.warn('No test found')
   endif
+  let currentTest = currentTest[0]
   let project = OmniSharp#GetHost(bufnr).project
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
@@ -120,18 +121,21 @@ function! s:run.single.test(testName, bufferTests) abort
   let bufnr = a:bufferTests[0].bufnr
   let tests = a:bufferTests[0].tests
   let currentTest = s:utils.findTest(tests, a:testName)
-  if type(currentTest) != type({})
+  if type(currentTest) != type([]) || len(currentTest) == 0
     return s:utils.log.warn('No test found')
   endif
   let s:run.running = 1
-  call OmniSharp#testrunner#StateRunning(bufnr, currentTest.name)
+  for ct in currentTest
+    call OmniSharp#testrunner#StateRunning(bufnr, ct.name)
+  endfor
+  let currentTest = currentTest[0]
   let project = OmniSharp#GetHost(bufnr).project
   let targetFramework = project.MsBuildProject.TargetFramework
   let opts = {
   \ 'ResponseHandler': funcref('s:run.process', [s:run.single.complete, bufnr, tests]),
   \ 'BufNum': bufnr,
   \ 'Parameters': {
-  \   'MethodName': currentTest.name,
+  \   'MethodName': substitute(currentTest.name, '(.*)$', '', ''),
   \   'NoBuild': get(s:, 'nobuild', 0),
   \   'TestFrameworkName': currentTest.framework,
   \   'TargetFrameworkVersion': targetFramework
@@ -143,6 +147,13 @@ function! s:run.single.test(testName, bufferTests) abort
 endfunction
 
 function! s:run.single.complete(summary) abort
+  if len(a:summary.locations) > 1
+    " A single test was run, but multiple test results were returned. This can
+    " happen when using e.g. NUnit TestCaseSources which re-run the test using
+    " different arguments.
+    call s:run.multiple.complete([a:summary])
+    return
+  endif
   if a:summary.pass && len(a:summary.locations) == 0
     echomsg 'No tests were run'
     " Do we ever reach here?
@@ -357,9 +368,9 @@ function! s:run.process(Callback, bufnr, tests, response) abort
     if !has_key(location, 'lnum')
       " Success, or unexpected test failure.
       let test = s:utils.findTest(a:tests, result.MethodName)
-      if type(test) == type({})
-        let location.lnum = test.nameRange.Start.Line
-        let location.col = test.nameRange.Start.Column
+      if type(test) == type([]) && len(test) > 0
+        let location.lnum = test[0].nameRange.Start.Line
+        let location.col = test[0].nameRange.Start.Column
         let location.vcol = 0
       endif
     endif
@@ -433,17 +444,21 @@ endfunction
 
 " Find the test in a list of tests that matches the current cursor position
 function! s:utils.findTest(tests, testName) abort
-  for test in a:tests
-    if a:testName !=# ''
+  if a:testName !=# ''
+    for test in a:tests
       if test.name ==# a:testName
-        return test
+        return [test]
       endif
-    else
+    endfor
+  else
+    let found = []
+    for test in a:tests
       if line('.') >= test.range.Start.Line && line('.') <= test.range.End.Line
-        return test
+        call add(found, test)
       endif
-    endif
-  endfor
+    endfor
+    return found
+  endif
   return 0
 endfunction
 
