@@ -298,15 +298,11 @@ function! s:run.process(Callback, bufnr, tests, response) abort
   \ 'locations': []
   \}
   for result in a:response.Body.Results
-    " Strip method signature from test method fullname
-    let fullname = substitute(result.MethodName, '(.*)$', '', '')
-    " Strip namespace and classname from test method name
-    let name = substitute(result.MethodName, '^.*\.', '', '')
     let location = {
     \ 'bufnr': a:bufnr,
-    \ 'fullname': fullname,
+    \ 'fullname': result.MethodName,
     \ 'filename': bufname(a:bufnr),
-    \ 'name': name
+    \ 'name': substitute(result.MethodName, '^.*\.', '', '')
     \}
     let locations = [location]
     " Write any standard output to message-history
@@ -393,22 +389,44 @@ function! s:utils.capabilities() abort
 endfunction
 
 " Find all of the test methods in a CodeStructure response
-function! s:utils.extractTests(codeElements) abort
+function! s:utils.extractTests(bufnr, codeElements) abort
   if type(a:codeElements) != type([]) | return [] | endif
+  let filename = fnamemodify(bufname(a:bufnr), ':p')
+  let testlines = map(
+  \ filter(
+  \   copy(OmniSharp#GetHost(a:bufnr).project.tests),
+  \   {_,dt -> dt.CodeFilePath ==# filename}),
+  \ {_,dt -> dt.LineNumber})
   let tests = []
   for element in a:codeElements
     if has_key(element, 'Properties')
     \ && type(element.Properties) == type({})
     \ && has_key(element.Properties, 'testMethodName')
     \ && has_key(element.Properties, 'testFramework')
-      call add(tests, {
-      \ 'name': element.Properties.testMethodName,
-      \ 'framework': element.Properties.testFramework,
-      \ 'range': element.Ranges.full,
-      \ 'nameRange': element.Ranges.name,
-      \})
+      " Compare with project discovered tests. Note that test discovery may
+      " include a test multiple times, if the test can be run with different
+      " arguments (e.g. NUnit TestCaseSource)
+
+      " Discovered test line numbers begin at the first line of code, not the
+      " line containing the test name, so when the method opening brace is not
+      " on the same line as the test method name, the line numbers will not
+      " match. We therefore search ahead for the closest line number, and use
+      " that.
+      let testStart = element.Ranges.name.Start.Line
+      let testStart = min(filter(copy(testlines), {_,l -> l >= testStart}))
+      for dt in OmniSharp#GetHost(a:bufnr).project.tests
+        if dt.CodeFilePath ==# filename && dt.LineNumber == testStart
+          " \ 'name': element.Properties.testMethodName,
+          call add(tests, {
+          \ 'name': dt.FullyQualifiedName,
+          \ 'framework': element.Properties.testFramework,
+          \ 'range': element.Ranges.full,
+          \ 'nameRange': element.Ranges.name,
+          \})
+        endif
+      endfor
     endif
-    call extend(tests, self.extractTests(get(element, 'Children', [])))
+    call extend(tests, self.extractTests(a:bufnr, get(element, 'Children', [])))
   endfor
   return tests
 endfunction
@@ -429,12 +447,13 @@ function! s:utils.findTest(tests, testName) abort
   return 0
 endfunction
 
-" For the given buffers, fetch the project structures, then fetch the buffer
-" code structures. All operations are performed asynchronously, and the
+" For the given buffers, discover the project's tests (which includes fetching
+" the project structure if it hasn't already been fetched. Finally, fetch the
+" buffer code structures. All operations are performed asynchronously, and the
 " a:Callback is called when all buffer code structures have been fetched.
 function! s:utils.initialize(buffers, Callback) abort
   call OmniSharp#testrunner#Init(a:buffers)
-  call s:utils.init.await(a:buffers, 'OmniSharp#actions#project#Get',
+  call s:utils.init.await(a:buffers, 'OmniSharp#testrunner#Discover',
   \ funcref('s:utils.init.await', [a:buffers, 'OmniSharp#actions#codestructure#Get',
   \   funcref('s:utils.init.extract', [a:Callback])]))
 endfunction
@@ -447,7 +466,7 @@ endfunction
 function! s:utils.init.extract(Callback, codeStructures) abort
   let bufferTests = map(a:codeStructures, {i, cs -> {
   \ 'bufnr': cs[0],
-  \ 'tests': s:utils.extractTests(cs[1])
+  \ 'tests': s:utils.extractTests(cs[0], cs[1])
   \}})
   call OmniSharp#testrunner#SetTests(bufferTests)
   let dict = { 'f': a:Callback }
