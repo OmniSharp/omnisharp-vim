@@ -51,7 +51,7 @@ augroup END
 
 setlocal omnifunc=OmniSharp#Complete
 
-command! -buffer -bar OmniSharpReloadProject call OmniSharp#actions#project#Reload(bufnr())
+command! -buffer -bar -nargs=? -complete=file OmniSharpReloadProject call OmniSharp#actions#project#Reload(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
