@@ -100,6 +100,24 @@ function! OmniSharp#actions#project#CreateDebugConfig(stopAtEntry, ...) abort
   call OmniSharp#actions#project#Get(bufnr, function('CreateDebugConfigCb', [bufnr, a:stopAtEntry, a:000]))
 endfunction
 
+function! OmniSharp#actions#project#Reload(bufnr) abort
+  call OmniSharp#actions#project#Get(a:bufnr, function('s:ReloadCB', [a:bufnr]))
+endfunction
+
+function! s:ReloadCB(bufnr) abort
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let projectFile = project.MsBuildProject.Path
+  let opts = {
+  \ 'BufNum': a:bufnr,
+  \ 'SendBuffer': 0,
+  \ 'Arguments': [{
+  \   'FileName': projectFile,
+  \   'ChangeType': 'Change'
+  \ }]
+  \}
+  call OmniSharp#stdio#Request('/filesChanged', opts)
+endfunction
+
 let &cpoptions = s:save_cpo
 unlet s:save_cpo
 
