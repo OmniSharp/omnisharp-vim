@@ -103,6 +103,13 @@ function! OmniSharp#actions#project#CreateDebugConfig(stopAtEntry, ...) abort
   call OmniSharp#actions#project#Get(bufnr, function('CreateDebugConfigCb', [bufnr, a:stopAtEntry, a:000]))
 endfunction
 
+function! OmniSharp#actions#project#Complete(arglead, cmdline, cursorpos) abort
+  let job = OmniSharp#GetHost(bufnr()).job
+  if !has_key(job, 'projects') | return [] | endif
+  let projectPaths = map(copy(job.projects), {_,p -> fnamemodify(p.path, ':.')})
+  return filter(projectPaths, {_,path -> path =~? a:arglead})
+endfunction
+
 function! OmniSharp#actions#project#Reload(projectFile) abort
   if len(a:projectFile) == 0
     call s:ReloadProjectForBuffer(bufnr())
