@@ -16,9 +16,17 @@ endfunction
 function! OmniSharp#project#RegisterLoaded(job) abort
   if a:job.loaded | return | endif
   if g:OmniSharp_server_display_loading
-    let elapsed = reltimefloat(reltime(a:job.start_time))
-    echomsg printf('Loaded server for %s in %.1fs',
-    \ a:job.sln_or_dir, elapsed)
+    if has_key(a:job, 'restart_time')
+      let elapsed = reltimefloat(reltime(a:job.restart_time))
+      echomsg printf('Reloaded %s in %.1fs',
+      \ a:job.restart_project, elapsed)
+      unlet a:job.restart_time
+      unlet a:job.restart_project
+    else
+      let elapsed = reltimefloat(reltime(a:job.start_time))
+      echomsg printf('Loaded server for %s in %.1fs',
+      \ a:job.sln_or_dir, elapsed)
+    endif
   endif
   let a:job.loaded = 1
   silent doautocmd <nomodeline> User OmniSharpReady

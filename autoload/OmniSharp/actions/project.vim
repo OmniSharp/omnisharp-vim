@@ -129,6 +129,11 @@ function! OmniSharp#actions#project#Reload(projectFile) abort
   \   'ChangeType': 'Change'
   \ }]
   \}
+  let job = OmniSharp#GetHost(bufnr()).job
+  let job.loaded = 0
+  let job.projects_loaded -= 1
+  let job.restart_time = reltime()
+  let job.restart_project = fnamemodify(a:projectFile, ':t')
   call OmniSharp#stdio#Request('/filesChanged', opts)
 endfunction
 
