@@ -115,6 +115,10 @@ function! OmniSharp#actions#project#Reload(projectFile) abort
     call s:ReloadProjectForBuffer(bufnr())
     return
   endif
+  if !filereadable(a:projectFile)
+    call OmniSharp#util#EchoErr('File ' . a:projectFile . ' cannot be read')
+    return
+  endif
   echohl Title
   echomsg 'Reloading ' . fnamemodify(a:projectFile, ':t')
   echohl None
