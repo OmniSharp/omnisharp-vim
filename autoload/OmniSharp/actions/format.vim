@@ -35,7 +35,7 @@ function! s:StdioFormatRH(Callback, response) abort
   let winview = winsaveview()
   call OmniSharp#buffer#Update(a:response.Body)
   call winrestview(winview)
-  normal! ``
+  silent! normal! ``
   call a:Callback()
 endfunction
 
