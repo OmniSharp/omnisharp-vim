@@ -12,18 +12,19 @@ function! OmniSharp#actions#usings#Fix(...) abort
     let Callback = function('s:CBFixUsings')
   endif
 
+  let bufnr = bufnr('%')
   if g:OmniSharp_server_stdio
-    call s:StdioFix(Callback)
+    call s:StdioFix(Callback, bufnr)
   else
     let locs = OmniSharp#py#Eval('fixUsings()')
     if OmniSharp#py#CheckForError() | return | endif
-    return Callback(locs)
+    return Callback(locs, bufnr)
   endif
 endfunction
 
-function! s:StdioFix(Callback) abort
+function! s:StdioFix(Callback, bufnr) abort
   let opts = {
-  \ 'ResponseHandler': function('s:StdioFixRH', [a:Callback]),
+  \ 'ResponseHandler': function('s:StdioFixRH', [a:Callback, a:bufnr]),
   \ 'Parameters': {
   \   'WantsTextChanges': 1
   \ }
@@ -31,11 +32,23 @@ function! s:StdioFix(Callback) abort
   call OmniSharp#stdio#Request('/fixusings', opts)
 endfunction
 
-function! s:StdioFixRH(Callback, response) abort
+function! s:StdioFixRH(Callback, bufnr, response) abort
   if !a:response.Success | return | endif
   normal! m'
   let winview = winsaveview()
+  let frombufname = bufname('%')
+  let frombufnr = bufnr('%')
+  if a:bufnr != frombufnr
+    call OmniSharp#locations#Navigate({
+    \ 'filename': bufname(a:bufnr)
+    \}, 'silent')
+  endif
   call OmniSharp#buffer#Update(a:response.Body)
+  if bufnr('%') != frombufnr
+    call OmniSharp#locations#Navigate({
+    \ 'filename': frombufname
+    \}, 'silent')
+  endif
   call winrestview(winview)
   silent! normal! ``
   if type(a:response.Body.AmbiguousResults) == type(v:null)
