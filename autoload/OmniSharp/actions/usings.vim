@@ -37,11 +37,7 @@ function! s:StdioFixRH(Callback, response) abort
   let winview = winsaveview()
   call OmniSharp#buffer#Update(a:response.Body)
   call winrestview(winview)
-  try
-    normal! ``
-  catch
-    " E20 Mark not set
-  endtry
+  silent! normal! ``
   if type(a:response.Body.AmbiguousResults) == type(v:null)
     call a:Callback([])
   else

@@ -91,7 +91,7 @@ function! OmniSharp#buffer#PerformChanges(opts, response) abort
     call winrestview(winview)
     let [line, col] = getpos("'`")[1:2]
     if line > 1 && col > 1
-      normal! ``
+      silent! normal! ``
     endif
     let &hidden = hidden_bak
   endif
