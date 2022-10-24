@@ -678,6 +678,13 @@ convenient user re-mapping. These can be used like so: >
     The command takes optional arguments that will be inserted into the generated
     config as args.
 
+                                                        *:OmniSharpReloadProject*
+                                               *<Plug>(omnisharp_reload_project)*
+:OmniSharpReloadProject [{project}]
+    Causes the .csproj {project}, or the current project if no argument is
+    given, to be re-read by the server. This can be particularly useful in
+    older style projects where all .cs files are listed in the .csproj.
+
                                                     *:OmniSharpRestartAllServers*
                                           *<Plug>(omnisharp_restart_all_servers)*
 :OmniSharpRestartAllServers
