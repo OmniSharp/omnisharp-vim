@@ -51,6 +51,7 @@ augroup END
 
 setlocal omnifunc=OmniSharp#Complete
 
+command! -buffer -bar -nargs=? -complete=customlist,OmniSharp#actions#project#Complete OmniSharpReloadProject call OmniSharp#actions#project#Reload(<q-args>)
 command! -buffer -bar OmniSharpRestartAllServers call OmniSharp#RestartAllServers()
 command! -buffer -bar OmniSharpRestartServer call OmniSharp#RestartServer()
 command! -buffer -bar -nargs=? -complete=file OmniSharpStartServer call OmniSharp#StartServer(<q-args>)
@@ -104,6 +105,7 @@ nnoremap <buffer> <Plug>(omnisharp_navigate_up) :OmniSharpNavigateUp<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_down) :OmniSharpNavigateDown<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_definition) :OmniSharpPreviewDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_preview_implementation) :OmniSharpPreviewImplementation<CR>
+nnoremap <buffer> <Plug>(omnisharp_reload_project) :OmniSharpReloadProject<CR>
 nnoremap <buffer> <Plug>(omnisharp_rename) :OmniSharpRename<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_server) :OmniSharpRestartServer<CR>
 nnoremap <buffer> <Plug>(omnisharp_restart_all_servers) :OmniSharpRestartAllServers<CR>
@@ -156,6 +158,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpNavigateDown
 \| delcommand OmniSharpPreviewDefinition
 \| delcommand OmniSharpPreviewImplementation
+\| delcommand OmniSharpReloadProject
 \| delcommand OmniSharpRename
 \| delcommand OmniSharpRenameTo
 \| delcommand OmniSharpRepeatCodeAction

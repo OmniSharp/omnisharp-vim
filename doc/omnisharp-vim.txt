@@ -85,6 +85,7 @@ By default, the roslyn server is run with mono on Linux and OSX. The roslyn
 server binaries usually come with an embedded mono, but this can be overridden
 to use the installed mono with this option. Note that mono must be in the
 $PATH.
+Note: overridden by |g:OmniSharp_server_use_net6|
 Note: changes require server reinstall: |:OmniSharpInstall|
 Default: 0 >
     let g:OmniSharp_server_use_mono = 1
@@ -92,7 +93,7 @@ Default: 0 >
                                                     *g:OmniSharp_server_use_net6*
 This variable tells OmniSharp-vim to use the new native dotnet net6.0 version
 of OmniSharp-roslyn, which does not require mono.
-Note: |g:OmniSharp_server_use_mono| must be set to 0
+Note: overrides |g:OmniSharp_server_use_mono|
 Note: changes require server reinstall: |:OmniSharpInstall|
 Default: 0 >
     let g:OmniSharp_server_use_net6 = 1
@@ -676,6 +677,13 @@ convenient user re-mapping. These can be used like so: >
     complicated to run using OmniSharpDebugProject.
     The command takes optional arguments that will be inserted into the generated
     config as args.
+
+                                                        *:OmniSharpReloadProject*
+                                               *<Plug>(omnisharp_reload_project)*
+:OmniSharpReloadProject [{project}]
+    Causes the .csproj {project}, or the current project if no argument is
+    given, to be re-read by the server. This can be particularly useful in
+    older style projects where all .cs files are listed in the .csproj.
 
                                                     *:OmniSharpRestartAllServers*
                                           *<Plug>(omnisharp_restart_all_servers)*

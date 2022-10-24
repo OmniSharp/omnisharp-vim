@@ -175,13 +175,19 @@ function! OmniSharp#stdio#Request(command, opts) abort
     let send_buffer = get(a:opts, 'SendBuffer', 1)
   endif
 
-  let body = {
-  \ 'Arguments': {
-  \   'FileName': filename,
-  \   'Line': lnum,
-  \   'Column': cnum,
-  \ }
-  \}
+  if has_key(a:opts, 'Arguments')
+    let body = {
+    \ 'Arguments': a:opts.Arguments
+    \}
+  else
+    let body = {
+    \ 'Arguments': {
+    \   'FileName': filename,
+    \   'Line': lnum,
+    \   'Column': cnum,
+    \ }
+    \}
+  endif
   if has_key(a:opts, 'EmptyBuffer')
     let body.Arguments.Buffer = ''
     let sep = ''

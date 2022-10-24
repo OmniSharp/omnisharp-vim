@@ -151,12 +151,12 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     let s:server_path = g:OmniSharp_server_path
   else
     let parts = [OmniSharp#util#ServerDir()]
-    if has('win32')
+    if g:OmniSharp_server_use_net6 && !has('win32')
+      let parts += ['OmniSharp']
+    elseif has('win32')
     \ || g:OmniSharp_translate_cygwin_wsl
     \ || g:OmniSharp_server_use_mono
       let parts += ['OmniSharp.exe']
-    elseif g:OmniSharp_server_use_net6
-      let parts += ['OmniSharp']
     else
       let parts += ['run']
     endif
@@ -185,7 +185,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
     let command += ['-l', g:OmniSharp_loglevel]
   endif
 
-  if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono
+  if !has('win32') && !s:is_cygwin() && g:OmniSharp_server_use_mono && !g:OmniSharp_server_use_net6
     let command = insert(command, '--assembly-loader=strict')
     let command = insert(command, 'mono')
   endif

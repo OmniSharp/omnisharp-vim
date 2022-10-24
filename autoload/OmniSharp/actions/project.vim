@@ -3,7 +3,7 @@ set cpoptions&vim
 
 function! OmniSharp#actions#project#Get(bufnr, Callback) abort
   if has_key(OmniSharp#GetHost(a:bufnr), 'project')
-    call a:Callback()
+    call a:Callback(v:true)
     return
   endif
   let opts = {
@@ -15,10 +15,13 @@ function! OmniSharp#actions#project#Get(bufnr, Callback) abort
 endfunction
 
 function! s:ProjectRH(Callback, bufnr, response) abort
-  if !a:response.Success | return | endif
-  let host = getbufvar(a:bufnr, 'OmniSharp_host')
-  let host.project = a:response.Body
-  call a:Callback()
+  if !a:response.Success
+    call a:Callback(v:false)
+  else
+    let host = getbufvar(a:bufnr, 'OmniSharp_host')
+    let host.project = a:response.Body
+    call a:Callback(v:true)
+  endif
 endfunction
 
 function! OmniSharp#actions#project#DebugProject(stopAtEntry, ...) abort
@@ -98,6 +101,56 @@ function! OmniSharp#actions#project#CreateDebugConfig(stopAtEntry, ...) abort
     endif
   endfunction
   call OmniSharp#actions#project#Get(bufnr, function('CreateDebugConfigCb', [bufnr, a:stopAtEntry, a:000]))
+endfunction
+
+function! OmniSharp#actions#project#Complete(arglead, cmdline, cursorpos) abort
+  let job = OmniSharp#GetHost(bufnr()).job
+  if !has_key(job, 'projects') | return [] | endif
+  let projectPaths = map(copy(job.projects), {_,p -> fnamemodify(p.path, ':.')})
+  return filter(projectPaths, {_,path -> path =~? a:arglead})
+endfunction
+
+function! OmniSharp#actions#project#Reload(projectFile) abort
+  if len(a:projectFile) == 0
+    call s:ReloadProjectForBuffer(bufnr())
+    return
+  endif
+  if !filereadable(a:projectFile)
+    call OmniSharp#util#EchoErr('File ' . a:projectFile . ' cannot be read')
+    return
+  endif
+  echohl Title
+  echomsg 'Reloading ' . fnamemodify(a:projectFile, ':t')
+  echohl None
+  let opts = {
+  \ 'SendBuffer': 0,
+  \ 'Arguments': [{
+  \   'FileName': fnamemodify(a:projectFile, ':p'),
+  \   'ChangeType': 'Change'
+  \ }]
+  \}
+  let job = OmniSharp#GetHost(bufnr()).job
+  let job.loaded = 0
+  let job.projects_loaded -= 1
+  let job.restart_time = reltime()
+  let job.restart_project = fnamemodify(a:projectFile, ':t')
+  call OmniSharp#stdio#Request('/filesChanged', opts)
+endfunction
+
+function! s:ReloadProjectForBuffer(bufnr) abort
+  call OmniSharp#actions#project#Get(a:bufnr, function('s:ReloadCB', [a:bufnr]))
+endfunction
+
+function! s:ReloadCB(bufnr, success) abort
+  if a:success
+    let project = OmniSharp#GetHost(a:bufnr).project
+    let projectFile = project.MsBuildProject.Path
+    call OmniSharp#actions#project#Reload(projectFile)
+  else
+    echohl WarningMsg
+    echomsg 'Project could not be found. Try reloading the project by name.'
+    echohl None
+  endif
 endfunction
 
 let &cpoptions = s:save_cpo
