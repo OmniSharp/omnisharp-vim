@@ -131,18 +131,19 @@ function! s:run.single.test(testName, bufferTests) abort
   let currentTest = currentTest[0]
   let project = OmniSharp#GetHost(bufnr).project
   let targetFramework = project.MsBuildProject.TargetFramework
+  let currentTestName = substitute(currentTest.name, '(.*)$', '', '')
   let opts = {
   \ 'ResponseHandler': funcref('s:run.process', [s:run.single.complete, bufnr, tests]),
   \ 'BufNum': bufnr,
   \ 'Parameters': {
-  \   'MethodName': substitute(currentTest.name, '(.*)$', '', ''),
+  \   'MethodName': currentTestName,
   \   'NoBuild': get(s:, 'nobuild', 0),
   \   'TestFrameworkName': currentTest.framework,
   \   'TargetFrameworkVersion': targetFramework
   \ },
   \ 'SendBuffer': 0
   \}
-  echomsg 'Running test ' . currentTest.name
+  echomsg 'Running test ' . currentTestName
   call OmniSharp#stdio#Request('/v2/runtest', opts)
 endfunction
 
@@ -243,7 +244,7 @@ function! s:run.multiple.inBuffer(bufnr, tests, Callback) abort
   \ 'ResponseHandler': funcref('s:run.process', [a:Callback, a:bufnr, a:tests]),
   \ 'BufNum': a:bufnr,
   \ 'Parameters': {
-  \   'MethodNames': map(copy(a:tests), {i,t -> t.name}),
+  \   'MethodNames': map(copy(a:tests), {i,t -> substitute(t.name, '(.*)$', '', '')}),
   \   'NoBuild': get(s:, 'nobuild', 0),
   \   'TestFrameworkName': a:tests[0].framework,
   \   'TargetFrameworkVersion': targetFramework
@@ -427,7 +428,6 @@ function! s:utils.extractTests(bufnr, codeElements) abort
       let testStart = min(filter(copy(testlines), {_,l -> l >= testStart}))
       for dt in OmniSharp#GetHost(a:bufnr).project.tests
         if dt.CodeFilePath ==# filename && dt.LineNumber == testStart
-          " \ 'name': element.Properties.testMethodName,
           call add(tests, {
           \ 'name': dt.FullyQualifiedName,
           \ 'framework': element.Properties.testFramework,
