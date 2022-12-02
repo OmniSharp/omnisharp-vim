@@ -24,6 +24,12 @@ function! s:ProjectRH(Callback, bufnr, response) abort
   endif
 endfunction
 
+function! PrintProjectLoadFailed() abort
+  echohl ErrorMsg
+  echomsg 'Failure getting project info. Check :OmniSharpOpenLog'
+  echohl None
+endfunction
+
 function! OmniSharp#actions#project#DebugProject(stopAtEntry, ...) abort
   if !OmniSharp#util#HasVimspector()
     echohl WarningMsg
@@ -32,10 +38,12 @@ function! OmniSharp#actions#project#DebugProject(stopAtEntry, ...) abort
     return
   endif
   let bufnr = bufnr('%')
-  function! DebugProjectCb(bufnr, stopAtEntry, args) abort
+  function! DebugProjectCb(bufnr, stopAtEntry, args, success) abort
     let project = getbufvar(a:bufnr, 'OmniSharp_host').project
     " Make sure we're not running on a csx script
-    if project.ScriptProject is v:null
+    if !a:success
+      call PrintProjectLoadFailed()
+    elseif project.ScriptProject is v:null
       let programPath = project.MsBuildProject.TargetPath
       if has('win32') | let programPath = substitute(programPath, '\', '/', 'g') | endif
       call vimspector#LaunchWithConfigurations({
@@ -60,40 +68,44 @@ endfunction
 
 function! OmniSharp#actions#project#CreateDebugConfig(stopAtEntry, ...) abort
   let bufnr = bufnr('%')
-  function! CreateDebugConfigCb(bufnr, stopAtEntry, args) abort
-    let host = getbufvar(a:bufnr, 'OmniSharp_host')
-    let programPath = host.project.MsBuildProject.TargetPath
-    if has('win32') | let programPath = substitute(programPath, '\', '/', 'g') | endif
-    let contents = [
-          \' {',
-          \'   "configurations": {',
-          \'     "attach": {',
-          \'       "adapter": "netcoredbg",',
-          \'       "configuration": {',
-          \'         "request": "attach",',
-          \'         "processId": "${pid}"',
-          \'       }',
-          \'     },',
-          \'     "launch": {',
-          \'       "adapter": "netcoredbg",',
-          \'       "configuration": {',
-          \'         "request": "launch",',
-          \'         "program": "'.programPath.'",',
-          \'         "args": ' . json_encode(a:args) . ',',
-          \'         "stopAtEntry": ' . (a:stopAtEntry ? 'true' : 'false'),
-          \'       }',
-          \'     }',
-          \'   }',
-          \' }',
-    \ ]
-    if isdirectory(host.sln_or_dir)
-      let hostdir = host.sln_or_dir
+  function! CreateDebugConfigCb(bufnr, stopAtEntry, args, success) abort
+    if !a:success
+      call PrintProjectLoadFailed()
     else
-      let hostdir = fnamemodify(host.sln_or_dir, ':h:p')
+      let host = getbufvar(a:bufnr, 'OmniSharp_host')
+      let programPath = host.project.MsBuildProject.TargetPath
+      if has('win32') | let programPath = substitute(programPath, '\', '/', 'g') | endif
+      let contents = [
+            \' {',
+            \'   "configurations": {',
+            \'     "attach": {',
+            \'       "adapter": "netcoredbg",',
+            \'       "configuration": {',
+            \'         "request": "attach",',
+            \'         "processId": "${pid}"',
+            \'       }',
+            \'     },',
+            \'     "launch": {',
+            \'       "adapter": "netcoredbg",',
+            \'       "configuration": {',
+            \'         "request": "launch",',
+            \'         "program": "'.programPath.'",',
+            \'         "args": ' . json_encode(a:args) . ',',
+            \'         "stopAtEntry": ' . (a:stopAtEntry ? 'true' : 'false'),
+            \'       }',
+            \'     }',
+            \'   }',
+            \' }',
+      \ ]
+      if isdirectory(host.sln_or_dir)
+        let hostdir = host.sln_or_dir
+      else
+        let hostdir = fnamemodify(host.sln_or_dir, ':h:p')
+      endif
+      let filename = hostdir . '/.vimspector.json'
+      call writefile(contents, filename)
+      execute 'edit ' . filename
     endif
-    let filename = hostdir . '/.vimspector.json'
-    call writefile(contents, filename)
-    execute 'edit ' . filename
     if !OmniSharp#util#HasVimspector()
       echohl WarningMsg
       echomsg 'Vimspector does not seem to be installed. You will need it to run the created configuration.'
