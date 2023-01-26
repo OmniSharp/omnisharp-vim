@@ -69,7 +69,7 @@ function! s:StdioGetCompletions(partial, opts, Callback) abort
   \ && &completeopt =~# 'popup'
   let wantDoc = wantDocPopup ? 'false'
   \ : g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
-  let wantSnippet = g:OmniSharp_want_snippet ? 'true' : 'false'
+  let wantSnippet = g:OmniSharp_want_snippet ? 'true' : g:OmniSharp_coc_snippet ? 'true' : 'false'
   let s:last_startcol = has_key(a:opts, 'startcol')
   \ ? a:opts.startcol
   \ : col('.') - len(a:partial) - 1
@@ -94,7 +94,7 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     if g:OmniSharp_want_snippet
       let word = cmp.MethodHeader != v:null ? cmp.MethodHeader : cmp.CompletionText
       let menu = cmp.ReturnType != v:null ? cmp.ReturnType : cmp.DisplayText
-    elseif g:OmniSharp_completion_without_overloads
+    elseif g:OmniSharp_completion_without_overloads && !g:OmniSharp_coc_snippet
       let word = cmp.CompletionText
       let menu = ''
     else
@@ -105,8 +105,15 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     if word == v:null
       continue
     endif
+    let snipCompletionText = get(cmp, 'Snippet', '')
+    let isSnippet = (snipCompletionText != cmp.CompletionText .. '$0')
+          \ && (snipCompletionText != cmp.CompletionText)
+          \ && (!empty(snipCompletionText))
+
     let completion = {
-    \ 'snip': get(cmp, 'Snippet', ''),
+    \ 'snip': snipCompletionText,
+    \ 'insertText': isSnippet ? snipCompletionText : '',
+    \ 'isSnippet': isSnippet,
     \ 'word': word,
     \ 'menu': menu,
     \ 'icase': 1,

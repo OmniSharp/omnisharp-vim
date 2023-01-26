@@ -430,6 +430,13 @@ Use this option to enable snippet completion, when ultisnips is available.
 Default: 0 >
     let g:OmniSharp_want_snippet = 0
 <
+                                                        *g:OmniSharp_coc_snippet*
+Use this option to enable snippet completion for coc source. For this feature
+to be enabled it is required that g:OmniSharp_want_snippet is set to 0. Only
+supports stdio server.
+Default: 0 >
+    let g:OmniSharp_coc_snippet = 0
+<
                                        *g:OmniSharp_completion_without_overloads*
 Use this option to get completion results without method arguments.
 Consequently, overloads will not be part of the completion results. For this
