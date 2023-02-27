@@ -13,6 +13,7 @@ let s:utils.log = {}
 
 function! OmniSharp#actions#test#Debug(nobuild, ...) abort
   if !s:utils.capabilities() | return | endif
+  if !s:utils.isrunning() | return | endif
   let s:nobuild = a:nobuild
   if !OmniSharp#util#HasVimspector()
     return s:utils.log.warn('Vimspector required to debug tests')
@@ -111,6 +112,7 @@ endfunction
 
 function! OmniSharp#actions#test#Run(nobuild, ...) abort
   if !s:utils.capabilities() | return | endif
+  if !s:utils.isrunning() | return | endif
   let s:nobuild = a:nobuild
   let bufnr = a:0 ? (type(a:1) == type('') ? bufnr(a:1) : a:1) : bufnr('%')
   let RunTest = funcref('s:run.single.test', [a:0 > 1 ? a:2 : ''])
@@ -186,6 +188,7 @@ endfunction
 function! OmniSharp#actions#test#RunInFile(nobuild, ...) abort
   let s:nobuild = a:nobuild
   if !s:utils.capabilities() | return | endif
+  if !s:utils.isrunning() | return | endif
   if a:0 && type(a:1) == type([])
     let files = a:1
   elseif a:0 && type(a:1) == type('')
@@ -395,6 +398,10 @@ function! s:utils.capabilities() abort
   if g:OmniSharp_translate_cygwin_wsl
     return self.log.warn('Tests do not work in WSL unfortunately')
   endif
+  return 1
+endfunction
+
+function! s:utils.isrunning() abort
   if s:run.running
     return self.log.warn('A test is already running')
   endif
