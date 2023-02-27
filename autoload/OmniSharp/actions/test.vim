@@ -148,19 +148,20 @@ function! s:run.single.test(testName, bufferTests) abort
 endfunction
 
 function! s:run.single.complete(summary) abort
-  if len(a:summary.locations) > 1
+  let locations = filter(copy(a:summary.locations), 'has_key(v:val, "bufnr")')
+  if len(locations) > 1
     " A single test was run, but multiple test results were returned. This can
     " happen when using e.g. NUnit TestCaseSources which re-run the test using
     " different arguments.
     call s:run.multiple.complete([a:summary])
     return
   endif
-  if a:summary.pass && len(a:summary.locations) == 0
+  if a:summary.pass && len(locations) == 0
     echomsg 'No tests were run'
     " Do we ever reach here?
     " call OmniSharp#testrunner#StateSkipped(bufnr)
   endif
-  let location = a:summary.locations[0]
+  let location = locations[0]
   call OmniSharp#testrunner#StateComplete(location)
   if a:summary.pass
     if get(location, 'type', '') ==# 'W'
