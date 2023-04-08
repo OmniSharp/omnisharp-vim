@@ -68,6 +68,7 @@ command! -buffer -bar OmniSharpFindUsages call OmniSharp#actions#usages#Find()
 command! -buffer -bar OmniSharpFixUsings call OmniSharp#actions#usings#Fix()
 command! -buffer -bar OmniSharpGetCodeActions call OmniSharp#actions#codeactions#Get('normal')
 command! -buffer -bar OmniSharpGlobalCodeCheck call OmniSharp#actions#diagnostics#CheckGlobal()
+command! -buffer -bar -nargs=? OmniSharpGotoTypeDefinition call OmniSharp#actions#typedefinition#Find(<q-args>)
 command! -buffer -bar -nargs=? OmniSharpGotoDefinition call OmniSharp#actions#definition#Find(<q-args>)
 command! -buffer -bar OmniSharpHighlight call OmniSharp#actions#highlight#Buffer()
 command! -buffer -bar OmniSharpHighlightEcho call OmniSharp#actions#highlight#Echo()
@@ -99,6 +100,7 @@ xnoremap <buffer> <Plug>(omnisharp_code_actions) :call OmniSharp#actions#codeact
 nnoremap <buffer> <Plug>(omnisharp_code_action_repeat) :OmniSharpRepeatCodeAction<CR>
 xnoremap <buffer> <Plug>(omnisharp_code_action_repeat) :call OmniSharp#actions#codeactions#Repeat('visual')<CR>
 nnoremap <buffer> <Plug>(omnisharp_global_code_check) :OmniSharpGlobalCodeCheck<CR>
+nnoremap <buffer> <Plug>(omnisharp_go_to_type_definition) :OmniSharpGotoTypeDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_go_to_definition) :OmniSharpGotoDefinition<CR>
 nnoremap <buffer> <Plug>(omnisharp_highlight) :OmniSharpHighlight<CR>
 nnoremap <buffer> <Plug>(omnisharp_navigate_up) :OmniSharpNavigateUp<CR>
@@ -149,6 +151,7 @@ let b:undo_ftplugin .= '
 \| delcommand OmniSharpFixUsings
 \| delcommand OmniSharpGetCodeActions
 \| delcommand OmniSharpGlobalCodeCheck
+\| delcommand OmniSharpGotoTypeDefinition
 \| delcommand OmniSharpGotoDefinition
 \| delcommand OmniSharpHighlight
 \| delcommand OmniSharpHighlightEcho

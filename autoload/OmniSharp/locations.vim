@@ -85,24 +85,39 @@ function! OmniSharp#locations#Navigate(location, ...) abort
   return navigated
 endfunction
 
+function! OmniSharp#locations#ParseLocation(value) abort
+  return {
+        \ 'filename': has_key(a:value, 'FileName')
+        \   ? OmniSharp#util#TranslatePathForClient(a:value.FileName)
+        \   : expand('%:p'),
+        \ 'lnum': a:value.Range.Start.Line,
+        \ 'col': a:value.Range.Start.Column,
+        \ 'end_lnum': a:value.Range.End.Line,
+        \ 'end_col': a:value.Range.End.Column - 1,
+        \ 'vcol': 1
+        \}
+endfunction
+
 function! OmniSharp#locations#Parse(quickfixes) abort
   let locations = []
   for quickfix in a:quickfixes
     let location = {
-    \ 'filename': has_key(quickfix, 'FileName')
-    \   ? OmniSharp#util#TranslatePathForClient(quickfix.FileName)
-    \   : expand('%:p'),
-    \ 'text': get(quickfix, 'Text', get(quickfix, 'Message', '')),
-    \ 'lnum': quickfix.Line,
-    \ 'col': quickfix.Column,
-    \ 'vcol': 1
-    \}
+          \ 'filename': has_key(quickfix, 'FileName')
+          \   ? OmniSharp#util#TranslatePathForClient(quickfix.FileName)
+          \   : expand('%:p'),
+          \ 'text': get(quickfix, 'Text', get(quickfix, 'Message', '')),
+          \ 'lnum': quickfix.Line,
+          \ 'col': quickfix.Column,
+          \ 'vcol': 1
+          \}
     if has_key(quickfix, 'EndLine') && has_key(quickfix, 'EndColumn')
       let location.end_lnum = quickfix.EndLine
       let location.end_col = quickfix.EndColumn - 1
     endif
+
     call add(locations, location)
   endfor
+
   return locations
 endfunction
 
