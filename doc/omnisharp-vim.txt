@@ -517,6 +517,19 @@ convenient user re-mapping. These can be used like so: >
     :OmniSharpGotoDefinition vsplit
     :OmniSharpGotoDefinition tabedit
 <
+                                                       *:OmniSharpGotoTypeDefinition*
+                                             *<Plug>(omnisharp_go_to_type_definition)*
+:OmniSharpGotoTypeDefinition [{cmd}]
+    Navigates to the type definition of the symbol under the cursor.
+    By default the definition is opened in the current window. To open it in a
+    new window or tab, pass a relevant command to use to open the buffer: >
+
+    :OmniSharpGotoTypeDefinition
+    :OmniSharpGotoTypeDefinition split
+    :OmniSharpGotoTypeDefinition vsplit
+    :OmniSharpGotoTypeDefinition tabedit
+<
+
                                                   *:OmniSharpFindImplementations*
                                          *<Plug>(omnisharp_find_implementations)*
 :OmniSharpFindImplementations
