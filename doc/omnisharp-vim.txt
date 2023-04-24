@@ -20,13 +20,14 @@ CONTENTS                                                     *omnisharp-contents
       3.2 Diagnostics ......................... |omnisharp-diagnostic-options|
       3.3 Highlights .......................... |omnisharp-highlight-options|
       3.4 Popups .............................. |omnisharp-popup-options|
-      3.5 Tests ............................... |omnisharp-test-options|
       3.6 Integrations ........................ |omnisharp-integration-options|
       3.7 Miscellaneous ....................... |omnisharp-miscellaneous-options|
-    4. Commands ............................... |omnisharp-commands|
+    4. General Commands ....................... |omnisharp-commands|
     5. Autocmds ............................... |omnisharp-autocmds|
     6. Test runner ............................ |omnisharp-testrunner|
-      6.1 Mappings ............................ |omnisharp-testrunner-mappings|
+      6.1 Options ............................. |omnisharp-test-options|
+      6.1 Commands ............................ |omnisharp-testrunner-commands|
+      6.2 Mappings ............................ |omnisharp-testrunner-mappings|
     7. Integrations ........................... |omnisharp-integrations|
 
 ===============================================================================
@@ -389,82 +390,7 @@ Default: atcursor >
     let g:OmniSharp_popup_position = 'peek'
 <
 -------------------------------------------------------------------------------
-3.5 TESTS                                                *omnisharp-test-options*
-
-                                               *g:OmniSharp_runtests_echo_output*
-When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|
-or from the |omnisharp-testrunner|, echo all test runner output to the
-|message-history|, so it can be viewed with |:messages|.
-Default: 0
-
-                                                  *g:OmniSharp_runtests_parallel*
-When running multiple unit test files with |:OmniSharpRunTestsInFile|, run
-tests in all files simultaneously - this is the fastest way to run multiple
-test files. The disadvantage is that when |g:OmniSharp_runtests_echo_output|
-is set to 1, tests from multiple files will be interspersed, and therefore
-difficult to read. Set |g:OmniSharp_runtests_parallel| to 0 in order to run
-test files in sequence instead, resulting in readable output in the
-|message-history|.
-Default: 1
-
-                                                  *g:OmniSharp_runtests_quickfix*
-When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|
-or from the |omnisharp-testrunner|, populate the quickfix list with test
-results.
-When a single test is run and an exception occurs, the quickfix will be
-populated with the exception stack trace.
-When multiple tests are run then each test will get a quickfix location:
-failed test locations point to the failed assertion; successful test locations
-point to the test method declaration.
-Default: 0
-
-                                                         *g:OmniSharp_testrunner*
-Open the |omnisharp-testrunner| automatically when running tests.
-Default: 1
-
-                                                  *g:OmniSharp_testrunner_banner*
-Display the |omnisharp-testrunner| help/introduction banner when opening the
-testrunner. When this option is set to 0, the banner may still be toggled with
-the <F1> (default) toggle mapping.
-Default: 1
-
-                                                   *g:OmniSharp_testrunner_glyph*
-Display a passed/failed "glyph" string beside completed test results in the
-|omnisharp-testrunner|.
-Default: 1
-
-                                            *g:OmniSharp_testrunner_glyph_failed*
-The "glyph" string to display beside failed completed tests in the testrunner.
-Default: ✘
-
-                                            *g:OmniSharp_testrunner_glyph_passed*
-The "glyph" string to display beside passed completed tests in the testrunner.
-Default: ✔
-
-                                                *g:OmniSharp_testrunner_loglevel*
-The type of build and test logs to output in the |omnisharp-testrunner|.
-
-           all      All build output and test runner output is displayed.
-
-           error    When a build error occurs, the error message and stack
-                    trace are output.
-
-           none     Only build error messages will be output.
-
-Default: error >
-    let g:OmniSharp_testrunner_loglevel = 'all'
-<
-                                                 *g:OmniSharp_testrunner_spinner*
-Display a "running" spinner animation when running tests in the testrunner.
-Default: 1
-
-                                            *g:OmniSharp_testrunner_spinnersteps*
-A list of "step" strings to be displayed as the |omnisharp-testrunner|
-"spinner" animation.
-Default: ['∙∙∙', '●∙∙', '∙●∙', '∙∙●', '∙∙∙']
-
--------------------------------------------------------------------------------
-3.6 INTEGRATIONS                                  *omnisharp-integration-options*
+3.5 INTEGRATIONS                                  *omnisharp-integration-options*
 
                                                         *g:OmniSharp_selector_ui*
 Use this option to specify a selector UI for choosing code actions and
@@ -525,7 +451,7 @@ Use this option to enable syntastic integration >
     let g:syntastic_cs_checkers = ['code_checker']
 <
 -------------------------------------------------------------------------------
-3.7 MISCELLANEOUS                               *omnisharp-miscellaneous-options*
+3.6 MISCELLANEOUS                               *omnisharp-miscellaneous-options*
 
                                                  *g:OmniSharp_filename_modifiers*
 File paths returned from the server are normalized using Vim
@@ -573,7 +499,7 @@ the |:OmniSharpDocumentation| command. Default: 1 >
     let g:omnicomplete_fetch_full_documentation = 1
 <
 ===============================================================================
-4. COMMANDS                                                  *omnisharp-commands*
+4. GENERAL COMMANDS                                          *omnisharp-commands*
 
 Most of the OmniSharp-vim commands have associated plug mappings defined, for
 convenient user re-mapping. These can be used like so: >
@@ -591,8 +517,8 @@ convenient user re-mapping. These can be used like so: >
     :OmniSharpGotoDefinition vsplit
     :OmniSharpGotoDefinition tabedit
 <
-                                                       *:OmniSharpGotoTypeDefinition*
-                                             *<Plug>(omnisharp_go_to_type_definition)*
+                                                   *:OmniSharpGotoTypeDefinition*
+                                        *<Plug>(omnisharp_go_to_type_definition)*
 :OmniSharpGotoTypeDefinition [{cmd}]
     Navigates to the type definition of the symbol under the cursor.
     By default the definition is opened in the current window. To open it in a
@@ -677,48 +603,6 @@ convenient user re-mapping. These can be used like so: >
 :OmniSharpNavigateDown
     Navigates to next method or class
 
-                                                              *:OmniSharpRunTest*
-                                                     *<Plug>(omnisharp_run_test)*
-                                            *<Plug>(omnisharp_run_test_no_build)*
-:OmniSharpRunTest[!]
-    Run the current unit test. The cursor can be anywhere in the test method.
-    The |omnisharp-testrunner| window will be opened to display the test
-    status and results.
-    If the test fails, the failure message and location will be displayed in
-    the testrunner, or optionally (see |g:OmniSharp_runtests_quickfix|) in the
-    quickfix list, along with the error stack trace if one exists.
-
-    When called with ! or the |<Plug>(omnisharp_run_test_no_build)| mapping, the
-    project is not built before running the test.
-
-                                                            *:OmniSharpDebugTest*
-                                                   *<Plug>(omnisharp_debug_test)*
-                                          *<Plug>(omnisharp_debug_test_no_build)*
-:OmniSharpDebugTest[!]
-    Debug the current unit test with Vimspector. The cursor can be anywhere in
-    the test method.
-
-    When called with ! or the |<Plug>(omnisharp_debug_test_no_build)| mapping,
-    the project is not built before starting the debugger.
-
-                                                       *:OmniSharpRunTestsInFile*
-                                            *<Plug>(omnisharp_run_tests_in_file)*
-                                   *<Plug>(omnisharp_run_tests_in_file_no_build)*
-:OmniSharpRunTestsInFile[!]
-    Run all unit tests in the current file. When |g:OmniSharp_runtests_quickfix|
-    is enabled, the quickfix list will be populated with the results of all
-    tests.
-    Optionally accepts one or more filenames of files to run tests for.
->
-    " Run all unit tests in the current file
-    :OmniSharpRunTestsInFile
-
-    " Run all unit tests in the current file, and file `tests/test1.cs`
-    :OmniSharpRunTestsInFile % tests/test1.cs
-<
-    When called with ! or the |<Plug>(omnisharp_run_tests_in_file_no_build)|
-    mapping, the project is not built before running the tests.
-
                                                               *:OmniSharpOpenLog*
                                                      *<Plug>(omnisharp_open_log)*
 :OmniSharpOpenLog [{cmd}]
@@ -731,9 +615,6 @@ convenient user re-mapping. These can be used like so: >
     :OmniSharpOpenLog vsplit
     :OmniSharpOpenLog tabedit
 <
-                                                       *:OmniSharpOpenTestRunner*
-    Open the |omnisharp-testrunner| window
-
                                                        *:OmniSharpGetCodeActions*
                                                  *<Plug>(omnisharp_code_actions)*
 :OmniSharpGetCodeActions
@@ -882,7 +763,7 @@ with the test status (running/passed/failed/not run) and any outputs that may
 be produced (exceptions and Console output).
 
 Open the test runner window by either running a test (with e.g.
-|:OmniSharpRunTest|) or with the |:OmniSharpOpenTestRunner| command.
+|:OmniSharpRunTest|) or with the |:OmniSharpTestRunner| command.
 
 Any time a new test is run, it (along with all other tests in the same file)
 is added to the runner. Tests remain visible in the test runner window until
@@ -899,7 +780,133 @@ display test results, use the following settings: >
     let g:OmniSharp_runtests_quickfix = 1
 <
 -------------------------------------------------------------------------------
-6.1 MAPPINGS                                      *omnisharp-testrunner-mappings*
+6.1 OPTIONS                                              *omnisharp-test-options*
+
+                                               *g:OmniSharp_runtests_echo_output*
+When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|
+or from the |omnisharp-testrunner|, echo all test runner output to the
+|message-history|, so it can be viewed with |:messages|.
+Default: 0
+
+                                                  *g:OmniSharp_runtests_parallel*
+When running multiple unit test files with |:OmniSharpRunTestsInFile|, run
+tests in all files simultaneously - this is the fastest way to run multiple
+test files. The disadvantage is that when |g:OmniSharp_runtests_echo_output|
+is set to 1, tests from multiple files will be interspersed, and therefore
+difficult to read. Set |g:OmniSharp_runtests_parallel| to 0 in order to run
+test files in sequence instead, resulting in readable output in the
+|message-history|.
+Default: 1
+
+                                                  *g:OmniSharp_runtests_quickfix*
+When running unit tests with |:OmniSharpRunTest| and |:OmniSharpRunTestsInFile|
+or from the |omnisharp-testrunner|, populate the quickfix list with test
+results.
+When a single test is run and an exception occurs, the quickfix will be
+populated with the exception stack trace.
+When multiple tests are run then each test will get a quickfix location:
+failed test locations point to the failed assertion; successful test locations
+point to the test method declaration.
+Default: 0
+
+                                                         *g:OmniSharp_testrunner*
+Open the |omnisharp-testrunner| automatically when running tests.
+Default: 1
+
+                                                  *g:OmniSharp_testrunner_banner*
+Display the |omnisharp-testrunner| help/introduction banner when opening the
+testrunner. When this option is set to 0, the banner may still be toggled with
+the <F1> (default) toggle mapping.
+Default: 1
+
+                                                   *g:OmniSharp_testrunner_glyph*
+Display a passed/failed "glyph" string beside completed test results in the
+|omnisharp-testrunner|.
+Default: 1
+
+                                            *g:OmniSharp_testrunner_glyph_failed*
+The "glyph" string to display beside failed completed tests in the testrunner.
+Default: ✘
+
+                                            *g:OmniSharp_testrunner_glyph_passed*
+The "glyph" string to display beside passed completed tests in the testrunner.
+Default: ✔
+
+                                                *g:OmniSharp_testrunner_loglevel*
+The type of build and test logs to output in the |omnisharp-testrunner|.
+
+           all      All build output and test runner output is displayed.
+
+           error    When a build error occurs, the error message and stack
+                    trace are output.
+
+           none     Only build error messages will be output.
+
+Default: error >
+    let g:OmniSharp_testrunner_loglevel = 'all'
+<
+                                                 *g:OmniSharp_testrunner_spinner*
+Display a "running" spinner animation when running tests in the testrunner.
+Default: 1
+
+                                            *g:OmniSharp_testrunner_spinnersteps*
+A list of "step" strings to be displayed as the |omnisharp-testrunner|
+"spinner" animation.
+Default: ['∙∙∙', '●∙∙', '∙●∙', '∙∙●', '∙∙∙']
+
+-------------------------------------------------------------------------------
+6.2 COMMANDS                                      *omnisharp-testrunner-commands*
+
+                                                              *:OmniSharpRunTest*
+                                                     *<Plug>(omnisharp_run_test)*
+                                            *<Plug>(omnisharp_run_test_no_build)*
+:OmniSharpRunTest[!]
+    Run the current unit test. The cursor can be anywhere in the test method.
+    The |omnisharp-testrunner| window will be opened to display the test
+    status and results.
+    If the test fails, the failure message and location will be displayed in
+    the testrunner, or optionally (see |g:OmniSharp_runtests_quickfix|) in the
+    quickfix list, along with the error stack trace if one exists.
+
+    When called with ! or the |<Plug>(omnisharp_run_test_no_build)| mapping, the
+    project is not built before running the test.
+
+                                                            *:OmniSharpDebugTest*
+                                                   *<Plug>(omnisharp_debug_test)*
+                                          *<Plug>(omnisharp_debug_test_no_build)*
+:OmniSharpDebugTest[!]
+    Debug the current unit test with Vimspector. The cursor can be anywhere in
+    the test method.
+
+    When called with ! or the |<Plug>(omnisharp_debug_test_no_build)| mapping,
+    the project is not built before starting the debugger.
+
+                                                       *:OmniSharpRunTestsInFile*
+                                            *<Plug>(omnisharp_run_tests_in_file)*
+                                   *<Plug>(omnisharp_run_tests_in_file_no_build)*
+:OmniSharpRunTestsInFile[!]
+    Run all unit tests in the current file. When |g:OmniSharp_runtests_quickfix|
+    is enabled, the quickfix list will be populated with the results of all
+    tests.
+    Optionally accepts one or more filenames of files to run tests for.
+>
+    " Run all unit tests in the current file
+    :OmniSharpRunTestsInFile
+
+    " Run all unit tests in the current file, and file `tests/test1.cs`
+    :OmniSharpRunTestsInFile % tests/test1.cs
+<
+    When called with ! or the |<Plug>(omnisharp_run_tests_in_file_no_build)|
+    mapping, the project is not built before running the tests.
+
+                                                           *:OmniSharpTestRunner*
+    Open the |omnisharp-testrunner| window
+
+                                                      *:OmniSharpTestRunnerReset*
+    Forget all test history and clear the test runner window
+
+-------------------------------------------------------------------------------
+6.3 MAPPINGS                                      *omnisharp-testrunner-mappings*
 
 The following |<Plug>| mappings and associated default recursive mappings are
 provided in the test runner window.
