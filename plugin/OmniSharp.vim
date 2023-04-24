@@ -54,8 +54,9 @@ let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_d
 
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
-command! -bar -nargs=? OmniSharpOpenTestRunner call OmniSharp#testrunner#Open()
 command! -bar -bang OmniSharpStatus call OmniSharp#Status(<bang>0)
+command! -bar OmniSharpTestRunner call OmniSharp#testrunner#Open()
+command! -bar OmniSharpTestRunnerReset call OmniSharp#testrunner#Reset()
 
 " Preserve backwards compatibility with older version g:OmniSharp_highlight_types
 let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 2))

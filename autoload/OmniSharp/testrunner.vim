@@ -421,6 +421,15 @@ function! s:buffer.repainttest(filename, testname, test) abort
 endfunction
 
 
+function! OmniSharp#testrunner#Reset() abort
+  let s:current = {}
+  let s:runner = {}
+  let s:tests = {}
+  call OmniSharp#actions#test#Reset()
+  call s:Open()
+endfunction
+
+
 function! OmniSharp#testrunner#SetBreakpoints() abort
   if !OmniSharp#util#HasVimspector()
     return s:utils.log.warn('Vimspector required to set breakpoints')
