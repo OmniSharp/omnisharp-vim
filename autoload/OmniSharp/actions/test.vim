@@ -110,6 +110,11 @@ function! s:debug.process.closed(...) abort
 endfunction
 
 
+function! OmniSharp#actions#test#Reset() abort
+  let s:run.running = 0
+endfunction
+
+
 function! OmniSharp#actions#test#Run(nobuild, ...) abort
   if !s:utils.capabilities() | return | endif
   if !s:utils.isrunning() | return | endif
