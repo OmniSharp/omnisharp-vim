@@ -176,8 +176,11 @@ set +eu
 # If using the system Mono, make the files executable
 if [ -n "$mono" ] && [ $mono -eq 1 ]; then
     find "$location" -type f -exec chmod +x {} +
+elif [ -z "$net6" ]; then
+    find "$location/run" -type f -exec chmod +x {} +
 fi
 
 echo "$version" > "$location/OmniSharpInstall-version.txt"
+echo "$full_url" >> "$location/OmniSharpInstall-version.txt"
 
 exit 0
