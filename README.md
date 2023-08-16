@@ -143,6 +143,8 @@ See [The Mono Project](https://www.mono-project.com/download/stable/) for instal
 
 Any time `g:OmniSharp_server_use_mono` is modified, the server needs to be re-installed with `:OmniSharpInstall`.
 
+**Note:** If installed on Apple Silicon using Homebrew, the native version of `mono` does not include MSBuild (current version requires .NET 5 but Apple Silicon support was added in .NET 6). So the package must be installed either via Rosetta or as a Cask. You can follow [this answer](https://stackoverflow.com/a/64883440) to install an Intel version instead.
+
 #### Native net6.0
 From version 1.38.0 of OmniSharp-roslyn, a dotnet native net6.0 server version is available.
 To use this version, set `g:OmniSharp_server_use_net6` in your vimrc before installing the server.
