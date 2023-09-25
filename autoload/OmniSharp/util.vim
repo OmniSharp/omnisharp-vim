@@ -181,7 +181,7 @@ function! OmniSharp#util#GetStartCmd(solution_file) abort
   endif
   let command += ['-s', solution_path]
 
-  if g:OmniSharp_loglevel !=? 'info'
+  if g:OmniSharp_loglevel !=? 'info' && g:OmniSharp_loglevel !=? 'none'
     let command += ['-l', g:OmniSharp_loglevel]
   endif
 
