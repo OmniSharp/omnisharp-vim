@@ -78,16 +78,13 @@ function! OmniSharp#project#ParseEvent(job, event, eventBody) abort
       endif
       call s:AcknowledgeLoadedProject(a:job, project)
     endif
-  elseif a:event ==# 'MsBuildProjectDiagnostics'
+  elseif has_key(a:job, 'restart_time') && a:event ==# 'MsBuildProjectDiagnostics'
     let project = a:eventBody.FileName
     call s:AcknowledgeLoadedProject(a:job, project)
   endif
 endfunction
 
 function! s:AcknowledgeLoadedProject(job, project)
-  if index(a:job.loading, a:project) < 0
-    return
-  endif
   call filter(a:job.loading, {idx,val -> val !=# a:project})
   let a:job.projects_loaded = get(a:job, 'projects_loaded', 0) + 1
   silent doautocmd <nomodeline> User OmniSharpProjectUpdated
