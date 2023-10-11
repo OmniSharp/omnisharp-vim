@@ -3,7 +3,7 @@ set cpoptions&vim
 
 let s:runningTest = 0
 
-function! s:BindTest(bufnr, Callback) abort
+function! s:BindTest(bufnr, Callback, ...) abort
   if !s:CheckCapabilities() | return | endif
   if !has_key(OmniSharp#GetHost(a:bufnr), 'project')
     " Initialize the test by fetching the project for the buffer - then call
