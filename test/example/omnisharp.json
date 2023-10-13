@@ -54,7 +54,9 @@
         "NewLineForClausesInQuery": true
     },
     "RoslynExtensionsOptions": {
+        "DocumentAnalysisTimeoutMS": 500,
         "EnableAnalyzersSupport": false,
-        "EnableDecompilationSupport": false
+        "EnableDecompilationSupport": false,
+        "EnableImportCompletion": false
     }
 }

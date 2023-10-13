@@ -31,8 +31,11 @@ Execute (set up async helper):
     if has_key(b:, 'OmniSharp_UpdateChangeTick')
       unlet b:OmniSharp_UpdateChangeTick
     endif
-    call OmniSharpTestAwait('OmniSharp#actions#buffer#Update',
-    \ [{'Callback': function('s:CallbackStopWaiting')}])
+    let opts = {
+    \ 'Callback': function('s:CallbackStopWaiting'),
+    \ 'SendBuffer': 1
+    \}
+    call OmniSharpTestAwait('OmniSharp#actions#buffer#Update', [opts])
   endfunction
 
   function! OmniSharpTestCleanupBuffer() abort
