@@ -55,7 +55,8 @@ function! OmniSharp#actions#diagnostics#StdioCheck(bufnr, Callback) abort
   " and does not need to be updated, the `/codecheck` request occurs
   " immediately.
   call OmniSharp#actions#buffer#Update({
-  \ 'Callback': function('s:StdioCheck', [a:bufnr, a:Callback])
+  \ 'Callback': function('s:StdioCheck', [a:bufnr, a:Callback]),
+  \ 'bufnr': a:bufnr
   \})
 endfunction
 

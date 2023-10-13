@@ -11,6 +11,7 @@ function! OmniSharp#buffer#Initialize(job, bufnr, command, opts) abort
   if has_key(OmniSharp#GetHost(a:bufnr), 'initializing') | return | endif
   let host.initializing = 1
   call OmniSharp#actions#buffer#Update({
+  \ 'bufnr': a:bufnr,
   \ 'Callback': function('s:CBInitialize', [a:job, a:bufnr, host]),
   \ 'Initializing': 1
   \})
@@ -156,7 +157,7 @@ function! OmniSharp#buffer#Update(responseBody) abort
 endfunction
 
 function! OmniSharp#buffer#Valid(...) abort
-  let bufnr = bufnr(a:0 ? a:1 : '%')
+  let bufnr = a:0 ? a:1 : bufnr('%')
   let bufname = fnamemodify(bufname(bufnr), ':p')
   let buftype = a:0 ? getbufvar(a:1, '&buftype') : &buftype
   return buftype !=# 'nofile' && bufname !=# ''
