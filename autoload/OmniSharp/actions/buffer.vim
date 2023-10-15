@@ -14,8 +14,9 @@ function! OmniSharp#actions#buffer#Update(...) abort
   let opts.Initializing = get(opts, 'Initializing', 0)
   let opts.SendBuffer = opts.Initializing || get(opts, 'SendBuffer', 0)
   let bufnr = get(opts, 'bufnr', bufnr('%'))
+  let bufferValid = OmniSharp#buffer#Valid(bufnr)
   let lasttick = get(b:, 'OmniSharp_UpdateChangeTick', -1)
-  if OmniSharp#buffer#Valid(bufnr) && opts.SendBuffer || b:changedtick != lasttick
+  if bufferValid && (opts.SendBuffer || b:changedtick != lasttick)
     let b:OmniSharp_UpdateChangeTick = b:changedtick
     if g:OmniSharp_server_stdio
       let requestOpts = {
