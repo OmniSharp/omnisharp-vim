@@ -310,7 +310,7 @@ function! s:buffer.paintbanner() abort
   call add(lines, '`' . repeat(self.delimiter(), 80))
   call add(lines, '`                             OmniSharp Test Runner')
   call add(lines, '`  ' . repeat(self.delimiter(), 76))
-  call add(lines, '`    <F1> Toggle this menu (:help omnisharp-test-runner for more)')
+  call add(lines, '`    <F1> Toggle this menu (:help omnisharp-testrunner for more)')
   call add(lines, '`    <F5> Run test or tests in file under cursor')
   call add(lines, '`    <F6> Debug test under cursor')
   call add(lines, '`    <CR> Navigate to test or stack trace')
