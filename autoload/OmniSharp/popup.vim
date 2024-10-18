@@ -318,6 +318,8 @@ function! s:VimOpen(what, opts) abort
   endif
   " Prevent popup buffer from being listed in buffer list (`:ls`)
   call setbufvar(winbufnr(winid), '&buflisted', 0)
+  " Make wrapping occur at word boundaries
+  call setwinvar(winid, '&linebreak', 1)
   return winid
 endfunction
 

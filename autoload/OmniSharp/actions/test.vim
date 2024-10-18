@@ -1,74 +1,199 @@
 let s:save_cpo = &cpoptions
 set cpoptions&vim
 
-let s:runningTest = 0
+let s:debug = {}
+let s:debug.process = {}
+let s:run = {}
+let s:run.running = 0
+let s:run.single = {}
+let s:run.multiple = {}
+let s:utils = {}
+let s:utils.init = {}
+let s:utils.log = {}
 
-function! s:BindTest(bufnr, Callback, ...) abort
-  if !s:CheckCapabilities() | return | endif
-  if !has_key(OmniSharp#GetHost(a:bufnr), 'project')
-    " Initialize the test by fetching the project for the buffer - then call
-    " this function again in the callback
-    call OmniSharp#actions#project#Get(a:bufnr,
-    \ function('s:BindTest', [a:bufnr, a:Callback]))
-    return
-  endif
-  let s:runningTest = 1
-  call OmniSharp#actions#codestructure#Get(a:bufnr,
-  \ a:Callback)
-endfunction
-
-function! OmniSharp#actions#test#Run(nobuild) abort
-  let s:nobuild = a:nobuild
-  call s:BindTest(bufnr('%'), function('s:RunTest', [function('s:CBRunTest')]))
-endfunction
-
-function! OmniSharp#actions#test#Debug(nobuild) abort
+function! OmniSharp#actions#test#Debug(nobuild, ...) abort
+  if !s:utils.capabilities() | return | endif
+  if !s:utils.isrunning() | return | endif
   let s:nobuild = a:nobuild
   if !OmniSharp#util#HasVimspector()
-    echohl WarningMsg
-    echomsg 'Vimspector required to debug tests'
-    echohl None
-    return
+    return s:utils.log.warn('Vimspector required to debug tests')
   endif
-  call s:BindTest(bufnr('%'), function('s:DebugTest', [function('s:CBDebugTest')]))
+  let bufnr = a:0 ? (type(a:1) == type('') ? bufnr(a:1) : a:1) : bufnr('%')
+  let DebugTest = funcref('s:debug.prepare', [a:0 > 1 ? a:2 : ''])
+  call s:utils.initialize([bufnr], DebugTest)
 endfunction
 
-function! s:CBRunTest(summary) abort
+function! s:debug.prepare(testName, bufferTests) abort
+  let bufnr = a:bufferTests[0].bufnr
+  let tests = a:bufferTests[0].tests
+  let currentTest = s:utils.findTest(tests, a:testName)
+  if type(currentTest) != type([]) || len(currentTest) == 0
+    return s:utils.log.warn('No test found')
+  endif
+  let currentTest = currentTest[0]
+  let project = OmniSharp#GetHost(bufnr).project
+  let targetFramework = project.MsBuildProject.TargetFramework
+  let opts = {
+  \ 'ResponseHandler': funcref('s:debug.launch', [bufnr, currentTest.name]),
+  \ 'BufNum': bufnr,
+  \ 'Parameters': {
+  \   'MethodName': currentTest.name,
+  \   'NoBuild': get(s:, 'nobuild', 0),
+  \   'TestFrameworkName': currentTest.framework,
+  \   'TargetFrameworkVersion': targetFramework
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  echomsg 'Debugging test ' . currentTest.name
+  call OmniSharp#stdio#Request('/v2/debugtest/getstartinfo', opts)
+endfunction
+
+function! s:debug.launch(bufnr, testname, response) abort
+  let args = split(substitute(a:response.Body.Arguments, '\"', '', 'g'), ' ')
+  let cmd = a:response.Body.FileName
+  let testhost = [cmd] + args
+  if !s:debug.process.start(testhost) | return | endif
+  let s:run.running = 1
+  call OmniSharp#testrunner#StateRunning(a:bufnr, a:testname)
+  let s:debug.bufnr = a:bufnr
+  let s:omnisharp_pre_debug_cwd = getcwd()
+  call vimspector#LaunchWithConfigurations({
+  \ 'attach': {
+  \   'adapter': 'netcoredbg',
+  \   'configuration': {
+  \     'request': 'attach',
+  \     'processId': s:debug.process.pid
+  \   }
+  \ }
+  \})
+  let project_dir = fnamemodify(OmniSharp#GetHost(a:bufnr).sln_or_dir, ':p:h')
+  execute 'tcd' project_dir
+  let opts = {
+  \ 'ResponseHandler': s:debug.complete,
+  \ 'Parameters': {
+  \   'TargetProcessId': s:debug.process.pid
+  \ }
+  \}
+  echomsg 'Launching debugged test'
+  call OmniSharp#stdio#Request('/v2/debugtest/launch', opts)
+endfunction
+
+function! s:debug.complete(response) abort
+  if !a:response.Success
+    call s:utils.log.warn(['Error debugging unit test', a:response.Message])
+    call OmniSharp#testrunner#StateError(s:debug.bufnr,
+    \ split(trim(a:response.Message), '\r\?\n', 1))
+  else
+    call OmniSharp#testrunner#StateSkipped(s:debug.bufnr)
+  endif
+endfunction
+
+function! s:debug.process.start(command) abort
+  if OmniSharp#proc#supportsNeovimJobs()
+    let jobid = jobstart(a:command, { 'on_exit': self.closed })
+    let self.pid = jobpid(jobid)
+  elseif OmniSharp#proc#supportsVimJobs()
+    let job = job_start(a:command, { 'close_cb': self.closed })
+    let self.pid = split(job, ' ')[1]
+  else
+    return s:utils.log.warn('Cannot launch test process.')
+  endif
+  return 1
+endfunction
+
+function! s:debug.process.closed(...) abort
+  call OmniSharp#stdio#Request('/v2/debugtest/stop', {})
+  let s:run.running = 0
+  call vimspector#Reset()
+  execute 'tcd' s:omnisharp_pre_debug_cwd
+  unlet s:omnisharp_pre_debug_cwd
+endfunction
+
+
+function! OmniSharp#actions#test#Reset() abort
+  let s:run.running = 0
+endfunction
+
+
+function! OmniSharp#actions#test#Run(nobuild, ...) abort
+  if !s:utils.capabilities() | return | endif
+  if !s:utils.isrunning() | return | endif
+  let s:nobuild = a:nobuild
+  let bufnr = a:0 ? (type(a:1) == type('') ? bufnr(a:1) : a:1) : bufnr('%')
+  let RunTest = funcref('s:run.single.test', [a:0 > 1 ? a:2 : ''])
+  call s:utils.initialize([bufnr], RunTest)
+endfunction
+
+function! s:run.single.test(testName, bufferTests) abort
+  let bufnr = a:bufferTests[0].bufnr
+  let tests = a:bufferTests[0].tests
+  let currentTest = s:utils.findTest(tests, a:testName)
+  if type(currentTest) != type([]) || len(currentTest) == 0
+    return s:utils.log.warn('No test found')
+  endif
+  let s:run.running = 1
+  for ct in currentTest
+    call OmniSharp#testrunner#StateRunning(bufnr, ct.name)
+  endfor
+  let currentTest = currentTest[0]
+  let project = OmniSharp#GetHost(bufnr).project
+  let targetFramework = project.MsBuildProject.TargetFramework
+  let currentTestName = substitute(currentTest.name, '(.*)$', '', '')
+  let opts = {
+  \ 'ResponseHandler': funcref('s:run.process', [s:run.single.complete, bufnr, tests]),
+  \ 'BufNum': bufnr,
+  \ 'Parameters': {
+  \   'MethodName': currentTestName,
+  \   'NoBuild': get(s:, 'nobuild', 0),
+  \   'TestFrameworkName': currentTest.framework,
+  \   'TargetFrameworkVersion': targetFramework
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  echomsg 'Running test ' . currentTestName
+  call OmniSharp#stdio#Request('/v2/runtest', opts)
+endfunction
+
+function! s:run.single.complete(summary) abort
+  let locations = filter(copy(a:summary.locations), 'has_key(v:val, "bufnr")')
+  if len(locations) > 1
+    " A single test was run, but multiple test results were returned. This can
+    " happen when using e.g. NUnit TestCaseSources which re-run the test using
+    " different arguments.
+    call s:run.multiple.complete([a:summary])
+    return
+  endif
+  if a:summary.pass && len(locations) == 0
+    echomsg 'No tests were run'
+    " Do we ever reach here?
+    " call OmniSharp#testrunner#StateSkipped(bufnr)
+  endif
+  let location = locations[0]
+  call OmniSharp#testrunner#StateComplete(location)
   if a:summary.pass
-    if len(a:summary.locations) == 0
-      echomsg 'No tests were run'
-    elseif get(a:summary.locations[0], 'type', '') ==# 'W'
-      echohl WarningMsg
-      echomsg a:summary.locations[0].name . ': skipped'
-      echohl None
+    if get(location, 'type', '') ==# 'W'
+      call s:utils.log.warn(location.name . ': skipped')
     else
-      echohl Title
-      echomsg a:summary.locations[0].name . ': passed'
-      echohl None
+      call s:utils.log.emphasize(location.name . ': passed')
     endif
   else
-    echomsg a:summary.locations[0].name . ': failed'
-    let title = 'Test failure: ' . a:summary.locations[0].name
+    echomsg location.name . ': failed'
+    let title = 'Test failure: ' . location.name
+    if get(g:, 'OmniSharp_runtests_quickfix', 0) == 0 | return | endif
     let what = {}
     if len(a:summary.locations) > 1
-      let what = {'quickfixtextfunc': function('s:QuickfixTextFuncStackTrace')}
+      let what.quickfixtextfunc = {info->
+      \ map(getqflist({'id': info.id, 'items': 1}).items, {_,i -> i.text})}
     endif
     call OmniSharp#locations#SetQuickfix(a:summary.locations, title, what)
   endif
 endfunction
 
-function! s:CBDebugTest(response) abort
-  if !a:response.Success
-    echohl WarningMsg
-    echomsg 'Error debugging unit test'
-    echomsg a:response.Message
-    echohl None
-  endif
-endfunction
 
 function! OmniSharp#actions#test#RunInFile(nobuild, ...) abort
   let s:nobuild = a:nobuild
-  if !s:CheckCapabilities() | return | endif
+  if !s:utils.capabilities() | return | endif
+  if !s:utils.isrunning() | return | endif
   if a:0 && type(a:1) == type([])
     let files = a:1
   elseif a:0 && type(a:1) == type('')
@@ -85,22 +210,60 @@ function! OmniSharp#actions#test#RunInFile(nobuild, ...) abort
       if filereadable(l:file)
         let nr = bufadd(l:file)
       else
-        echohl WarningMsg | echomsg 'File not found: ' . l:file | echohl None
+        call s:utils.log.warn('File not found: ' . l:file)
         continue
       endif
     endif
     call add(buffers, nr)
   endfor
-  if len(buffers) == 0
-    return
-  endif
-  let s:runningTest = 1
-  call OmniSharp#util#AwaitParallel(
-  \ map(copy(buffers), {i,b -> function('OmniSharp#actions#project#Get', [b])}),
-  \ function('s:FindTestsInFiles', [function('s:CBRunTestsInFile'), buffers]))
+  if len(buffers) == 0 | return | endif
+  call s:utils.initialize(buffers, s:run.multiple.prepare)
 endfunction
 
-function! s:CBRunTestsInFile(summary) abort
+function! s:run.multiple.prepare(bufferTests) abort
+  let Requests = []
+  for btests in a:bufferTests
+    let bufnr = btests.bufnr
+    let tests = btests.tests
+    let testnames = map(copy(tests), {_,t -> t.name})
+    if len(tests)
+      call OmniSharp#testrunner#StateRunning(bufnr, testnames)
+      call add(Requests, funcref('s:run.multiple.inBuffer', [bufnr, tests]))
+    endif
+  endfor
+  if len(Requests) == 0 | return s:utils.log.warn('No tests found') | endif
+  let s:run.running = 1
+  if g:OmniSharp_runtests_parallel
+    if g:OmniSharp_runtests_echo_output
+      echomsg '---- Running tests ----'
+    endif
+    call OmniSharp#util#AwaitParallel(Requests, s:run.multiple.complete)
+  else
+    call OmniSharp#util#AwaitSequence(Requests, s:run.multiple.complete)
+  endif
+endfunction
+
+function! s:run.multiple.inBuffer(bufnr, tests, Callback) abort
+  if !g:OmniSharp_runtests_parallel && g:OmniSharp_runtests_echo_output
+    echomsg '---- Running tests: ' . bufname(a:bufnr) . ' ----'
+  endif
+  let project = OmniSharp#GetHost(a:bufnr).project
+  let targetFramework = project.MsBuildProject.TargetFramework
+  let opts = {
+  \ 'ResponseHandler': funcref('s:run.process', [a:Callback, a:bufnr, a:tests]),
+  \ 'BufNum': a:bufnr,
+  \ 'Parameters': {
+  \   'MethodNames': map(copy(a:tests), {i,t -> substitute(t.name, '(.*)$', '', '')}),
+  \   'NoBuild': get(s:, 'nobuild', 0),
+  \   'TestFrameworkName': a:tests[0].framework,
+  \   'TargetFrameworkVersion': targetFramework
+  \ },
+  \ 'SendBuffer': 0
+  \}
+  call OmniSharp#stdio#Request('/v2/runtestsinclass', opts)
+endfunction
+
+function! s:run.multiple.complete(summary) abort
   let pass = 1
   let locations = []
   for summary in a:summary
@@ -109,9 +272,12 @@ function! s:CBRunTestsInFile(summary) abort
       let pass = 0
     endif
   endfor
+  for location in locations
+    call OmniSharp#testrunner#StateComplete(location)
+  endfor
   if pass
     let title = len(locations) . ' tests passed'
-    echohl Title
+    call s:utils.log.emphasize(title)
   else
     let passed = 0
     let noStackTrace = 0
@@ -127,63 +293,46 @@ function! s:CBRunTestsInFile(summary) abort
     if noStackTrace
       let title .= '. Check :messages for details.'
     endif
-    echohl WarningMsg
+    call s:utils.log.warn(title)
   endif
-  echomsg title
-  echohl None
+  if get(g:, 'OmniSharp_runtests_quickfix', 0) == 0 | return | endif
   call OmniSharp#locations#SetQuickfix(locations, title)
 endfunction
 
-function! s:RunTest(Callback, bufnr, codeElements) abort
-  let tests = s:FindTests(a:codeElements)
-  let currentTest = s:FindTest(tests)
-  if type(currentTest) != type({})
-    echohl WarningMsg | echomsg 'No test found' | echohl None
-    let s:runningTest = 0
-    return
-  endif
-  let project = OmniSharp#GetHost(a:bufnr).project
-  let targetFramework = project.MsBuildProject.TargetFramework
-  let opts = {
-  \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, a:bufnr, tests]),
-  \ 'Parameters': {
-  \   'MethodName': currentTest.name,
-  \   'NoBuild': get(s:, 'nobuild', 0),
-  \   'TestFrameworkName': currentTest.framework,
-  \   'TargetFrameworkVersion': targetFramework
-  \ },
-  \ 'SendBuffer': 0
-  \}
-  echomsg 'Running test ' . currentTest.name
-  call OmniSharp#stdio#Request('/v2/runtest', opts)
-endfunction
 
-function! s:RunTestsRH(Callback, bufnr, tests, response) abort
-  let s:runningTest = 0
-  if !a:response.Success | return | endif
+" Response handler used when running a single test, or multiple tests in files
+function! s:run.process(Callback, bufnr, tests, response) abort
+  let s:run.running = 0
+  if !a:response.Success
+    call OmniSharp#testrunner#StateError(a:bufnr,
+    \ split(trim(eval(a:response.Message)), '\r\?\n', 1))
+    return s:utils.log.warn('An error has occurred. This may indicate a failed build')
+  endif
   if type(a:response.Body.Results) != type([])
-    echohl WarningMsg
-    echomsg 'Error: "'  . a:response.Body.Failure .
-    \ '"   - this may indicate a failed build'
-    echohl None
-    return
+    call OmniSharp#testrunner#StateError(a:bufnr,
+    \ split(trim(a:response.Body.Failure), '\r\?\n', 1))
+    return s:utils.log.warn('Error: "' . a:response.Body.Failure .
+    \ '"   - this may indicate a failed build')
   endif
   let summary = {
   \ 'pass': a:response.Body.Pass,
   \ 'locations': []
   \}
   for result in a:response.Body.Results
-    " Strip namespace and classname from test method name
     let location = {
+    \ 'bufnr': a:bufnr,
+    \ 'fullname': result.MethodName,
     \ 'filename': bufname(a:bufnr),
     \ 'name': substitute(result.MethodName, '^.*\.', '', '')
     \}
     let locations = [location]
     " Write any standard output to message-history
     if len(get(result, 'StandardOutput', []))
+      let location.output = []
       echomsg 'Standard output from test ' . location.name . ':'
       for output in result.StandardOutput
         for line in split(trim(output), '\r\?\n', 1)
+          call add(location.output, line)
           echomsg '  ' . line
         endfor
       endfor
@@ -191,6 +340,8 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
     if result.Outcome =~? 'failed'
       let location.type = 'E'
       let location.text = location.name . ': ' . result.ErrorMessage
+      let location.message = split(result.ErrorMessage, '\r\?\n')
+      let location.stacktrace = split(result.ErrorStackTrace, '\r\?\n')
       let st = result.ErrorStackTrace
       let parsed = matchlist(st, '.* in \(.\+\):line \(\d\+\)')
       if len(parsed) > 0
@@ -226,10 +377,10 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
     endif
     if !has_key(location, 'lnum')
       " Success, or unexpected test failure.
-      let test = s:FindTest(a:tests, result.MethodName)
-      if type(test) == type({})
-        let location.lnum = test.nameRange.Start.Line
-        let location.col = test.nameRange.Start.Column
+      let test = s:utils.findTest(a:tests, result.MethodName)
+      if type(test) == type([]) && len(test) > 0
+        let location.lnum = test[0].nameRange.Start.Line
+        let location.col = test[0].nameRange.Start.Column
         let location.vcol = 0
       endif
     endif
@@ -240,197 +391,133 @@ function! s:RunTestsRH(Callback, bufnr, tests, response) abort
   call a:Callback(summary)
 endfunction
 
-function! s:DebugTest(Callback, bufnr, codeElements) abort
-  let tests = s:FindTests(a:codeElements)
-  let currentTest = s:FindTest(tests)
-  if type(currentTest) != type({})
-    echohl WarningMsg | echomsg 'No test found' | echohl None
-    let s:runningTest = 0
-    return
+
+function! OmniSharp#actions#test#Validate() abort
+  return s:utils.capabilities()
+endfunction
+
+function! s:utils.capabilities() abort
+  if !g:OmniSharp_server_stdio
+    return self.log.warn('stdio only, sorry')
   endif
-  let project = OmniSharp#GetHost(a:bufnr).project
-  let targetFramework = project.MsBuildProject.TargetFramework
-  let opts = {
-  \ 'ResponseHandler': function('s:DebugTestsRH', [a:Callback, a:bufnr, tests]),
-  \ 'Parameters': {
-  \   'MethodName': currentTest.name,
-  \   'NoBuild': get(s:, 'nobuild', 0),
-  \   'TestFrameworkName': currentTest.framework,
-  \   'TargetFrameworkVersion': targetFramework
-  \ },
-  \ 'SendBuffer': 0
-  \}
-  echomsg 'Debugging test ' . currentTest.name
-  call OmniSharp#stdio#Request('/v2/debugtest/getstartinfo', opts)
-endfunction
-
-function! s:DebugTestsRH(Callback, bufnr, tests, response) abort
-  let testhost = [a:response.Body.FileName] + split(substitute(a:response.Body.Arguments, '\"', '', 'g'), ' ')
-  let testhost_job_pid = s:StartTestProcess(testhost)
-  let g:testhost_job_pid = testhost_job_pid
-
-  let host = OmniSharp#GetHost()
-  let s:omnisharp_pre_debug_cwd = getcwd()
-  let new_cwd = fnamemodify(host.sln_or_dir, ':p:h')
-  call vimspector#LaunchWithConfigurations({
-  \  'attach': {
-  \    'adapter': 'netcoredbg',
-  \    'configuration': {
-  \      'request': 'attach',
-  \      'processId': testhost_job_pid
-  \    }
-  \  }
-  \})
-  execute 'tcd '.new_cwd
-
-  call s:LaunchDebuggedTest(a:Callback, testhost_job_pid)
-endfunction
-
-function! s:LaunchDebuggedTest(Callback, pid) abort
-  let opts = {
-  \ 'ResponseHandler': function('s:LaunchDebuggedTestRH', [a:Callback, a:pid]),
-  \ 'Parameters': {
-  \   'TargetProcessId': a:pid
-  \ }
-  \}
-  echomsg 'Launching debugged test'
-  call OmniSharp#stdio#Request('/v2/debugtest/launch', opts)
-endfunction
-
-function! s:LaunchDebuggedTestRH(Callback, pid, response) abort
-  call a:Callback(a:response)
-endfunction
-
-function! s:FindTestsInFiles(Callback, buffers, ...) abort
-  call OmniSharp#util#AwaitParallel(
-  \ map(copy(a:buffers), {i,b -> function('OmniSharp#actions#codestructure#Get', [b])}),
-  \ function('s:RunTestsInFiles', [a:Callback]))
-endfunction
-
-function! s:RunTestsInFiles(Callback, bufferCodeStructures) abort
-  let Requests = []
-  for bcs in a:bufferCodeStructures
-    let bufnr = bcs[0]
-    let codeElements = bcs[1]
-    let tests = s:FindTests(codeElements)
-    if len(tests)
-      call add(Requests, function('s:RunTestsInFile', [bufnr, tests]))
-    endif
-  endfor
-  if len(Requests) == 0
-    echohl WarningMsg | echomsg 'No tests found' | echohl None
-    let s:runningTest = 0
-    return
+  if g:OmniSharp_translate_cygwin_wsl
+    return self.log.warn('Tests do not work in WSL unfortunately')
   endif
-  if g:OmniSharp_runtests_parallel
-    if g:OmniSharp_runtests_echo_output
-      echomsg '---- Running tests ----'
-    endif
-    call OmniSharp#util#AwaitParallel(Requests, a:Callback)
-  else
-    call OmniSharp#util#AwaitSequence(Requests, a:Callback)
+  return 1
+endfunction
+
+function! s:utils.isrunning() abort
+  if s:run.running
+    return self.log.warn('A test is already running')
   endif
+  return 1
 endfunction
 
-function! s:RunTestsInFile(bufnr, tests, Callback) abort
-  if !g:OmniSharp_runtests_parallel && g:OmniSharp_runtests_echo_output
-    echomsg '---- Running tests: ' . bufname(a:bufnr) . ' ----'
-  endif
-  let project = OmniSharp#GetHost(a:bufnr).project
-  let targetFramework = project.MsBuildProject.TargetFramework
-  let opts = {
-  \ 'ResponseHandler': function('s:RunTestsRH', [a:Callback, a:bufnr, a:tests]),
-  \ 'BufNum': a:bufnr,
-  \ 'Parameters': {
-  \   'MethodNames': map(copy(a:tests), {i,t -> t.name}),
-  \   'NoBuild': get(s:, 'nobuild', 0),
-  \   'TestFrameworkName': a:tests[0].framework,
-  \   'TargetFrameworkVersion': targetFramework
-  \ },
-  \ 'SendBuffer': 0
-  \}
-  call OmniSharp#stdio#Request('/v2/runtestsinclass', opts)
-endfunction
-
-function! s:FindTest(tests, ...) abort
-  for test in a:tests
-    if a:0
-      if test.name ==# a:1
-        return test
-      endif
-    else
-      if line('.') >= test.range.Start.Line && line('.') <= test.range.End.Line
-        return test
-      endif
-    endif
-  endfor
-  return 0
-endfunction
-
-function! s:FindTests(codeElements) abort
+" Find all of the test methods in a CodeStructure response
+function! s:utils.extractTests(bufnr, codeElements) abort
   if type(a:codeElements) != type([]) | return [] | endif
+  let filename = fnamemodify(bufname(a:bufnr), ':p')
+  let testlines = map(
+  \ filter(
+  \   copy(OmniSharp#GetHost(a:bufnr).project.tests),
+  \   {_,dt -> dt.CodeFilePath ==# filename}),
+  \ {_,dt -> dt.LineNumber})
   let tests = []
   for element in a:codeElements
     if has_key(element, 'Properties')
     \ && type(element.Properties) == type({})
     \ && has_key(element.Properties, 'testMethodName')
     \ && has_key(element.Properties, 'testFramework')
-      call add(tests, {
-      \ 'name': element.Properties.testMethodName,
-      \ 'framework': element.Properties.testFramework,
-      \ 'range': element.Ranges.full,
-      \ 'nameRange': element.Ranges.name,
-      \})
+      " Compare with project discovered tests. Note that test discovery may
+      " include a test multiple times, if the test can be run with different
+      " arguments (e.g. NUnit TestCaseSource)
+
+      " Discovered test line numbers begin at the first line of code, not the
+      " line containing the test name, so when the method opening brace is not
+      " on the same line as the test method name, the line numbers will not
+      " match. We therefore search ahead for the closest line number, and use
+      " that.
+      let testStart = element.Ranges.name.Start.Line
+      let testStart = min(filter(copy(testlines), {_,l -> l >= testStart}))
+      for dt in OmniSharp#GetHost(a:bufnr).project.tests
+        if dt.CodeFilePath ==# filename && dt.LineNumber == testStart
+          call add(tests, {
+          \ 'name': dt.FullyQualifiedName,
+          \ 'framework': element.Properties.testFramework,
+          \ 'range': element.Ranges.full,
+          \ 'nameRange': element.Ranges.name,
+          \})
+        endif
+      endfor
     endif
-    call extend(tests, s:FindTests(get(element, 'Children', [])))
+    call extend(tests, self.extractTests(a:bufnr, get(element, 'Children', [])))
   endfor
   return tests
 endfunction
 
-function! s:CheckCapabilities() abort
-  if !g:OmniSharp_server_stdio
-    echohl WarningMsg | echomsg 'stdio only, sorry' | echohl None
-    return 0
+" Find the test in a list of tests that matches the current cursor position
+function! s:utils.findTest(tests, testName) abort
+  if a:testName !=# ''
+    for test in a:tests
+      if test.name ==# a:testName
+        return [test]
+      endif
+    endfor
+  else
+    let found = []
+    for test in a:tests
+      if line('.') >= test.range.Start.Line && line('.') <= test.range.End.Line
+        call add(found, test)
+      endif
+    endfor
+    return found
   endif
-  if g:OmniSharp_translate_cygwin_wsl
-    echohl WarningMsg
-    echomsg 'Tests do not work in WSL unfortunately'
-    echohl None
-    return 0
-  endif
-  if s:runningTest
-    echohl WarningMsg | echomsg 'A test is already running' | echohl None
-    return 0
-  endif
+  return 0
+endfunction
+
+" For the given buffers, discover the project's tests (which includes fetching
+" the project structure if it hasn't already been fetched. Finally, fetch the
+" buffer code structures. All operations are performed asynchronously, and the
+" a:Callback is called when all buffer code structures have been fetched.
+function! s:utils.initialize(buffers, Callback) abort
+  call OmniSharp#testrunner#Init(a:buffers)
+  call s:utils.init.await(a:buffers, 'OmniSharp#testrunner#Discover',
+  \ funcref('s:utils.init.await', [a:buffers, 'OmniSharp#actions#codestructure#Get',
+  \   funcref('s:utils.init.extract', [a:Callback])]))
+endfunction
+
+function! s:utils.init.await(buffers, functionName, Callback, ...) abort
+  let Funcs = map(copy(a:buffers), {i,b -> function(a:functionName, [b])})
+  call OmniSharp#util#AwaitParallel(Funcs, a:Callback)
+endfunction
+
+function! s:utils.init.extract(Callback, codeStructures) abort
+  let bufferTests = map(a:codeStructures, {i, cs -> {
+  \ 'bufnr': cs[0],
+  \ 'tests': s:utils.extractTests(cs[0], cs[1])
+  \}})
+  call OmniSharp#testrunner#SetTests(bufferTests)
+  let dict = { 'f': a:Callback }
+  call dict.f(bufferTests)
+endfunction
+
+function! s:utils.log.echo(highlightGroup, message) abort
+  let messageLines = type(a:message) == type([]) ? a:message : [a:message]
+  execute 'echohl' a:highlightGroup
+  for messageLine in messageLines
+    echomsg messageLine
+  endfor
+  echohl None
+endfunction
+
+function! s:utils.log.emphasize(message) abort
+  call self.echo('Title', a:message)
   return 1
 endfunction
 
-function! s:TestProcessClosed(...) abort
-  call OmniSharp#stdio#Request('/v2/debugtest/stop', {})
-  let s:runningTest = 0
-  call vimspector#Reset()
-  execute 'tcd '.s:omnisharp_pre_debug_cwd
-  unlet s:omnisharp_pre_debug_cwd
-endfunction
-
-function! s:StartTestProcess(command) abort
-  if OmniSharp#proc#supportsNeovimJobs()
-    let job = jobpid(jobstart(a:command, {
-      \ 'on_exit': function('s:TestProcessClosed')
-    \ }))
-  elseif OmniSharp#proc#supportsVimJobs()
-    let job = split(job_start(a:command, {
-      \ 'close_cb': function('s:TestProcessClosed')
-    \ }), ' ',)[1]
-  else
-    echohl WarningMsg | echomsg 'Cannot launch test process.' | echohl None
-  endif
-  return job
-endfunction
-
-function! s:QuickfixTextFuncStackTrace(info) abort
-  let items = getqflist({'id' : a:info.id, 'items' : 1}).items
-  return map(items, {_,i -> i.text})
+function! s:utils.log.warn(message) abort
+  call self.echo('WarningMsg', a:message)
+  return 0
 endfunction
 
 let &cpoptions = s:save_cpo
