@@ -78,6 +78,7 @@ function! s:StdioGetCompletions(partial, opts, Callback) abort
   \ 'WantDocumentationForEveryCompletionResult': wantDoc,
   \ 'WantSnippet': wantSnippet,
   \ 'WantMethodHeader': 'true',
+  \ 'WantKind': 'true',
   \ 'WantReturnType': 'true'
   \}
   let opts = {
@@ -117,6 +118,7 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     \ 'word': word,
     \ 'menu': menu,
     \ 'icase': 1,
+    \ 'kind': s:ToKind(cmp.Kind),
     \ 'dup': g:OmniSharp_completion_without_overloads ? 0 : 1
     \}
     if a:wantDocPopup
@@ -130,6 +132,20 @@ function! s:StdioGetCompletionsRH(Callback, wantDocPopup, response) abort
     call add(completions, completion)
   endfor
   call a:Callback(completions, a:wantDocPopup)
+endfunction
+
+function! s:ToKind(roslynKind)
+  " Values defined in:
+  " https://github.com/OmniSharp/omnisharp-roslyn/blob/master/src/OmniSharp.Abstractions/Models/v1/Completion/CompletionItem.cs#L104C6-L129C28
+  let variable = ['Color', 'Event', 'Field', 'Keyword', 'Variable', 'Value']
+  let function = ['Constructor', 'Function', 'Method']
+  let member = ['Constant', 'EnumMember', 'Property', 'TypeParameter']
+  let typedef = ['Class', 'Enum', 'Interface', 'Module', 'Struct']
+  return
+  \ index(variable, a:roslynKind) >= 0 ? 'v' :
+  \ index(function, a:roslynKind) >= 0 ? 'f' :
+  \ index(member, a:roslynKind) >= 0 ? 'm' :
+  \ index(typedef, a:roslynKind) >= 0 ? 't' : ''
 endfunction
 
 function! s:CBGet(opts, completions, ...) abort
