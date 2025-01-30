@@ -109,7 +109,11 @@ function! OmniSharp#FindSolutionOrDir(...) abort
   let bufnr = a:0 > 1 ? a:2 : bufnr('%')
   if empty(getbufvar(bufnr, 'OmniSharp_buf_server'))
     try
-      let sln = s:FindSolution(interactive, bufnr)
+      if g:OmniSharp_sln_resolve_function != v:null
+        let sln = call(g:OmniSharp_sln_resolve_function, [])
+      else
+        let sln = s:FindSolution(interactive, bufnr)
+      endif
       call setbufvar(bufnr, 'OmniSharp_buf_server', sln)
     catch
       return ''

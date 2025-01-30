@@ -52,6 +52,8 @@ let g:OmniSharp_coc_snippet = get(g:, 'OmniSharp_coc_snippet', 0)
 
 let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_documentation', 1)
 
+let g:OmniSharp_sln_resolve_function = get(g:, 'OmniSharp_sln_resolve_function',  v:null)
+
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 command! -bar -bang OmniSharpStatus call OmniSharp#Status(<bang>0)
