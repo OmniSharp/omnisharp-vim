@@ -190,6 +190,22 @@ Default: {} >
     \ 'C:\path\to\other\project': 2004,
     \}
 <
+                                                      *g:OmniSharp_find_solution*
+Function used to resolve the solution file anytime it needs to be resolved
+based on the currently opened file.
+
+This can be used in various ways, but one particular use case might be when
+you need Omnisharp to stick to a given solution file that would contain all
+the projects that you need to work with even though you navigate to
+subprojects where other solution files could be found there. In that case, one
+could pass a value along the following lines: >
+    let g:OmniSharp_find_solution = {bufnr -> "/path/to/main_project.sln"}
+<
+
+This is a lambda expression that always evaluates to the string
+`/the/path/to/my/main_project.sln`. One could imagine more complexed cases.
+It's up to the user to use this as he sees fit.
+
 -------------------------------------------------------------------------------
 3.2 DIAGNOSTICS                                    *omnisharp-diagnostic-options*
 
