@@ -67,6 +67,7 @@ function! s:StdioGetCompletions(partial, opts, Callback) abort
   let wantDocPopup = OmniSharp#popup#Enabled()
   \ && g:omnicomplete_fetch_full_documentation
   \ && &completeopt =~# 'popup'
+  \ && !has('nvim')
   let wantDoc = wantDocPopup ? 'false'
   \ : g:omnicomplete_fetch_full_documentation ? 'true' : 'false'
   let wantSnippet = g:OmniSharp_want_snippet ? 'true' : g:OmniSharp_coc_snippet ? 'true' : 'false'
