@@ -39,7 +39,7 @@ let g:OmniSharp_loglevel = get(g:, 'OmniSharp_loglevel', defaultlevel)
 let g:OmniSharp_diagnostic_listen = get(g:, 'OmniSharp_diagnostic_listen', 2)
 
 let g:OmniSharp_runtests_parallel = get(g:, 'OmniSharp_runtests_parallel', 1)
-let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 1)
+let g:OmniSharp_runtests_echo_output = get(g:, 'OmniSharp_runtests_echo_output', 0)
 
 " Set to 1 when ultisnips is installed
 let g:OmniSharp_want_snippet = get(g:, 'OmniSharp_want_snippet', 0)
@@ -55,6 +55,8 @@ let g:omnicomplete_fetch_full_documentation = get(g:, 'omnicomplete_fetch_full_d
 command! -bar -nargs=? OmniSharpInstall call OmniSharp#Install(<f-args>)
 command! -bar -nargs=? OmniSharpOpenLog call OmniSharp#log#Open(<q-args>)
 command! -bar -bang OmniSharpStatus call OmniSharp#Status(<bang>0)
+command! -bar OmniSharpTestRunner call OmniSharp#testrunner#Open()
+command! -bar OmniSharpTestRunnerReset call OmniSharp#testrunner#Reset()
 
 " Preserve backwards compatibility with older version g:OmniSharp_highlight_types
 let g:OmniSharp_highlighting = get(g:, 'OmniSharp_highlighting', get(g:, 'OmniSharp_highlight_types', 2))
