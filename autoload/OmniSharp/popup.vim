@@ -77,6 +77,10 @@ function! OmniSharp#popup#Map(mode, mapName, defaultLHS, funcall) abort
 endfunction
 
 
+function! OmniSharp#popup#Close() abort
+  call s:CloseLast(0)
+endfunction
+
 function s:CloseLast(redraw) abort
   if exists('s:lastwinid')
     if has('nvim')
